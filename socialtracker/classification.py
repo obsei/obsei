@@ -5,11 +5,15 @@ from transformers import pipeline
 
 
 class SentimentClassifier:
-    def __init__(self, classifier_model: Optional[str] = None):
+    def __init__(
+            self,
+            classifier_model: Optional[str] = None,
+            multi_class: Optional[bool] = True,
+    ):
         # Model names: joeddav/xlm-roberta-large-xnli, facebook/bart-large-mnli
 
         self.analyzer = SentimentIntensityAnalyzer()
-
+        self.multi_class = multi_class
         if classifier_model is not None:
             self.classifier = pipeline("zero-shot-classification", model=classifier_model)
 
@@ -27,6 +31,6 @@ class SentimentClassifier:
         if self.classifier is None:
             raise AttributeError("Classifier not initialized")
 
-        scores_data = self.classifier(text, labels)
+        scores_data = self.classifier(text, labels, multi_class=self.multi_class)
 
         return scores_data["labels"], scores_data["scores"]
