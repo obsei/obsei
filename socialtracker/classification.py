@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from transformers import pipeline
@@ -27,10 +27,11 @@ class SentimentClassifier:
         scores = self.analyzer.polarity_scores(text)
         return scores["compound"]
 
-    def classify_text(self, text: str, labels: List[str]) -> Tuple[List[str], List[float]]:
+    def classify_text(self, text: str, labels: List[str]) -> Dict[str, float]:
         if self.classifier is None:
             raise AttributeError("Classifier not initialized")
 
         scores_data = self.classifier(text, labels, multi_class=self.multi_class)
 
-        return scores_data["labels"], scores_data["scores"]
+        score_dict = {label: score for label, score in zip(scores_data["labels"], scores_data["scores"])}
+        return dict(sorted(score_dict.items(), key=lambda x: x[1], reverse=True))

@@ -11,16 +11,12 @@ MIXED_TEXT = '''What do you guys think of this type of chart? I've done them bef
 This is England COVID-19 persons tested positive by specimen date (blue) and hospital admissions (yellow).'''
 
 
-def print_score(labels: List[str], scores: List[float]):
-    for label, score in zip(labels, scores):
-        print(label, "=", score)
-
-
 def test_good_sentiment(sentiment_classifier):
     labels = ["facility", "food", "comfortable"]
-    label_list, scores = sentiment_classifier.classify_text(GOOD_TEXT, labels)
+    score_dict = sentiment_classifier.classify_text(GOOD_TEXT, labels)
 
-    print_score(label_list, scores)
+    for label, score in score_dict.items():
+        print(label, "=", score)
 
     sentiment_score = sentiment_classifier.get_sentiment_score(GOOD_TEXT)
 
@@ -32,27 +28,29 @@ def test_good_sentiment(sentiment_classifier):
 
 def test_bad_sentiment(sentiment_classifier):
     labels = ["experience", "service", "comfortable"]
-    label_list, scores = sentiment_classifier.classify_text(BAD_TEXT, labels)
+    score_dict = sentiment_classifier.classify_text(BAD_TEXT, labels)
 
-    print_score(label_list, scores)
+    for label, score in score_dict.items():
+        print(label, "=", score)
 
     sentiment_score = sentiment_classifier.get_sentiment_score(BAD_TEXT)
 
     print("\nsentiment_score=", sentiment_score)
 
-    assert len(labels) == len(label_list)
+    assert len(labels) == len(score_dict)
     assert sentiment_score < 0
 
 
 def test_mixed_sentiment(sentiment_classifier):
     labels = ["feeling", "data", "trust"]
-    label_list, scores = sentiment_classifier.classify_text(MIXED_TEXT, labels)
+    score_dict = sentiment_classifier.classify_text(MIXED_TEXT, labels)
 
-    print_score(label_list, scores)
+    for label, score in score_dict.items():
+        print(label, "=", score)
 
     sentiment_score = sentiment_classifier.get_sentiment_score(MIXED_TEXT)
 
     print("\nsentiment_score=", sentiment_score)
 
-    assert len(labels) == len(label_list)
+    assert len(labels) == len(score_dict)
     assert 0.75 > sentiment_score > -0.25
