@@ -36,7 +36,7 @@ def test_bad_sentiment(sentiment_classifier):
 
     print_score(label_list, scores)
 
-    sentiment_score = sentiment_classifier.get_sentiment_score(GOOD_TEXT)
+    sentiment_score = sentiment_classifier.get_sentiment_score(BAD_TEXT)
 
     print("\nsentiment_score=", sentiment_score)
 
@@ -50,7 +50,7 @@ def test_mixed_sentiment(sentiment_classifier):
 
     print_score(label_list, scores)
 
-    sentiment_score = sentiment_classifier.get_sentiment_score(GOOD_TEXT)
+    sentiment_score = sentiment_classifier.get_sentiment_score(MIXED_TEXT)
 
     print("\nsentiment_score=", sentiment_score)
 
