@@ -1,4 +1,6 @@
-from typing import List
+import logging
+
+logger = logging.getLogger(__name__)
 
 GOOD_TEXT = '''If anyone is interested... these are our hosts. I can’t recommend them enough, Abc & Pbc.
 
@@ -16,11 +18,11 @@ def test_good_sentiment(sentiment_classifier):
     score_dict = sentiment_classifier.classify_text(GOOD_TEXT, labels)
 
     for label, score in score_dict.items():
-        print(label, "=", score)
+        logger.info(f'{label}={score}')
 
     sentiment_score = sentiment_classifier.get_sentiment_score(GOOD_TEXT)
 
-    print("\nsentiment_score=", sentiment_score)
+    logger.info(f'\nsentiment_score=={sentiment_score}')
 
     assert len(labels) == len(score_dict)
     assert sentiment_score > 0
@@ -31,11 +33,11 @@ def test_bad_sentiment(sentiment_classifier):
     score_dict = sentiment_classifier.classify_text(BAD_TEXT, labels)
 
     for label, score in score_dict.items():
-        print(label, "=", score)
+        logger.info(f'{label}={score}')
 
     sentiment_score = sentiment_classifier.get_sentiment_score(BAD_TEXT)
 
-    print("\nsentiment_score=", sentiment_score)
+    logger.info(f'\nsentiment_score=={sentiment_score}')
 
     assert len(labels) == len(score_dict)
     assert sentiment_score < 0
@@ -46,11 +48,11 @@ def test_mixed_sentiment(sentiment_classifier):
     score_dict = sentiment_classifier.classify_text(MIXED_TEXT, labels)
 
     for label, score in score_dict.items():
-        print(label, "=", score)
+        logger.info(f'{label}={score}')
 
     sentiment_score = sentiment_classifier.get_sentiment_score(MIXED_TEXT)
 
-    print("\nsentiment_score=", sentiment_score)
+    logger.info(f'\nsentiment_score=={sentiment_score}')
 
     assert len(labels) == len(score_dict)
     assert 0.75 > sentiment_score > -0.25
