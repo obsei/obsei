@@ -55,4 +55,4 @@ def test_mixed_sentiment(sentiment_classifier):
     print("\nsentiment_score=", sentiment_score)
 
     assert len(labels) == len(label_list)
-    assert 0.5 > sentiment_score > -0.5
+    assert 0.75 > sentiment_score > -0.25
