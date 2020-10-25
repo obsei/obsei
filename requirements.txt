@@ -1,0 +1,2 @@
+vaderSentiment~=3.3.2
+transformers~=3.4.0
