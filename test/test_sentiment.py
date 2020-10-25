@@ -22,7 +22,7 @@ def test_good_sentiment(sentiment_classifier):
 
     print("\nsentiment_score=", sentiment_score)
 
-    assert len(labels) == len(label_list)
+    assert len(labels) == len(score_dict)
     assert sentiment_score > 0
 
 
