@@ -1,2 +1,5 @@
 vaderSentiment~=3.3.2
 transformers~=3.4.0
+# PyTorch
+--find-links=https://download.pytorch.org/whl/torch_stable.html
+torch>1.5
