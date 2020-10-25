@@ -31,7 +31,7 @@ def test_good_sentiment(sentiment_classifier):
 
 
 def test_bad_sentiment(sentiment_classifier):
-    labels = ["facility", "food", "comfortable"]
+    labels = ["experience", "service", "comfortable"]
     label_list, scores = sentiment_classifier.classify_text(BAD_TEXT, labels)
 
     print_score(label_list, scores)
@@ -45,7 +45,7 @@ def test_bad_sentiment(sentiment_classifier):
 
 
 def test_mixed_sentiment(sentiment_classifier):
-    labels = ["facility", "food", "comfortable"]
+    labels = ["feeling", "data", "trust"]
     label_list, scores = sentiment_classifier.classify_text(MIXED_TEXT, labels)
 
     print_score(label_list, scores)
