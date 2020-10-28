@@ -1,8 +1,12 @@
 import pytest
 
-from socialtracker.classification import SentimentClassifier
+from socialtracker.text_analyzer import TextAnalyzer
 
 
 @pytest.fixture(scope="session")
 def sentiment_classifier():
-    return SentimentClassifier("joeddav/xlm-roberta-large-xnli")
+    return TextAnalyzer(
+        classifier_model_name="joeddav/xlm-roberta-large-xnli",
+        multi_class_classification=True,
+        initialize_sentiment_model=True,
+    )
