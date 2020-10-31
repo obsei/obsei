@@ -40,18 +40,7 @@ class TwitterSource(BaseSource):
         if not config.query and not config.keywords and not config.hashtags and config.usernames:
             raise AttributeError("At least one non empty parameter required (query, keywords, hashtags, and usernames)")
 
-#        if config.consumer_key:
-#            os.environ["SEARCHTWEETS_CONSUMER_KEY"] = config.consumer_key
-#        if config.consumer_secret:
-#            os.environ["SEARCHTWEETS_CONSUMER_SECRET"] = config.consumer_secret
-#        if config.account_type:
-#            os.environ["SEARCHTWEETS_ACCOUNT_TYPE"] = config.account_type
-#        if config.bearer_token:
-#            os.environ["SEARCHTWEETS_BEARER_TOKEN"] = config.bearer_token
-#        if config.endpoint:
-#            os.environ["SEARCHTWEETS_ENDPOINT"] = config.endpoint
-
-        search_args = load_credentials(env_overwrite=True)
+        search_args = load_credentials(filename=config.twitter_config_filename, env_overwrite=True)
 
         place_fields = ",".join(config.place_fields or DEFAULT_PLACE_FIELDS)
         user_fields = ",".join(config.user_fields or DEFAULT_USER_FIELDS)

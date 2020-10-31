@@ -6,32 +6,24 @@ from socialtracker.source.base_source_config import BaseSourceConfig
 class TwitterSourceConfig(BaseSourceConfig):
     def __init__(
         self,
-        consumer_key: Optional[str] = None,
-        consumer_secret: Optional[str] = None,
-        account_type: Optional[str] = None,
-        bearer_token: Optional[str] = None,
-        endpoint: Optional[str] = None,
-        query: Optional[str] = None,
-        keywords: Optional[List[str]] = None,
-        hashtags: Optional[List[str]] = None,
-        usernames: Optional[List[str]] = None,
-        operators: Optional[List[str]] = None,
+        twitter_config_filename: str = None,
+        query: str = None,
+        keywords: List[str] = None,
+        hashtags: List[str] = None,
+        usernames: List[str] = None,
+        operators: List[str] = None,
         since_id: Optional[int] = None,
         until_id: Optional[int] = None,
         # 10d
         # 15m
-        lookup_period: Optional[str] = None,
-        tweet_fields: Optional[List[str]] = None,
-        user_fields: Optional[List[str]] = None,
-        expansions: Optional[List[str]] = None,
-        place_fields: Optional[List[str]] = None,
+        lookup_period: str = None,
+        tweet_fields: List[str] = None,
+        user_fields: List[str] = None,
+        expansions: List[str] = None,
+        place_fields: List[str] = None,
         max_tweets: Optional[int] = None,
     ):
-        self.consumer_key = consumer_key
-        self.consumer_secret = consumer_secret
-        self.account_type = account_type
-        self.bearer_token = bearer_token
-        self.endpoint = endpoint
+        self.twitter_config_filename = twitter_config_filename
 
         self.query = query
         self.keywords = keywords

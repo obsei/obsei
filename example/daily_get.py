@@ -5,9 +5,9 @@ from socialtracker.source.twitter_source import TwitterSource
 from socialtracker.text_analyzer import TextAnalyzer
 
 sink_config = HttpSinkConfig(
-    url="",
+    url=<URL>,
     base_payload={
-        "partnerId": 0,
+        "partnerId": <PARTNER_ID>,
     },
     payload_mapping={
       "text": ["enquiryMessage", "text"],
@@ -28,7 +28,6 @@ source_config = TwitterSourceConfig(
 source = TwitterSource()
 sink = HttpSink()
 text_analyzer = TextAnalyzer(
-#    classifier_model_name="joeddav/xlm-roberta-large-xnli",
     initialize_sentiment_model=False,
 )
 
