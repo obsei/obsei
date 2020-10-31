@@ -40,16 +40,16 @@ class TwitterSource(BaseSource):
         if not config.query and not config.keywords and not config.hashtags and config.usernames:
             raise AttributeError("At least one non empty parameter required (query, keywords, hashtags, and usernames)")
 
-        if config.consumer_key:
-            os.environ["SEARCHTWEETS_CONSUMER_KEY"] = config.consumer_key
-        if config.consumer_secret:
-            os.environ["SEARCHTWEETS_CONSUMER_SECRET"] = config.consumer_secret
-        if config.account_type:
-            os.environ["SEARCHTWEETS_ACCOUNT_TYPE"] = config.account_type
-        if config.bearer_token:
-            os.environ["SEARCHTWEETS_BEARER_TOKEN"] = config.bearer_token
-        if config.endpoint:
-            os.environ["SEARCHTWEETS_ENDPOINT"] = config.endpoint
+#        if config.consumer_key:
+#            os.environ["SEARCHTWEETS_CONSUMER_KEY"] = config.consumer_key
+#        if config.consumer_secret:
+#            os.environ["SEARCHTWEETS_CONSUMER_SECRET"] = config.consumer_secret
+#        if config.account_type:
+#            os.environ["SEARCHTWEETS_ACCOUNT_TYPE"] = config.account_type
+#        if config.bearer_token:
+#            os.environ["SEARCHTWEETS_BEARER_TOKEN"] = config.bearer_token
+#        if config.endpoint:
+#            os.environ["SEARCHTWEETS_ENDPOINT"] = config.endpoint
 
         search_args = load_credentials(env_overwrite=True)
 
@@ -64,10 +64,6 @@ class TwitterSource(BaseSource):
         keywords = config.keywords or []
 
         max_tweets = config.max_tweets or DEFAULT_MAX_TWEETS
-
-        start_time = None
-        if config.lookup_period_in_sec:
-            start_time = datetime.utcnow() - timedelta(seconds=config.lookup_period_in_sec)
 
         query = self._generate_query_string(
             query=config.query,
@@ -86,7 +82,7 @@ class TwitterSource(BaseSource):
             tweet_fields=tweet_fields,
             since_id=config.since_id,
             until_id=config.until_id,
-            start_time=start_time
+            start_time=config.lookup_period
         )
 
         tweets = collect_results(
@@ -125,7 +121,7 @@ class TwitterSource(BaseSource):
             or_tokens.append(f'({" OR ".join(usernames)})')
 
         if operators:
-            and_tokens.append(f'({" AND ".join(operators)})')
+            and_tokens.append(f'{" AND ".join(operators)}')
 
         return f'({" OR ".join(or_tokens)})' + f' AND ({" AND ".join(and_tokens)})' if and_tokens else ''
 

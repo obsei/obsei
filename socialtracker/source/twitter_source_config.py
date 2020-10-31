@@ -6,8 +6,8 @@ from socialtracker.source.base_source_config import BaseSourceConfig
 class TwitterSourceConfig(BaseSourceConfig):
     def __init__(
         self,
-        consumer_key: str,
-        consumer_secret: str,
+        consumer_key: Optional[str] = None,
+        consumer_secret: Optional[str] = None,
         account_type: Optional[str] = None,
         bearer_token: Optional[str] = None,
         endpoint: Optional[str] = None,
@@ -18,7 +18,9 @@ class TwitterSourceConfig(BaseSourceConfig):
         operators: Optional[List[str]] = None,
         since_id: Optional[int] = None,
         until_id: Optional[int] = None,
-        lookup_period_in_sec: Optional[int] = None,
+        # 10d
+        # 15m
+        lookup_period: Optional[str] = None,
         tweet_fields: Optional[List[str]] = None,
         user_fields: Optional[List[str]] = None,
         expansions: Optional[List[str]] = None,
@@ -39,7 +41,7 @@ class TwitterSourceConfig(BaseSourceConfig):
 
         self.since_id = since_id
         self.until_id = until_id
-        self.lookup_period_in_sec = lookup_period_in_sec
+        self.lookup_period = lookup_period
 
         self.tweet_fields = tweet_fields
         self.user_fields = user_fields
