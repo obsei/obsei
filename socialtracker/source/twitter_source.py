@@ -1,7 +1,6 @@
 import logging
-import os
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+
+from typing import Any, Dict, List
 
 from searchtweets import collect_results, gen_request_parameters, load_credentials
 
@@ -9,29 +8,6 @@ from socialtracker.source.twitter_source_config import TwitterSourceConfig
 from socialtracker.source.base_source import BaseSource, SourceResponse
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_MAX_TWEETS = 10
-
-DEFAULT_TWEET_FILEDS = [
-    "author_id", "entities.mentions.username", "geo.place_id", "in_reply_to_user_id", "referenced_tweets.id",
-    "referenced_tweets.id.author_id",
-]
-
-DEFAULT_EXPANSIONS = [
-    "author_id", "entities.mentions.username", "geo.place_id", "in_reply_to_user_id", "referenced_tweets.id",
-    "referenced_tweets.id.author_id"
-]
-
-DEFAULT_PLACE_FIELDS = ["country"]
-
-DEFAULT_USER_FIELDS = [
-    "public_metrics", "username", "verified", "name"
-]
-
-DEFAULT_OPERATORS = [
-    "-is:reply",
-    "-is:retweet"
-]
 
 
 class TwitterSource(BaseSource):
@@ -42,29 +18,22 @@ class TwitterSource(BaseSource):
 
         search_args = load_credentials(filename=config.twitter_config_filename, env_overwrite=True)
 
-        place_fields = ",".join(config.place_fields or DEFAULT_PLACE_FIELDS)
-        user_fields = ",".join(config.user_fields or DEFAULT_USER_FIELDS)
-        expansions = ",".join(config.expansions or DEFAULT_EXPANSIONS)
-        tweet_fields = ",".join(config.tweet_fields or DEFAULT_TWEET_FILEDS)
-
-        operators = config.operators or DEFAULT_OPERATORS
-        usernames = config.usernames or []
-        hashtags = config.hashtags or []
-        keywords = config.keywords or []
-
-        max_tweets = config.max_tweets or DEFAULT_MAX_TWEETS
+        place_fields = ",".join(config.place_fields) if config.place_fields is not None else None
+        user_fields = ",".join(config.user_fields) if config.user_fields is not None else None
+        expansions = ",".join(config.expansions) if config.expansions is not None else None
+        tweet_fields = ",".join(config.tweet_fields) if config.tweet_fields is not None else None
 
         query = self._generate_query_string(
             query=config.query,
-            keywords=keywords,
-            hashtags=hashtags,
-            usernames=usernames,
-            operators=operators
+            keywords=config.keywords,
+            hashtags=config.hashtags,
+            usernames=config.usernames,
+            operators=config.operators
         )
 
         search_query = gen_request_parameters(
             query=query,
-            results_per_call=max_tweets,
+            results_per_call=config.max_tweets,
             place_fields=place_fields,
             expansions=expansions,
             user_fields=user_fields,
@@ -76,29 +45,34 @@ class TwitterSource(BaseSource):
 
         tweets = collect_results(
             query=search_query,
-            max_tweets=max_tweets,
+            max_tweets=config.max_tweets,
             result_stream_args=search_args
         )
 
-        return [TwitterSource.get_source_output(tweet) for tweet in tweets]
+        source_responses: List[SourceResponse] = []
+        next_stats: Dict[str, Any] = None # TODO use it later
+        for tweet in tweets:
+            if "id" in tweet:
+                source_responses.append(TwitterSource.get_source_output(tweet))
+            else:
+                next_stats = tweet
+
+        logger.info(f"next_stats='{next_stats}'")
+        return source_responses
 
     @staticmethod
     def _generate_query_string(
-            query: Optional[str] = None,
-            keywords=None,
-            hashtags=None,
-            usernames=None,
-            operators=None,
+            query: str = None,
+            keywords: List[str] = None,
+            hashtags: List[str] = None,
+            usernames: List[str] = None,
+            operators: List[str] = None,
     ) -> str:
-        operators = operators or DEFAULT_OPERATORS
-        usernames = usernames or []
-        hashtags = hashtags or []
-        keywords = keywords or []
+        if query:
+            return query
+
         or_tokens = []
         and_tokens = []
-
-        if query:
-            or_tokens.append(query)
 
         if keywords:
             or_tokens.append(f'({" OR ".join(keywords)})')
@@ -112,7 +86,12 @@ class TwitterSource(BaseSource):
         if operators:
             and_tokens.append(f'{" AND ".join(operators)}')
 
-        return f'({" OR ".join(or_tokens)})' + f' AND ({" AND ".join(and_tokens)})' if and_tokens else ''
+        or_query_str = f'({" OR ".join(or_tokens)})'
+        and_query_str = ""
+        if and_tokens:
+            and_query_str = f' AND ({" AND ".join(and_tokens)})' if and_tokens else ''
+
+        return or_query_str + and_query_str
 
     @staticmethod
     def get_source_output(tweet: Dict[str, Any]):

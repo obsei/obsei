@@ -26,8 +26,13 @@ class Processor:
 
     def process(self):
         source_response_list = self.source.lookup(self.source_config)
-        logger.info("source_response_list=", source_response_list)
+        for idx, source_response in enumerate(source_response_list):
+            logger.info(f"source_response#'{idx}'='{source_response}'")
+
         analyzer_response_list = self.text_analyzer.analyze_input(source_response_list)
-        logger.info("analyzer_response_list=", analyzer_response_list)
+        for idx, analyzer_response in enumerate(analyzer_response_list):
+            logger.info(f"source_response#'{idx}'='{analyzer_response}'")
+
         sink_response_list = self.sink.send_data(analyzer_response_list, self.sink_config)
-        logger.info("sink_response_list=", sink_response_list)
+        for idx, sink_response in enumerate(sink_response_list):
+            logger.info(f"source_response#'{idx}'='{sink_response}'")

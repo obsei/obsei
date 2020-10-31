@@ -1,13 +1,20 @@
+import logging
+import sys
+
 from socialtracker.sink.http_sink_config import HttpSinkConfig
 from socialtracker.sink.http_sink import HttpSink
 from socialtracker.source.twitter_source_config import TwitterSourceConfig
 from socialtracker.source.twitter_source import TwitterSource
 from socialtracker.text_analyzer import TextAnalyzer
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+
+
 sink_config = HttpSinkConfig(
-    url=<URL>,
+    url="<URL>",
     base_payload={
-        "partnerId": <PARTNER_ID>,
+        "partnerId": <ID>,
     },
     payload_mapping={
       "text": ["enquiryMessage", "text"],
@@ -19,10 +26,15 @@ sink_config = HttpSinkConfig(
 )
 
 source_config = TwitterSourceConfig(
-    consumer_key="",
-    consumer_secret="",
+    twitter_config_filename="../config/twitter.yaml", # "~/.twitter_keys.yaml",
     query="XpressBees",
-    lookup_period="15d",
+    lookup_period="7d",
+    tweet_fields=None,
+    operators=None,
+    user_fields=None,
+    expansions=None,
+    place_fields=None,
+    max_tweets=10,
 )
 
 source = TwitterSource()
@@ -32,10 +44,13 @@ text_analyzer = TextAnalyzer(
 )
 
 source_response_list = source.lookup(source_config)
-print("source_response_list=", source_response_list)
-analyzer_response_list = text_analyzer.analyze_input(
-    source_response_list
-)
-print("analyzer_response_list=", analyzer_response_list)
+for idx, source_response in enumerate(source_response_list):
+    logger.info(f"source_response#'{idx}'='{source_response.__dict__}'")
+
+analyzer_response_list = text_analyzer.analyze_input(source_response_list)
+for idx, analyzer_response in enumerate(analyzer_response_list):
+    logger.info(f"source_response#'{idx}'='{analyzer_response.__dict__}'")
+
 sink_response_list = sink.send_data(analyzer_response_list, sink_config)
-print("sink_response_list=", sink_response_list)
+for idx, sink_response in enumerate(sink_response_list):
+    logger.info(f"source_response#'{idx}'='{sink_response.__dict__}'")

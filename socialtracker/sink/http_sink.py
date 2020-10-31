@@ -50,5 +50,5 @@ class HttpSink(BaseSink):
                 headers=headers,
             )
 
-            logger.info(response)
+            logger.info(f"response='{response}'")
             responses.append(response)
