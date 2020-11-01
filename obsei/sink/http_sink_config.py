@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from socialtracker.sink.base_sink_config import BaseSinkConfig
+from obsei.sink.base_sink_config import BaseSinkConfig
 
 
 class HttpSinkConfig(BaseSinkConfig):

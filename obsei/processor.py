@@ -1,10 +1,10 @@
 import logging
 
-from socialtracker.sink.base_sink_config import BaseSinkConfig
-from socialtracker.source.base_source_config import BaseSourceConfig
-from socialtracker.sink.base_sink import BaseSink
-from socialtracker.source.base_source import BaseSource
-from socialtracker.text_analyzer import TextAnalyzer
+from obsei.sink.base_sink_config import BaseSinkConfig
+from obsei.source.base_source_config import BaseSourceConfig
+from obsei.sink.base_sink import BaseSink
+from obsei.source.base_source import BaseSource
+from obsei.text_analyzer import TextAnalyzer
 
 logger = logging.getLogger(__name__)
 

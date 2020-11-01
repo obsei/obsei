@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from socialtracker.source.base_source_config import BaseSourceConfig
+from obsei.source.base_source_config import BaseSourceConfig
 
 DEFAULT_MAX_TWEETS = 10
 

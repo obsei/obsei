@@ -1,11 +1,11 @@
 import logging
 import sys
 
-from socialtracker.sink.http_sink_config import HttpSinkConfig
-from socialtracker.sink.http_sink import HttpSink
-from socialtracker.source.twitter_source_config import TwitterSourceConfig
-from socialtracker.source.twitter_source import TwitterSource
-from socialtracker.text_analyzer import TextAnalyzer
+from obsei.sink.http_sink_config import HttpSinkConfig
+from obsei.sink.http_sink import HttpSink
+from obsei.source.twitter_source_config import TwitterSourceConfig
+from obsei.source.twitter_source import TwitterSource
+from obsei.text_analyzer import TextAnalyzer
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)

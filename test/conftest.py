@@ -1,6 +1,6 @@
 import pytest
 
-from socialtracker.text_analyzer import TextAnalyzer
+from obsei.text_analyzer import TextAnalyzer
 
 
 @pytest.fixture(scope="session")

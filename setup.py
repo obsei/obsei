@@ -1,3 +1,4 @@
+import pathlib
 from io import open
 
 from setuptools import find_packages, setup
@@ -32,17 +33,39 @@ def get_dependency_links(filename):
 dependency_links = get_dependency_links('requirements.txt')
 parsed_requirements = parse_requirements('requirements.txt')
 
+# The directory containing this file
+HERE = pathlib.Path(__file__).parent
+
+# The text of the README file
+README = (HERE / "README.md").read_text()
+
+
 setup(
-    name="social-tracker",
+    name="obsei",
     version="0.0.1",
     author="Lalit Pagaria",
     author_email="pagaria.lalit@gmail.com",
-    description="",
-    license="GPL Version 3",
-    url="https://github.com/lalitpagaria/SocialTracker",
+    description="Observe PoI text data from the various sources, segment it and then inform about it",
+    long_description=README,
+    license="Apache Version 2.0",
+    url="https://github.com/lalitpagaria/obsei",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     dependency_links=dependency_links,
     install_requires=parsed_requirements,
+    include_package_data=True,
     python_requires=">=3.6.0",
     tests_require=["pytest"],
+    classifiers=[
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Customer Service",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Information Technology",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
 )

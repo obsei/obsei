@@ -4,9 +4,9 @@ from typing import List
 import logging
 import requests
 
-from socialtracker.sink.http_sink_config import HttpSinkConfig
-from socialtracker.sink.base_sink import BaseSink
-from socialtracker.text_analyzer import AnalyzerResponse
+from obsei.sink.http_sink_config import HttpSinkConfig
+from obsei.sink.base_sink import BaseSink
+from obsei.text_analyzer import AnalyzerResponse
 
 logger = logging.getLogger(__name__)
 

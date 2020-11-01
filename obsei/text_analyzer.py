@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from socialtracker.source.base_source import SourceResponse
+from obsei.source.base_source import SourceResponse
 
 logger = logging.getLogger(__name__)
 

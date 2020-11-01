@@ -4,8 +4,8 @@ from typing import Any, Dict, List
 
 from searchtweets import collect_results, gen_request_parameters, load_credentials
 
-from socialtracker.source.twitter_source_config import TwitterSourceConfig
-from socialtracker.source.base_source import BaseSource, SourceResponse
+from obsei.source.twitter_source_config import TwitterSourceConfig
+from obsei.source.base_source import BaseSource, SourceResponse
 
 logger = logging.getLogger(__name__)
 
