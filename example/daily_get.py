@@ -30,7 +30,7 @@ sink_config = HttpSinkConfig(
 )
 
 source_config = TwitterSourceConfig(
-    twitter_config_filename="../config/twitter.yaml", # "~/.twitter_keys.yaml",
+    twitter_config_filename=os.environ['PYTHONPATH'] + "/config/twitter.yaml",
     query=os.environ['DAILYGET_QUERY'],
     lookup_period=os.environ['DAILYGET_LOOKUP_PERIOD'],
     tweet_fields=None,
