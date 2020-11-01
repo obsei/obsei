@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 
 from obsei.sink.http_sink_config import HttpSinkConfig
@@ -12,9 +13,9 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 sink_config = HttpSinkConfig(
-    url="<URL>",
+    url=os.environ['DAILYGET_URL'],
     base_payload={
-        "partnerId": <ID>,
+        "partnerId": os.environ['DAILYGET_PARTNER_ID'],
     },
     payload_mapping={
       "text": ["enquiryMessage", "text"],
@@ -27,8 +28,8 @@ sink_config = HttpSinkConfig(
 
 source_config = TwitterSourceConfig(
     twitter_config_filename="../config/twitter.yaml", # "~/.twitter_keys.yaml",
-    query="XpressBees",
-    lookup_period="7d",
+    query=os.environ['DAILYGET_QUERY'],
+    lookup_period=os.environ['DAILYGET_LOOKUP_PERIOD'],
     tweet_fields=None,
     operators=None,
     user_fields=None,
