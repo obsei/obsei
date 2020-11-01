@@ -1,0 +1,40 @@
+name: "Daily-Get"
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '0 * * * *'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run
+            env:
+              SEARCHTWEETS_BEARER_TOKEN: ${{ secrets.SEARCHTWEETS_BEARER_TOKEN }}
+              SEARCHTWEETS_CONSUMER_KEY: ${{ secrets.SEARCHTWEETS_CONSUMER_KEY }}
+              SEARCHTWEETS_CONSUMER_SECRET: ${{ secrets.SEARCHTWEETS_CONSUMER_SECRET }}
+              DAILYGET_URL: ${{ secrets.DAILYGET_URL }}
+              DAILYGET_QUERY: ${{ secrets.DAILYGET_QUERY }}
+              DAILYGET_PARTNER_ID: ${{ secrets.DAILYGET_PARTNER_ID }}
+              DAILYGET_LOOKUP_PERIOD: ${{ secrets.DAILYGET_LOOKUP_PERIOD }}
+            run: |
+              python example/daily-get.py

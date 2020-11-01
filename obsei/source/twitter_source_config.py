@@ -5,8 +5,8 @@ from obsei.source.base_source_config import BaseSourceConfig
 DEFAULT_MAX_TWEETS = 10
 
 DEFAULT_TWEET_FIELDS = [
-    "author_id", "entities.mentions.username", "geo.place_id", "in_reply_to_user_id", "referenced_tweets.id",
-    "referenced_tweets.id.author_id",
+    "author_id", "conversation_id", "created_at", "entities", "geo", "id", "in_reply_to_user_id", "lang",
+    "public_metrics", "referenced_tweets", "source", "text"
 ]
 
 DEFAULT_EXPANSIONS = [
@@ -14,10 +14,10 @@ DEFAULT_EXPANSIONS = [
     "referenced_tweets.id.author_id"
 ]
 
-DEFAULT_PLACE_FIELDS = ["country"]
+DEFAULT_PLACE_FIELDS = ["contained_within", "country", "country_code", "full_name", "geo", "id", "name", "place_type"]
 
 DEFAULT_USER_FIELDS = [
-    "public_metrics", "username", "verified", "name"
+    "created_at", "description", "entities", "id", "location", "name", "public_metrics", "url", "username", "verified"
 ]
 
 DEFAULT_OPERATORS = [

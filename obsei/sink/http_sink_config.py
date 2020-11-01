@@ -11,8 +11,10 @@ class HttpSinkConfig(BaseSinkConfig):
         base_payload: Dict[str, Any] = None,
         # analyzer_output to payload mapping
         payload_mapping: Dict[str, List[str]] = None,
+        field_conversion: Dict[str, str] = None,
     ):
         self.url = url
         self.headers = headers
         self.base_payload = base_payload
         self.payload_mapping = payload_mapping
+        self.field_conversion = field_conversion

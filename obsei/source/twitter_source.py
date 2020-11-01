@@ -84,12 +84,12 @@ class TwitterSource(BaseSource):
             or_tokens.append(f'({" OR ".join(usernames)})')
 
         if operators:
-            and_tokens.append(f'{" AND ".join(operators)}')
+            and_tokens.append(f'{" ".join(operators)}')
 
         or_query_str = f'({" OR ".join(or_tokens)})'
         and_query_str = ""
         if and_tokens:
-            and_query_str = f' AND ({" AND ".join(and_tokens)})' if and_tokens else ''
+            and_query_str = f' ({" ".join(and_tokens)})' if and_tokens else ''
 
         return or_query_str + and_query_str
 
