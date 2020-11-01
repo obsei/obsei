@@ -37,4 +37,5 @@ jobs:
           DAILYGET_PARTNER_ID: ${{ secrets.DAILYGET_PARTNER_ID }}
           DAILYGET_LOOKUP_PERIOD: ${{ secrets.DAILYGET_LOOKUP_PERIOD }}
         run: |
+          export PYTHONPATH=`pwd`
           python example/daily_get.py
