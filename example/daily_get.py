@@ -18,11 +18,14 @@ sink_config = HttpSinkConfig(
         "partnerId": os.environ['DAILYGET_PARTNER_ID'],
     },
     payload_mapping={
-      "text": ["enquiryMessage", "text"],
-      "sentiment_value": ["enquiryMessage", "sentiment_value"],
-      "sentiment_type": ["enquiryMessage", "sentiment_type"],
-      "classification_map": ["enquiryMessage", "classification_map"],
-      "meta_information": ["enquiryMessage", "meta_information"],
+      "text": ["enquiryMessage"],
+      "sentiment_value": ["enquiryMessage"],
+      "sentiment_type": ["enquiryMessage"],
+      "classification_map": ["enquiryMessage"],
+      "meta_information": ["enquiryMessage"],
+    },
+    field_conversion={
+        "enquiryMessage": "flat_string"
     }
 )
 
@@ -31,7 +34,6 @@ source_config = TwitterSourceConfig(
     query=os.environ['DAILYGET_QUERY'],
     lookup_period=os.environ['DAILYGET_LOOKUP_PERIOD'],
     tweet_fields=None,
-    operators=None,
     user_fields=None,
     expansions=None,
     place_fields=None,
@@ -41,17 +43,22 @@ source_config = TwitterSourceConfig(
 source = TwitterSource()
 sink = HttpSink()
 text_analyzer = TextAnalyzer(
-    initialize_sentiment_model=False,
+    classifier_model_name="joeddav/xlm-roberta-large-xnli",
+    initialize_sentiment_model=True,
 )
 
 source_response_list = source.lookup(source_config)
 for idx, source_response in enumerate(source_response_list):
     logger.info(f"source_response#'{idx}'='{source_response.__dict__}'")
 
-analyzer_response_list = text_analyzer.analyze_input(source_response_list)
+analyzer_response_list = text_analyzer.analyze_input(
+    source_response_list=source_response_list,
+    labels=["experience", "service", "comfortable", "delivery", "delay", "customer care", "response", "frustration"]
+)
 for idx, analyzer_response in enumerate(analyzer_response_list):
-    logger.info(f"source_response#'{idx}'='{analyzer_response.__dict__}'")
+    logger.info(f"analyzer_response#'{idx}'='{analyzer_response.__dict__}'")
 
 sink_response_list = sink.send_data(analyzer_response_list, sink_config)
-for idx, sink_response in enumerate(sink_response_list):
-    logger.info(f"source_response#'{idx}'='{sink_response.__dict__}'")
+for sink_response in sink_response_list:
+    if sink_response is not None:
+        logger.info(f"sink_response='{sink_response.__dict__}'")
