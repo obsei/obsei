@@ -18,8 +18,8 @@ DEFAULT_PAYLOAD_MAPPING = {
     "processed_text": ["processed_text"],
     "sentiment_value": ["sentiment_value"],
     "sentiment_type": ["sentiment_type"],
-    "classification_map": ["classification_map"],
-    "meta_information": ["meta_information"],
+    "classification": ["classification"],
+    "meta": ["meta"],
 }
 
 
@@ -62,6 +62,7 @@ class HttpSink(BaseSink):
             # TODO: Clean this
             if "enquiryMessage" in request_payload:
                 flat_dict = self.flatten(analyzer_response_dict)
+                flat_dict.pop("processed_text")
                 kv_str_list = [str(k) + ": " + str(v).replace("\n", "") for k, v in flat_dict.items()]
                 request_payload["enquiryMessage"] = "\n".join(kv_str_list)
 
@@ -86,6 +87,8 @@ class HttpSink(BaseSink):
                 for subdict in val:
                     deeper = self.flatten(subdict).items()
                     out.update({key + '_' + key2: val2 for key2, val2 in deeper})
+            elif isinstance(val, float):
+                out[key] = format(val, '.2f')
             else:
                 out[key] = val
         return out

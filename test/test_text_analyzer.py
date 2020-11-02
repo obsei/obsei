@@ -24,7 +24,7 @@ def test_text_analyzer_with_model(text_analyzer_with_model):
     assert len(analyzer_responses) == len(TEXTS)
 
     for analyzer_response in analyzer_responses:
-        assert len(analyzer_response.classification_map) == len(labels)
+        assert len(analyzer_response.classification) == len(labels)
         assert analyzer_response.sentiment_type in ["POSITIVE", "NEGATIVE"]
         assert -1.0 <= analyzer_response.sentiment_value <= 1.0
 

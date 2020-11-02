@@ -12,22 +12,22 @@ class AnalyzerResponse:
         processed_text: str,
         sentiment_value: float,
         sentiment_type: str,
-        classification_map: Dict[str, float] = None,
-        meta_information: Dict[str, Any] = None,
+        classification: Dict[str, float] = None,
+        meta: Dict[str, Any] = None,
     ):
         self.sentiment_value = sentiment_value
         self.sentiment_type = sentiment_type
-        self.classification_map = classification_map
+        self.classification = classification
         self.processed_text = processed_text
-        self.meta_information = meta_information
+        self.meta = meta
 
     def to_dict(self):
         return {
             "processed_text": self.processed_text,
             "sentiment_value": self.sentiment_value,
             "sentiment_type": self.sentiment_type,
-            "classification_map": self.classification_map,
-            "meta_information": self.meta_information,
+            "classification": self.classification,
+            "meta": self.meta,
         }
 
 
@@ -123,10 +123,10 @@ class TextAnalyzer:
             analyzer_output.append(
                 AnalyzerResponse(
                     processed_text=source_response.processed_text,
-                    meta_information=source_response.meta_information,
+                    meta=source_response.meta,
                     sentiment_value=sentiment_value,
                     sentiment_type=sentiment_type,
-                    classification_map=classification_map
+                    classification=classification_map
                 )
             )
 

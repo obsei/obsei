@@ -8,10 +8,10 @@ class SourceResponse:
     def __init__(
         self,
         processed_text: str,
-        meta_information: Optional[Dict[str, Any]] = None,
+        meta: Optional[Dict[str, Any]] = None,
     ):
         self.processed_text = processed_text
-        self.meta_information = meta_information
+        self.meta = meta
 
 
 class BaseSource(ABC):

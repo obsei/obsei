@@ -17,13 +17,14 @@ sink_config = HttpSinkConfig(
     url=os.environ['DAILYGET_URL'],
     base_payload={
         "partnerId": os.environ['DAILYGET_PARTNER_ID'],
+        "consumerPhoneNumber": os.environ['DAILYGET_CONSUMER_NUMBER'],
     },
     payload_mapping={
       "processed_text": ["enquiryMessage"],
       "sentiment_value": ["enquiryMessage"],
       "sentiment_type": ["enquiryMessage"],
-      "classification_map": ["enquiryMessage"],
-      "meta_information": ["enquiryMessage"],
+      "classification": ["enquiryMessage"],
+      "meta": ["enquiryMessage"],
     },
     field_conversion={
         "enquiryMessage": "flat_string"
@@ -35,10 +36,10 @@ source_config = TwitterSourceConfig(
     twitter_config_filename=f'{dir_path}/config/twitter.yaml',
     keywords=[os.environ['DAILYGET_QUERY']],
     lookup_period=os.environ['DAILYGET_LOOKUP_PERIOD'],
-    # tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],
+    tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],
     # user_fields=["name", "public_metrics", "username", "verified"],
     # tweet_fields=["author_id", "created_at", "id", "public_metrics", "text"],
-    tweet_fields=None,
+    # tweet_fields=None,
     user_fields=None,
     expansions=None,
     place_fields=None,
