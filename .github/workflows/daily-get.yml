@@ -32,6 +32,7 @@ jobs:
           DAILYGET_QUERY: ${{ secrets.DAILYGET_QUERY }}
           DAILYGET_PARTNER_ID: ${{ secrets.DAILYGET_PARTNER_ID }}
           DAILYGET_LOOKUP_PERIOD: ${{ secrets.DAILYGET_LOOKUP_PERIOD }}
+          DAILYGET_CONSUMER_NUMBER: ${{ secrets.DAILYGET_CONSUMER_NUMBER }}
         run: |
           export SEARCHTWEETS_ENDPOINT="https://api.twitter.com/2/tweets/search/recent"
           export PYTHONPATH=`pwd`
