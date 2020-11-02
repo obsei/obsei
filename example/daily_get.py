@@ -47,7 +47,7 @@ source_config = TwitterSourceConfig(
 source = TwitterSource()
 sink = HttpSink()
 text_analyzer = TextAnalyzer(
-    classifier_model_name="facebook/bart-large-mnli",
+    classifier_model_name="joeddav/bart-large-mnli-yahoo-answers",
  #   classifier_model_name="joeddav/xlm-roberta-large-xnli",
     initialize_model=True,
 )
