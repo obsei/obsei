@@ -12,7 +12,7 @@ TEXTS = [GOOD_TEXT, BAD_TEXT, MIXED_TEXT]
 
 
 def test_text_analyzer_with_model(text_analyzer_with_model):
-    labels = ["facility", "food", "comfortable"]
+    labels = ["facility", "food", "comfortable", "positive", "negative"]
 
     source_responses = [SourceResponse(text) for text in TEXTS]
     analyzer_responses = text_analyzer_with_model.analyze_input(
@@ -24,7 +24,7 @@ def test_text_analyzer_with_model(text_analyzer_with_model):
     assert len(analyzer_responses) == len(TEXTS)
 
     for analyzer_response in analyzer_responses:
-        assert len(analyzer_response.classification) == len(labels) + 2
+        assert len(analyzer_response.classification) == len(labels)
         assert "positive" in analyzer_response.classification
         assert "negative" in analyzer_response.classification
 

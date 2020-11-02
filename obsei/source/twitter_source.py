@@ -123,7 +123,10 @@ class TwitterSource(BaseSource):
 
         return or_query_str + and_query_str
 
-    @staticmethod
-    def get_source_output(tweet: Dict[str, Any]):
+    def get_source_output(self, tweet: Dict[str, Any]):
         processed_text = cleaning_processor.clean(tweet["text"])
-        return SourceResponse(processed_text, tweet)
+        return SourceResponse(
+            processed_text=processed_text,
+            meta=tweet,
+            source_name=type(self).__name__
+        )
