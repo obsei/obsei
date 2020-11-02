@@ -45,30 +45,38 @@ class TwitterSource(BaseSource):
             start_time=config.lookup_period
         )
 
-        tweets = collect_results(
+        tweets_output = collect_results(
             query=search_query,
             max_tweets=config.max_tweets,
             result_stream_args=search_args
         )
 
-        if tweets is None:
+        if not tweets_output:
             logger.info("No Tweets found")
             return []
 
-        # TODO use it later
-        next_stats: Dict[str, Any] = tweets.get("meta", None)
-        logger.info(f"next_stats='{next_stats}'")
+        tweets = []
+        users = []
+        meta_info = None
+        for raw_output in tweets_output:
+            if "text" in raw_output:
+                tweets.append(raw_output)
+            elif "users" in raw_output:
+                users = raw_output["users"]
+            elif "meta" in raw_output:
+                meta_info = raw_output["meta"]
 
         # Extract user info and create user map
         user_map: Dict[str, Dict[str, Any]] = {}
-        if "includes" in tweets and "users" in tweets["includes"]:
-            users = tweets["includes"]["users"]
-            if users and len(users) > 0 and "id" in users[0]:
-                for user in users:
-                    user_map[user["id"]] = user
+        if len(users) > 0 and "id" in users[0]:
+            for user in users:
+                user_map[user["id"]] = user
+
+        # TODO use it later
+        logger.info(f"Twitter API meta_info='{meta_info}'")
 
         source_responses: List[SourceResponse] = []
-        for tweet in tweets.get("data", []):
+        for tweet in tweets:
             if "author_id" in tweet and tweet["author_id"] in user_map:
                 tweet["author_info"] = user_map.get(tweet["author_id"])
 

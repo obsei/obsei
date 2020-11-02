@@ -39,7 +39,7 @@ source_config = TwitterSourceConfig(
     # tweet_fields=["author_id", "created_at", "id", "public_metrics", "text"],
     # tweet_fields=None,
     # user_fields=None,
-    expansions=None,
+    expansions=["author_id"],
     place_fields=None,
     max_tweets=10,
 )
@@ -58,7 +58,7 @@ for idx, source_response in enumerate(source_response_list):
 
 analyzer_response_list = text_analyzer.analyze_input(
     source_response_list=source_response_list,
-    labels=["experience", "service", "comfortable", "delivery", "delay", "customer care", "response", "frustration"]
+    labels=["update", "service", "delay", "response"]
 )
 for idx, analyzer_response in enumerate(analyzer_response_list):
     logger.info(f"analyzer_response#'{idx}'='{analyzer_response.__dict__}'")
