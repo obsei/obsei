@@ -24,9 +24,9 @@ def test_text_analyzer_with_model(text_analyzer_with_model):
     assert len(analyzer_responses) == len(TEXTS)
 
     for analyzer_response in analyzer_responses:
-        assert len(analyzer_response.classification) == len(labels)
-        assert analyzer_response.sentiment_type in ["POSITIVE", "NEGATIVE"]
-        assert -1.0 <= analyzer_response.sentiment_value <= 1.0
+        assert len(analyzer_response.classification) == len(labels) + 2
+        assert "positive" in analyzer_response.classification
+        assert "negative" in analyzer_response.classification
 
 
 def test_text_analyzer_with_vader(text_analyzer_with_vader):
@@ -38,12 +38,6 @@ def test_text_analyzer_with_vader(text_analyzer_with_vader):
     assert len(analyzer_responses) == len(TEXTS)
 
     for analyzer_response in analyzer_responses:
-        if analyzer_response.processed_text == GOOD_TEXT:
-            assert analyzer_response.sentiment_type == "POSITIVE"
-            assert analyzer_response.sentiment_value > 0.0
-        elif analyzer_response.processed_text == BAD_TEXT:
-            assert analyzer_response.sentiment_type == "NEGATIVE"
-            assert analyzer_response.sentiment_value < 0.0
-        else:
-            assert analyzer_response.sentiment_type in ["POSITIVE", "NEGATIVE"]
-            assert -0.5 < analyzer_response.sentiment_value < 0.75
+        assert len(analyzer_response.classification) == 2
+        assert "positive" in analyzer_response.classification
+        assert "negative" in analyzer_response.classification

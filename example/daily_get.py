@@ -21,8 +21,6 @@ sink_config = HttpSinkConfig(
     },
     payload_mapping={
       "processed_text": ["enquiryMessage"],
-      "sentiment_value": ["enquiryMessage"],
-      "sentiment_type": ["enquiryMessage"],
       "classification": ["enquiryMessage"],
       "meta": ["enquiryMessage"],
     },
@@ -37,10 +35,10 @@ source_config = TwitterSourceConfig(
     keywords=[os.environ['DAILYGET_QUERY']],
     lookup_period=os.environ['DAILYGET_LOOKUP_PERIOD'],
     tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],
-    # user_fields=["name", "public_metrics", "username", "verified"],
+    user_fields=["id", "name", "public_metrics", "username", "verified"],
     # tweet_fields=["author_id", "created_at", "id", "public_metrics", "text"],
     # tweet_fields=None,
-    user_fields=None,
+    # user_fields=None,
     expansions=None,
     place_fields=None,
     max_tweets=10,
@@ -49,8 +47,9 @@ source_config = TwitterSourceConfig(
 source = TwitterSource()
 sink = HttpSink()
 text_analyzer = TextAnalyzer(
-    classifier_model_name="joeddav/xlm-roberta-large-xnli",
-    initialize_sentiment_model=True,
+    classifier_model_name="facebook/bart-large-mnli",
+ #   classifier_model_name="joeddav/xlm-roberta-large-xnli",
+    initialize_model=True,
 )
 
 source_response_list = source.lookup(source_config)

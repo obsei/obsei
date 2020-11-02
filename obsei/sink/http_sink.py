@@ -16,8 +16,6 @@ DEFAULT_HEADERS = {
 
 DEFAULT_PAYLOAD_MAPPING = {
     "processed_text": ["processed_text"],
-    "sentiment_value": ["sentiment_value"],
-    "sentiment_type": ["sentiment_type"],
     "classification": ["classification"],
     "meta": ["meta"],
 }

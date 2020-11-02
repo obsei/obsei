@@ -10,13 +10,9 @@ class AnalyzerResponse:
     def __init__(
         self,
         processed_text: str,
-        sentiment_value: float,
-        sentiment_type: str,
         classification: Dict[str, float] = None,
         meta: Dict[str, Any] = None,
     ):
-        self.sentiment_value = sentiment_value
-        self.sentiment_type = sentiment_type
         self.classification = classification
         self.processed_text = processed_text
         self.meta = meta
@@ -24,8 +20,6 @@ class AnalyzerResponse:
     def to_dict(self):
         return {
             "processed_text": self.processed_text,
-            "sentiment_value": self.sentiment_value,
-            "sentiment_type": self.sentiment_type,
             "classification": self.classification,
             "meta": self.meta,
         }
@@ -37,18 +31,14 @@ class TextAnalyzer:
             # Model names: joeddav/xlm-roberta-large-xnli, facebook/bart-large-mnli
             classifier_model_name: Optional[str] = None,
             multi_class_classification: Optional[bool] = True,
-            initialize_sentiment_model: Optional[bool] = False,
+            initialize_model: Optional[bool] = False,
     ):
         self.multi_class_classification = multi_class_classification
         self.classifier_model_name = classifier_model_name
 
-        if self.classifier_model_name is not None:
+        if initialize_model is not None or self.classifier_model_name is not None:
             from transformers import pipeline
             self.classifier_model = pipeline("zero-shot-classification", model=classifier_model_name)
-
-        if initialize_sentiment_model is not None:
-            from transformers import pipeline
-            self.sentiment_model = pipeline("sentiment-analysis")
             self.vader_sentiment_analyzer = None
         else:
             from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -62,13 +52,6 @@ class TextAnalyzer:
         from transformers import pipeline
         self.classifier_model = pipeline("zero-shot-classification", model=classifier_model_name)
 
-    def _init_sentiment_model(self):
-        if self.sentiment_model is not None:
-            raise AttributeError("Classifier already initialized")
-
-        from transformers import pipeline
-        self.sentiment_model = pipeline("sentiment-analysis")
-
     def init_vader_sentiment_analyzer(self):
         if self.vader_sentiment_analyzer is not None:
             raise AttributeError("Classifier already initialized")
@@ -76,22 +59,14 @@ class TextAnalyzer:
         from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
         self.vader_sentiment_analyzer = SentimentIntensityAnalyzer()
 
-    def _get_sentiment_score(self, text: str, use_sentiment_model: bool = False) -> float:
-        if use_sentiment_model:
-            if self.sentiment_model is None:
-                self._init_sentiment_model()
+    def _get_sentiment_score_from_vader(self, text: str) -> float:
+        if self.vader_sentiment_analyzer is None:
+            self.init_vader_sentiment_analyzer()
 
-            score = self.sentiment_model(text)[0]
+        scores = self.vader_sentiment_analyzer.polarity_scores(text)
+        return scores["compound"]
 
-            return score['score'] if 'POSITIVE' == score['label'] else -score['score']
-        else:
-            if self.vader_sentiment_analyzer is None:
-                self.init_vader_sentiment_analyzer()
-
-            scores = self.vader_sentiment_analyzer.polarity_scores(text)
-            return scores["compound"]
-
-    def _classify_text(self, text: str, labels: List[str]) -> Dict[str, float]:
+    def _classify_text_from_model(self, text: str, labels: List[str]) -> Dict[str, float]:
         if self.classifier_model is None:
             self._init_classifier_model(self.classifier_model_name)
 
@@ -108,24 +83,30 @@ class TextAnalyzer:
     ) -> List[AnalyzerResponse]:
 
         analyzer_output: List[AnalyzerResponse] = []
-        for source_response in source_response_list:
-            sentiment_value = self._get_sentiment_score(source_response.processed_text, use_sentiment_model)
-            if sentiment_value < 0.0:
-                sentiment_type = "NEGATIVE"
-            else:
-                sentiment_type = "POSITIVE"
 
-            if labels is not None:
-                classification_map = self._classify_text(source_response.processed_text, labels)
+        labels = labels or []
+        if "positive" not in labels:
+            labels.append("positive")
+        if "negative" not in labels:
+            labels.append("negative")
+
+        for source_response in source_response_list:
+            classification_map = {}
+            if not use_sentiment_model:
+                sentiment_value = self._get_sentiment_score_from_vader(source_response.processed_text)
+                if sentiment_value < 0.0:
+                    classification_map["negative"] = -sentiment_value
+                    classification_map["positive"] = 1.0 + classification_map["negative"]
+                else:
+                    classification_map["positive"] = sentiment_value
+                    classification_map["negative"] = 1.0 - classification_map["positive"]
             else:
-                classification_map = None
+                classification_map = self._classify_text_from_model(source_response.processed_text, labels)
 
             analyzer_output.append(
                 AnalyzerResponse(
                     processed_text=source_response.processed_text,
                     meta=source_response.meta,
-                    sentiment_value=sentiment_value,
-                    sentiment_type=sentiment_type,
                     classification=classification_map
                 )
             )

@@ -51,15 +51,29 @@ class TwitterSource(BaseSource):
             result_stream_args=search_args
         )
 
-        source_responses: List[SourceResponse] = []
-        next_stats: Dict[str, Any] = None # TODO use it later
-        for tweet in tweets:
-            if "id" in tweet:
-                source_responses.append(TwitterSource.get_source_output(tweet))
-            else:
-                next_stats = tweet
+        if tweets is None:
+            logger.info("No Tweets found")
+            return []
 
+        # TODO use it later
+        next_stats: Dict[str, Any] = tweets.get("meta", None)
         logger.info(f"next_stats='{next_stats}'")
+
+        # Extract user info and create user map
+        user_map: Dict[str, Dict[str, Any]] = {}
+        if "includes" in tweets and "users" in tweets["includes"]:
+            users = tweets["includes"]["users"]
+            if users and len(users) > 0 and "id" in users[0]:
+                for user in users:
+                    user_map[user["id"]] = user
+
+        source_responses: List[SourceResponse] = []
+        for tweet in tweets.get("data", []):
+            if "author_id" in tweet and tweet["author_id"] in user_map:
+                tweet["author_info"] = user_map.get(tweet["author_id"])
+
+            source_responses.append(TwitterSource.get_source_output(tweet))
+
         return source_responses
 
     @staticmethod
