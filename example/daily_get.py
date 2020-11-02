@@ -58,7 +58,8 @@ for idx, source_response in enumerate(source_response_list):
 
 analyzer_response_list = text_analyzer.analyze_input(
     source_response_list=source_response_list,
-    labels=["update", "service", "delay", "response"]
+    labels=["service", "delay", "tracking"],
+    use_sentiment_model=True
 )
 for idx, analyzer_response in enumerate(analyzer_response_list):
     logger.info(f"analyzer_response#'{idx}'='{analyzer_response.__dict__}'")

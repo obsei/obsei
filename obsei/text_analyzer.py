@@ -96,7 +96,7 @@ class TextAnalyzer:
                 sentiment_value = self._get_sentiment_score_from_vader(source_response.processed_text)
                 if sentiment_value < 0.0:
                     classification_map["negative"] = -sentiment_value
-                    classification_map["positive"] = 1.0 + classification_map["negative"]
+                    classification_map["positive"] = 1.0 - classification_map["negative"]
                 else:
                     classification_map["positive"] = sentiment_value
                     classification_map["negative"] = 1.0 - classification_map["positive"]
