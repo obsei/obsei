@@ -14,7 +14,7 @@ TEXTS = [GOOD_TEXT, BAD_TEXT, MIXED_TEXT]
 def test_text_analyzer_with_model(text_analyzer_with_model):
     labels = ["facility", "food", "comfortable", "positive", "negative"]
 
-    source_responses = [SourceResponse(text) for text in TEXTS]
+    source_responses = [SourceResponse(text, "sample") for text in TEXTS]
     analyzer_responses = text_analyzer_with_model.analyze_input(
         source_response_list=source_responses,
         labels=labels,
@@ -30,7 +30,7 @@ def test_text_analyzer_with_model(text_analyzer_with_model):
 
 
 def test_text_analyzer_with_vader(text_analyzer_with_vader):
-    source_responses = [SourceResponse(text) for text in TEXTS]
+    source_responses = [SourceResponse(text, "sample") for text in TEXTS]
     analyzer_responses = text_analyzer_with_vader.analyze_input(
         source_response_list=source_responses
     )
