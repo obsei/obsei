@@ -61,7 +61,8 @@ class HttpSink(BaseSink):
             if "enquiryMessage" in request_payload:
                 flat_dict = self.flatten(analyzer_response_dict)
                 flat_dict.pop("processed_text")
-                kv_str_list = [str(k) + ": " + str(v).replace("\n", "") for k, v in flat_dict.items()]
+                kv_str_list = ["_".join(str(k).rsplit("_")[-2:]) + ": " + str(v).replace("\n", "")
+                               for k, v in flat_dict.items()]
                 request_payload["enquiryMessage"] = "\n".join(kv_str_list)
 
             response = requests.post(
