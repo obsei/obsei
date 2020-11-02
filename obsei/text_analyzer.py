@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class AnalyzerResponse:
     def __init__(
         self,
-        text: str,
+        processed_text: str,
         sentiment_value: float,
         sentiment_type: str,
         classification_map: Dict[str, float] = None,
@@ -18,12 +18,12 @@ class AnalyzerResponse:
         self.sentiment_value = sentiment_value
         self.sentiment_type = sentiment_type
         self.classification_map = classification_map
-        self.text = text
+        self.processed_text = processed_text
         self.meta_information = meta_information
 
     def to_dict(self):
         return {
-            "text": self.text,
+            "processed_text": self.processed_text,
             "sentiment_value": self.sentiment_value,
             "sentiment_type": self.sentiment_type,
             "classification_map": self.classification_map,
@@ -109,20 +109,20 @@ class TextAnalyzer:
 
         analyzer_output: List[AnalyzerResponse] = []
         for source_response in source_response_list:
-            sentiment_value = self._get_sentiment_score(source_response.text, use_sentiment_model)
+            sentiment_value = self._get_sentiment_score(source_response.processed_text, use_sentiment_model)
             if sentiment_value < 0.0:
                 sentiment_type = "NEGATIVE"
             else:
                 sentiment_type = "POSITIVE"
 
             if labels is not None:
-                classification_map = self._classify_text(source_response.text, labels)
+                classification_map = self._classify_text(source_response.processed_text, labels)
             else:
                 classification_map = None
 
             analyzer_output.append(
                 AnalyzerResponse(
-                    text=source_response.text,
+                    processed_text=source_response.processed_text,
                     meta_information=source_response.meta_information,
                     sentiment_value=sentiment_value,
                     sentiment_type=sentiment_type,

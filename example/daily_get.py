@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from pathlib import Path
 
 from obsei.sink.http_sink_config import HttpSinkConfig
 from obsei.sink.http_sink import HttpSink
@@ -18,7 +19,7 @@ sink_config = HttpSinkConfig(
         "partnerId": os.environ['DAILYGET_PARTNER_ID'],
     },
     payload_mapping={
-      "text": ["enquiryMessage"],
+      "processed_text": ["enquiryMessage"],
       "sentiment_value": ["enquiryMessage"],
       "sentiment_type": ["enquiryMessage"],
       "classification_map": ["enquiryMessage"],
@@ -29,10 +30,14 @@ sink_config = HttpSinkConfig(
     }
 )
 
+dir_path = Path(__file__).resolve().parent.parent
 source_config = TwitterSourceConfig(
-    twitter_config_filename=os.environ['PYTHONPATH'] + "/config/twitter.yaml",
-    query=os.environ['DAILYGET_QUERY'],
+    twitter_config_filename=f'{dir_path}/config/twitter.yaml',
+    keywords=[os.environ['DAILYGET_QUERY']],
     lookup_period=os.environ['DAILYGET_LOOKUP_PERIOD'],
+    # tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],
+    # user_fields=["name", "public_metrics", "username", "verified"],
+    # tweet_fields=["author_id", "created_at", "id", "public_metrics", "text"],
     tweet_fields=None,
     user_fields=None,
     expansions=None,

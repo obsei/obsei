@@ -7,6 +7,8 @@ from searchtweets import collect_results, gen_request_parameters, load_credentia
 from obsei.source.twitter_source_config import TwitterSourceConfig
 from obsei.source.base_source import BaseSource, SourceResponse
 
+import preprocessor as cleaning_processor
+
 logger = logging.getLogger(__name__)
 
 
@@ -74,20 +76,26 @@ class TwitterSource(BaseSource):
         or_tokens = []
         and_tokens = []
 
-        if keywords:
-            or_tokens.append(f'({" OR ".join(keywords)})')
+        or_tokens_list = [keywords, hashtags, usernames]
+        for tokens in or_tokens_list:
+            if tokens:
+                if len(tokens) > 0:
+                    or_tokens.append(f'({" OR ".join(tokens)})')
+                else:
+                    or_tokens.append(f'{"".join(tokens)}')
 
-        if hashtags:
-            or_tokens.append(f'({" OR ".join(hashtags)})')
+        and_query_str = ""
+        or_query_str = ""
 
-        if usernames:
-            or_tokens.append(f'({" OR ".join(usernames)})')
+        if or_tokens:
+            if len(or_tokens) > 0:
+                or_query_str = f'{" OR ".join(or_tokens)}'
+            else:
+                or_query_str = f'{"".join(or_tokens)}'
 
         if operators:
             and_tokens.append(f'{" ".join(operators)}')
 
-        or_query_str = f'({" OR ".join(or_tokens)})'
-        and_query_str = ""
         if and_tokens:
             and_query_str = f' ({" ".join(and_tokens)})' if and_tokens else ''
 
@@ -95,5 +103,5 @@ class TwitterSource(BaseSource):
 
     @staticmethod
     def get_source_output(tweet: Dict[str, Any]):
-        text = tweet["text"]
-        return SourceResponse(text, tweet)
+        processed_text = cleaning_processor.clean(tweet["text"])
+        return SourceResponse(processed_text, tweet)

@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import logging
 import requests
@@ -15,7 +15,7 @@ DEFAULT_HEADERS = {
 }
 
 DEFAULT_PAYLOAD_MAPPING = {
-    "text": ["text"],
+    "processed_text": ["processed_text"],
     "sentiment_value": ["sentiment_value"],
     "sentiment_type": ["sentiment_type"],
     "classification_map": ["classification_map"],
@@ -61,14 +61,9 @@ class HttpSink(BaseSink):
 
             # TODO: Clean this
             if "enquiryMessage" in request_payload:
-                if isinstance(request_payload["enquiryMessage"], Dict):
-                    value = request_payload["enquiryMessage"]
-                    request_payload["enquiryMessage"] = ""
-                    for k, v in value.items():
-                        if isinstance(v, List):
-                            request_payload["enquiryMessage"] += str(k) + ":" + ",".join(v).replace("\n", "") + "\n"
-                        else:
-                            request_payload["enquiryMessage"] += str(k) + ":" + str(v).replace("\n", "") + "\n"
+                flat_dict = self.flatten(analyzer_response_dict)
+                kv_str_list = [str(k) + ": " + str(v).replace("\n", "") for k, v in flat_dict.items()]
+                request_payload["enquiryMessage"] = "\n".join(kv_str_list)
 
             response = requests.post(
                 url=config.url,
@@ -80,3 +75,17 @@ class HttpSink(BaseSink):
             responses.append(response)
 
         return responses
+
+    # Copied from https://stackoverflow.com/a/52081812
+    def flatten(self, d):
+        out: Dict[str, Any] = {}
+        for key, val in d.items():
+            if isinstance(val, dict):
+                val = [val]
+            if isinstance(val, list):
+                for subdict in val:
+                    deeper = self.flatten(subdict).items()
+                    out.update({key + '_' + key2: val2 for key2, val2 in deeper})
+            else:
+                out[key] = val
+        return out

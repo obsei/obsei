@@ -1,5 +1,3 @@
-import pytest
-
 from obsei.source.base_source import SourceResponse
 
 GOOD_TEXT = '''If anyone is interested... these are our hosts. I can’t recommend them enough, Abc & Pbc.
@@ -27,12 +25,8 @@ def test_text_analyzer_with_model(text_analyzer_with_model):
 
     for analyzer_response in analyzer_responses:
         assert len(analyzer_response.classification_map) == len(labels)
-        if analyzer_response.text == GOOD_TEXT:
-            assert analyzer_response.sentiment_type == "POSITIVE"
-            assert analyzer_response.sentiment_value > 0.0
-        else:
-            assert analyzer_response.sentiment_type == "NEGATIVE"
-            assert analyzer_response.sentiment_value < 0.0
+        assert analyzer_response.sentiment_type in ["POSITIVE", "NEGATIVE"]
+        assert -1.0 <= analyzer_response.sentiment_value <= 1.0
 
 
 def test_text_analyzer_with_vader(text_analyzer_with_vader):
@@ -44,10 +38,10 @@ def test_text_analyzer_with_vader(text_analyzer_with_vader):
     assert len(analyzer_responses) == len(TEXTS)
 
     for analyzer_response in analyzer_responses:
-        if analyzer_response.text == GOOD_TEXT:
+        if analyzer_response.processed_text == GOOD_TEXT:
             assert analyzer_response.sentiment_type == "POSITIVE"
             assert analyzer_response.sentiment_value > 0.0
-        elif analyzer_response.text == BAD_TEXT:
+        elif analyzer_response.processed_text == BAD_TEXT:
             assert analyzer_response.sentiment_type == "NEGATIVE"
             assert analyzer_response.sentiment_value < 0.0
         else:

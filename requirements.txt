@@ -6,3 +6,4 @@ torch>1.5
 requests
 requests-oauthlib
 searchtweets-v2
+tweet-preprocessor
