@@ -145,7 +145,7 @@ class TwitterSource(BaseSource):
         if not parsed_tweet.urls:
             return tweet_url
 
-        last_index = len(tweet_text) - 1
+        last_index = len(tweet_text)
         for url_info in parsed_tweet.urls:
             if url_info.end_index == last_index:
                 tweet_url = url_info.match
