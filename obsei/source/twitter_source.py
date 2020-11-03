@@ -124,9 +124,32 @@ class TwitterSource(BaseSource):
         return or_query_str + and_query_str
 
     def get_source_output(self, tweet: Dict[str, Any]):
-        processed_text = cleaning_processor.clean(tweet["text"])
+        tweet_url = TwitterSource.get_tweet_url(tweet["text"])
+        processed_text = TwitterSource.clean_tweet_text(tweet["text"])
+
+        tweet["tweet_url"] = tweet_url
         return SourceResponse(
             processed_text=processed_text,
             meta=tweet,
             source_name=type(self).__name__
         )
+
+    @staticmethod
+    def clean_tweet_text(tweet_text: str):
+        return cleaning_processor.clean(tweet_text)
+
+    @staticmethod
+    def get_tweet_url(tweet_text: str):
+        parsed_tweet = cleaning_processor.parse(tweet_text)
+        tweet_url = None
+        if not parsed_tweet.urls:
+            return tweet_url
+
+        last_index = len(tweet_text) - 1
+        for url_info in parsed_tweet.urls:
+            if url_info.end_index == last_index:
+                tweet_url = url_info.match
+                break
+
+        return tweet_url
+

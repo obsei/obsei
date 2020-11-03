@@ -10,33 +10,17 @@ from obsei.sink.http_sink import HttpSink
 from obsei.source.twitter_source_config import TwitterSourceConfig
 from obsei.source.twitter_source import TwitterSource
 from obsei.text_analyzer import AnalyzerResponse, TextAnalyzer
+from obsei.utils import flatten_dict
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-
-
-# Copied from https://stackoverflow.com/a/52081812
-def flatten(d):
-    out: Dict[str, Any] = {}
-    for key, val in d.items():
-        if isinstance(val, dict):
-            val = [val]
-        if isinstance(val, list):
-            for subdict in val:
-                deeper = flatten(subdict).items()
-                out.update({key + '_' + key2: val2 for key2, val2 in deeper})
-        elif isinstance(val, float):
-            out[key] = format(val, '.2f')
-        else:
-            out[key] = val
-    return out
 
 
 class PayloadConvertor(Convertor):
     def convert(self, analyzer_response: AnalyzerResponse, base_payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         request_payload = base_payload or {}
 
-        flat_dict = flatten(analyzer_response.to_dict())
+        flat_dict = flatten_dict(analyzer_response.to_dict())
         flat_dict.pop("processed_text")
         kv_str_list = ["_".join(str(k).rsplit("_")[-2:]) + ": " + str(v).replace("\n", "")
                        for k, v in flat_dict.items()]
