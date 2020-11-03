@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class TwitterSource(BaseSource):
+    name = "Twitter"
 
     def lookup(self, config: TwitterSourceConfig) -> List[SourceResponse]:
         if not config.query and not config.keywords and not config.hashtags and config.usernames:
@@ -131,7 +132,7 @@ class TwitterSource(BaseSource):
         return SourceResponse(
             processed_text=processed_text,
             meta=tweet,
-            source_name=type(self).__name__
+            source_name=self.name
         )
 
     @staticmethod

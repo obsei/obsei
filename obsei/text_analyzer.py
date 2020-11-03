@@ -12,16 +12,19 @@ class AnalyzerResponse:
         processed_text: str,
         classification: Dict[str, float] = None,
         meta: Dict[str, Any] = None,
+        source_name: str = None
     ):
         self.classification = classification
         self.processed_text = processed_text
         self.meta = meta
+        self.source_name = source_name
 
     def to_dict(self):
         return {
             "processed_text": self.processed_text,
             "classification": self.classification,
             "meta": self.meta,
+            "source_name": self.source_name
         }
 
 
@@ -107,7 +110,8 @@ class TextAnalyzer:
                 AnalyzerResponse(
                     processed_text=source_response.processed_text,
                     meta=source_response.meta,
-                    classification=classification_map
+                    classification=classification_map,
+                    source_name=source_response.source_name,
                 )
             )
 
