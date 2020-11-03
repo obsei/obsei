@@ -1,12 +1,13 @@
 from typing import Any, Dict, List
 
-from obsei.sink.base_sink_config import BaseSinkConfig
+from obsei.sink.base_sink_config import BaseSinkConfig, Convertor
 
 
 class HttpSinkConfig(BaseSinkConfig):
     def __init__(
         self,
-        url,
+        url: str,
+        convertor: Convertor,
         headers: Dict[str, Any] = None,
         base_payload: Dict[str, Any] = None,
         # analyzer_output to payload mapping
@@ -18,3 +19,4 @@ class HttpSinkConfig(BaseSinkConfig):
         self.base_payload = base_payload
         self.payload_mapping = payload_mapping
         self.field_conversion = field_conversion
+        super(HttpSinkConfig, self).__init__(convertor)

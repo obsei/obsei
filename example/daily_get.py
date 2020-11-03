@@ -2,18 +2,50 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Any, Dict, Optional
 
+from obsei.sink.base_sink_config import Convertor
 from obsei.sink.http_sink_config import HttpSinkConfig
 from obsei.sink.http_sink import HttpSink
 from obsei.source.twitter_source_config import TwitterSourceConfig
 from obsei.source.twitter_source import TwitterSource
-from obsei.text_analyzer import TextAnalyzer
+from obsei.text_analyzer import AnalyzerResponse, TextAnalyzer
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
+# Copied from https://stackoverflow.com/a/52081812
+def flatten(d):
+    out: Dict[str, Any] = {}
+    for key, val in d.items():
+        if isinstance(val, dict):
+            val = [val]
+        if isinstance(val, list):
+            for subdict in val:
+                deeper = flatten(subdict).items()
+                out.update({key + '_' + key2: val2 for key2, val2 in deeper})
+        elif isinstance(val, float):
+            out[key] = format(val, '.2f')
+        else:
+            out[key] = val
+    return out
+
+
+class PayloadConvertor(Convertor):
+    def convert(self, analyzer_response: AnalyzerResponse, base_payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        request_payload = base_payload or {}
+
+        flat_dict = flatten(analyzer_response.to_dict())
+        flat_dict.pop("processed_text")
+        kv_str_list = ["_".join(str(k).rsplit("_")[-2:]) + ": " + str(v).replace("\n", "")
+                       for k, v in flat_dict.items()]
+        request_payload["enquiryMessage"] = "\n".join(kv_str_list)
+        return request_payload
+
+
 sink_config = HttpSinkConfig(
+    convertor=PayloadConvertor(),
     url=os.environ['DAILYGET_URL'],
     base_payload={
         "partnerId": os.environ['DAILYGET_PARTNER_ID'],
@@ -61,8 +93,8 @@ analyzer_response_list = text_analyzer.analyze_input(
     labels=["service", "delay", "tracking"],
     use_sentiment_model=True
 )
-for idx, analyzer_response in enumerate(analyzer_response_list):
-    logger.info(f"analyzer_response#'{idx}'='{analyzer_response.__dict__}'")
+for idx, an_response in enumerate(analyzer_response_list):
+    logger.info(f"analyzer_response#'{idx}'='{an_response.__dict__}'")
 
 sink_response_list = sink.send_data(analyzer_response_list, sink_config)
 for sink_response in sink_response_list:

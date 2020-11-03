@@ -80,7 +80,7 @@ class TwitterSource(BaseSource):
             if "author_id" in tweet and tweet["author_id"] in user_map:
                 tweet["author_info"] = user_map.get(tweet["author_id"])
 
-            source_responses.append(TwitterSource.get_source_output(tweet))
+            source_responses.append(self.get_source_output(tweet))
 
         return source_responses
 
