@@ -25,6 +25,7 @@ class PayloadConvertor(Convertor):
         positive = 0.0
         negative = 0.0
         text = ""
+        tweet_id = None
 
         flat_dict = flatten_dict(analyzer_response.to_dict())
         for k, v in flat_dict.items():
@@ -38,6 +39,8 @@ class PayloadConvertor(Convertor):
                 positive = float(v)
             elif "negative" in k:
                 negative = float(v)
+            elif "meta_id" in k:
+                tweet_id = v
 
         # Sentiment rules
         if negative > 8.0:
@@ -57,6 +60,7 @@ class PayloadConvertor(Convertor):
             "Sentiment": sentiment,
             "TweetUrl": tweet_url,
             "FormattedText": text,
+            "TweetId": tweet_id,
         }
 
         kv_str_list = [k + ": " + str(v) for k, v in enquiry.items()]
