@@ -57,7 +57,7 @@ class PayloadConvertor(Convertor):
                 tzinfo=timezone.utc
             ).astimezone(tz=IST_TZ).strftime('%Y-%m-%d %H:%M:%S')
 
-        tweet_url = user_url + "status/" + tweet_id
+        tweet_url = user_url + "/status/" + tweet_id
         # Sentiment rules
         if negative > 8.0:
             sentiment = "Strong Negative"
