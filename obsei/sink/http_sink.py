@@ -21,16 +21,18 @@ class HttpSink(BaseSink):
 
         headers = config.headers or DEFAULT_HEADERS
 
+        payloads = []
         responses = []
         for analyzer_response in analyzer_responses:
-            request_payload = config.convertor.convert(
+            payloads.append(config.convertor.convert(
                 analyzer_response=analyzer_response,
                 base_payload=deepcopy(config.base_payload)
-            )
+            ))
 
+        for payload in payloads:
             response = requests.post(
                 url=config.url,
-                json=request_payload,
+                json=payload,
                 headers=headers,
             )
 

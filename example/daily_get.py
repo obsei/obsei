@@ -4,6 +4,10 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from datetime import timezone
+from dateutil import parser
+import pytz
+
 from obsei.sink.base_sink_config import Convertor
 from obsei.sink.http_sink_config import HttpSinkConfig
 from obsei.sink.http_sink import HttpSink
@@ -15,24 +19,25 @@ from obsei.utils import flatten_dict
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
+TWITTER_URL_PREFIX = "https://twitter.com/"
+IST_TZ = pytz.timezone('Asia/Kolkata')
 
 class PayloadConvertor(Convertor):
     def convert(self, analyzer_response: AnalyzerResponse, base_payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         request_payload = base_payload or {}
 
-        username = ""
-        tweet_url = ""
+        user_url = ""
         positive = 0.0
         negative = 0.0
         text = ""
         tweet_id = None
+        created_at_str = None
+        classification_list = []
 
         flat_dict = flatten_dict(analyzer_response.to_dict())
         for k, v in flat_dict.items():
             if "username" in k:
-                username = "@" + v
-            elif "tweet_url" in k:
-                tweet_url = v
+                user_url = TWITTER_URL_PREFIX + v
             elif "text" in k:
                 text = str(v).replace("\n", " ")
             elif "positive" in k:
@@ -41,7 +46,18 @@ class PayloadConvertor(Convertor):
                 negative = float(v)
             elif "meta_id" in k:
                 tweet_id = v
+            elif "created_at" in k:
+                created_at_str = v
+            elif "classification" in k and len(classification_list) < 2:
+                classification_list.append(k.rsplit("_", 1)[1])
 
+        if created_at_str:
+            created_at = parser.isoparse(created_at_str)
+            created_at_str = created_at.replace(
+                tzinfo=timezone.utc
+            ).astimezone(tz=IST_TZ).strftime('%Y-%m-%d %H:%M:%S')
+
+        tweet_url = user_url + "status/" + tweet_id
         # Sentiment rules
         if negative > 8.0:
             sentiment = "Strong Negative"
@@ -56,12 +72,15 @@ class PayloadConvertor(Convertor):
 
         enquiry = {
             "Source": analyzer_response.source_name + " " + os.environ['DAILYGET_QUERY'],
-            "FeedbackBy": username,
+            "FeedbackBy": user_url,
             "Sentiment": sentiment,
             "TweetUrl": tweet_url,
             "FormattedText": text,
-            "TweetId": tweet_id,
+            "PredictedCategories": ",".join(classification_list),
         }
+
+        if created_at_str:
+            enquiry["ReportedAt"] = created_at_str
 
         kv_str_list = [k + ": " + str(v) for k, v in enquiry.items()]
         request_payload["enquiryMessage"] = "\n".join(kv_str_list)
@@ -111,7 +130,7 @@ for idx, source_response in enumerate(source_response_list):
 
 analyzer_response_list = text_analyzer.analyze_input(
     source_response_list=source_response_list,
-    labels=["service", "delay", "tracking"],
+    labels=["service", "delay", "tracking", "no response", "missing items", "delivery", "mask"],
     use_sentiment_model=True
 )
 for idx, an_response in enumerate(analyzer_response_list):
