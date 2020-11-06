@@ -9,3 +9,4 @@ searchtweets-v2
 tweet-preprocessor
 pytz
 atlassian-python-api
+elasticsearch
