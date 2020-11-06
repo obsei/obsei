@@ -18,7 +18,7 @@ class HttpSinkConfig(BaseSinkConfig):
     def __init__(
         self,
         url: str,
-        convertor: Convertor,
+        convertor: Convertor = Convertor(),
         headers: Dict[str, Any] = None,
         base_payload: Dict[str, Any] = None,
         # analyzer_output to payload mapping

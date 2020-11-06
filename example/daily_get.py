@@ -10,6 +10,7 @@ import pytz
 
 from obsei.sink.base_sink import Convertor
 from obsei.sink.http_sink import HttpSink, HttpSinkConfig
+from obsei.sink.jira_sink import JiraSink, JiraSinkConfig
 from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig
 from obsei.text_analyzer import AnalyzerResponse, TextAnalyzer
 from obsei.utils import flatten_dict
@@ -20,8 +21,9 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 TWITTER_URL_PREFIX = "https://twitter.com/"
 IST_TZ = pytz.timezone('Asia/Kolkata')
 
+
 class PayloadConvertor(Convertor):
-    def convert(self, analyzer_response: AnalyzerResponse, base_payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def convert(self, analyzer_response: AnalyzerResponse, base_payload: Optional[Dict[str, Any]] = None, **kwargs) -> Dict[str, Any]:
         request_payload = base_payload or {}
 
         user_url = ""
@@ -134,6 +136,7 @@ analyzer_response_list = text_analyzer.analyze_input(
 for idx, an_response in enumerate(analyzer_response_list):
     logger.info(f"analyzer_response#'{idx}'='{an_response.__dict__}'")
 
+# HTTP Sink
 sink_response_list = sink.send_data(analyzer_response_list, sink_config)
 for sink_response in sink_response_list:
     if sink_response is not None:
