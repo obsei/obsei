@@ -1,8 +1,9 @@
 from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
-from elasticsearch import Elasticsearch, RequestError
+from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
+from elasticsearch.exceptions import RequestError
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.text_analyzer import AnalyzerResponse
@@ -11,7 +12,6 @@ from obsei.text_analyzer import AnalyzerResponse
 class ElasticSearchSinkConfig(BaseSinkConfig):
     def __init__(
         self,
-        convertor: Convertor,
         host: str,
         port: int,
         index_name: str,
@@ -25,6 +25,7 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
         custom_mapping: Optional[dict] = None,
         refresh_type: str = "wait_for",
         base_payload: Dict[str, Any] = None,
+        convertor: Convertor = Convertor(),
     ):
         self.es_client = Elasticsearch(
             hosts=[{"host": host, "port": port}],
@@ -37,7 +38,10 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
         self.index_name: str = index_name
         self.custom_mapping = custom_mapping
         self.refresh_type = refresh_type
-        self.base_payload = base_payload
+        self.base_payload = base_payload or {
+            "_op_type": "create",  # TODO update exiting support?
+            "_index": self.index_name,
+        }
         if create_index:
             self._create_index(index_name)
 

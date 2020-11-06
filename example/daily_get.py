@@ -10,7 +10,6 @@ import pytz
 
 from obsei.sink.base_sink import Convertor
 from obsei.sink.http_sink import HttpSink, HttpSinkConfig
-from obsei.sink.jira_sink import JiraSink, JiraSinkConfig
 from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig
 from obsei.text_analyzer import AnalyzerResponse, TextAnalyzer
 from obsei.utils import flatten_dict
