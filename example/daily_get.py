@@ -8,11 +8,9 @@ from datetime import timezone
 from dateutil import parser
 import pytz
 
-from obsei.sink.base_sink_config import Convertor
-from obsei.sink.http_sink_config import HttpSinkConfig
-from obsei.sink.http_sink import HttpSink
-from obsei.source.twitter_source_config import TwitterSourceConfig
-from obsei.source.twitter_source import TwitterSource
+from obsei.sink.base_sink import Convertor
+from obsei.sink.http_sink import HttpSink, HttpSinkConfig
+from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig
 from obsei.text_analyzer import AnalyzerResponse, TextAnalyzer
 from obsei.utils import flatten_dict
 

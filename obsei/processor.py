@@ -1,9 +1,7 @@
 import logging
 
-from obsei.sink.base_sink_config import BaseSinkConfig
-from obsei.source.base_source_config import BaseSourceConfig
-from obsei.sink.base_sink import BaseSink
-from obsei.source.base_source import BaseSource
+from obsei.sink.base_sink import BaseSink, BaseSinkConfig
+from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.text_analyzer import TextAnalyzer
 
 logger = logging.getLogger(__name__)

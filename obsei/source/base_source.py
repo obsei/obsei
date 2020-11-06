@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
-from obsei.source.base_source_config import BaseSourceConfig
+
+class BaseSourceConfig(ABC):
+    pass
 
 
 class SourceResponse:
