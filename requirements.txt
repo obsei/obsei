@@ -10,3 +10,4 @@ tweet-preprocessor
 pytz
 atlassian-python-api
 elasticsearch
+fastapi

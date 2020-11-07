@@ -4,7 +4,8 @@ from typing import Any, Dict, List, Optional
 
 from searchtweets import collect_results, gen_request_parameters, load_credentials
 
-from obsei.source.base_source import BaseSource, BaseSourceConfig, SourceResponse
+from obsei.source.base_source import BaseSource, BaseSourceConfig
+from obsei.text_analyzer import AnalyzerRequest
 
 import preprocessor as cleaning_processor
 
@@ -72,7 +73,7 @@ class TwitterSourceConfig(BaseSourceConfig):
 class TwitterSource(BaseSource):
     name = "Twitter"
 
-    def lookup(self, config: TwitterSourceConfig) -> List[SourceResponse]:
+    def lookup(self, config: TwitterSourceConfig) -> List[AnalyzerRequest]:
         if not config.query and not config.keywords and not config.hashtags and config.usernames:
             raise AttributeError("At least one non empty parameter required (query, keywords, hashtags, and usernames)")
 
@@ -133,7 +134,7 @@ class TwitterSource(BaseSource):
         # TODO use it later
         logger.info(f"Twitter API meta_info='{meta_info}'")
 
-        source_responses: List[SourceResponse] = []
+        source_responses: List[AnalyzerRequest] = []
         for tweet in tweets:
             if "author_id" in tweet and tweet["author_id"] in user_map:
                 tweet["author_info"] = user_map.get(tweet["author_id"])
@@ -186,7 +187,7 @@ class TwitterSource(BaseSource):
         processed_text = TwitterSource.clean_tweet_text(tweet["text"])
 
         tweet["tweet_url"] = tweet_url
-        return SourceResponse(
+        return AnalyzerRequest(
             processed_text=processed_text,
             meta=tweet,
             source_name=self.name

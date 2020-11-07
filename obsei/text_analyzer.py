@@ -1,9 +1,19 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from obsei.source.base_source import SourceResponse
-
 logger = logging.getLogger(__name__)
+
+
+class AnalyzerRequest:
+    def __init__(
+        self,
+        processed_text: str,
+        source_name: str = "Undefined",
+        meta: Optional[Dict[str, Any]] = None,
+    ):
+        self.processed_text = processed_text
+        self.meta = meta
+        self.source_name = source_name
 
 
 class AnalyzerResponse:
@@ -80,7 +90,7 @@ class TextAnalyzer:
 
     def analyze_input(
         self,
-        source_response_list: List[SourceResponse],
+        source_response_list: List[AnalyzerRequest],
         labels: List[str] = None,
         use_sentiment_model: bool = False,
     ) -> List[AnalyzerResponse]:

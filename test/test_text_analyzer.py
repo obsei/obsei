@@ -1,4 +1,4 @@
-from obsei.source.base_source import SourceResponse
+from obsei.text_analyzer import AnalyzerRequest
 
 GOOD_TEXT = '''If anyone is interested... these are our hosts. I can’t recommend them enough, Abc & Pbc.
 
@@ -14,7 +14,7 @@ TEXTS = [GOOD_TEXT, BAD_TEXT, MIXED_TEXT]
 def test_text_analyzer_with_model(text_analyzer_with_model):
     labels = ["facility", "food", "comfortable", "positive", "negative"]
 
-    source_responses = [SourceResponse(text, "sample") for text in TEXTS]
+    source_responses = [AnalyzerRequest(text, "sample") for text in TEXTS]
     analyzer_responses = text_analyzer_with_model.analyze_input(
         source_response_list=source_responses,
         labels=labels,
@@ -30,7 +30,7 @@ def test_text_analyzer_with_model(text_analyzer_with_model):
 
 
 def test_text_analyzer_with_vader(text_analyzer_with_vader):
-    source_responses = [SourceResponse(text, "sample") for text in TEXTS]
+    source_responses = [AnalyzerRequest(text, "sample") for text in TEXTS]
     analyzer_responses = text_analyzer_with_vader.analyze_input(
         source_response_list=source_responses
     )
