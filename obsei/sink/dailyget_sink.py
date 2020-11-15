@@ -117,6 +117,15 @@ class DailyGetSinkConfig(HttpSinkConfig):
             field_conversion=None,
         )
 
+    @classmethod
+    def from_dict(cls, config: Dict[str, Any]):
+        return cls(
+            url=config["url"],
+            partner_id=config["partner_id"],
+            consumer_phone_number=config["consumer_phone_number"],
+            source_information=config["source_information"],
+        )
+
 
 class DailyGetSink(HttpSink):
     def send_data(self, analyzer_responses: List[AnalyzerResponse], config: DailyGetSinkConfig):

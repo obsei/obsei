@@ -16,6 +16,10 @@ class BaseSinkConfig(ABC):
     def __init__(self, convertor: Convertor):
         self.convertor = convertor
 
+    @classmethod
+    def from_dict(cls, config: Dict[str, Any]):
+        pass
+
 
 class BaseSink(ABC):
 

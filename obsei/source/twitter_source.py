@@ -69,6 +69,25 @@ class TwitterSourceConfig(BaseSourceConfig):
         self.place_fields = place_fields if place_fields is not None else DEFAULT_PLACE_FIELDS
         self.max_tweets = max_tweets
 
+    @classmethod
+    def from_dict(cls, config: Dict[str, Any]):
+        return cls(
+            twitter_config_filename=config["twitter_config_filename"] if "twitter_config_filename" in config else None,
+            query=config["query"] if "query" in config else None,
+            keywords=config["keywords"] if "keywords" in config else None,
+            hashtags=config["hashtags"] if "hashtags" in config else None,
+            usernames=config["usernames"] if "usernames" in config else None,
+            operators=config["operators"] if "operators" in config else None,
+            since_id=config["since_id"] if "since_id" in config else None,
+            until_id=config["until_id"] if "until_id" in config else None,
+            lookup_period=config["lookup_period"] if "lookup_period" in config else None,
+            tweet_fields=config["tweet_fields"] if "tweet_fields" in config else None,
+            user_fields=config["user_fields"] if "user_fields" in config else None,
+            expansions=config["expansions"] if "expansions" in config else None,
+            place_fields=config["place_fields"] if "place_fields" in config else None,
+            max_tweets=config["max_tweets"] if "max_tweets" in config else DEFAULT_MAX_TWEETS,
+        )
+
 
 class TwitterSource(BaseSource):
     name = "Twitter"

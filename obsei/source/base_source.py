@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Any, Dict, List
 
 from obsei.text_analyzer import AnalyzerRequest
 
 
 class BaseSourceConfig(ABC):
-    pass
+    @classmethod
+    def from_dict(cls, config: Dict[str, Any]):
+        pass
 
 
 class BaseSource(ABC):

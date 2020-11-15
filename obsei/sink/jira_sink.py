@@ -51,6 +51,19 @@ class JiraSinkConfig(BaseSinkConfig):
         self.summary_max_length = summary_max_length
         super(JiraSinkConfig, self).__init__(convertor)
 
+    @classmethod
+    def from_dict(cls, config: Dict[str, Any]):
+        return cls(
+            url=config["url"],
+            username=config["username"],
+            password=config["password"],
+            issue_type=config["issue_type"],
+            project=config["project"],
+            convertor=config["convertor"] if "convertor" in config else JiraPayloadConvertor(),
+            verify_ssl=config["verify_ssl"] if "verify_ssl" in config else True,
+            summary_max_length=config["summary_max_length"] if "summary_max_length" in config else 50,
+        )
+
 
 class JiraSink(BaseSink):
     def send_data(self, analyzer_responses: List[AnalyzerResponse], config: JiraSinkConfig):

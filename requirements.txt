@@ -11,6 +11,9 @@ pytz
 atlassian-python-api
 elasticsearch
 fastapi
-apache-airflow
 uvicorn
 setuptools
+pydantic
+python-dateutil
+starlette
+apscheduler

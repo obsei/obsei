@@ -14,7 +14,7 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
         self,
         host: str,
         port: int,
-        index_name: str,
+        index_name: str = "es_index",
         username: str = "",
         password: str = "",
         scheme: str = "http",
@@ -72,6 +72,25 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
             # - one fails as the other one already created it
             if not self.es_client.indices.exists(index=index_name):
                 raise e
+
+    @classmethod
+    def from_dict(cls, config: Dict[str, Any]):
+        return cls(
+            host=config["host"],
+            port=config["port"],
+            index_name=config["index_name"] if "index_name" in config else "es_index",
+            username=config["username"] if "username" in config else "",
+            password=config["password"] if "password" in config else "",
+            scheme=config["scheme"] if "scheme" in config else "http",
+            ca_certs=config["ca_certs"] if "ca_certs" in config else False,
+            verify_certs=config["verify_certs"] if "verify_certs" in config else True,
+            create_index=config["create_index"] if "create_index" in config else True,
+            timeout=config["timeout"] if "timeout" in config else 30,
+            custom_mapping=config["custom_mapping"] if "custom_mapping" in config else None,
+            refresh_type=config["refresh_type"] if "refresh_type" in config else "wait_for",
+            base_payload=config["base_payload"] if "base_payload" in config else None,
+            convertor=config["convertor"] if "convertor" in config else Convertor(),
+        )
 
 
 class ElasticSearchSink(BaseSink):

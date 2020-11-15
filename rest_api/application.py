@@ -5,6 +5,9 @@ from threading import Semaphore
 from typing import Any, Dict, List
 
 import uvicorn as uvicorn
+from apscheduler.jobstores.base import JobLookupError
+from apscheduler.jobstores.memory import MemoryJobStore
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import APIRouter
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -12,6 +15,11 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from obsei.processor import Processor
+from obsei.sink.base_sink import BaseSink, BaseSinkConfig
+from obsei.sink.sink_utils import sink_config_from_dict
+from obsei.source.base_source import BaseSource, BaseSourceConfig
+from obsei.source.source_utils import source_config_from_dict
 from obsei.text_analyzer import AnalyzerRequest, TextAnalyzer
 
 logging.basicConfig(format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p")
@@ -46,18 +54,101 @@ class ClassifierRequest(BaseModel):
         arbitrary_types_allowed = True
 
 
+class SinkConfig(BaseModel):
+    name: str
+    config: Dict[str, Any]
+
+
+class SourceConfig(BaseModel):
+    name: str
+    config: Dict[str, Any]
+
+
+class ApplicationConfig(BaseModel):
+    sink_config: SinkConfig
+    source_config: SourceConfig
+    time_in_seconds: int
+
+
+current_config: ApplicationConfig
+
 text_analyzer = TextAnalyzer(
     classifier_model_name="joeddav/bart-large-mnli-yahoo-answers",
     initialize_model=True,
 )
+
+sink: BaseSink
+sink_config: BaseSinkConfig
+source: BaseSource
+source_config: BaseSourceConfig
+processor = Processor(text_analyzer)
 
 CONCURRENT_REQUEST_PER_WORKER = int(os.getenv("CONCURRENT_REQUEST_PER_WORKER", 4))
 rate_limiter = RequestLimiter(CONCURRENT_REQUEST_PER_WORKER)
 
 router = APIRouter()
 
+Schedule = AsyncIOScheduler()
+Schedule.start()
+JOB_NAME = "obsei"
 
-@router.post("/classifier", response_model=List[Dict[str, float]], response_model_exclude_unset=True)
+
+def process_scheduled_job():
+    global current_config
+    global processor
+
+    try:
+        if current_config:
+            processor.process(
+                sink=sink,
+                sink_config=sink_config,
+                source=source,
+                source_config=source_config,
+            )
+    except Exception as ex:
+        logger.error(f'Exception occur: {ex}')
+
+
+def get_application() -> FastAPI:
+    application = FastAPI(title="OBSEI-APIs", debug=True, version="0.1")
+
+    application.add_middleware(
+        CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
+    )
+
+    application.add_exception_handler(HTTPException, http_error_handler)
+
+    application.include_router(router)
+
+    return application
+
+
+app = get_application()
+
+
+@app.on_event("startup")
+async def load_schedule_or_create_blank():
+    global Schedule
+    try:
+        jobstores = {
+            'default': MemoryJobStore()
+        }
+        Schedule = AsyncIOScheduler(jobstores=jobstores)
+        Schedule.start()
+        logger.info("Created Schedule Object")
+    except Exception as ex:
+        logger.error("Unable to Create Schedule Object")
+
+
+@app.get("/schedule/show_schedules/", tags=["schedule"])
+async def get_scheduled_syncs():
+    schedules = []
+    for job in Schedule.get_jobs():
+        schedules.append({"name": str(job.id), "run_frequency": str(job.trigger), "next_run": str(job.next_run_time)})
+    return schedules
+
+
+@app.post("/classifier", response_model=List[Dict[str, float]], response_model_exclude_unset=True, tags=["api"])
 def classify_post(request: ClassifierRequest):
     with rate_limiter.run():
         analyzer_requests: List[AnalyzerRequest] = [
@@ -80,21 +171,75 @@ def classify_post(request: ClassifierRequest):
         return response
 
 
-def get_application() -> FastAPI:
-    application = FastAPI(title="OBSEI-APIs", debug=True, version="0.1")
+@app.post("/config", response_model=Dict[str, Any], response_model_exclude_unset=True, tags=["config"])
+def classify_post(request: ApplicationConfig):
+    with rate_limiter.run():
+        global current_config
+        global Schedule
+        global sink
+        global source
+        global sink_config
+        global source_config
 
-    application.add_middleware(
-        CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
-    )
+        try:
+            Schedule.remove_job(job_id=JOB_NAME)
+        except JobLookupError as ex:
+            logger.warning(f'Job {JOB_NAME} not found')
+        current_config = request
 
-    application.add_exception_handler(HTTPException, http_error_handler)
+        sink, sink_config = sink_config_from_dict(
+            current_config.sink_config.name,
+            current_config.sink_config.config
+        )
+        source, source_config = source_config_from_dict(
+            current_config.source_config.name,
+            current_config.source_config.config
+        )
 
-    application.include_router(router)
+        scheduled_job = Schedule.add_job(
+            func=process_scheduled_job,
+            trigger='interval',
+            seconds=request.time_in_seconds,
+            id=JOB_NAME,
+        )
 
-    return application
+        logger.info(current_config)
+
+        return {"scheduled": True, "job_id": scheduled_job.id}
 
 
-app = get_application()
+@app.get("/config", response_model=ApplicationConfig, response_model_exclude_unset=True, tags=["config"])
+def classify_post():
+    with rate_limiter.run():
+        return current_config
+
+
+@app.delete("/schedule/", tags=["schedule"])
+async def remove_scheduled_job():
+    global JOB_NAME
+    global Schedule
+
+    Schedule.remove_job(JOB_NAME)
+    return {"scheduled": False, "job_id": JOB_NAME}
+
+
+@app.post("/schedule/", tags=["schedule"])
+async def add_scheduled_job():
+    global JOB_NAME
+    global Schedule
+    global current_config
+
+    if current_config:
+        scheduled_job = Schedule.add_job(
+            func=process_scheduled_job,
+            trigger='interval',
+            seconds=current_config.time_in_seconds,
+            id=JOB_NAME,
+        )
+        return {"scheduled": True, "job_id": scheduled_job.id}
+    else:
+        return {"error": "No config exist"}
+
 
 logger.info("Open http://127.0.0.1:8000/docs to see Swagger API Documentation.")
 

@@ -32,6 +32,17 @@ class HttpSinkConfig(BaseSinkConfig):
         self.field_conversion = field_conversion
         super(HttpSinkConfig, self).__init__(convertor)
 
+    @classmethod
+    def from_dict(cls, config: Dict[str, Any]):
+        return cls(
+            url=config["url"],
+            convertor=config["convertor"] if "convertor" in config else Convertor(),
+            headers=config["headers"] if "headers" in config else None,
+            base_payload=config["base_payload"] if "base_payload" in config else None,
+            payload_mapping=config["payload_mapping"] if "payload_mapping" in config else None,
+            field_conversion=config["field_conversion"] if "field_conversion" in config else None,
+        )
+
 
 class HttpSink(BaseSink):
 
