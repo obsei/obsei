@@ -1,8 +1,8 @@
-vaderSentiment~=3.3.2
-transformers~=3.4.0
+vaderSentiment
+transformers
 # PyTorch
 --find-links=https://download.pytorch.org/whl/torch_stable.html
-torch>1.5
+torch
 requests
 requests-oauthlib
 searchtweets-v2
@@ -11,3 +11,6 @@ pytz
 atlassian-python-api
 elasticsearch
 fastapi
+apache-airflow
+uvicorn
+setuptools
