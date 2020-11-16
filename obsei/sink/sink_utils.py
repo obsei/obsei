@@ -9,19 +9,19 @@ from obsei.sink.jira_sink import JiraSink, JiraSinkConfig
 sink_map = {
     "Http": {
         "config": HttpSinkConfig,  # type: BaseSinkConfig
-        "sink": HttpSink,  # type: BaseSink
+        "sink": HttpSink(),  # type: BaseSink
     },
     "Jira": {
         "config": JiraSinkConfig,  # type: BaseSinkConfig
-        "sink": JiraSink,  # type: BaseSink
+        "sink": JiraSink(),  # type: BaseSink
     },
     "DailyGet": {
         "config": DailyGetSinkConfig,  # type: BaseSinkConfig
-        "sink": DailyGetSink,  # type: BaseSink
+        "sink": DailyGetSink(),  # type: BaseSink
     },
     "Elasticsearch": {
         "config": ElasticSearchSinkConfig,  # type: BaseSinkConfig
-        "sink": ElasticSearchSink,  # type: BaseSink
+        "sink": ElasticSearchSink(),  # type: BaseSink
     },
 }
 

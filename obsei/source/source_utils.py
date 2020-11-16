@@ -5,7 +5,7 @@ from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig
 source_map = {
     "Twitter": {
         "config": TwitterSourceConfig,
-        "source": TwitterSource,
+        "source": TwitterSource(),
     },
 }
 
