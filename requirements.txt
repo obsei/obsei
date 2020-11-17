@@ -17,3 +17,5 @@ pydantic
 python-dateutil
 starlette
 apscheduler
+Flask
+SQLAlchemy
