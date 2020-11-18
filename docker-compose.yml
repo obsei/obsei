@@ -11,6 +11,6 @@ services:
       # Optional: mount your own models from disk into the container
       - "./models:/home/user/models"
     environment:
-      - READER_MODEL_PATH=deepset/roberta-base-squad2
+      - "SEARCHTWEETS_BEARER_TOKEN=${SEARCHTWEETS_BEARER_TOKEN}"
     restart: always
     command: "/bin/bash -c 'sleep 15 && gunicorn rest_api.application:app -b 0.0.0.0 -k uvicorn.workers.UvicornWorker --workers 1 --timeout 180 --preload'"
