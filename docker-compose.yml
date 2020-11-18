@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     image: "lalitpagaria/obsei:latest"
     ports:
-      - 8000:8000
+      - 9898:9898
     volumes:
       # Optional: mount your own models from disk into the container
       - "./models:/home/user/models"

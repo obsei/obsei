@@ -197,7 +197,7 @@ def classify_texts(request: ClassifierRequest):
         return response
 
 
-logger.info("Open http://127.0.0.1:8000/docs to see Swagger API Documentation.")
+logger.info("Open http://127.0.0.1:9898/docs to see Swagger API Documentation.")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=9898)
