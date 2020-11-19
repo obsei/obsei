@@ -2,9 +2,7 @@ import json
 import logging
 import textwrap
 from copy import deepcopy
-from typing import Any, Dict, List, Optional
-
-from atlassian import Jira
+from typing import Any, Dict, List, Literal, Optional
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.text_analyzer import AnalyzerResponse
@@ -29,6 +27,7 @@ class JiraPayloadConvertor(Convertor):
 
 
 class JiraSinkConfig(BaseSinkConfig):
+    TYPE: Literal["Jira"] = "Jira"
     url: str
     username: str
     password: str

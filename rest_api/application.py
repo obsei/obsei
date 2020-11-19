@@ -7,13 +7,11 @@ import uvicorn as uvicorn
 from apscheduler.jobstores.base import JobLookupError
 from fastapi import HTTPException
 
-from obsei.sink.sink_utils import sink_map
-from obsei.source.source_utils import source_map
 from obsei.text_analyzer import AnalyzerRequest
 from rest_api.api_request_response import ScheduleResponse, TaskAddResponse, TaskConfig, ClassifierRequest, \
-    ClassifierResponse, \
-    TaskDetail
-from rest_api.global_utils import get_application, processor, rate_limiter, schedule, text_analyzer
+    ClassifierResponse, TaskDetail
+from rest_api.global_utils import get_application, processor, rate_limiter, schedule, sink_map, source_map, \
+    text_analyzer
 from rest_api.task_config_store import TaskConfigStore
 
 
@@ -42,10 +40,10 @@ def process_scheduled_job(task_config: TaskConfig):
     try:
         if task_config:
             processor.process(
-                sink=sink_map[task_config.sink_config.name],
-                sink_config=task_config.sink_config,
-                source=source_map[task_config.source_config.name],
-                source_config=task_config.source_config,
+                sink=sink_map[task_config.sink_config.TYPE],
+                sink_config=task_config.sink_config.config,
+                source=source_map[task_config.source_config.TYPE],
+                source_config=task_config.source_config.config,
             )
     except Exception as ex:
         logger.error(f'Exception occur: {ex}')
@@ -136,7 +134,7 @@ async def get_task(task_id: str):
 
 @app.delete(
     "/tasks/{task_id}",
-    response_model=str,
+    response_model=TaskAddResponse,
     response_model_exclude_unset=True,
     tags=["task"]
 )
@@ -157,7 +155,7 @@ async def delete_task(task_id: str):
                 detail=f'Task {task_id} not found'
             )
 
-        return task_id
+        return TaskAddResponse(id=task_id)
 
 
 @app.post(
@@ -243,7 +241,7 @@ def classify_texts(request: ClassifierRequest):
         return response
 
 
-logger.info("Open http://127.0.0.1:9898/redoc to see API Documentation.")
+logger.info("Open http://127.0.0.1:9898/redoc or http://127.0.0.1:9898/docs to see API Documentation.")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=9898)

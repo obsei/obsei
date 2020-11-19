@@ -1,6 +1,6 @@
 import logging
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from searchtweets import collect_results, gen_request_parameters, load_credentials
 
@@ -32,6 +32,7 @@ DEFAULT_OPERATORS = [
 
 
 class TwitterSourceConfig(BaseSourceConfig):
+    TYPE: Literal["Twitter"] = "Twitter"
     twitter_config_filename: str = None
     query: str = None
     keywords: List[str] = None
@@ -49,7 +50,7 @@ class TwitterSourceConfig(BaseSourceConfig):
 
 
 class TwitterSource(BaseSource):
-    name = "Twitter"
+    NAME: Literal["Twitter"] = "Twitter"
 
     def lookup(self, config: TwitterSourceConfig) -> List[AnalyzerRequest]:
         if not config.query and not config.keywords and not config.hashtags and config.usernames:
@@ -168,7 +169,7 @@ class TwitterSource(BaseSource):
         return AnalyzerRequest(
             processed_text=processed_text,
             meta=tweet,
-            source_name=self.name
+            source_name=self.NAME
         )
 
     @staticmethod

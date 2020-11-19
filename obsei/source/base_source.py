@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import List, Literal
 
 from pydantic.main import BaseModel
 
@@ -7,6 +7,8 @@ from obsei.text_analyzer import AnalyzerRequest
 
 
 class BaseSourceConfig(BaseModel):
+    TYPE: Literal["Base"] = "Base"
+
     class Config:
         arbitrary_types_allowed = True
 

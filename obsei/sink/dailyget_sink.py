@@ -1,7 +1,7 @@
 import logging
 from copy import deepcopy
 from datetime import timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 import pytz
 import requests
@@ -95,6 +95,7 @@ class PayloadConvertor(Convertor):
 
 
 class DailyGetSinkConfig(HttpSinkConfig):
+    TYPE: Literal["DailyGet"] = "DailyGet"
     partner_id: str
     consumer_phone_number: str
     source_information: str

@@ -7,12 +7,14 @@ services:
     image: "lalitpagaria/obsei:latest"
     ports:
       - 9898:9898
-    volumes:
+    # volumes:
       # Optional: mount your own models from disk into the container
       # - "./models:/home/user/models"
-      - "./:/home/user"
+      # - "./:/home/user"
     environment:
       - "SEARCHTWEETS_BEARER_TOKEN=${SEARCHTWEETS_BEARER_TOKEN}"
+      - "SEARCHTWEETS_CONSUMER_KEY=${SEARCHTWEETS_CONSUMER_KEY}"
+      - "SEARCHTWEETS_CONSUMER_SECRET=${SEARCHTWEETS_CONSUMER_SECRET}"
       - "LOG_LEVEL:DEBUG"
     restart: always
     command: "/bin/bash -c 'sleep 15 && gunicorn rest_api.application:app -b 0.0.0.0:9898 -k uvicorn.workers.UvicornWorker --workers 1 --timeout 180'"

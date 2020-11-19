@@ -23,65 +23,9 @@ class ClassifierResponse(BaseModel):
     data: List[Dict[str, float]]
 
 
-class SinkConfig(BaseModel):
-    name: str
-    config: Union[
-        HttpSinkConfig,
-        JiraSinkConfig,
-        ElasticSearchSinkConfig,
-        DailyGetSinkConfig
-    ]
-
-    class Config:
-        arbitrary_types_allowed = True
-        schema_extra = {
-            "example": {
-                "target": DailyGetSinkConfig(
-                            url="http://127.0.0.1:8080/endpoint",
-                            partner_id=12345,
-                            consumer_phone_number=1234567890,
-                            source_information="Twitter",
-                            base_payload={
-                                "partnerId": 12345,
-                                "consumerPhoneNumber": 1234567890,
-                            }
-                        ).dict()
-            }
-        }
-
-
-class SourceConfig(BaseModel):
-    name: str
-    config: Union[
-        TwitterSourceConfig
-    ]
-
-    class Config:
-        arbitrary_types_allowed = True
-        schema_extra = {
-            "example": {
-                "target": TwitterSourceConfig(
-                            twitter_config_filename=f'/user/home/config/twitter.yaml',
-                            keywords=["machine_leanring"],
-                            hashtags=["#ai"],
-                            usernames=["@user1"],
-                            operators=["-is:reply", "-is:retweet"],
-                            since_id=1234,
-                            until_id=9999,
-                            lookup_period="1d",
-                            tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],
-                            user_fields=["id", "name", "public_metrics", "username", "verified"],
-                            expansions=["author_id"],
-                            place_fields=["country"],
-                            max_tweets=10,
-                        ).dict()
-            }
-        }
-
-
 class TaskConfig(BaseModel):
-    source_config: SourceConfig
-    sink_config: SinkConfig
+    source_config: Union[TwitterSourceConfig]
+    sink_config: Union[HttpSinkConfig, JiraSinkConfig, ElasticSearchSinkConfig, DailyGetSinkConfig]
     time_in_seconds: int
 
     def to_json(self):
@@ -89,6 +33,36 @@ class TaskConfig(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+        schema_extra = {
+            "example": {
+                "source_config": TwitterSourceConfig(
+                    twitter_config_filename=f'/home/user/config/twitter.yaml',
+                    keywords=["machine_leanring"],
+                    hashtags=["#ai"],
+                    usernames=["@user1"],
+                    operators=["-is:reply", "-is:retweet"],
+                    since_id=1234,
+                    until_id=9999,
+                    lookup_period="1d",
+                    tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],
+                    user_fields=["id", "name", "public_metrics", "username", "verified"],
+                    expansions=["author_id"],
+                    place_fields=["country"],
+                    max_tweets=10,
+                ).dict(),
+                "sink_config": DailyGetSinkConfig(
+                    url="http://127.0.0.1:8080/endpoint",
+                    partner_id=12345,
+                    consumer_phone_number=1234567890,
+                    source_information="Twitter",
+                    base_payload={
+                        "partnerId": 12345,
+                        "consumerPhoneNumber": 1234567890,
+                    }
+                ).dict(),
+                "time_in_seconds": 300
+            }
+        }
 
 
 class ScheduleResponse(BaseModel):

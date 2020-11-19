@@ -1,10 +1,10 @@
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Literal
 
 import logging
 import requests
 
-from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
+from obsei.sink.base_sink import BaseSink, BaseSinkConfig
 from obsei.text_analyzer import AnalyzerResponse
 
 logger = logging.getLogger(__name__)
@@ -15,6 +15,7 @@ DEFAULT_HEADERS = {
 
 
 class HttpSinkConfig(BaseSinkConfig):
+    TYPE: Literal["Http"] = "Http"
     url: str
     headers: Dict[str, Any] = None
     base_payload: Dict[str, Any] = None

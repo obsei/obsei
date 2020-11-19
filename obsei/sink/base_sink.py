@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic.main import BaseModel
 
@@ -8,7 +8,12 @@ from obsei.text_analyzer import AnalyzerResponse
 
 class Convertor(BaseModel):
 
-    def convert(self, analyzer_response: AnalyzerResponse, base_payload: Optional[Dict[str, Any]] = None, **kwargs) -> dict:
+    def convert(
+        self,
+        analyzer_response: AnalyzerResponse,
+        base_payload: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ) -> dict:
 
         return {**base_payload, **analyzer_response.to_dict()} \
             if base_payload is not None else analyzer_response.to_dict()
@@ -18,6 +23,7 @@ class Convertor(BaseModel):
 
 
 class BaseSinkConfig(BaseModel):
+    TYPE: Literal["Base"] = "Base"
     convertor: Convertor = Convertor()
 
     @classmethod
