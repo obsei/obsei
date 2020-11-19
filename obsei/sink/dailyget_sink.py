@@ -127,6 +127,7 @@ class DailyGetSink(HttpSink):
                 headers=headers,
             )
 
+            logger.info(f"payload='{payload}'")
             logger.info(f"response='{response.__dict__}'")
             responses.append(response)
 

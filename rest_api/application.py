@@ -19,7 +19,8 @@ log_level = os.environ.get('LOG_LEVEL', logging.DEBUG)
 
 logging.basicConfig(
     level=log_level,
-    format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p"
+    format="%(asctime)s %(name)s:%(funcName)s [%(processName)s:%(threadName)s] %(message)s",
+    datefmt="%d/%m/%Y %H:%M:%S %Z"
 )
 
 logger = logging.getLogger(__name__)
