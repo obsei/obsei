@@ -80,8 +80,8 @@ class SourceConfig(BaseModel):
 
 
 class TaskConfig(BaseModel):
-    sink_config: SinkConfig
     source_config: SourceConfig
+    sink_config: SinkConfig
     time_in_seconds: int
 
     def to_json(self):

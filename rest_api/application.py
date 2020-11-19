@@ -29,6 +29,9 @@ logging.getLogger("obsei").setLevel(log_level)
 logging.root.setLevel(log_level)
 logging.root.propagate = True
 
+gunicorn_logger = logging.getLogger('gunicorn.error')
+gunicorn_logger.setLevel(log_level)
+gunicorn_logger.propagate = True
 
 config_store: TaskConfigStore
 
@@ -155,6 +158,36 @@ async def delete_task(task_id: str):
             )
 
         return task_id
+
+
+@app.post(
+    "/tasks/{task_id}",
+    response_model=TaskAddResponse,
+    response_model_exclude_unset=True,
+    tags=["task"]
+)
+async def update_task(task_id: str, request: TaskConfig):
+    global config_store
+
+    with rate_limiter.run():
+        try:
+            schedule.remove_job(job_id=task_id)
+        except JobLookupError as ex:
+            logger.warning(f'Job {task_id} not found. Error: {ex.__cause__}')
+
+        task_detail = TaskDetail(id=task_id, config=request)
+        config_store.update_task(task_detail)
+        schedule.add_job(
+            func=process_scheduled_job,
+            kwargs={
+                "task_config": task_detail.config
+            },
+            trigger='interval',
+            seconds=task_detail.config.time_in_seconds,
+            id=task_detail.id,
+        )
+
+        return TaskAddResponse(id=task_detail.id)
 
 
 @app.post(

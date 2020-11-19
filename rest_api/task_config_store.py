@@ -1,9 +1,8 @@
 import json
 import logging
 from abc import ABC
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import uuid4
-from types import SimpleNamespace as Namespace
 
 from sqlalchemy import Column, DateTime, String, create_engine, func
 from sqlalchemy.ext.declarative import declarative_base
@@ -72,7 +71,7 @@ class TaskConfigStore(ABC):
 
     def update_tasks(self, tasks: List[TaskDetail]):
         for task in tasks:
-            self.session.query(TaskTable).filter_by(TaskTable.id == task.id).update({
+            self.session.query(TaskTable).filter_by(id=task.id).update({
                 TaskTable.config: task.config.to_json()
             }, synchronize_session=False)
         try:
