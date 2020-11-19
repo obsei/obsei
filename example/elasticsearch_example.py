@@ -29,6 +29,14 @@ text_analyzer = TextAnalyzer(
     initialize_model=True,
 )
 
+# Start Elasticsearch server locally
+# `docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" elasticsearch:7.9.2`
+sink_config = ElasticSearchSinkConfig(
+    host="localhost",
+    port=9200,
+    index_name="test",
+)
+
 source_response_list = source.lookup(source_config)
 for idx, source_response in enumerate(source_response_list):
     logger.info(f"source_response#'{idx}'='{source_response.__dict__}'")
@@ -40,14 +48,6 @@ analyzer_response_list = text_analyzer.analyze_input(
 )
 for idx, an_response in enumerate(analyzer_response_list):
     logger.info(f"analyzer_response#'{idx}'='{an_response.__dict__}'")
-
-# Start Elasticsearch server locally
-# `docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" elasticsearch:7.9.2`
-sink_config = ElasticSearchSinkConfig(
-    host="localhost",
-    port=9200,
-    index_name="test",
-)
 
 sink = ElasticSearchSink()
 sink_response = sink.send_data(analyzer_response_list, sink_config)

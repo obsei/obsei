@@ -7,9 +7,12 @@ import uvicorn as uvicorn
 from apscheduler.jobstores.base import JobLookupError
 from fastapi import HTTPException
 
+from obsei.sink.sink_utils import sink_map
+from obsei.source.source_utils import source_map
 from obsei.text_analyzer import AnalyzerRequest
-from rest_api.api_request_response import ScheduleResponse, TaskConfig, ClassifierRequest, ClassifierResponse, \
-    TaskConfigObjects, TaskDetail
+from rest_api.api_request_response import ScheduleResponse, TaskAddResponse, TaskConfig, ClassifierRequest, \
+    ClassifierResponse, \
+    TaskDetail
 from rest_api.global_utils import get_application, processor, rate_limiter, schedule, text_analyzer
 from rest_api.task_config_store import TaskConfigStore
 
@@ -32,14 +35,14 @@ config_store: TaskConfigStore
 app = get_application()
 
 
-def process_scheduled_job(task_config_objects: TaskConfigObjects):
+def process_scheduled_job(task_config: TaskConfig):
     try:
-        if task_config_objects:
+        if task_config:
             processor.process(
-                sink=task_config_objects.sink,
-                sink_config=task_config_objects.sink_config,
-                source=task_config_objects.source,
-                source_config=task_config_objects.source_config,
+                sink=sink_map[task_config.sink_config.name],
+                sink_config=task_config.sink_config,
+                source=source_map[task_config.source_config.name],
+                source_config=task_config.source_config,
             )
     except Exception as ex:
         logger.error(f'Exception occur: {ex}')
@@ -64,12 +67,11 @@ def schedule_tasks():
     tasks = config_store.get_all_tasks()
     jobs = []
     for task in tasks:
-        task_config_objects = TaskConfigObjects(config=task.config)
         jobs.append(
             schedule.add_job(
                 func=process_scheduled_job,
                 kwargs={
-                    "task_config_objects": task_config_objects
+                    "task_config": task.config
                 },
                 trigger='interval',
                 seconds=task.config.time_in_seconds,
@@ -157,7 +159,7 @@ async def delete_task(task_id: str):
 
 @app.post(
     "/tasks/",
-    response_model=TaskDetail,
+    response_model=TaskAddResponse,
     response_model_exclude_unset=True,
     tags=["task"]
 )
@@ -167,18 +169,17 @@ async def add_task(request: TaskConfig):
     with rate_limiter.run():
         task_detail = TaskDetail(id=str(uuid4()), config=request)
         config_store.add_task(task_detail)
-        task_config_objects = TaskConfigObjects(config=task_detail.config)
         schedule.add_job(
             func=process_scheduled_job,
             kwargs={
-                "task_config_objects": task_config_objects
+                "task_config": task_detail.config
             },
             trigger='interval',
             seconds=task_detail.config.time_in_seconds,
             id=task_detail.id,
         )
 
-        return task_detail
+        return TaskAddResponse(id=task_detail.id)
 
 
 @app.post(
@@ -209,7 +210,7 @@ def classify_texts(request: ClassifierRequest):
         return response
 
 
-logger.info("Open http://127.0.0.1:9898/docs to see Swagger API Documentation.")
+logger.info("Open http://127.0.0.1:9898/redoc to see API Documentation.")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=9898)

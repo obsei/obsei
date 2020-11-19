@@ -95,36 +95,13 @@ class PayloadConvertor(Convertor):
 
 
 class DailyGetSinkConfig(HttpSinkConfig):
-    def __init__(
-        self,
-        url: str,
-        partner_id: str,
-        consumer_phone_number: str,
-        source_information: str,
-    ):
-        self.source_information = source_information
-        super(DailyGetSinkConfig, self).__init__(
-            url=url,
-            convertor=PayloadConvertor(),
-            headers={
-                "Content-type": "application/json"
-            },
-            base_payload={
-                "partnerId": partner_id,
-                "consumerPhoneNumber": consumer_phone_number,
-            },
-            payload_mapping=None,
-            field_conversion=None,
-        )
-
-    @classmethod
-    def from_dict(cls, config: Dict[str, Any]):
-        return cls(
-            url=config["url"],
-            partner_id=config["partner_id"],
-            consumer_phone_number=config["consumer_phone_number"],
-            source_information=config["source_information"],
-        )
+    partner_id: str
+    consumer_phone_number: str
+    source_information: str
+    convertor: Convertor = PayloadConvertor()
+    headers: Dict[str, Any] = {
+        "Content-type": "application/json"
+    }
 
 
 class DailyGetSink(HttpSink):

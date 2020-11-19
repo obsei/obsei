@@ -14,7 +14,11 @@ sink_config = DailyGetSinkConfig(
     url=os.environ['DAILYGET_URL'],
     partner_id=os.environ['DAILYGET_PARTNER_ID'],
     consumer_phone_number=os.environ['DAILYGET_CONSUMER_NUMBER'],
-    source_information="Twitter " + os.environ['DAILYGET_QUERY']
+    source_information="Twitter " + os.environ['DAILYGET_QUERY'],
+    base_payload={
+        "partnerId": os.environ['DAILYGET_PARTNER_ID'],
+        "consumerPhoneNumber": os.environ['DAILYGET_CONSUMER_NUMBER'],
+    }
 )
 
 dir_path = Path(__file__).resolve().parent.parent

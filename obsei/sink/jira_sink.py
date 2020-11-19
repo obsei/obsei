@@ -29,40 +29,14 @@ class JiraPayloadConvertor(Convertor):
 
 
 class JiraSinkConfig(BaseSinkConfig):
-    def __init__(
-        self,
-        url: str,
-        username: str,
-        password: str,
-        issue_type: Dict[str, str],
-        project: Dict[str, str],
-        verify_ssl: bool = True,
-        summary_max_length: int = 50,
-        convertor: Convertor = JiraPayloadConvertor(),
-    ):
-        self.jira = Jira(
-            url=url,
-            username=username,
-            password=password,
-            verify_ssl=verify_ssl,
-        )
-        self.issue_type = issue_type
-        self.project = project
-        self.summary_max_length = summary_max_length
-        super(JiraSinkConfig, self).__init__(convertor)
-
-    @classmethod
-    def from_dict(cls, config: Dict[str, Any]):
-        return cls(
-            url=config["url"],
-            username=config["username"],
-            password=config["password"],
-            issue_type=config["issue_type"],
-            project=config["project"],
-            convertor=config["convertor"] if "convertor" in config else JiraPayloadConvertor(),
-            verify_ssl=config["verify_ssl"] if "verify_ssl" in config else True,
-            summary_max_length=config["summary_max_length"] if "summary_max_length" in config else 50,
-        )
+    url: str
+    username: str
+    password: str
+    issue_type: Dict[str, str]
+    project: Dict[str, str]
+    verify_ssl: bool = True
+    summary_max_length: int = 50
+    convertor: Convertor = JiraPayloadConvertor()
 
 
 class JiraSink(BaseSink):

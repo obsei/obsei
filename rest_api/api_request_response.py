@@ -1,11 +1,13 @@
 import json
-from abc import ABC
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from pydantic.main import BaseModel
 
-from obsei.sink.sink_utils import sink_config_from_dict
-from obsei.source.source_utils import source_config_from_dict
+from obsei.sink.dailyget_sink import DailyGetSinkConfig
+from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
+from obsei.sink.http_sink import HttpSinkConfig
+from obsei.sink.jira_sink import JiraSinkConfig
+from obsei.source.twitter_source import TwitterSourceConfig
 
 
 class ClassifierRequest(BaseModel):
@@ -23,12 +25,58 @@ class ClassifierResponse(BaseModel):
 
 class SinkConfig(BaseModel):
     name: str
-    config: Dict[str, Any]
+    config: Union[
+        HttpSinkConfig,
+        JiraSinkConfig,
+        ElasticSearchSinkConfig,
+        DailyGetSinkConfig
+    ]
+
+    class Config:
+        arbitrary_types_allowed = True
+        schema_extra = {
+            "example": {
+                "target": DailyGetSinkConfig(
+                            url="http://127.0.0.1:8080/endpoint",
+                            partner_id=12345,
+                            consumer_phone_number=1234567890,
+                            source_information="Twitter",
+                            base_payload={
+                                "partnerId": 12345,
+                                "consumerPhoneNumber": 1234567890,
+                            }
+                        ).dict()
+            }
+        }
 
 
 class SourceConfig(BaseModel):
     name: str
-    config: Dict[str, Any]
+    config: Union[
+        TwitterSourceConfig
+    ]
+
+    class Config:
+        arbitrary_types_allowed = True
+        schema_extra = {
+            "example": {
+                "target": TwitterSourceConfig(
+                            twitter_config_filename=f'/user/home/config/twitter.yaml',
+                            keywords=["machine_leanring"],
+                            hashtags=["#ai"],
+                            usernames=["@user1"],
+                            operators=["-is:reply", "-is:retweet"],
+                            since_id=1234,
+                            until_id=9999,
+                            lookup_period="1d",
+                            tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],
+                            user_fields=["id", "name", "public_metrics", "username", "verified"],
+                            expansions=["author_id"],
+                            place_fields=["country"],
+                            max_tweets=10,
+                        ).dict()
+            }
+        }
 
 
 class TaskConfig(BaseModel):
@@ -39,17 +87,8 @@ class TaskConfig(BaseModel):
     def to_json(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-
-class TaskConfigObjects(ABC):
-    def __init__(self, config: TaskConfig):
-        self.sink, self.sink_config = sink_config_from_dict(
-            config.sink_config.name,
-            config.sink_config.config
-        )
-        self.source, self.source_config = source_config_from_dict(
-            config.source_config.name,
-            config.source_config.config
-        )
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class ScheduleResponse(BaseModel):
@@ -57,8 +96,17 @@ class ScheduleResponse(BaseModel):
     run_frequency: str
     next_run: str
 
+    class Config:
+        arbitrary_types_allowed = True
+
 
 class TaskDetail(BaseModel):
     id: Optional[str]
     config: TaskConfig
 
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class TaskAddResponse(BaseModel):
+    id: str

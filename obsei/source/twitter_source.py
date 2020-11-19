@@ -32,61 +32,20 @@ DEFAULT_OPERATORS = [
 
 
 class TwitterSourceConfig(BaseSourceConfig):
-    def __init__(
-        self,
-        twitter_config_filename: str = None,
-        query: str = None,
-        keywords: List[str] = None,
-        hashtags: List[str] = None,
-        usernames: List[str] = None,
-        operators: Optional[List[str]] = None,
-        since_id: Optional[int] = None,
-        until_id: Optional[int] = None,
-        # 10d
-        # 15m
-        lookup_period: str = None,
-        tweet_fields: Optional[List[str]] = None,
-        user_fields: Optional[List[str]] = None,
-        expansions: Optional[List[str]] = None,
-        place_fields: Optional[List[str]] = None,
-        max_tweets: int = DEFAULT_MAX_TWEETS,
-    ):
-        self.twitter_config_filename = twitter_config_filename
-
-        self.query = query
-        self.keywords = keywords
-        self.hashtags = hashtags
-        self.usernames = usernames
-        self.operators = operators if operators is not None else DEFAULT_OPERATORS
-
-        self.since_id = since_id
-        self.until_id = until_id
-        self.lookup_period = lookup_period
-
-        self.tweet_fields = tweet_fields if tweet_fields is not None else DEFAULT_TWEET_FIELDS
-        self.user_fields = user_fields if user_fields is not None else DEFAULT_USER_FIELDS
-        self.expansions = expansions if expansions is not None else DEFAULT_EXPANSIONS
-        self.place_fields = place_fields if place_fields is not None else DEFAULT_PLACE_FIELDS
-        self.max_tweets = max_tweets
-
-    @classmethod
-    def from_dict(cls, config: Dict[str, Any]):
-        return cls(
-            twitter_config_filename=config["twitter_config_filename"] if "twitter_config_filename" in config else None,
-            query=config["query"] if "query" in config else None,
-            keywords=config["keywords"] if "keywords" in config else None,
-            hashtags=config["hashtags"] if "hashtags" in config else None,
-            usernames=config["usernames"] if "usernames" in config else None,
-            operators=config["operators"] if "operators" in config else None,
-            since_id=config["since_id"] if "since_id" in config else None,
-            until_id=config["until_id"] if "until_id" in config else None,
-            lookup_period=config["lookup_period"] if "lookup_period" in config else None,
-            tweet_fields=config["tweet_fields"] if "tweet_fields" in config else None,
-            user_fields=config["user_fields"] if "user_fields" in config else None,
-            expansions=config["expansions"] if "expansions" in config else None,
-            place_fields=config["place_fields"] if "place_fields" in config else None,
-            max_tweets=config["max_tweets"] if "max_tweets" in config else DEFAULT_MAX_TWEETS,
-        )
+    twitter_config_filename: str = None
+    query: str = None
+    keywords: List[str] = None
+    hashtags: List[str] = None
+    usernames: List[str] = None
+    operators: Optional[List[str]] = DEFAULT_OPERATORS
+    since_id: Optional[int] = None
+    until_id: Optional[int] = None
+    lookup_period: str = None
+    tweet_fields: Optional[List[str]] = DEFAULT_TWEET_FIELDS
+    user_fields: Optional[List[str]] = DEFAULT_USER_FIELDS
+    expansions: Optional[List[str]] = DEFAULT_EXPANSIONS
+    place_fields: Optional[List[str]] = DEFAULT_PLACE_FIELDS
+    max_tweets: int = DEFAULT_MAX_TWEETS
 
 
 class TwitterSource(BaseSource):
