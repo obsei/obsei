@@ -2,13 +2,14 @@ FROM python:3.7.4-stretch
 
 WORKDIR /home/user
 
-RUN apt-get update && apt-get install -y curl git pkg-config cmake
+RUN apt-get update && apt-get upgrade -y && apt-get install -y curl git pkg-config cmake
 
 # copy code
-COPY haystack /home/user/haystack
+COPY obsei /home/user/obsei
 
 # install as a package
 COPY setup.py requirements.txt README.md /home/user/
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install -e .
 
@@ -27,4 +28,4 @@ COPY rest_api /home/user/rest_api
 EXPOSE 9898
 
 # cmd for running the API
-CMD ["gunicorn", "rest_api.application:app",  "-b", "0.0.0.0", "-k", "uvicorn.workers.UvicornWorker", "--workers", "1", "--timeout", "180", "--preload"]
+CMD ["gunicorn", "rest_api.application:app",  "-b", "0.0.0.0:9898", "-k", "uvicorn.workers.UvicornWorker", "--workers", "1", "--timeout", "180"]

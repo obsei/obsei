@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import List
 from uuid import uuid4
 
@@ -12,8 +13,19 @@ from rest_api.api_request_response import ScheduleResponse, TaskConfig, Classifi
 from rest_api.global_utils import get_application, processor, rate_limiter, schedule, text_analyzer
 from rest_api.task_config_store import TaskConfigStore
 
-logging.basicConfig(format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p")
+
+log_level = os.environ.get('LOG_LEVEL', logging.DEBUG)
+
+logging.basicConfig(
+    level=log_level,
+    format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p"
+)
+
 logger = logging.getLogger(__name__)
+logging.getLogger("obsei").setLevel(log_level)
+logging.root.setLevel(log_level)
+logging.root.propagate = True
+
 
 config_store: TaskConfigStore
 

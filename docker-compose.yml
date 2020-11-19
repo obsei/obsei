@@ -9,8 +9,10 @@ services:
       - 9898:9898
     volumes:
       # Optional: mount your own models from disk into the container
-      - "./models:/home/user/models"
+      # - "./models:/home/user/models"
+      - "./:/home/user"
     environment:
       - "SEARCHTWEETS_BEARER_TOKEN=${SEARCHTWEETS_BEARER_TOKEN}"
+      - "LOG_LEVEL:DEBUG"
     restart: always
-    command: "/bin/bash -c 'sleep 15 && gunicorn rest_api.application:app -b 0.0.0.0 -k uvicorn.workers.UvicornWorker --workers 1 --timeout 180 --preload'"
+    command: "/bin/bash -c 'sleep 15 && gunicorn rest_api.application:app -b 0.0.0.0:9898 -k uvicorn.workers.UvicornWorker --workers 1 --timeout 180'"

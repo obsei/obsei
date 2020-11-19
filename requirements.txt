@@ -11,11 +11,13 @@ pytz
 atlassian-python-api
 elasticsearch
 fastapi
-uvicorn
 setuptools
 pydantic
 python-dateutil
-starlette
 apscheduler
 Flask
 SQLAlchemy
+uvicorn
+gunicorn
+uvloop
+httptools
