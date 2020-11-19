@@ -99,20 +99,22 @@ class DailyGetSinkConfig(HttpSinkConfig):
     partner_id: str
     consumer_phone_number: str
     source_information: str
-    convertor: Convertor = PayloadConvertor()
     headers: Dict[str, Any] = {
         "Content-type": "application/json"
     }
 
 
 class DailyGetSink(HttpSink):
+    def __init__(self, convertor: Convertor = PayloadConvertor()):
+        super().__init__(convertor)
+
     def send_data(self, analyzer_responses: List[AnalyzerResponse], config: DailyGetSinkConfig):
         headers = config.headers
 
         payloads = []
         responses = []
         for analyzer_response in analyzer_responses:
-            payloads.append(config.convertor.convert(
+            payloads.append(self.convertor.convert(
                 analyzer_response=analyzer_response,
                 base_payload=deepcopy(config.base_payload),
                 source_information=config.source_information,

@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from elasticsearch.exceptions import RequestError
 
-from obsei.sink.base_sink import BaseSink, BaseSinkConfig
+from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.text_analyzer import AnalyzerResponse
 
 
@@ -78,11 +78,14 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
 
 
 class ElasticSearchSink(BaseSink):
+    def __init__(self, convertor: Convertor = Convertor()):
+        super().__init__(convertor)
+
     def send_data(self, analyzer_responses: List[AnalyzerResponse], config: ElasticSearchSinkConfig, **kwargs):
 
         payloads = []
         for analyzer_response in analyzer_responses:
-            payloads.append(config.convertor.convert(
+            payloads.append(self.convertor.convert(
                 analyzer_response=analyzer_response,
                 base_payload=deepcopy(config.base_payload)
             ))

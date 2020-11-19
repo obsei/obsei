@@ -24,7 +24,6 @@ class Convertor(BaseModel):
 
 class BaseSinkConfig(BaseModel):
     TYPE: Literal["Base"] = "Base"
-    convertor: Convertor = Convertor()
 
     @classmethod
     def from_dict(cls, config: Dict[str, Any]):
@@ -35,6 +34,8 @@ class BaseSinkConfig(BaseModel):
 
 
 class BaseSink(ABC):
+    def __init__(self, convertor: Convertor = Convertor()):
+        self.convertor = convertor
 
     @abstractmethod
     def send_data(self, analyzer_responses: List[AnalyzerResponse], config: BaseSinkConfig):

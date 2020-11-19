@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Literal
 import logging
 import requests
 
-from obsei.sink.base_sink import BaseSink, BaseSinkConfig
+from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.text_analyzer import AnalyzerResponse
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,8 @@ class HttpSinkConfig(BaseSinkConfig):
 
 
 class HttpSink(BaseSink):
+    def __init__(self, convertor: Convertor = Convertor()):
+        super().__init__(convertor)
 
     def send_data(self, analyzer_responses: List[AnalyzerResponse], config: HttpSinkConfig):
 
@@ -33,7 +35,7 @@ class HttpSink(BaseSink):
         payloads = []
         responses = []
         for analyzer_response in analyzer_responses:
-            payloads.append(config.convertor.convert(
+            payloads.append(self.convertor.convert(
                 analyzer_response=analyzer_response,
                 base_payload=deepcopy(config.base_payload)
             ))

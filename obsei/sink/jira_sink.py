@@ -35,15 +35,17 @@ class JiraSinkConfig(BaseSinkConfig):
     project: Dict[str, str]
     verify_ssl: bool = True
     summary_max_length: int = 50
-    convertor: Convertor = JiraPayloadConvertor()
 
 
 class JiraSink(BaseSink):
+    def __init__(self, convertor: Convertor = JiraPayloadConvertor()):
+        super().__init__(convertor)
+
     def send_data(self, analyzer_responses: List[AnalyzerResponse], config: JiraSinkConfig):
         responses = []
         payloads = []
         for analyzer_response in analyzer_responses:
-            payloads.append(config.convertor.convert(
+            payloads.append(self.convertor.convert(
                 analyzer_response=analyzer_response,
                 base_payload={
                     "project": config.project,
