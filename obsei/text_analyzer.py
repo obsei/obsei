@@ -1,7 +1,14 @@
 import logging
 from typing import Any, Dict, List, Optional
 
+from pydantic import BaseModel
+
 logger = logging.getLogger(__name__)
+
+
+class AnalyzerConfig(BaseModel):
+    labels: List[str] = ["positive", "negative"]
+    use_sentiment_model: bool = False
 
 
 class AnalyzerRequest:
@@ -45,9 +52,11 @@ class TextAnalyzer:
             classifier_model_name: Optional[str] = None,
             multi_class_classification: Optional[bool] = True,
             initialize_model: Optional[bool] = False,
+            analyzer_config: AnalyzerConfig = None,
     ):
         self.multi_class_classification = multi_class_classification
         self.classifier_model_name = classifier_model_name
+        self.analyzer_config = analyzer_config if analyzer_config is None else AnalyzerConfig()
 
         if initialize_model is not None or self.classifier_model_name is not None:
             from transformers import pipeline
@@ -91,13 +100,12 @@ class TextAnalyzer:
     def analyze_input(
         self,
         source_response_list: List[AnalyzerRequest],
-        labels: List[str] = None,
-        use_sentiment_model: bool = False,
+        analyzer_config: AnalyzerConfig = None,
     ) -> List[AnalyzerResponse]:
-
+        analyzer_config = analyzer_config or self.analyzer_config
         analyzer_output: List[AnalyzerResponse] = []
 
-        labels = labels or []
+        labels = analyzer_config.labels or []
         if "positive" not in labels:
             labels.append("positive")
         if "negative" not in labels:
@@ -105,7 +113,7 @@ class TextAnalyzer:
 
         for source_response in source_response_list:
             classification_map = {}
-            if not use_sentiment_model:
+            if not analyzer_config.use_sentiment_model:
                 sentiment_value = self._get_sentiment_score_from_vader(source_response.processed_text)
                 if sentiment_value < 0.0:
                     classification_map["negative"] = -sentiment_value

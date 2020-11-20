@@ -8,6 +8,7 @@ from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
 from obsei.sink.http_sink import HttpSinkConfig
 from obsei.sink.jira_sink import JiraSinkConfig
 from obsei.source.twitter_source import TwitterSourceConfig
+from obsei.text_analyzer import AnalyzerConfig
 
 
 class ClassifierRequest(BaseModel):
@@ -26,6 +27,7 @@ class ClassifierResponse(BaseModel):
 class TaskConfig(BaseModel):
     source_config: Union[TwitterSourceConfig]
     sink_config: Union[HttpSinkConfig, JiraSinkConfig, ElasticSearchSinkConfig, DailyGetSinkConfig]
+    analyzer_config: AnalyzerConfig
     time_in_seconds: int
 
     def to_json(self):
@@ -59,6 +61,10 @@ class TaskConfig(BaseModel):
                         "partnerId": 12345,
                         "consumerPhoneNumber": 1234567890,
                     }
+                ).dict(),
+                "analyzer_config": AnalyzerConfig(
+                    labels=["service", "quality", "tracking"],
+                    use_sentiment_model=True
                 ).dict(),
                 "time_in_seconds": 300
             }

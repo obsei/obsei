@@ -45,6 +45,7 @@ def process_scheduled_job(task_config: TaskConfig):
                 sink_config=task_config.sink_config,
                 source=source_map[task_config.source_config.TYPE],
                 source_config=task_config.source_config,
+                analyzer_config=task_config.analyzer_config
             )
     except Exception as ex:
         logger.error(f'Exception occur: {ex}')
