@@ -1,4 +1,4 @@
-from obsei.text_analyzer import AnalyzerRequest
+from obsei.text_analyzer import AnalyzerConfig, AnalyzerRequest
 
 GOOD_TEXT = '''If anyone is interested... these are our hosts. I can’t recommend them enough, Abc & Pbc.
 
@@ -17,8 +17,10 @@ def test_text_analyzer_with_model(text_analyzer_with_model):
     source_responses = [AnalyzerRequest(text, "sample") for text in TEXTS]
     analyzer_responses = text_analyzer_with_model.analyze_input(
         source_response_list=source_responses,
-        labels=labels,
-        use_sentiment_model=True
+        analyzer_config=AnalyzerConfig(
+            labels=labels,
+            use_sentiment_model=True
+        )
     )
 
     assert len(analyzer_responses) == len(TEXTS)
@@ -32,7 +34,10 @@ def test_text_analyzer_with_model(text_analyzer_with_model):
 def test_text_analyzer_with_vader(text_analyzer_with_vader):
     source_responses = [AnalyzerRequest(text, "sample") for text in TEXTS]
     analyzer_responses = text_analyzer_with_vader.analyze_input(
-        source_response_list=source_responses
+        source_response_list=source_responses,
+        analyzer_config=AnalyzerConfig(
+            use_sentiment_model=False
+        )
     )
 
     assert len(analyzer_responses) == len(TEXTS)
