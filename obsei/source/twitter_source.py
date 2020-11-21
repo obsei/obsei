@@ -1,7 +1,10 @@
 import logging
+import requests
 
 from typing import Any, Dict, List, Literal, Optional
 
+from pydantic import BaseSettings
+from pydantic.types import SecretStr
 from searchtweets import collect_results, gen_request_parameters, load_credentials
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
@@ -10,6 +13,8 @@ from obsei.text_analyzer import AnalyzerRequest
 import preprocessor as cleaning_processor
 
 logger = logging.getLogger(__name__)
+
+TWITTER_OAUTH_ENDPOINT = 'https://api.twitter.com/oauth2/token'
 
 DEFAULT_MAX_TWEETS = 10
 
@@ -29,6 +34,50 @@ DEFAULT_OPERATORS = [
     "-is:reply",
     "-is:retweet"
 ]
+
+
+class TwitterCredentials(BaseSettings):
+    bearer_token: Optional[SecretStr] = None
+    consumer_key: Optional[SecretStr] = None
+    consumer_secret: Optional[SecretStr] = None
+    endpoint: str = "https://api.twitter.com/2/tweets/search/recent"
+    extra_headers_dict: Optional[Dict[str, Any]] = None
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        if self.bearer_token is None:
+            if self.consumer_key is None and self.consumer_secret is None:
+                raise AttributeError("consumer_key and consumer_secret required to generate bearer_token via Twitter")
+
+            self.bearer_token = TwitterCredentials.generate_bearer_token()
+
+    def get_twitter_credentials(self):
+        if self.bearer_token is None:
+            self.bearer_token = TwitterCredentials.generate_bearer_token()
+
+        return {
+            "bearer_token": self.bearer_token,
+            "endpoint": self.endpoint,
+            "extra_headers_dict": self.extra_headers_dict,
+        }
+
+    # Copied from Twitter searchtweets-v2 lib
+    def generate_bearer_token(self):
+        """
+        Return the bearer token for a given pair of consumer key and secret values.
+        """
+        data = [('grant_type', 'client_credentials')]
+        resp = requests.post(
+            TWITTER_OAUTH_ENDPOINT,
+            data=data,
+            auth=(self.consumer_key, self.consumer_secret)
+        )
+        logger.warning("Grabbing bearer token from OAUTH")
+        if resp.status_code >= 400:
+            logger.error(resp.text)
+            resp.raise_for_status()
+
+        return resp.json()['access_token']
 
 
 class TwitterSourceConfig(BaseSourceConfig):
