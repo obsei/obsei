@@ -49,18 +49,18 @@ class TextAnalyzer:
     def __init__(
             self,
             # Model names: joeddav/xlm-roberta-large-xnli, facebook/bart-large-mnli
-            classifier_model_name: Optional[str] = None,
-            multi_class_classification: Optional[bool] = True,
-            initialize_model: Optional[bool] = False,
+            model_name_or_path: str = None,
+            multi_class_classification: bool = True,
+            initialize_model: bool = False,
             analyzer_config: AnalyzerConfig = None,
     ):
         self.multi_class_classification = multi_class_classification
-        self.classifier_model_name = classifier_model_name
-        self.analyzer_config = analyzer_config if analyzer_config is None else AnalyzerConfig()
+        self.classifier_model_name = model_name_or_path
+        self.analyzer_config = analyzer_config if analyzer_config is None else AnalyzerConfig(use_sentiment_model=False)
 
-        if initialize_model is not None or self.classifier_model_name is not None:
+        if initialize_model is True or self.classifier_model_name is not None:
             from transformers import pipeline
-            self.classifier_model = pipeline("zero-shot-classification", model=classifier_model_name)
+            self.classifier_model = pipeline("zero-shot-classification", model=model_name_or_path)
             self.vader_sentiment_analyzer = None
         else:
             from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer

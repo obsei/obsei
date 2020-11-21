@@ -27,7 +27,7 @@ class ClassifierResponse(BaseModel):
 class TaskConfig(BaseModel):
     source_config: Union[TwitterSourceConfig]
     sink_config: Union[HttpSinkConfig, JiraSinkConfig, ElasticSearchSinkConfig, DailyGetSinkConfig]
-    analyzer_config: AnalyzerConfig
+    analyzer_config: Optional[AnalyzerConfig] = None
     time_in_seconds: int
 
     def to_json(self):

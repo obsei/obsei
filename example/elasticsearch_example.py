@@ -24,8 +24,8 @@ source_config = TwitterSourceConfig(
 
 source = TwitterSource()
 text_analyzer = TextAnalyzer(
-    classifier_model_name="joeddav/bart-large-mnli-yahoo-answers",
-#   classifier_model_name="joeddav/xlm-roberta-large-xnli",
+    model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
+#   model_name_or_path="joeddav/xlm-roberta-large-xnli",
     initialize_model=True,
     analyzer_config=AnalyzerConfig(
         labels=["service", "delay", "tracking", "no response", "missing items", "delivery", "mask"],

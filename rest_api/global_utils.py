@@ -38,9 +38,9 @@ CONCURRENT_REQUEST_PER_WORKER = int(os.getenv("CONCURRENT_REQUEST_PER_WORKER", 4
 rate_limiter = RequestLimiter(CONCURRENT_REQUEST_PER_WORKER)
 
 text_analyzer = TextAnalyzer(
-    # classifier_model_name="joeddav/bart-large-mnli-yahoo-answers",
-    classifier_model_name="/home/user/models/bart-large-mnli-yahoo-answers",
-    initialize_model=True,
+    # model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
+    # model_name_or_path="/home/user/models/bart-large-mnli-yahoo-answers",
+    initialize_model=False,
 )
 processor = Processor(text_analyzer)
 

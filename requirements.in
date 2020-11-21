@@ -1,0 +1,22 @@
+vaderSentiment
+transformers
+# PyTorch
+--find-links=https://download.pytorch.org/whl/torch_stable.html
+torch
+requests
+requests-oauthlib
+searchtweets-v2
+tweet-preprocessor
+pytz
+atlassian-python-api
+elasticsearch
+fastapi
+pydantic
+python-dateutil
+apscheduler
+Flask
+SQLAlchemy
+uvicorn
+gunicorn
+uvloop
+httptools
