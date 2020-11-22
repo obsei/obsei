@@ -1,9 +1,9 @@
 import logging
 import requests
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, Field
 from pydantic.types import SecretStr
 from searchtweets import collect_results, gen_request_parameters, load_credentials
 
@@ -81,7 +81,7 @@ class TwitterCredentials(BaseSettings):
 
 
 class TwitterSourceConfig(BaseSourceConfig):
-    TYPE: Literal["Twitter"] = "Twitter"
+    TYPE: str = Field("Twitter", const=True)
     twitter_config_filename: str = None
     query: str = None
     keywords: List[str] = None
@@ -99,7 +99,7 @@ class TwitterSourceConfig(BaseSourceConfig):
 
 
 class TwitterSource(BaseSource):
-    NAME: Literal["Twitter"] = "Twitter"
+    NAME: str = Field("Twitter", const=True)
 
     def lookup(self, config: TwitterSourceConfig) -> List[AnalyzerRequest]:
         if not config.query and not config.keywords and not config.hashtags and config.usernames:

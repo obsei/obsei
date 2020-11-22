@@ -1,11 +1,12 @@
 import logging
 from copy import deepcopy
 from datetime import timezone
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Optional
 
 import pytz
 import requests
 from dateutil import parser
+from pydantic import Field
 
 from obsei.sink.base_sink import Convertor
 from obsei.sink.http_sink import HttpSink, HttpSinkConfig
@@ -95,7 +96,7 @@ class PayloadConvertor(Convertor):
 
 
 class DailyGetSinkConfig(HttpSinkConfig):
-    TYPE: Literal["DailyGet"] = "DailyGet"
+    TYPE: str = Field("DailyGet", const=True)
     partner_id: str
     consumer_phone_number: str
     source_information: str

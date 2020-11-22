@@ -1,38 +1,31 @@
 import logging
-import os
 from typing import List
 from uuid import uuid4
 
-import uvicorn as uvicorn
+import hydra
 from apscheduler.jobstores.base import JobLookupError
+from apscheduler.schedulers.base import BaseScheduler
 from fastapi import HTTPException
+from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 
-from obsei.text_analyzer import AnalyzerRequest
+from obsei.processor import Processor
+from obsei.text_analyzer import AnalyzerRequest, TextAnalyzer
 from rest_api.api_request_response import ScheduleResponse, TaskAddResponse, TaskConfig, ClassifierRequest, \
     ClassifierResponse, TaskDetail
-from rest_api.global_utils import get_application, processor, rate_limiter, schedule, sink_map, source_map, \
-    text_analyzer
+from rest_api.global_utils import get_application, sink_map, source_map
+from rest_api.rate_limiter import RequestLimiter
 from rest_api.task_config_store import TaskConfigStore
 
-
-log_level = os.environ.get('LOG_LEVEL', logging.DEBUG)
-
-logging.basicConfig(
-    level=log_level,
-    format="%(asctime)s %(name)s:%(funcName)s [%(processName)s:%(threadName)s] %(message)s",
-    datefmt="%d/%m/%Y %H:%M:%S %Z"
-)
-
 logger = logging.getLogger(__name__)
-logging.getLogger("obsei").setLevel(log_level)
-logging.root.setLevel(log_level)
-logging.root.propagate = True
-
-gunicorn_logger = logging.getLogger('gunicorn.error')
-gunicorn_logger.setLevel(log_level)
-gunicorn_logger.propagate = True
 
 config_store: TaskConfigStore
+app_cfg: DictConfig
+scheduler: BaseScheduler
+text_analyzer: TextAnalyzer
+processor: Processor
+rate_limiter: RequestLimiter
+
 
 app = get_application()
 
@@ -51,27 +44,13 @@ def process_scheduled_job(task_config: TaskConfig):
         logger.error(f'Exception occur: {ex}')
 
 
-def start_scheduler():
-    try:
-        schedule.start()
-        logger.info("Created Schedule Object")
-    except Exception as ex:
-        logger.error(f'Unable to Create Schedule Object, error: {ex.__cause__ }')
-        raise ex
-
-
-def init_config_store():
-    global config_store
-    config_store = TaskConfigStore()
-
-
 def schedule_tasks():
     global config_store
     tasks = config_store.get_all_tasks()
     jobs = []
     for task in tasks:
         jobs.append(
-            schedule.add_job(
+            scheduler.add_job(
                 func=process_scheduled_job,
                 kwargs={
                     "task_config": task.config
@@ -83,11 +62,81 @@ def schedule_tasks():
         )
 
 
-@app.on_event("startup")
-async def load_schedule_or_create_blank():
+def scheduler_init():
+    global scheduler
+    global app_cfg
+
+    try:
+        job_store = instantiate(app_cfg.task_scheduler.jobstore)
+        scheduler = instantiate(app_cfg.task_scheduler.scheduler)
+        scheduler.configure({'default': job_store})
+
+        scheduler.start()
+        logger.info("Created Schedule Object")
+        schedule_tasks()
+    except Exception as ex:
+        logger.error(f'Unable to Create Schedule Object, error: {ex.__cause__ }')
+        raise ex
+
+
+def logging_init():
+    global app_cfg
+    global logger
+
+    logging.basicConfig(**app_cfg.logging.base_config)
+
+    # logging.getLogger("obsei").setLevel(app_cfg.logging.base_config.log_level)
+    # logging.getLogger("uvicorn").setLevel(app_cfg.logging.base_config.log_level)
+    logging.root.setLevel(app_cfg.logging.base_config.log_level)
+    logging.root.propagate = True
+
+
+def init_config_store():
+    global config_store
+    global app_cfg
+    config_store = instantiate(app_cfg.task_config_store)
+
+
+def init_analyzer():
+    global text_analyzer
+    global app_cfg
+    text_analyzer = instantiate(app_cfg.analyzer)
+
+
+def init_processor():
+    global text_analyzer
+    global processor
+    processor = Processor(text_analyzer)
+
+
+def init_rate_limiter():
+    global rate_limiter
+    global app_cfg
+    rate_limiter = instantiate(app_cfg.rate_limiter)
+
+
+def uvicorn_init():
+    global app_cfg
+    logger.info("Open http://127.0.0.1:9898/redoc or http://127.0.0.1:9898/docs to see API Documentation.")
+    instantiate(app_cfg.uvicorn)
+
+
+@hydra.main(config_name="rest", config_path="../config")
+def config_init(cfg: DictConfig) -> None:
+    global app_cfg
+    logger.debug("Configuration: \n" + OmegaConf.to_yaml(cfg))
+    app_cfg = cfg
+
+
+def app_init():
+    config_init()
+    logging_init()
+    init_analyzer()
+    init_processor()
     init_config_store()
-    start_scheduler()
-    schedule_tasks()
+    scheduler_init()
+    init_rate_limiter()
+    uvicorn_init()
 
 
 @app.get(
@@ -99,7 +148,7 @@ async def load_schedule_or_create_blank():
 async def get_scheduled_syncs():
     with rate_limiter.run():
         schedules = []
-        for job in schedule.get_jobs():
+        for job in scheduler.get_jobs():
             schedules.append(
                 ScheduleResponse(
                     id=str(job.id),
@@ -144,7 +193,7 @@ async def delete_task(task_id: str):
     global config_store
     with rate_limiter.run():
         try:
-            schedule.remove_job(job_id=task_id)
+            scheduler.remove_job(job_id=task_id)
         except JobLookupError as ex:
             logger.warning(f'Job {task_id} not found. Error: {ex.__cause__}')
 
@@ -171,13 +220,13 @@ async def update_task(task_id: str, request: TaskConfig):
 
     with rate_limiter.run():
         try:
-            schedule.remove_job(job_id=task_id)
+            scheduler.remove_job(job_id=task_id)
         except JobLookupError as ex:
             logger.warning(f'Job {task_id} not found. Error: {ex.__cause__}')
 
         task_detail = TaskDetail(id=task_id, config=request)
         config_store.update_task(task_detail)
-        schedule.add_job(
+        scheduler.add_job(
             func=process_scheduled_job,
             kwargs={
                 "task_config": task_detail.config
@@ -202,7 +251,7 @@ async def add_task(request: TaskConfig):
     with rate_limiter.run():
         task_detail = TaskDetail(id=str(uuid4()), config=request)
         config_store.add_task(task_detail)
-        schedule.add_job(
+        scheduler.add_job(
             func=process_scheduled_job,
             kwargs={
                 "task_config": task_detail.config
@@ -232,8 +281,7 @@ def classify_texts(request: ClassifierRequest):
         ]
         analyzer_responses = text_analyzer.analyze_input(
             source_response_list=analyzer_requests,
-            labels=request.labels,
-            use_sentiment_model=request.use_sentiment_model,
+            analyzer_config=request.analyzer_config,
         )
 
         response = []
@@ -243,7 +291,5 @@ def classify_texts(request: ClassifierRequest):
         return response
 
 
-logger.info("Open http://127.0.0.1:9898/redoc or http://127.0.0.1:9898/docs to see API Documentation.")
-
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=9898)
+    app_init()

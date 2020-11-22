@@ -1,9 +1,10 @@
 from copy import deepcopy
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Optional
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from elasticsearch.exceptions import RequestError
+from pydantic import Field
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.text_analyzer import AnalyzerResponse
@@ -11,7 +12,7 @@ from obsei.text_analyzer import AnalyzerResponse
 
 class ElasticSearchSinkConfig(BaseSinkConfig):
     __slots__ = ('_es_client',)
-    TYPE: Literal["Elasticsearch"] = "Elasticsearch"
+    TYPE: str = Field("Elasticsearch", const=True)
     host: str
     port: int
     index_name: str = "es_index"

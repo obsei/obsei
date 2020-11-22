@@ -1,8 +1,9 @@
 from copy import deepcopy
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List
 
 import logging
 import requests
+from pydantic import Field
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.text_analyzer import AnalyzerResponse
@@ -15,7 +16,7 @@ DEFAULT_HEADERS = {
 
 
 class HttpSinkConfig(BaseSinkConfig):
-    TYPE: Literal["Http"] = "Http"
+    TYPE: str = Field("Http", const=True)
     url: str
     headers: Dict[str, Any] = None
     base_payload: Dict[str, Any] = None

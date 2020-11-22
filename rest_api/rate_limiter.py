@@ -5,8 +5,8 @@ from fastapi import HTTPException
 
 
 class RequestLimiter:
-    def __init__(self, limit):
-        self.semaphore = Semaphore(limit - 1)
+    def __init__(self, concurrent_request_per_worker: int = 1):
+        self.semaphore = Semaphore(concurrent_request_per_worker - 1)
 
     @contextmanager
     def run(self):

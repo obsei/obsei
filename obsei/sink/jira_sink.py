@@ -2,7 +2,9 @@ import json
 import logging
 import textwrap
 from copy import deepcopy
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Optional
+
+from pydantic import Field
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.text_analyzer import AnalyzerResponse
@@ -27,7 +29,7 @@ class JiraPayloadConvertor(Convertor):
 
 
 class JiraSinkConfig(BaseSinkConfig):
-    TYPE: Literal["Jira"] = "Jira"
+    TYPE: str = Field("Jira", const=True)
     url: str
     username: str
     password: str

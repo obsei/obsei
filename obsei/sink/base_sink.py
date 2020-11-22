@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Optional
 
+from pydantic import Field
 from pydantic.main import BaseModel
 
 from obsei.text_analyzer import AnalyzerResponse
@@ -23,7 +24,7 @@ class Convertor(BaseModel):
 
 
 class BaseSinkConfig(BaseModel):
-    TYPE: Literal["Base"] = "Base"
+    TYPE: str = Field("Base", const=True)
 
     @classmethod
     def from_dict(cls, config: Dict[str, Any]):

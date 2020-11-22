@@ -13,8 +13,7 @@ from obsei.text_analyzer import AnalyzerConfig
 
 class ClassifierRequest(BaseModel):
     texts: List[str]
-    labels: List[str]
-    use_sentiment_model: bool = True
+    analyzer_config: AnalyzerConfig = AnalyzerConfig(use_sentiment_model=False)
 
     class Config:
         arbitrary_types_allowed = True
