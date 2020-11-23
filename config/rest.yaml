@@ -1,12 +1,3 @@
-uvicorn:
-  _target_: uvicorn.run
-  host: 0.0.0.0
-  port: 9898
-  workers: 1
-  limit_concurrency: 2
-  reload: true
-  app: rest_api.application:app
-
 task_config_store:
   _target_: rest_api.task_config_store.TaskConfigStore
   url: sqlite:///../obsei.db
