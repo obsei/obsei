@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 class AnalyzerConfig(BaseModel):
     labels: List[str] = ["positive", "negative"]
     use_sentiment_model: bool = False
+    multi_class_classification: bool = True
 
 
 class AnalyzerRequest:
@@ -50,11 +51,9 @@ class TextAnalyzer:
             self,
             # Model names: joeddav/xlm-roberta-large-xnli, facebook/bart-large-mnli
             model_name_or_path: str = None,
-            multi_class_classification: bool = True,
             initialize_model: bool = False,
             analyzer_config: AnalyzerConfig = None,
     ):
-        self.multi_class_classification = multi_class_classification
         self.classifier_model_name = model_name_or_path
         self.analyzer_config = analyzer_config if analyzer_config is None else AnalyzerConfig(use_sentiment_model=False)
 
@@ -88,11 +87,15 @@ class TextAnalyzer:
         scores = self.vader_sentiment_analyzer.polarity_scores(text)
         return scores["compound"]
 
-    def _classify_text_from_model(self, text: str, labels: List[str]) -> Dict[str, float]:
+    def _classify_text_from_model(
+            self, text: str,
+            labels: List[str],
+            multi_class_classification: bool = True
+    ) -> Dict[str, float]:
         if self.classifier_model is None:
             self._init_classifier_model(self.classifier_model_name)
 
-        scores_data = self.classifier_model(text, labels, multi_class=self.multi_class_classification)
+        scores_data = self.classifier_model(text, labels, multi_class=multi_class_classification)
 
         score_dict = {label: score for label, score in zip(scores_data["labels"], scores_data["scores"])}
         return dict(sorted(score_dict.items(), key=lambda x: x[1], reverse=True))
@@ -122,7 +125,11 @@ class TextAnalyzer:
                     classification_map["positive"] = sentiment_value
                     classification_map["negative"] = 1.0 - classification_map["positive"]
             else:
-                classification_map = self._classify_text_from_model(source_response.processed_text, labels)
+                classification_map = self._classify_text_from_model(
+                    source_response.processed_text,
+                    labels,
+                    analyzer_config.multi_class_classification
+                )
 
             analyzer_output.append(
                 AnalyzerResponse(

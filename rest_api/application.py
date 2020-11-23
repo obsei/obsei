@@ -2,10 +2,10 @@ import logging
 from typing import List
 from uuid import uuid4
 
-import hydra
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.base import BaseScheduler
 from fastapi import HTTPException
+from hydra.experimental import compose, initialize
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
@@ -45,7 +45,6 @@ def process_scheduled_job(task_config: TaskConfig):
 
 
 def schedule_tasks():
-    global config_store
     tasks = config_store.get_all_tasks()
     jobs = []
     for task in tasks:
@@ -64,7 +63,6 @@ def schedule_tasks():
 
 def scheduler_init():
     global scheduler
-    global app_cfg
 
     try:
         job_store = instantiate(app_cfg.task_scheduler.jobstore)
@@ -75,59 +73,52 @@ def scheduler_init():
         logger.info("Created Schedule Object")
         schedule_tasks()
     except Exception as ex:
-        logger.error(f'Unable to Create Schedule Object, error: {ex.__cause__ }')
+        logger.error(f'Unable to Create Schedule Object, error: {ex.__cause__}')
         raise ex
 
 
 def logging_init():
-    global app_cfg
-    global logger
-
     logging.basicConfig(**app_cfg.logging.base_config)
 
-    # logging.getLogger("obsei").setLevel(app_cfg.logging.base_config.log_level)
-    # logging.getLogger("uvicorn").setLevel(app_cfg.logging.base_config.log_level)
-    logging.root.setLevel(app_cfg.logging.base_config.log_level)
+    # logging.getLogger("obsei").setLevel(app_cfg.logging.base_config.level)
+    # logging.getLogger("uvicorn").setLevel(app_cfg.logging.base_config.level)
+    logging.root.setLevel(app_cfg.logging.base_config.level)
     logging.root.propagate = True
+
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    gunicorn_logger.setLevel(app_cfg.logging.base_config.level)
+    gunicorn_logger.propagate = True
 
 
 def init_config_store():
     global config_store
-    global app_cfg
     config_store = instantiate(app_cfg.task_config_store)
 
 
 def init_analyzer():
     global text_analyzer
-    global app_cfg
     text_analyzer = instantiate(app_cfg.analyzer)
 
 
 def init_processor():
-    global text_analyzer
     global processor
     processor = Processor(text_analyzer)
 
 
 def init_rate_limiter():
     global rate_limiter
-    global app_cfg
     rate_limiter = instantiate(app_cfg.rate_limiter)
 
 
-def uvicorn_init():
-    global app_cfg
-    logger.info("Open http://127.0.0.1:9898/redoc or http://127.0.0.1:9898/docs to see API Documentation.")
-    instantiate(app_cfg.uvicorn)
-
-
-@hydra.main(config_name="rest", config_path="../config")
-def config_init(cfg: DictConfig) -> None:
+def config_init() -> None:
+    initialize(config_path="../config")
+    cfg = compose("rest.yaml")
     global app_cfg
     logger.debug("Configuration: \n" + OmegaConf.to_yaml(cfg))
     app_cfg = cfg
 
 
+@app.on_event("startup")
 def app_init():
     config_init()
     logging_init()
@@ -136,7 +127,8 @@ def app_init():
     init_config_store()
     scheduler_init()
     init_rate_limiter()
-    uvicorn_init()
+
+    logger.info("Open http://127.0.0.1:9898/redoc or http://127.0.0.1:9898/docs to see API Documentation.")
 
 
 @app.get(
@@ -166,7 +158,6 @@ async def get_scheduled_syncs():
     tags=["task"]
 )
 async def get_all_tasks():
-    global config_store
     with rate_limiter.run():
         return config_store.get_all_tasks()
 
@@ -178,7 +169,6 @@ async def get_all_tasks():
     tags=["task"]
 )
 async def get_task(task_id: str):
-    global config_store
     with rate_limiter.run():
         return config_store.get_task_by_id(task_id)
 
@@ -190,7 +180,6 @@ async def get_task(task_id: str):
     tags=["task"]
 )
 async def delete_task(task_id: str):
-    global config_store
     with rate_limiter.run():
         try:
             scheduler.remove_job(job_id=task_id)
@@ -216,8 +205,6 @@ async def delete_task(task_id: str):
     tags=["task"]
 )
 async def update_task(task_id: str, request: TaskConfig):
-    global config_store
-
     with rate_limiter.run():
         try:
             scheduler.remove_job(job_id=task_id)
@@ -246,8 +233,6 @@ async def update_task(task_id: str, request: TaskConfig):
     tags=["task"]
 )
 async def add_task(request: TaskConfig):
-    global config_store
-
     with rate_limiter.run():
         task_detail = TaskDetail(id=str(uuid4()), config=request)
         config_store.add_task(task_detail)
@@ -288,8 +273,9 @@ def classify_texts(request: ClassifierRequest):
         for analyzer_response in analyzer_responses:
             response.append(analyzer_response.classification)
 
-        return response
+        return ClassifierResponse(data=response)
 
 
 if __name__ == "__main__":
-    app_init()
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=9898)

@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from sqlalchemy import Column, DateTime, String, create_engine, func
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
 
 from rest_api.api_request_response import TaskConfig, TaskDetail
@@ -37,7 +38,7 @@ class TaskConfigStore(ABC):
         engine = create_engine(url)
         ORMBase.metadata.create_all(engine)
         session = sessionmaker(bind=engine)
-        self.session = session()
+        self.session = scoped_session(session)
 
     def get_task_by_id(self, id: str) -> Optional[TaskDetail]:
         tasks = self.get_tasks_by_id([id])

@@ -19,6 +19,7 @@ fastapi==0.61.2           # via -r requirements.in
 filelock==3.0.12          # via transformers
 flask==1.1.2              # via -r requirements.in
 future==0.18.2            # via torch
+gunicorn==20.0.4          # via -r requirements.in
 h11==0.11.0               # via uvicorn
 httptools==0.1.1          # via -r requirements.in
 hydra-core==1.0.4         # via -r requirements.in

@@ -3,6 +3,7 @@ uvicorn:
   host: 0.0.0.0
   port: 9898
   workers: 1
+  limit_concurrency: 2
   reload: true
   app: rest_api.application:app
 
@@ -18,9 +19,10 @@ task_scheduler:
 
 analyzer:
   _target_: obsei.text_analyzer.TextAnalyzer
-  # model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
-  # model_name_or_path="/home/user/models/bart-large-mnli-yahoo-answers",
-  initialize_model: false
+  # model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers",
+  # model_name_or_path: "/home/user/models/bart-large-mnli-yahoo-answers",
+  model_name_or_path: '../../models/bart-large-mnli-yahoo-answers'
+  initialize_model: true
 
 rate_limiter:
   _target_: rest_api.rate_limiter.RequestLimiter
@@ -28,7 +30,7 @@ rate_limiter:
 
 logging:
   base_config:
-    log_level: DEBUG
+    level: DEBUG
     format: '%(asctime)s %(name)s:%(funcName)s [%(processName)s:%(threadName)s] %(message)s'
     datefmt: '%d/%m/%Y %H:%M:%S %Z'
 

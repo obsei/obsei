@@ -53,17 +53,18 @@ class TaskConfig(BaseModel):
                 ).dict(),
                 "sink_config": DailyGetSinkConfig(
                     url="http://127.0.0.1:8080/endpoint",
-                    partner_id=12345,
-                    consumer_phone_number=1234567890,
+                    partner_id="12345",
+                    consumer_phone_number="1234567890",
                     source_information="Twitter",
                     base_payload={
-                        "partnerId": 12345,
-                        "consumerPhoneNumber": 1234567890,
+                        "partnerId": "12345",
+                        "consumerPhoneNumber": "1234567890",
                     }
                 ).dict(),
                 "analyzer_config": AnalyzerConfig(
                     labels=["service", "quality", "tracking"],
-                    use_sentiment_model=True
+                    use_sentiment_model=True,
+                    multi_class_classification=False
                 ).dict(),
                 "time_in_seconds": 300
             }

@@ -17,6 +17,7 @@ apscheduler
 Flask
 SQLAlchemy
 uvicorn
+gunicorn
 uvloop
 httptools
 hydra-core
