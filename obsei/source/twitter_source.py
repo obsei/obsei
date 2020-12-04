@@ -37,10 +37,10 @@ DEFAULT_OPERATORS = [
 
 
 class TwitterCredentials(BaseSettings):
-    bearer_token: Optional[SecretStr] = None
-    consumer_key: Optional[SecretStr] = None
-    consumer_secret: Optional[SecretStr] = None
-    endpoint: str = "https://api.twitter.com/2/tweets/search/recent"
+    bearer_token: Optional[SecretStr] = Field(None, env='twitter_bearer_token')
+    consumer_key: Optional[SecretStr] = Field(None, env='twitter_consumer_key')
+    consumer_secret: Optional[SecretStr] = Field(None, env='twitter_consumer_secret')
+    endpoint: str = Field("https://api.twitter.com/2/tweets/search/recent", env='twitter_endpoint')
     extra_headers_dict: Optional[Dict[str, Any]] = None
 
     def __init__(self, **data: Any):
@@ -49,11 +49,11 @@ class TwitterCredentials(BaseSettings):
             if self.consumer_key is None and self.consumer_secret is None:
                 raise AttributeError("consumer_key and consumer_secret required to generate bearer_token via Twitter")
 
-            self.bearer_token = TwitterCredentials.generate_bearer_token()
+            self.bearer_token = self.generate_bearer_token()
 
     def get_twitter_credentials(self):
         if self.bearer_token is None:
-            self.bearer_token = TwitterCredentials.generate_bearer_token()
+            self.bearer_token = self.generate_bearer_token()
 
         return {
             "bearer_token": self.bearer_token,
@@ -82,7 +82,6 @@ class TwitterCredentials(BaseSettings):
 
 class TwitterSourceConfig(BaseSourceConfig):
     TYPE: str = Field("Twitter", const=True)
-    twitter_config_filename: str = None
     query: str = None
     keywords: List[str] = None
     hashtags: List[str] = None
@@ -96,6 +95,7 @@ class TwitterSourceConfig(BaseSourceConfig):
     expansions: Optional[List[str]] = DEFAULT_EXPANSIONS
     place_fields: Optional[List[str]] = DEFAULT_PLACE_FIELDS
     max_tweets: int = DEFAULT_MAX_TWEETS
+    credentials: Optional[TwitterCredentials] = TwitterCredentials()
 
 
 class TwitterSource(BaseSource):
@@ -104,8 +104,6 @@ class TwitterSource(BaseSource):
     def lookup(self, config: TwitterSourceConfig) -> List[AnalyzerRequest]:
         if not config.query and not config.keywords and not config.hashtags and config.usernames:
             raise AttributeError("At least one non empty parameter required (query, keywords, hashtags, and usernames)")
-
-        search_args = load_credentials(filename=config.twitter_config_filename, env_overwrite=True)
 
         place_fields = ",".join(config.place_fields) if config.place_fields is not None else None
         user_fields = ",".join(config.user_fields) if config.user_fields is not None else None
@@ -135,7 +133,7 @@ class TwitterSource(BaseSource):
         tweets_output = collect_results(
             query=search_query,
             max_tweets=config.max_tweets,
-            result_stream_args=search_args
+            result_stream_args=config.credentials.get_twitter_credentials()
         )
 
         if not tweets_output:

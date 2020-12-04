@@ -12,7 +12,6 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 dir_path = Path(__file__).resolve().parent.parent
 source_config = TwitterSourceConfig(
-    twitter_config_filename=f'{dir_path}/config/twitter.yaml',
     keywords=[os.environ['DAILYGET_QUERY']],
     lookup_period=os.environ['DAILYGET_LOOKUP_PERIOD'],
     tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],

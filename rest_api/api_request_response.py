@@ -7,7 +7,7 @@ from obsei.sink.dailyget_sink import DailyGetSinkConfig
 from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
 from obsei.sink.http_sink import HttpSinkConfig
 from obsei.sink.jira_sink import JiraSinkConfig
-from obsei.source.twitter_source import TwitterSourceConfig
+from obsei.source.twitter_source import TwitterCredentials, TwitterSourceConfig
 from obsei.text_analyzer import AnalyzerConfig
 
 
@@ -37,7 +37,6 @@ class TaskConfig(BaseModel):
         schema_extra = {
             "example": {
                 "source_config": TwitterSourceConfig(
-                    twitter_config_filename=f'/home/user/config/twitter.yaml',
                     keywords=["machine_leanring"],
                     hashtags=["#ai"],
                     usernames=["@user1"],
@@ -50,6 +49,9 @@ class TaskConfig(BaseModel):
                     expansions=["author_id"],
                     place_fields=["country"],
                     max_tweets=10,
+                    credentials=TwitterCredentials(
+                        bearer_token="<twitter_bearer_token>"
+                    )
                 ).dict(),
                 "sink_config": DailyGetSinkConfig(
                     url="http://127.0.0.1:8080/endpoint",
