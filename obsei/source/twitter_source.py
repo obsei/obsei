@@ -95,7 +95,15 @@ class TwitterSourceConfig(BaseSourceConfig):
     expansions: Optional[List[str]] = DEFAULT_EXPANSIONS
     place_fields: Optional[List[str]] = DEFAULT_PLACE_FIELDS
     max_tweets: int = DEFAULT_MAX_TWEETS
-    credentials: Optional[TwitterCredentials] = TwitterCredentials()
+    credentials: Optional[TwitterCredentials] = None
+    credentials_dict: Dict[str, Any] = None
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        if self.credentials is None and self.credentials_dict is not None:
+            self.credentials = TwitterCredentials(**self.credentials_dict)
+        if self.credentials is None:
+            self.credentials = TwitterCredentials()
 
 
 class TwitterSource(BaseSource):

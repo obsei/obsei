@@ -111,11 +111,11 @@ def init_rate_limiter():
 
 
 def config_init() -> None:
-    initialize(config_path="../config")
-    cfg = compose("rest.yaml")
     global app_cfg
-    logger.debug("Configuration: \n" + OmegaConf.to_yaml(cfg))
-    app_cfg = cfg
+    with initialize(config_path="../config"):
+        cfg = compose("rest.yaml")
+        logger.debug("Configuration: \n" + OmegaConf.to_yaml(cfg))
+        app_cfg = cfg
 
 
 @app.on_event("startup")

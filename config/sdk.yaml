@@ -1,0 +1,49 @@
+twitter_source:
+  keywords:
+    - "@sample"
+  lookup_period: "1d"
+  tweet_fields:
+    - "author_id"
+    - "conversation_id"
+    - "created_at"
+    - "id"
+    - "public_metrics"
+    - "text"
+  user_fields:
+    - "id"
+    - "name"
+    - "public_metrics"
+    - "username"
+    - "verified"
+  expansions:
+    - "author_id"
+  place_fields: []
+  max_tweets: 10
+
+daily_get_sink:
+  url: "http://localhost:8080/sample"
+  partner_id: "123456"
+  consumer_phone_number: "1234567890"
+  source_information: "Twitter @sample"
+  base_payload:
+    partnerId: daily_get_sink.partner_id
+    consumerPhoneNumber: daily_get_sink.consumer_phone_number
+
+analyzer_config:
+  labels:
+    - "service"
+    - "delay"
+    - "tracking"
+    - "no response"
+  use_sentiment_model: true
+
+text_analyzer:
+  model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
+  initialize_model: true
+  analyzer_config_dict:
+    labels:
+      - "service"
+      - "delay"
+      - "tracking"
+      - "no response"
+    use_sentiment_model: true
