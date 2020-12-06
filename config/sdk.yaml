@@ -75,12 +75,4 @@ text_analyzer:
   _convert_: all
   model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
   initialize_model: true
-  analyzer_config:
-    _target_: obsei.text_analyzer.AnalyzerConfig
-    _convert_: all
-    labels:
-      - "service"
-      - "delay"
-      - "tracking"
-      - "no response"
-    use_sentiment_model: true
+  analyzer_config: ${analyzer_config}
