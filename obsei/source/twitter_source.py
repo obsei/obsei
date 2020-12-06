@@ -37,9 +37,9 @@ DEFAULT_OPERATORS = [
 
 
 class TwitterCredentials(BaseSettings):
-    bearer_token: Optional[SecretStr] = Field(None, env='twitter_bearer_token')
-    consumer_key: Optional[SecretStr] = Field(None, env='twitter_consumer_key')
-    consumer_secret: Optional[SecretStr] = Field(None, env='twitter_consumer_secret')
+    bearer_token: Optional[SecretStr] = None
+    consumer_key: Optional[SecretStr] = None
+    consumer_secret: Optional[SecretStr] = None
     endpoint: str = Field("https://api.twitter.com/2/tweets/search/recent", env='twitter_endpoint')
     extra_headers_dict: Optional[Dict[str, Any]] = None
 
@@ -95,15 +95,12 @@ class TwitterSourceConfig(BaseSourceConfig):
     expansions: Optional[List[str]] = DEFAULT_EXPANSIONS
     place_fields: Optional[List[str]] = DEFAULT_PLACE_FIELDS
     max_tweets: int = DEFAULT_MAX_TWEETS
-    credentials: Optional[TwitterCredentials] = None
-    credentials_dict: Dict[str, Any] = None
+    credential: Optional[TwitterCredentials] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        if self.credentials is None and self.credentials_dict is not None:
-            self.credentials = TwitterCredentials(**self.credentials_dict)
-        if self.credentials is None:
-            self.credentials = TwitterCredentials()
+        if self.credential is None:
+            self.credential = TwitterCredentials()
 
 
 class TwitterSource(BaseSource):
@@ -141,7 +138,7 @@ class TwitterSource(BaseSource):
         tweets_output = collect_results(
             query=search_query,
             max_tweets=config.max_tweets,
-            result_stream_args=config.credentials.get_twitter_credentials()
+            result_stream_args=config.credential.get_twitter_credentials()
         )
 
         if not tweets_output:

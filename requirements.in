@@ -20,4 +20,4 @@ uvicorn
 gunicorn
 uvloop
 httptools
-hydra-core
+git+https://github.com/facebookresearch/hydra.git#egg=hydra-core

@@ -53,13 +53,10 @@ class TextAnalyzer:
             model_name_or_path: str = None,
             initialize_model: bool = False,
             analyzer_config: AnalyzerConfig = None,
-            analyzer_config_dict: Dict[str, any] = None,
     ):
         self.classifier_model_name = model_name_or_path
 
-        if analyzer_config is None and analyzer_config_dict is not None:
-            analyzer_config = AnalyzerConfig(**analyzer_config_dict)
-        self.analyzer_config = analyzer_config if analyzer_config is None else AnalyzerConfig(use_sentiment_model=False)
+        self.analyzer_config = analyzer_config or AnalyzerConfig(use_sentiment_model=False)
 
         if initialize_model is True or self.classifier_model_name is not None:
             from transformers import pipeline

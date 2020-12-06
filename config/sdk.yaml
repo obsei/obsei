@@ -1,4 +1,6 @@
 twitter_source:
+  _target_: obsei.source.twitter_source.TwitterSourceConfig
+  _convert_: all
   keywords:
     - "@sample"
   lookup_period: "1d"
@@ -19,8 +21,14 @@ twitter_source:
     - "author_id"
   place_fields: []
   max_tweets: 10
+  credential:
+    _target_: obsei.source.twitter_source.TwitterCredentials
+    _convert_: all
+    bearer_token: "bearer_token"
 
 daily_get_sink:
+  _target_: obsei.sink.dailyget_sink.DailyGetSinkConfig
+  _convert_: all
   url: "http://localhost:8080/sample"
   partner_id: "123456"
   consumer_phone_number: "1234567890"
@@ -29,7 +37,32 @@ daily_get_sink:
     partnerId: daily_get_sink.partner_id
     consumerPhoneNumber: daily_get_sink.consumer_phone_number
 
+http_sink:
+  _target_: obsei.sink.http_sink.HttpSinkConfig
+  _convert_: all
+  url: "http://localhost:8080/sample"
+
+elasticsearch_sink:
+  _target_: obsei.sink.elasticsearch_sink.ElasticSearchSinkConfig
+  _convert_: all
+  host: "localhost"
+  port: 9200
+  index_name: "test"
+
+jira_sink:
+  _target_: obsei.sink.jira_sink.JiraSinkConfig
+  _convert_: all
+  url: "http://localhost:2990/jira"
+  username: "user"
+  password: "pass"
+  issue_type:
+    name: "Task"
+  project:
+    key: "CUS"
+
 analyzer_config:
+  _target_: obsei.text_analyzer.AnalyzerConfig
+  _convert_: all
   labels:
     - "service"
     - "delay"
@@ -38,9 +71,13 @@ analyzer_config:
   use_sentiment_model: true
 
 text_analyzer:
+  _target_: obsei.text_analyzer.TextAnalyzer
+  _convert_: all
   model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
   initialize_model: true
-  analyzer_config_dict:
+  analyzer_config:
+    _target_: obsei.text_analyzer.AnalyzerConfig
+    _convert_: all
     labels:
       - "service"
       - "delay"

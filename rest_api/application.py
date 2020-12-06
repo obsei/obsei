@@ -65,9 +65,9 @@ def scheduler_init():
     global scheduler
 
     try:
-        job_store = instantiate(app_cfg.task_scheduler.jobstore)
-        scheduler = instantiate(app_cfg.task_scheduler.scheduler)
-        scheduler.configure({'default': job_store})
+        #job_store = instantiate(app_cfg.task_scheduler.jobstore)
+        scheduler = instantiate(app_cfg.task_scheduler, _recursive_=True)
+        #scheduler.configure({'default': job_store})
 
         scheduler.start()
         logger.info("Created Schedule Object")
@@ -92,12 +92,12 @@ def logging_init():
 
 def init_config_store():
     global config_store
-    config_store = instantiate(app_cfg.task_config_store)
+    config_store = instantiate(app_cfg.task_config_store, _recursive_=True)
 
 
 def init_analyzer():
     global text_analyzer
-    text_analyzer = instantiate(app_cfg.analyzer)
+    text_analyzer = instantiate(app_cfg.analyzer, _recursive_=True)
 
 
 def init_processor():
@@ -107,7 +107,7 @@ def init_processor():
 
 def init_rate_limiter():
     global rate_limiter
-    rate_limiter = instantiate(app_cfg.rate_limiter)
+    rate_limiter = instantiate(app_cfg.rate_limiter, _recursive_=True)
 
 
 def config_init() -> None:

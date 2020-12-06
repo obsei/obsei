@@ -49,7 +49,7 @@ class TaskConfig(BaseModel):
                     expansions=["author_id"],
                     place_fields=["country"],
                     max_tweets=10,
-                    credentials=TwitterCredentials(
+                    credential=TwitterCredentials(
                         bearer_token="<twitter_bearer_token>"
                     )
                 ).dict(),

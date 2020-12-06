@@ -1,15 +1,19 @@
 task_config_store:
   _target_: rest_api.task_config_store.TaskConfigStore
+  _convert_: all
   url: sqlite:///../obsei.db
 
 task_scheduler:
-  scheduler:
-    _target_: apscheduler.schedulers.asyncio.AsyncIOScheduler
-  jobstore:
-    _target_: apscheduler.jobstores.memory.MemoryJobStore
+  _target_: apscheduler.schedulers.asyncio.AsyncIOScheduler
+  _convert_: all
+  jobstores:
+    default:
+      _target_: apscheduler.jobstores.memory.MemoryJobStore
+      _convert_: all
 
 analyzer:
   _target_: obsei.text_analyzer.TextAnalyzer
+  _convert_: all
   # model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers",
   # model_name_or_path: "/home/user/models/bart-large-mnli-yahoo-answers",
   model_name_or_path: '../../models/bart-large-mnli-yahoo-answers'
@@ -17,6 +21,7 @@ analyzer:
 
 rate_limiter:
   _target_: rest_api.rate_limiter.RequestLimiter
+  _convert_: all
   concurrent_request_per_worker: 2
 
 logging:

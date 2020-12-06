@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from elasticsearch.exceptions import RequestError
-from pydantic import Field
+from pydantic import Field, SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.text_analyzer import AnalyzerResponse
@@ -16,8 +16,8 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
     host: str
     port: int
     index_name: str = "es_index"
-    username: str = ""
-    password: str = ""
+    username: SecretStr = SecretStr("")
+    password: SecretStr = SecretStr("")
     scheme: str = "http"
     ca_certs: bool = False
     verify_certs: bool = True
@@ -34,7 +34,7 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
             '_es_client',
             Elasticsearch(
                 hosts=[{"host": self.host, "port": self.port}],
-                http_auth=(self.username, self.password),
+                http_auth=(self.username.get_secret_value(), self.password.get_secret_value()),
                 scheme=self.scheme,
                 ca_certs=self.ca_certs,
                 verify_certs=self.verify_certs,

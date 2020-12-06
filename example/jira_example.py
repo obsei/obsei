@@ -4,6 +4,8 @@ import os
 import sys
 from pathlib import Path
 
+from pydantic import SecretStr
+
 from obsei.sink.jira_sink import JiraSink, JiraSinkConfig
 from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig
 from obsei.text_analyzer import AnalyzerConfig, TextAnalyzer
@@ -46,8 +48,8 @@ for idx, an_response in enumerate(analyzer_response_list):
 # Start jira server locally `atlas-run-standalone --product jira`
 jira_sink_config = JiraSinkConfig(
     url="http://localhost:2990/jira",
-    username="user",
-    password="pass",
+    username=SecretStr("user"),
+    password=SecretStr("pass"),
     issue_type={"name": "Task"},
     project={"key": "CUS"},
 )
