@@ -65,9 +65,7 @@ def scheduler_init():
     global scheduler
 
     try:
-        #job_store = instantiate(app_cfg.task_scheduler.jobstore)
         scheduler = instantiate(app_cfg.task_scheduler, _recursive_=True)
-        #scheduler.configure({'default': job_store})
 
         scheduler.start()
         logger.info("Created Schedule Object")
@@ -80,8 +78,6 @@ def scheduler_init():
 def logging_init():
     logging.basicConfig(**app_cfg.logging.base_config)
 
-    # logging.getLogger("obsei").setLevel(app_cfg.logging.base_config.level)
-    # logging.getLogger("uvicorn").setLevel(app_cfg.logging.base_config.level)
     logging.root.setLevel(app_cfg.logging.base_config.level)
     logging.root.propagate = True
 
