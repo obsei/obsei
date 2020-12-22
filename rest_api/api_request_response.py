@@ -88,6 +88,7 @@ class TaskDetail(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+        response_model_exclude_unset = True
 
 
 class TaskAddResponse(BaseModel):

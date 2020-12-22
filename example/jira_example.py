@@ -1,6 +1,5 @@
 # Jira Sink
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -15,8 +14,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 dir_path = Path(__file__).resolve().parent.parent
 source_config = TwitterSourceConfig(
-    keywords=[os.environ['DAILYGET_QUERY']],
-    lookup_period=os.environ['DAILYGET_LOOKUP_PERIOD'],
+    keywords=["text-classification"],
+    lookup_period="15m",
     tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],
     user_fields=["id", "name", "public_metrics", "username", "verified"],
     expansions=["author_id"],
@@ -25,6 +24,17 @@ source_config = TwitterSourceConfig(
 )
 
 source = TwitterSource()
+
+# Start jira server locally `atlas-run-standalone --product jira`
+jira_sink_config = JiraSinkConfig(
+    url="http://localhost:2990/jira",
+    username=SecretStr("user"),
+    password=SecretStr("pass"),
+    issue_type={"name": "Task"},
+    project={"key": "CUS"},
+)
+jira_sink = JiraSink()
+
 text_analyzer = TextAnalyzer(
     model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
  #   model_name_or_path="joeddav/xlm-roberta-large-xnli",
@@ -45,15 +55,6 @@ analyzer_response_list = text_analyzer.analyze_input(
 for idx, an_response in enumerate(analyzer_response_list):
     logger.info(f"analyzer_response#'{idx}'='{an_response.__dict__}'")
 
-# Start jira server locally `atlas-run-standalone --product jira`
-jira_sink_config = JiraSinkConfig(
-    url="http://localhost:2990/jira",
-    username=SecretStr("user"),
-    password=SecretStr("pass"),
-    issue_type={"name": "Task"},
-    project={"key": "CUS"},
-)
-jira_sink = JiraSink()
 sink_response_list = jira_sink.send_data(analyzer_response_list, jira_sink_config)
 for sink_response in sink_response_list:
     if sink_response is not None:

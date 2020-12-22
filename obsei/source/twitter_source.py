@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseSettings, Field
 from pydantic.types import SecretStr
-from searchtweets import collect_results, gen_request_parameters, load_credentials
+from searchtweets import collect_results, gen_request_parameters
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.text_analyzer import AnalyzerRequest
@@ -37,9 +37,9 @@ DEFAULT_OPERATORS = [
 
 
 class TwitterCredentials(BaseSettings):
-    bearer_token: Optional[SecretStr] = None
-    consumer_key: Optional[SecretStr] = None
-    consumer_secret: Optional[SecretStr] = None
+    bearer_token: Optional[SecretStr] = Field(None, env='twitter_bearer_token')
+    consumer_key: Optional[SecretStr] = Field(None, env='twitter_consumer_key')
+    consumer_secret: Optional[SecretStr] = Field(None, env='twitter_consumer_secret')
     endpoint: str = Field("https://api.twitter.com/2/tweets/search/recent", env='twitter_endpoint')
     extra_headers_dict: Optional[Dict[str, Any]] = None
 
@@ -79,22 +79,25 @@ class TwitterCredentials(BaseSettings):
 
         return resp.json()['access_token']
 
+    class Config:
+        arbitrary_types_allowed = True
+
 
 class TwitterSourceConfig(BaseSourceConfig):
     TYPE: str = Field("Twitter", const=True)
-    query: str = None
-    keywords: List[str] = None
-    hashtags: List[str] = None
-    usernames: List[str] = None
-    operators: Optional[List[str]] = DEFAULT_OPERATORS
+    query: Optional[str] = None
+    keywords: Optional[List[str]] = None
+    hashtags: Optional[List[str]] = None
+    usernames: Optional[List[str]] = None
+    operators: Optional[List[str]] = Field(DEFAULT_OPERATORS)
     since_id: Optional[int] = None
     until_id: Optional[int] = None
     lookup_period: str = None
-    tweet_fields: Optional[List[str]] = DEFAULT_TWEET_FIELDS
-    user_fields: Optional[List[str]] = DEFAULT_USER_FIELDS
-    expansions: Optional[List[str]] = DEFAULT_EXPANSIONS
-    place_fields: Optional[List[str]] = DEFAULT_PLACE_FIELDS
-    max_tweets: int = DEFAULT_MAX_TWEETS
+    tweet_fields: Optional[List[str]] = Field(DEFAULT_TWEET_FIELDS)
+    user_fields: Optional[List[str]] = Field(DEFAULT_USER_FIELDS)
+    expansions: Optional[List[str]] = Field(DEFAULT_EXPANSIONS)
+    place_fields: Optional[List[str]] = Field(DEFAULT_PLACE_FIELDS)
+    max_tweets: Optional[int] = DEFAULT_MAX_TWEETS
     credential: Optional[TwitterCredentials] = None
 
     def __init__(self, **data: Any):
