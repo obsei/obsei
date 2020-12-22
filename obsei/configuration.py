@@ -1,7 +1,9 @@
+import logging
 from typing import Any
 
 from hydra.experimental import compose, initialize
 from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 from pydantic import BaseSettings, Field, constr
 
 from obsei.sink.dailyget_sink import DailyGetSinkConfig
@@ -9,7 +11,9 @@ from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
 from obsei.sink.http_sink import HttpSinkConfig
 from obsei.sink.jira_sink import JiraSinkConfig
 from obsei.source.twitter_source import TwitterSourceConfig
-from obsei.text_analyzer import AnalyzerConfig, TextAnalyzer
+from obsei.analyzer.text_analyzer import AnalyzerConfig, TextAnalyzer
+
+logger = logging.getLogger(__name__)
 
 
 class ObseiConfiguration(BaseSettings):
@@ -25,6 +29,7 @@ class ObseiConfiguration(BaseSettings):
                 'configuration',
                 compose(self.config_filename)
             )
+            logger.debug("Configuration: \n" + OmegaConf.to_yaml(self.configuration))
 
     def initialize_instance(self, key_name: str = None):
         return instantiate(self.configuration[key_name], _recursive_=True)
@@ -49,3 +54,6 @@ class ObseiConfiguration(BaseSettings):
 
     def get_analyzer_config(self, key_name: str = "analyzer_config") -> AnalyzerConfig:
         return self.initialize_instance(key_name)
+
+    def get_logging_config(self, key_name: str = "logging") -> DictConfig:
+        return self.configuration[key_name]

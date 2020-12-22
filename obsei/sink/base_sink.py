@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import Field
 from pydantic.main import BaseModel
 
-from obsei.text_analyzer import AnalyzerResponse
+from obsei.analyzer.text_analyzer import AnalyzerResponse
 
 
 class Convertor(BaseModel):

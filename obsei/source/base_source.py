@@ -4,7 +4,7 @@ from typing import List
 from pydantic import Field
 from pydantic.main import BaseModel
 
-from obsei.text_analyzer import AnalyzerRequest
+from obsei.analyzer.text_analyzer import AnalyzerRequest
 
 
 class BaseSourceConfig(BaseModel):

@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import Field, SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from obsei.text_analyzer import AnalyzerResponse
+from obsei.analyzer.text_analyzer import AnalyzerResponse
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ from pydantic import Field
 
 from obsei.sink.base_sink import Convertor
 from obsei.sink.http_sink import HttpSink, HttpSinkConfig
-from obsei.text_analyzer import AnalyzerResponse
+from obsei.analyzer.text_analyzer import AnalyzerResponse
 from obsei.utils import flatten_dict
 
 logger = logging.getLogger(__name__)

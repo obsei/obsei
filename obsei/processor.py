@@ -3,7 +3,7 @@ from typing import Optional
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig
 from obsei.source.base_source import BaseSource, BaseSourceConfig
-from obsei.text_analyzer import AnalyzerConfig, TextAnalyzer
+from obsei.analyzer.text_analyzer import AnalyzerConfig, TextAnalyzer
 
 logger = logging.getLogger(__name__)
 

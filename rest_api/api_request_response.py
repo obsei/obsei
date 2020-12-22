@@ -8,7 +8,7 @@ from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
 from obsei.sink.http_sink import HttpSinkConfig
 from obsei.sink.jira_sink import JiraSinkConfig
 from obsei.source.twitter_source import TwitterCredentials, TwitterSourceConfig
-from obsei.text_analyzer import AnalyzerConfig
+from obsei.analyzer.text_analyzer import AnalyzerConfig
 
 
 class ClassifierRequest(BaseModel):

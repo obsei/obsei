@@ -6,7 +6,7 @@ import requests
 from pydantic import Field
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from obsei.text_analyzer import AnalyzerResponse
+from obsei.analyzer.text_analyzer import AnalyzerResponse
 
 logger = logging.getLogger(__name__)
 

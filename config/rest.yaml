@@ -11,8 +11,8 @@ task_scheduler:
       _target_: apscheduler.jobstores.memory.MemoryJobStore
       _convert_: all
 
-analyzer:
-  _target_: obsei.text_analyzer.TextAnalyzer
+text_analyzer:
+  _target_: obsei.analyzer.text_analyzer.TextAnalyzer
   _convert_: all
   # model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers",
   # model_name_or_path: "/home/user/models/bart-large-mnli-yahoo-answers",

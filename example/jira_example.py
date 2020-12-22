@@ -7,7 +7,7 @@ from pydantic import SecretStr
 
 from obsei.sink.jira_sink import JiraSink, JiraSinkConfig
 from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig
-from obsei.text_analyzer import AnalyzerConfig, TextAnalyzer
+from obsei.analyzer.text_analyzer import AnalyzerConfig, TextAnalyzer
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)

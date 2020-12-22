@@ -1,16 +1,15 @@
 import logging
+import os
 from typing import List
 from uuid import uuid4
 
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.base import BaseScheduler
 from fastapi import HTTPException
-from hydra.experimental import compose, initialize
-from hydra.utils import instantiate
-from omegaconf import DictConfig, OmegaConf
 
+from obsei.configuration import ObseiConfiguration
 from obsei.processor import Processor
-from obsei.text_analyzer import AnalyzerRequest, TextAnalyzer
+from obsei.analyzer.text_analyzer import AnalyzerRequest, TextAnalyzer
 from rest_api.api_request_response import ScheduleResponse, TaskAddResponse, TaskConfig, ClassifierRequest, \
     ClassifierResponse, TaskDetail
 from rest_api.global_utils import get_application, sink_map, source_map
@@ -19,8 +18,9 @@ from rest_api.task_config_store import TaskConfigStore
 
 logger = logging.getLogger(__name__)
 
+obsei_config: ObseiConfiguration
+
 config_store: TaskConfigStore
-app_cfg: DictConfig
 scheduler: BaseScheduler
 text_analyzer: TextAnalyzer
 processor: Processor
@@ -65,7 +65,7 @@ def scheduler_init():
     global scheduler
 
     try:
-        scheduler = instantiate(app_cfg.task_scheduler, _recursive_=True)
+        scheduler = obsei_config.initialize_instance("task_scheduler")
 
         scheduler.start()
         logger.info("Created Schedule Object")
@@ -76,24 +76,26 @@ def scheduler_init():
 
 
 def logging_init():
-    logging.basicConfig(**app_cfg.logging.base_config)
+    log_config = obsei_config.get_logging_config()
 
-    logging.root.setLevel(app_cfg.logging.base_config.level)
+    logging.basicConfig(**log_config.base_config)
+
+    logging.root.setLevel(log_config.base_config.level)
     logging.root.propagate = True
 
     gunicorn_logger = logging.getLogger('gunicorn.error')
-    gunicorn_logger.setLevel(app_cfg.logging.base_config.level)
+    gunicorn_logger.setLevel(log_config.base_config.level)
     gunicorn_logger.propagate = True
 
 
 def init_config_store():
     global config_store
-    config_store = instantiate(app_cfg.task_config_store, _recursive_=True)
+    config_store = obsei_config.initialize_instance("task_config_store")
 
 
 def init_analyzer():
     global text_analyzer
-    text_analyzer = instantiate(app_cfg.analyzer, _recursive_=True)
+    text_analyzer = obsei_config.initialize_instance("analyzer")
 
 
 def init_processor():
@@ -103,15 +105,15 @@ def init_processor():
 
 def init_rate_limiter():
     global rate_limiter
-    rate_limiter = instantiate(app_cfg.rate_limiter, _recursive_=True)
+    rate_limiter = obsei_config.initialize_instance("rate_limiter")
 
 
 def config_init() -> None:
-    global app_cfg
-    with initialize(config_path="../config"):
-        cfg = compose("rest.yaml")
-        logger.debug("Configuration: \n" + OmegaConf.to_yaml(cfg))
-        app_cfg = cfg
+    global obsei_config
+    obsei_config = ObseiConfiguration(
+        config_path=os.getenv('OBSEI_CONFIG_PATH', "../config"),
+        config_filename=os.getenv('OBSEI_CONFIG_FILENAME', "rest.yaml")
+    )
 
 
 @app.on_event("startup")

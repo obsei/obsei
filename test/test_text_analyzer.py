@@ -1,4 +1,4 @@
-from obsei.text_analyzer import AnalyzerConfig, AnalyzerRequest
+from obsei.analyzer.text_analyzer import AnalyzerConfig, AnalyzerRequest
 
 GOOD_TEXT = '''If anyone is interested... these are our hosts. I can’t recommend them enough, Abc & Pbc.
 

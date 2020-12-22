@@ -1,6 +1,6 @@
 import pytest
 
-from obsei.text_analyzer import TextAnalyzer
+from obsei.analyzer.text_analyzer import TextAnalyzer
 
 
 @pytest.fixture(scope="session")

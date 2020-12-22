@@ -61,7 +61,7 @@ jira_sink:
     key: "CUS"
 
 analyzer_config:
-  _target_: obsei.text_analyzer.AnalyzerConfig
+  _target_: obsei.analyzer.text_analyzer.AnalyzerConfig
   _convert_: all
   labels:
     - "service"
@@ -71,7 +71,7 @@ analyzer_config:
   use_sentiment_model: true
 
 text_analyzer:
-  _target_: obsei.text_analyzer.TextAnalyzer
+  _target_: obsei.analyzer.text_analyzer.TextAnalyzer
   _convert_: all
   model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
   initialize_model: true
