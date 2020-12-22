@@ -18,18 +18,18 @@
 </p>
 
 Obsei is intended to be an automation workflow tool to -
- - `OBserve`, Platforms like Twitter, Facebook, App Stores, Google reviews, Amazon reviews and,
- - `SEgment`, them using AI-based text classification and sentiment analysis and,
- - `Inform`, to customer centric ticketing system, data store or other places for action.
+ - **OBserve**, Platforms like Twitter, Facebook, App Stores, Google reviews, Amazon reviews and,
+ - **SEgment**, them using AI-based text classification and sentiment analysis and,
+ - **Inform**, to customer centric ticketing system, data store or other places for action.
 
 ## Installation
 
-### As SDK
+### Use as SDK
 You use `obsei` as SDK to further extend/customize it for your own use case as follows -
 
-Install via PyPi:
+~~Install via PyPi:~~
 
-    pip install obsei
+~~pip install obsei~~
 
 Install from master branch (if you wanna try the latest features):
 
@@ -40,16 +40,16 @@ Install from master branch (if you wanna try the latest features):
 To update your installation, just do a `git pull`. The `--editable` flag
 will update changes immediately.
 
-### As API interface
+### Use as API interface
 You can use `obsei` restful interface to directly run and customize via it's rest interface as follows -
 
-Start docker with default configuration file:
+~~Start docker with default configuration file:~~
 
-    docker run -d --name obesi -p 9898:9898 lalitpagaria/obsei:latest
+~~docker run -d --name obesi -p 9898:9898 lalitpagaria/obsei:latest~~
 
-Start docker with custom configuration file (Assuming you have configfile `config.yaml` at `/home/user/obsei/config` at host machine):
+~~Start docker with custom configuration file (Assuming you have configfile `config.yaml` at `/home/user/obsei/config` at host machine):~~
 
-    docker run -d --name obesi -v "/home/user/obsei/config:/home/user/config" -e "OBSEI_CONFIG_PATH=/home/user/config" -e "OBSEI_CONFIG_FILENAME=config.yaml" -p 9898:9898 lalitpagaria/obsei:latest
+~~docker run -d --name obesi -v "/home/user/obsei/config:/home/user/config" -e "OBSEI_CONFIG_PATH=/home/user/config" -e "OBSEI_CONFIG_FILENAME=config.yaml" -p 9898:9898 lalitpagaria/obsei:latest~~
 
 Start docker locally with custom code:
 
@@ -65,10 +65,10 @@ Following environment variables can useful to customization purpose -
 
 ## Components
 
-- **Source**: 
-- **Analyzer**: 
-- **Sink**: 
-- **Processor**: 
+- **Source**
+- **Analyzer**
+- **Sink**
+- **Processor**
 
 ## Examples
 Please refer [example](https://github.com/lalitpagaria/obsei/tree/master/example) folder for various examples to use obsei for various use case.
