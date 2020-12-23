@@ -87,7 +87,7 @@ Obsei use cases are following, but not limited to -
 
 - **Source**: Twitter (Facebook, Instagram, Google reviews, Amazon reviews, App Store reviews, Slack, Microsoft Team, Chatbots etc in future)
 - **Analyzer**: Sentiment and Text classification (QA, Natural Search, FAQ, Summarization etc in future)
-- **Sink**: API, ElasticSearch, and Jira (Salesforce, Zendesk, Hubspot, Slack, Microsoft Team, etc in future)
+- **Sink**: API, ElasticSearch, DailyGet, and Jira (Salesforce, Zendesk, Hubspot, Slack, Microsoft Team, etc in future)
 - **Processor**: Simple integration between Source, Analyser and Sink (Rich workflows using rule engine)
 
 ## Examples
