@@ -6,11 +6,20 @@
     <a href="https://github.com/lalitpagaria/obsei/actions">
         <img alt="CI" src="https://github.com/lalitpagaria/obsei/workflows/CI/badge.svg?branch=master">
     </a>
+    <a href="https://github.com/lalitpagaria/obsei/blob/master/LICENSE">
+        <img alt="License" src="https://img.shields.io/github/license/lalitpagaria/obsei?color=blue">
+    </a>
     <a href="https://github.com/lalitpagaria/obsei/releases">
         <img alt="Release" src="https://img.shields.io/github/v/release/lalitpagaria/obsei?include_prereleases">
     </a>
-    <a href="https://github.com/lalitpagaria/obsei/blob/master/LICENSE">
-        <img alt="License" src="https://img.shields.io/github/license/lalitpagaria/obsei?color=blue">
+    <a href="https://pypi.org/project/obsei/">
+        <img src="https://img.shields.io/pypi/v/obsei" alt="PyPI" />
+    </a>
+    <a href="#">
+        <img src="https://img.shields.io/pypi/lalitpagaria/obsei" alt="PyPI - Python Version" />
+    </a>
+    <a href="https://pepy.tech/project/obsei?versions=0.0.*">
+        <img src="https://pepy.tech/badge/obsei/month" alt="Downloads" />
     </a>
     <a href="https://github.com/lalitpagaria/obsei/commits/master">
         <img alt="Last commit" src="https://img.shields.io/github/last-commit/lalitpagaria/obsei">
