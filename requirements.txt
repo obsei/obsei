@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements.in
 #
+--find-links=https://download.pytorch.org/whl/torch_stable.html
+
 antlr4-python3-runtime==4.8  # via hydra-core
 apscheduler==3.6.3        # via -r requirements.in
 atlassian-python-api==2.2.0  # via -r requirements.in
