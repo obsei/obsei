@@ -21,6 +21,9 @@
     <a href="https://pepy.tech/project/obsei?versions=0.0.*">
         <img src="https://pepy.tech/badge/obsei/month" alt="Downloads" />
     </a>
+    <a href="#">
+        <img src="https://img.shields.io/docker/pulls/lalitpagaria/obsei" alt="Docker Pulls" />
+    </a>
     <a href="https://github.com/lalitpagaria/obsei/commits/master">
         <img alt="Last commit" src="https://img.shields.io/github/last-commit/lalitpagaria/obsei">
     </a>
@@ -36,9 +39,9 @@ Obsei is intended to be a workflow automation tool for text segmentation need. O
 ### Use as SDK
 You use `obsei` as SDK to further extend/customize it for your own use case as follows -
 
-~~Install via PyPi:~~
+Install via PyPi:
 
-~~pip install obsei~~
+    pip install obsei
 
 Install from master branch (if you wanna try the latest features):
 
@@ -50,7 +53,7 @@ To update your installation, just do a `git pull`. The `--editable` flag
 will update changes immediately.
 
 ### Use as API interface
-You can use `obsei` restful interface to directly run and customize via it's rest interface as follows -
+You can use `obsei` restful interface to directly run and customize via it's rest interface.
 
 Start docker with default configuration file:
 
