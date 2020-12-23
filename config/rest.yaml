@@ -1,7 +1,7 @@
 task_config_store:
   _target_: rest_api.task_config_store.TaskConfigStore
   _convert_: all
-  url: sqlite:///../obsei.db
+  url: sqlite:///obsei.db
 
 task_scheduler:
   _target_: apscheduler.schedulers.asyncio.AsyncIOScheduler
@@ -16,8 +16,8 @@ text_analyzer:
   _convert_: all
   # model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers",
   # model_name_or_path: "/home/user/models/bart-large-mnli-yahoo-answers",
-  model_name_or_path: '../../models/bart-large-mnli-yahoo-answers'
-  initialize_model: true
+  # model_name_or_path: '../../models/bart-large-mnli-yahoo-answers'
+  initialize_model: false
 
 rate_limiter:
   _target_: rest_api.rate_limiter.RequestLimiter

@@ -95,7 +95,7 @@ def init_config_store():
 
 def init_analyzer():
     global text_analyzer
-    text_analyzer = obsei_config.initialize_instance("analyzer")
+    text_analyzer = obsei_config.initialize_instance("text_analyzer")
 
 
 def init_processor():

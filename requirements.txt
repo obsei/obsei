@@ -4,8 +4,6 @@
 #
 #    pip-compile requirements.in
 #
---find-links=https://download.pytorch.org/whl/torch_stable.html
-
 antlr4-python3-runtime==4.8  # via hydra-core
 apscheduler==3.6.3        # via -r requirements.in
 atlassian-python-api==2.2.0  # via -r requirements.in
@@ -22,7 +20,7 @@ h11==0.11.0               # via uvicorn
 httptools==0.1.1          # via -r requirements.in
 git+https://github.com/facebookresearch/hydra.git#egg=hydra-core  # via -r requirements.in
 idna==2.10                # via requests
-importlib-resources==3.3.0  # via hydra-core
+importlib-resources==3.3.1  # via hydra-core
 itsdangerous==1.1.0       # via flask
 jinja2==2.11.2            # via flask
 joblib==1.0.0             # via sacremoses
