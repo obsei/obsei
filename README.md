@@ -7,13 +7,13 @@
     <a href="https://github.com/lalitpagaria/obsei/blob/master/LICENSE">
         <img alt="License" src="https://img.shields.io/github/license/lalitpagaria/obsei?color=blue">
     </a>
-    <a href="https://github.com/lalitpagaria/obsei/releases">
-        <img alt="Release" src="https://img.shields.io/github/v/release/lalitpagaria/obsei?include_prereleases">
-    </a>
     <a href="#">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
     </a>
-    <a href="https://pepy.tech/project/obsei?versions=0.0.*">
+    <a href="#">
+        <img alt="Release" src="https://img.shields.io/pypi/v/obsei">
+    </a>
+    <a href="#">
         <img src="https://img.shields.io/pypi/dm/obsei" alt="Downloads" />
     </a>
     <a href="#">
