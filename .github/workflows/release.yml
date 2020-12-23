@@ -38,5 +38,5 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: my-docker-hub-namespace/my-docker-hub-repository
+        repository: lalitpagaria/obsei
         tag_with_ref: true
