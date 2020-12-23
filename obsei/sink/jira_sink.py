@@ -4,7 +4,7 @@ import textwrap
 from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
-from pydantic import Field, SecretStr
+from pydantic import SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.analyzer.text_analyzer import AnalyzerResponse
@@ -29,7 +29,7 @@ class JiraPayloadConvertor(Convertor):
 
 
 class JiraSinkConfig(BaseSinkConfig):
-    TYPE: str = Field("Jira", const=True)
+    TYPE: str = "Jira"
     url: str
     username: SecretStr
     password: SecretStr

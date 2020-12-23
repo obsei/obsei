@@ -87,7 +87,7 @@ class TwitterCredentials(BaseSettings):
 
 
 class TwitterSourceConfig(BaseSourceConfig):
-    TYPE: str = Field("Twitter", const=True)
+    TYPE: str = "Twitter"
     query: Optional[str] = None
     keywords: Optional[List[str]] = None
     hashtags: Optional[List[str]] = None
@@ -110,7 +110,7 @@ class TwitterSourceConfig(BaseSourceConfig):
 
 
 class TwitterSource(BaseSource):
-    NAME: str = Field("Twitter", const=True)
+    NAME: str = "Twitter"
 
     def lookup(self, config: TwitterSourceConfig) -> List[AnalyzerRequest]:
         if not config.query and not config.keywords and not config.hashtags and config.usernames:
@@ -176,7 +176,7 @@ class TwitterSource(BaseSource):
             if "author_id" in tweet and tweet["author_id"] in user_map:
                 tweet["author_info"] = user_map.get(tweet["author_id"])
 
-            source_responses.append(self.get_source_output(tweet))
+            source_responses.append(self._get_source_output(tweet))
 
         return source_responses
 
@@ -219,7 +219,7 @@ class TwitterSource(BaseSource):
 
         return or_query_str + and_query_str
 
-    def get_source_output(self, tweet: Dict[str, Any]):
+    def _get_source_output(self, tweet: Dict[str, Any]):
         tweet_url = TwitterSource.get_tweet_url(tweet["text"])
         processed_text = TwitterSource.clean_tweet_text(tweet["text"])
 

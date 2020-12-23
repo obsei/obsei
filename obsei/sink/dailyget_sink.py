@@ -6,7 +6,6 @@ from typing import Any, Dict, List, Optional
 import pytz
 import requests
 from dateutil import parser
-from pydantic import Field
 
 from obsei.sink.base_sink import Convertor
 from obsei.sink.http_sink import HttpSink, HttpSinkConfig
@@ -96,7 +95,7 @@ class PayloadConvertor(Convertor):
 
 
 class DailyGetSinkConfig(HttpSinkConfig):
-    TYPE: str = Field("DailyGet", const=True)
+    TYPE: str = "DailyGet"
     partner_id: str
     consumer_phone_number: str
     source_information: str

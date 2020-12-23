@@ -12,7 +12,7 @@ from obsei.analyzer.text_analyzer import AnalyzerResponse
 
 class ElasticSearchSinkConfig(BaseSinkConfig):
     __slots__ = ('_es_client',)
-    TYPE: str = Field("Elasticsearch", const=True)
+    TYPE: str = "Elasticsearch"
     host: str
     port: int
     index_name: str = "es_index"
