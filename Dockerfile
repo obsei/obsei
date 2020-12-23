@@ -3,6 +3,13 @@ FROM python:3.8-slim-buster
 RUN useradd --create-home user
 WORKDIR /home/user
 
+# env variable
+ENV OBSEI_NUM_OF_WORKERS 1
+ENV OBSEI_WORKER_TIMEOUT 180
+ENV OBSEI_SERVER_PORT 9898
+ENV OBSEI_WORKER_TYPE uvicorn.workers.UvicornWorker
+
+# Hack to install jre on debian
 RUN mkdir -p /usr/share/man/man1
 
 # install few required tools
@@ -15,26 +22,20 @@ COPY setup.py requirements.txt README.md /home/user/
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-
-# env variable
-ENV OBSEI_NUM_OF_WORKERS 1
-ENV OBSEI_WORKER_TIMEOUT 180
-ENV OBSEI_SERVER_PORT 9898
-ENV OBSEI_WORKER_TYPE uvicorn.workers.UvicornWorker
-
 # copy README and config
 COPY README.md /home/user/
+# hack to fix CI builds
+RUN true
 COPY config /home/user/config
-
-# copy downloaded model
-# COPY models /home/user/models
+# hack to fix CI builds
+RUN true
+# Copy REST API code
+COPY rest_api /home/user/rest_api
 
 # copy code
 COPY obsei /home/user/obsei
 RUN pip install -e .
 
-# Copy REST API code
-COPY rest_api /home/user/rest_api
 
 USER user
 

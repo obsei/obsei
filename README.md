@@ -11,10 +11,10 @@
         <img alt="Release" src="https://img.shields.io/github/v/release/lalitpagaria/obsei?include_prereleases">
     </a>
     <a href="#">
-        <img src="https://img.shields.io/pypi/lalitpagaria/obsei" alt="PyPI - Python Version" />
+        <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
     </a>
     <a href="https://pepy.tech/project/obsei?versions=0.0.*">
-        <img src="https://pepy.tech/badge/obsei/month" alt="Downloads" />
+        <img src="https://img.shields.io/pypi/dm/obsei" alt="Downloads" />
     </a>
     <a href="#">
         <img src="https://img.shields.io/docker/pulls/lalitpagaria/obsei" alt="Docker Pulls" />
