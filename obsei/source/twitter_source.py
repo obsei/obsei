@@ -49,14 +49,14 @@ class TwitterCredentials(BaseSettings):
             if self.consumer_key is None and self.consumer_secret is None:
                 raise AttributeError("consumer_key and consumer_secret required to generate bearer_token via Twitter")
 
-            self.bearer_token = self.generate_bearer_token()
+            self.bearer_token = SecretStr(self.generate_bearer_token())
 
     def get_twitter_credentials(self):
         if self.bearer_token is None:
             self.bearer_token = self.generate_bearer_token()
 
         return {
-            "bearer_token": self.bearer_token,
+            "bearer_token": self.bearer_token.get_secret_value(),
             "endpoint": self.endpoint,
             "extra_headers_dict": self.extra_headers_dict,
         }
@@ -70,7 +70,10 @@ class TwitterCredentials(BaseSettings):
         resp = requests.post(
             TWITTER_OAUTH_ENDPOINT,
             data=data,
-            auth=(self.consumer_key, self.consumer_secret)
+            auth=(
+                self.consumer_key.get_secret_value(),
+                self.consumer_secret.get_secret_value()
+            )
         )
         logger.warning("Grabbing bearer token from OAUTH")
         if resp.status_code >= 400:
