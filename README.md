@@ -29,6 +29,19 @@
  - **SEgmenter**, which perform text classification and sentiment analysis and feed that information to,
  - **Informer**, which send it to ticketing system, data store or other places for further action and analysis.
 
+Current flow -
+<p align="center">
+    <br>
+    <img src="https://github.com/lalitpagaria/obsei/blob/master/images/Obsei-flow-diagram.png?raw=true" />
+    <br>
+<p>
+Future concept (Coming Soon! :smiley)
+<p align="center">
+    <br>
+    <img src="https://github.com/lalitpagaria/obsei/blob/master/images/Obsei-future-concept.png?raw=true" />
+    <br>
+<p>
+
 ## Installation
 
 ### To use as SDK
@@ -77,13 +90,13 @@ Following environment variables are useful to customize various parameters -
 
 ## Components and Integrations
 
-- **Source**: Twitter (Facebook, Instagram, Google reviews, Amazon reviews, App Store reviews, Slack, Microsoft Team, Chat-bots etc planned in future)
-- **Analyzer**: Sentiment and Text classification (QA, Natural Search, FAQ, Summarization etc planned in future)
-- **Sink**: HTTP API, ElasticSearch, DailyGet, and Jira (Salesforce, Zendesk, Hubspot, Slack, Microsoft Team, etc planned in future)
-- **Processor**: Simple integration between Source, Analyser and Sink (Rich workflows using rule engine planned in future)
+- **Source/Observer**: Twitter (Facebook, Instagram, Google reviews, Amazon reviews, App Store reviews, Slack, Microsoft Team, Chat-bots etc planned in future)
+- **Analyzer/Segmenter**: Sentiment and Text classification (QA, Natural Search, FAQ, Summarization etc planned in future)
+- **Sink/Informer**: HTTP API, ElasticSearch, DailyGet, and Jira (Salesforce, Zendesk, Hubspot, Slack, Microsoft Team, etc planned in future)
+- **Processor/WorkflowEngine**: Simple integration between Source, Analyser and Sink (Rich workflows using rule engine planned in future)
 
 ## Examples
-Refer [example](https://github.com/lalitpagaria/obsei/tree/master/example) folder for `obsei` usage examples.
+Refer [example](https://github.com/lalitpagaria/obsei/tree/master/example) and [config](https://github.com/lalitpagaria/obsei/tree/master/config) folders for `obsei` usage and configurations.
 
 ## Attribution
 This could not have been possible without following open source software -
@@ -98,6 +111,10 @@ This could not have been possible without following open source software -
 - [pydantic](https://github.com/samuelcolvin/pydantic): For data validation
 - [fastapi](https://fastapi.tiangolo.com/) & [gunicorn](https://gunicorn.org/): For HTTP server and API interface
 
+## Contribution
+Currently, we are not accepting any pull requests. All PRs will be closed. If you want a feature or something doesn't work, please create an issue.
+
+
 ## Citing Obsei
 If you use `obsei` in your research please use the following BibTeX entry:
 ```text
@@ -109,3 +126,8 @@ If you use `obsei` in your research please use the following BibTeX entry:
   url =          {https://github.com/lalitpagaria/obsei}
 }
 ```
+
+## Acknowledgement
+
+We would like to thank [DailyGet](https://dailyget.in/) for continuous support and encouragement.
+Please check [DailyGet](https://dailyget.in/) out. it is a platform which can easily be configured to solve any business process automation requirements.
