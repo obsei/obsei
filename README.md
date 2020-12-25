@@ -35,7 +35,7 @@ Current flow -
     <img src="https://github.com/lalitpagaria/obsei/blob/master/images/Obsei-flow-diagram.png?raw=true" />
     <br>
 <p>
-Future concept (Coming Soon! :smiley)
+Future concept (Coming Soon! :slightly_smiling_face:)
 <p align="center">
     <br>
     <img src="https://github.com/lalitpagaria/obsei/blob/master/images/Obsei-future-concept.png?raw=true" />
