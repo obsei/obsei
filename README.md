@@ -75,7 +75,7 @@ Following environment variables are useful to customize various parameters -
 - Extraction of deeper insight from feedbacks on various platforms
 - Research purpose
 
-## Components
+## Components and Integrations
 
 - **Source**: Twitter (Facebook, Instagram, Google reviews, Amazon reviews, App Store reviews, Slack, Microsoft Team, Chat-bots etc planned in future)
 - **Analyzer**: Sentiment and Text classification (QA, Natural Search, FAQ, Summarization etc planned in future)
