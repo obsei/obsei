@@ -25,7 +25,7 @@ source_config = TwitterSourceConfig(
 
 source = TwitterSource()
 
-# Start jira server locally `atlas-run-standalone --product jira`
+# To start jira server locally `atlas-run-standalone --product jira`
 jira_sink_config = JiraSinkConfig(
     url="http://localhost:2990/jira",
     username=SecretStr("user"),

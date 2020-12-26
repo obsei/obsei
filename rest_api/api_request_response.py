@@ -7,6 +7,7 @@ from obsei.sink.dailyget_sink import DailyGetSinkConfig
 from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
 from obsei.sink.http_sink import HttpSinkConfig
 from obsei.sink.jira_sink import JiraSinkConfig
+from obsei.source.playstore_reviews import PlayStoreConfig
 from obsei.source.twitter_source import TwitterCredentials, TwitterSourceConfig
 from obsei.analyzer.text_analyzer import AnalyzerConfig
 
@@ -24,7 +25,7 @@ class ClassifierResponse(BaseModel):
 
 
 class TaskConfig(BaseModel):
-    source_config: Union[TwitterSourceConfig]
+    source_config: Union[TwitterSourceConfig, PlayStoreConfig]
     sink_config: Union[HttpSinkConfig, JiraSinkConfig, ElasticSearchSinkConfig, DailyGetSinkConfig]
     analyzer_config: AnalyzerConfig = AnalyzerConfig(use_sentiment_model=False)
     time_in_seconds: int
@@ -37,7 +38,7 @@ class TaskConfig(BaseModel):
         schema_extra = {
             "example": {
                 "source_config": TwitterSourceConfig(
-                    keywords=["machine_leanring"],
+                    keywords=["machine_learning"],
                     hashtags=["#ai"],
                     usernames=["@user1"],
                     operators=["-is:reply", "-is:retweet"],

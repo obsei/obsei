@@ -12,12 +12,14 @@ from obsei.sink.elasticsearch_sink import ElasticSearchSink
 from obsei.sink.http_sink import HttpSink
 from obsei.sink.jira_sink import JiraSink
 from obsei.source.base_source import BaseSource
+from obsei.source.playstore_reviews import PlayStoreSource
 from obsei.source.twitter_source import TwitterSource
 
 logger = logging.getLogger(__name__)
 
 source_map: Dict[str, BaseSource] = {
     "Twitter": TwitterSource(),
+    "PlayStore": PlayStoreSource()
 }
 
 sink_map: Dict[str, BaseSink] = {

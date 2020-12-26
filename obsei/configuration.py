@@ -10,6 +10,7 @@ from obsei.sink.dailyget_sink import DailyGetSinkConfig
 from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
 from obsei.sink.http_sink import HttpSinkConfig
 from obsei.sink.jira_sink import JiraSinkConfig
+from obsei.source.playstore_reviews import PlayStoreConfig
 from obsei.source.twitter_source import TwitterSourceConfig
 from obsei.analyzer.text_analyzer import AnalyzerConfig, TextAnalyzer
 
@@ -35,6 +36,9 @@ class ObseiConfiguration(BaseSettings):
         return instantiate(self.configuration[key_name], _recursive_=True)
 
     def get_twitter_source_config(self, key_name: str = "twitter_source") -> TwitterSourceConfig:
+        return self.initialize_instance(key_name)
+
+    def get_play_store_source_config(self, key_name: str = "play_store_source") -> PlayStoreConfig:
         return self.initialize_instance(key_name)
 
     def get_http_sink_config(self, key_name: str = "http_sink") -> HttpSinkConfig:

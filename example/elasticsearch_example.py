@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -12,8 +11,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 dir_path = Path(__file__).resolve().parent.parent
 source_config = TwitterSourceConfig(
-    keywords=[os.environ['DAILYGET_QUERY']],
-    lookup_period=os.environ['DAILYGET_LOOKUP_PERIOD'],
+    keywords="@Handle",
+    lookup_period="1h", # 1 Hour
     tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],
     user_fields=["id", "name", "public_metrics", "username", "verified"],
     expansions=["author_id"],

@@ -37,8 +37,8 @@ class TaskConfigStore(ABC):
     ):
         engine = create_engine(url)
         ORMBase.metadata.create_all(engine)
-        session = sessionmaker(bind=engine)
-        self.session = scoped_session(session)
+        local_session = sessionmaker(bind=engine)
+        self.session = local_session()
 
     def get_task_by_id(self, id: str) -> Optional[TaskDetail]:
         tasks = self.get_tasks_by_id([id])

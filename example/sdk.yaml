@@ -26,6 +26,18 @@ twitter_source:
     _convert_: all
     bearer_token: "bearer_token"
 
+play_store_source:
+  _target_: obsei.source.playstore_reviews.PlayStoreConfig
+  _convert_: all
+  package_name: "com.company.package"
+  max_results: 10
+  num_retries: 2
+  cred_info:
+    _target_: obsei.source.playstore_reviews.GoogleCredInfo
+    _convert_: all
+    service_cred_file: "foo/credential.json"
+    developer_key: "test_key"
+
 daily_get_sink:
   _target_: obsei.sink.dailyget_sink.DailyGetSinkConfig
   _convert_: all

@@ -32,13 +32,13 @@
 Current flow -
 <p align="center">
     <br>
-    <img src="https://github.com/lalitpagaria/obsei/blob/master/images/Obsei-flow-diagram.png?raw=true" />
+    <img src="https://github.com/lalitpagaria/obsei/blob/master/images/Obsei-flow-diagram.png?raw=true" width="600" />
     <br>
 <p>
 Future concept (Coming Soon! :slightly_smiling_face:)
 <p align="center">
     <br>
-    <img src="https://github.com/lalitpagaria/obsei/blob/master/images/Obsei-future-concept.png?raw=true" />
+    <img src="https://github.com/lalitpagaria/obsei/blob/master/images/Obsei-future-concept.png?raw=true" width="600" />
     <br>
 <p>
 
