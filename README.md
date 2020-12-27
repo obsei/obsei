@@ -95,8 +95,11 @@ Following environment variables are useful to customize various parameters -
 - [Twitter](https://twitter.com/): To make authorized API call, get access from [dev portal](https://developer.twitter.com/en/apply-for-access). Read about [search api](https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction) for more details. 
 - [Play Store](https://play.google.com/): To make authorized API calls, get [service account's credentials](https://developers.google.com/identity/protocols/oauth2/service-account). Read about [review api](https://googleapis.github.io/google-api-python-client/docs/dyn/androidpublisher_v3.reviews.html) for more details.
 
-## Examples
+## Examples and Screenshots
 Refer [example](https://github.com/lalitpagaria/obsei/tree/master/example) and [config](https://github.com/lalitpagaria/obsei/tree/master/config) folders for `obsei` usage and configurations.
+
+### Jira
+![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/jira_screenshot.png)
 
 ## Attribution
 This could not have been possible without following open source software -

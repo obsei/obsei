@@ -11,6 +11,7 @@ from obsei.analyzer.text_analyzer import AnalyzerResponse
 
 
 class ElasticSearchSinkConfig(BaseSinkConfig):
+    # This is done to avoid exposing member to API response
     __slots__ = ('_es_client',)
     TYPE: str = "Elasticsearch"
     host: str
