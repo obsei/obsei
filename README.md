@@ -30,17 +30,13 @@
  - **Informer**, which send it to ticketing system, data store or other places for further action and analysis.
 
 Current flow -
-<p align="center">
-    <br>
-    <img src="https://github.com/lalitpagaria/obsei/blob/master/images/Obsei-flow-diagram.png?raw=true" width="600" />
-    <br>
-<p>
-Future concept (Coming Soon! :slightly_smiling_face:)
-<p align="center">
-    <br>
-    <img src="https://github.com/lalitpagaria/obsei/blob/master/images/Obsei-future-concept.png?raw=true" width="600" />
-    <br>
-<p>
+
+![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png)
+
+A future concept (Coming Soon! :slightly_smiling_face:)
+
+![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
+
 
 ## Installation
 
@@ -90,10 +86,14 @@ Following environment variables are useful to customize various parameters -
 
 ## Components and Integrations
 
-- **Source/Observer**: Twitter (Facebook, Instagram, Google reviews, Amazon reviews, App Store reviews, Slack, Microsoft Team, Chat-bots etc planned in future)
+- **Source/Observer**: Twitter, Play Store Reviews (Facebook, Instagram, Google reviews, Amazon reviews, App Store reviews, Slack, Microsoft Team, Chat-bots etc planned in future)
 - **Analyzer/Segmenter**: Sentiment and Text classification (QA, Natural Search, FAQ, Summarization etc planned in future)
 - **Sink/Informer**: HTTP API, ElasticSearch, DailyGet, and Jira (Salesforce, Zendesk, Hubspot, Slack, Microsoft Team, etc planned in future)
 - **Processor/WorkflowEngine**: Simple integration between Source, Analyser and Sink (Rich workflows using rule engine planned in future)
+
+**Note:** In order to use some integrations you would need credentials, refer following list -
+- [Twitter](https://twitter.com/): To make authorized API call, get access from [dev portal](https://developer.twitter.com/en/apply-for-access). Read about [search api](https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction) for more details. 
+- [Play Store](https://play.google.com/): To make authorized API calls, get [service account's credentials](https://developers.google.com/identity/protocols/oauth2/service-account). Read about [review api](https://googleapis.github.io/google-api-python-client/docs/dyn/androidpublisher_v3.reviews.html) for more details.
 
 ## Examples
 Refer [example](https://github.com/lalitpagaria/obsei/tree/master/example) and [config](https://github.com/lalitpagaria/obsei/tree/master/config) folders for `obsei` usage and configurations.
