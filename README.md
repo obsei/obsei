@@ -90,6 +90,7 @@ Following environment variables are useful to customize various parameters -
 - **Analyzer/Segmenter**: Sentiment and Text classification (QA, Natural Search, FAQ, Summarization etc planned in future)
 - **Sink/Informer**: HTTP API, ElasticSearch, DailyGet, and Jira (Salesforce, Zendesk, Hubspot, Slack, Microsoft Team, etc planned in future)
 - **Processor/WorkflowEngine**: Simple integration between Source, Analyser and Sink (Rich workflows using rule engine planned in future)
+- **Convertor**: Very important part, which convert data from analyzer format to the format sink understand. It is very helpful in any customizations, refer `dailyget_sink.py` and `jira_sink.py`.
 
 **Note:** In order to use some integrations you would need credentials, refer following list -
 - [Twitter](https://twitter.com/): To make authorized API call, get access from [dev portal](https://developer.twitter.com/en/apply-for-access). Read about [search api](https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction) for more details. 
@@ -112,10 +113,11 @@ This could not have been possible without following open source software -
 - [hydra](https://github.com/facebookresearch/hydra.git): To elegantly configuring Obsei
 - [apscheduler](https://github.com/agronholm/apscheduler): To schedule task to execute desired workflow
 - [pydantic](https://github.com/samuelcolvin/pydantic): For data validation
+- [sqlalchemy](https://github.com/sqlalchemy/sqlalchemy): As SQL toolkit to access DB storage
 - [fastapi](https://fastapi.tiangolo.com/) & [gunicorn](https://gunicorn.org/): For HTTP server and API interface
 
 ## Contribution
-Currently, we are not accepting any pull requests. All PRs will be closed. If you want a feature or something doesn't work, please create an issue.
+Currently, we are not accepting any pull requests. If you want a feature or something doesn't work, please create an issue.
 
 
 ## Citing Obsei
