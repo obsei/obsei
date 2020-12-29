@@ -43,7 +43,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="obsei",
-    version="0.0.3",
+    version="0.0.4dev0",
     author="Lalit Pagaria",
     author_email="pagaria.lalit@gmail.com",
     description="Observe PoI text data from the various sources, segment it and then inform about it",
