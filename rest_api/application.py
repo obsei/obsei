@@ -10,17 +10,18 @@ from fastapi import HTTPException
 from obsei.configuration import ObseiConfiguration
 from obsei.processor import Processor
 from obsei.analyzer.text_analyzer import AnalyzerRequest, TextAnalyzer
-from rest_api.api_request_response import ScheduleResponse, TaskAddResponse, TaskConfig, ClassifierRequest, \
-    ClassifierResponse, TaskDetail
+from rest_api.api_request_response import ScheduleResponse, TaskAddResponse, ClassifierRequest, \
+    ClassifierResponse
+from obsei.workflow.workflow import WorkflowConfig, Workflow
 from rest_api.global_utils import get_application, sink_map, source_map
 from rest_api.rate_limiter import RequestLimiter
-from rest_api.task_config_store import TaskConfigStore
+from obsei.workflow.store import WorkflowStore
 
 logger = logging.getLogger(__name__)
 
 obsei_config: ObseiConfiguration
 
-config_store: TaskConfigStore
+config_store: WorkflowStore
 scheduler: BaseScheduler
 text_analyzer: TextAnalyzer
 processor: Processor
@@ -30,7 +31,7 @@ rate_limiter: RequestLimiter
 app = get_application()
 
 
-def process_scheduled_job(task_config: TaskConfig):
+def process_scheduled_job(task_config: WorkflowConfig):
     try:
         if task_config:
             processor.process(
@@ -45,7 +46,7 @@ def process_scheduled_job(task_config: TaskConfig):
 
 
 def schedule_tasks():
-    tasks = config_store.get_all_tasks()
+    tasks = config_store.get_all()
     jobs = []
     for task in tasks:
         jobs.append(
@@ -151,24 +152,24 @@ async def get_scheduled_syncs():
 
 @app.get(
     "/tasks/",
-    response_model=List[TaskDetail],
+    response_model=List[Workflow],
     response_model_exclude_unset=True,
     tags=["task"]
 )
 async def get_all_tasks():
     with rate_limiter.run():
-        return config_store.get_all_tasks()
+        return config_store.get_all()
 
 
 @app.get(
     "/tasks/{task_id}",
-    response_model=TaskDetail,
+    response_model=Workflow,
     response_model_exclude_unset=True,
     tags=["task"]
 )
 async def get_task(task_id: str):
     with rate_limiter.run():
-        return config_store.get_task_by_id(task_id)
+        return config_store.get(task_id)
 
 
 @app.delete(
@@ -185,7 +186,7 @@ async def delete_task(task_id: str):
             logger.warning(f'Job {task_id} not found. Error: {ex.__cause__}')
 
         try:
-            config_store.delete_task(task_id)
+            config_store.delete_workflow(task_id)
         except Exception as ex:
             logger.warning(f'Task {task_id} not able to delete. Error: {ex.__cause__}')
             raise HTTPException(
@@ -202,15 +203,15 @@ async def delete_task(task_id: str):
     response_model_exclude_unset=True,
     tags=["task"]
 )
-async def update_task(task_id: str, request: TaskConfig):
+async def update_task(task_id: str, request: WorkflowConfig):
     with rate_limiter.run():
         try:
             scheduler.remove_job(job_id=task_id)
         except JobLookupError as ex:
             logger.warning(f'Job {task_id} not found. Error: {ex.__cause__}')
 
-        task_detail = TaskDetail(id=task_id, config=request)
-        config_store.update_task(task_detail)
+        task_detail = Workflow(id=task_id, config=request)
+        config_store.update_workflow(task_detail)
         scheduler.add_job(
             func=process_scheduled_job,
             kwargs={
@@ -230,10 +231,10 @@ async def update_task(task_id: str, request: TaskConfig):
     response_model_exclude_unset=True,
     tags=["task"]
 )
-async def add_task(request: TaskConfig):
+async def add_task(request: WorkflowConfig):
     with rate_limiter.run():
-        task_detail = TaskDetail(id=str(uuid4()), config=request)
-        config_store.add_task(task_detail)
+        task_detail = Workflow(id=str(uuid4()), config=request)
+        config_store.add_workflow(task_detail)
         scheduler.add_job(
             func=process_scheduled_job,
             kwargs={

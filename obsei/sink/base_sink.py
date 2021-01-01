@@ -33,6 +33,11 @@ class BaseSinkConfig(BaseModel):
         arbitrary_types_allowed = True
 
 
+class BaseSinkState(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class BaseSink(ABC):
     def __init__(self, convertor: Convertor = Convertor()):
         self.convertor = convertor

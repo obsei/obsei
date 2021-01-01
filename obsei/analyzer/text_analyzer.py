@@ -7,9 +7,15 @@ logger = logging.getLogger(__name__)
 
 
 class AnalyzerConfig(BaseModel):
+    TYPE: str = "Classification"
     labels: List[str] = ["positive", "negative"]
     use_sentiment_model: bool = False
     multi_class_classification: bool = True
+
+
+class AnalyzerState(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class AnalyzerRequest:

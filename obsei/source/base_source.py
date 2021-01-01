@@ -13,6 +13,11 @@ class BaseSourceConfig(BaseModel):
         arbitrary_types_allowed = True
 
 
+class BaseSourceState(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class BaseSource(ABC):
 
     @abstractmethod

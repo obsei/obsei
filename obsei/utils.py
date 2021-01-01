@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict, Optional
 
 
@@ -21,6 +22,12 @@ def flatten_dict(
         else:
             out[key] = val
     return out
+
+
+def obj_to_json(obj: Any):
+    if obj is None:
+        return None
+    return json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 
 def obj_to_markdown(
