@@ -1,5 +1,5 @@
 task_config_store:
-  _target_: rest_api.task_config_store.WorkflowStore
+  _target_: obsei.workflow.store.WorkflowStore
   _convert_: all
   url: sqlite:///obsei.db
 
