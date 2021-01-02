@@ -26,5 +26,5 @@ class ScheduleResponse(BaseModel):
         arbitrary_types_allowed = True
 
 
-class TaskAddResponse(BaseModel):
+class WorkflowAddResponse(BaseModel):
     id: str

@@ -1,9 +1,9 @@
-task_config_store:
+workflow_store:
   _target_: obsei.workflow.store.WorkflowStore
   _convert_: all
   url: sqlite:///obsei.db
 
-task_scheduler:
+workflow_scheduler:
   _target_: apscheduler.schedulers.asyncio.AsyncIOScheduler
   _convert_: all
   jobstores:
