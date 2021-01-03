@@ -1,18 +1,18 @@
 import logging
+from datetime import datetime
+
 import requests
 
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseSettings, Field
 from pydantic.types import SecretStr
-from searchtweets import collect_results, gen_request_parameters
+from searchtweets import collect_results, convert_utc_time, gen_request_parameters
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.text_analyzer import AnalyzerRequest
 
 import preprocessor as cleaning_processor
-
-from obsei.utils import flatten_dict
 
 logger = logging.getLogger(__name__)
 
@@ -131,8 +131,18 @@ class TwitterSource(BaseSource):
         id: str = kwargs.get("id", None)
         state: Dict[str, Any] = None if id is None else self.store.get_source_state(id)
         since_id: Optional[int] = config.since_id or None if state is None else state.get("since_id", None)
+        until_id: Optional[int] = config.until_id or None if state is None else state.get("until_id", None)
         update_state: bool = True if id else False
         state = state or dict()
+        max_tweet_id = since_id
+        min_tweet_id = until_id
+        lookup_period = config.lookup_period
+        start_time = None if lookup_period is None else datetime.strptime(
+            convert_utc_time(lookup_period), "%Y-%m-%dT%H:%M:%S%z"
+        )
+
+        if since_id or until_id:
+            lookup_period = None
 
         query = self._generate_query_string(
             query=config.query,
@@ -142,58 +152,85 @@ class TwitterSource(BaseSource):
             operators=config.operators
         )
 
-        search_query = gen_request_parameters(
-            query=query,
-            results_per_call=config.max_tweets,
-            place_fields=place_fields,
-            expansions=expansions,
-            user_fields=user_fields,
-            tweet_fields=tweet_fields,
-            since_id=since_id,
-            until_id=config.until_id,
-            start_time=config.lookup_period
-        )
-
-        tweets_output = collect_results(
-            query=search_query,
-            max_tweets=config.max_tweets,
-            result_stream_args=config.credential.get_twitter_credentials()
-        )
-
-        if not tweets_output:
-            logger.info("No Tweets found")
-            return []
-
-        tweets = []
-        users = []
-        meta_info = None
-        for raw_output in tweets_output:
-            if "text" in raw_output:
-                tweets.append(raw_output)
-            elif "users" in raw_output:
-                users = raw_output["users"]
-            elif "meta" in raw_output:
-                meta_info = raw_output["meta"]
-
-        # Extract user info and create user map
-        user_map: Dict[str, Dict[str, Any]] = {}
-        if len(users) > 0 and "id" in users[0]:
-            for user in users:
-                user_map[user["id"]] = user
-
-        # TODO use it later
-        logger.info(f"Twitter API meta_info='{meta_info}'")
-
         source_responses: List[AnalyzerRequest] = []
-        for tweet in tweets:
-            if "author_id" in tweet and tweet["author_id"] in user_map:
-                tweet["author_info"] = user_map.get(tweet["author_id"])
+        need_more_lookup = True
+        while need_more_lookup:
+            search_query = gen_request_parameters(
+                query=query,
+                results_per_call=config.max_tweets,
+                place_fields=place_fields,
+                expansions=expansions,
+                user_fields=user_fields,
+                tweet_fields=tweet_fields,
+                since_id=since_id,
+                until_id=until_id,
+                start_time=lookup_period
+            )
+            logger.info(search_query)
 
-            source_responses.append(self._get_source_output(tweet))
+            tweets_output = collect_results(
+                query=search_query,
+                max_tweets=config.max_tweets,
+                result_stream_args=config.credential.get_twitter_credentials()
+            )
 
-        if len(tweets) > 0 and update_state:
-            tweet_id = self._get_tweet_id(tweets[-1])
-            state["since_id"] = tweet_id
+            if not tweets_output:
+                logger.info("No Tweets found")
+                need_more_lookup = False
+                break
+
+            tweets = []
+            users = []
+            meta_info = None
+            for raw_output in tweets_output:
+                if "text" in raw_output:
+                    tweets.append(raw_output)
+                elif "users" in raw_output:
+                    users = raw_output["users"]
+                elif "meta" in raw_output:
+                    meta_info = raw_output["meta"]
+
+            # Extract user info and create user map
+            user_map: Dict[str, Dict[str, Any]] = {}
+            if len(users) > 0 and "id" in users[0]:
+                for user in users:
+                    user_map[user["id"]] = user
+
+            # TODO use it later
+            logger.info(f"Twitter API meta_info='{meta_info}'")
+
+            for tweet in tweets:
+                if "author_id" in tweet and tweet["author_id"] in user_map:
+                    tweet["author_info"] = user_map.get(tweet["author_id"])
+
+                source_responses.append(self._get_source_output(tweet))
+
+                # Get latest tweet id
+                current_tweet_id = int(tweet["id"])
+
+                logger.info(f'{tweet["created_at"]}:{current_tweet_id}:{since_id}:{until_id}')
+
+                if start_time:
+                    created_date = datetime.strptime(tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                    if start_time > created_date:
+                        need_more_lookup = False
+                        break
+
+                if max_tweet_id is None:
+                    max_tweet_id = current_tweet_id
+                if min_tweet_id is None:
+                    min_tweet_id = current_tweet_id
+                if max_tweet_id < current_tweet_id:
+                    max_tweet_id = current_tweet_id
+                if min_tweet_id > current_tweet_id:
+                    min_tweet_id = current_tweet_id
+
+            logger.info(f'{max_tweet_id}:{min_tweet_id}')
+            until_id = min_tweet_id
+            lookup_period = None
+
+        if update_state:
+            state["since_id"] = max_tweet_id
             self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses
@@ -247,13 +284,6 @@ class TwitterSource(BaseSource):
             meta=tweet,
             source_name=self.NAME
         )
-
-    @staticmethod
-    def _get_tweet_id(tweet: Dict[str, Any]) -> Optional[int]:
-        flat_dict = flatten_dict(tweet)
-        for k, v in flat_dict.items():
-            if "meta_id" in k:
-                return int(v)
 
     @staticmethod
     def clean_tweet_text(tweet_text: str):
