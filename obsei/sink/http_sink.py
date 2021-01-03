@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import logging
 import requests
@@ -32,7 +32,6 @@ class HttpSink(BaseSink):
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: HttpSinkConfig,
-        state: Optional[Dict[str, Any]] = None,
         **kwargs
     ):
 

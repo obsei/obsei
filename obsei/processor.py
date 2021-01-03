@@ -19,7 +19,6 @@ class Processor:
         source_config: BaseSourceConfig = None,
         sink: BaseSink = None,
         sink_config: BaseSinkConfig = None,
-        workflow_store: Optional[WorkflowStore] = None
     ):
         self.source = source
         self.source_config = source_config
@@ -27,7 +26,6 @@ class Processor:
         self.sink_config = sink_config
         self.text_analyzer = text_analyzer
         self.analyzer_config = analyzer_config
-        self.workflow_store = workflow_store or WorkflowStore()
 
     def process(
         self,
@@ -40,12 +38,12 @@ class Processor:
         sink = sink or self.sink
         text_analyzer = text_analyzer or self.text_analyzer
 
-        workflow_state: WorkflowState = WorkflowState()
+        id: Optional[str] = None
         if workflow:
             sink_config = workflow.config.sink_config
             source_config = workflow.config.source_config
             analyzer_config = workflow.config.analyzer_config
-            workflow_state = self.workflow_store.get_workflow_state(workflow.id)
+            id = workflow.id
         else:
             sink_config = self.sink_config
             source_config = self.source_config
@@ -53,7 +51,7 @@ class Processor:
 
         source_response_list = source.lookup(
             config=source_config,
-            state=workflow_state.source_state
+            id=id
         )
         for idx, source_response in enumerate(source_response_list):
             logger.info(f"source_response#'{idx}'='{source_response}'")
@@ -61,7 +59,7 @@ class Processor:
         analyzer_response_list = text_analyzer.analyze_input(
             source_response_list=source_response_list,
             analyzer_config=analyzer_config,
-            state=workflow_state.analyzer_state
+            id=id
         )
         for idx, analyzer_response in enumerate(analyzer_response_list):
             logger.info(f"source_response#'{idx}'='{analyzer_response}'")
@@ -69,7 +67,7 @@ class Processor:
         sink_response_list = sink.send_data(
             analyzer_responses=analyzer_response_list,
             config=sink_config,
-            state=workflow_state.sink_state
+            id=id
         )
         for idx, sink_response in enumerate(sink_response_list):
             logger.info(f"source_response#'{idx}'='{sink_response}'")

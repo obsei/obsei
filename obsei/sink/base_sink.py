@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from pydantic.main import BaseModel
 
 from obsei.analyzer.text_analyzer import AnalyzerResponse
+from obsei.workflow.store import WorkflowStore
 
 
 class Convertor(BaseModel):
@@ -34,6 +35,8 @@ class BaseSinkConfig(BaseModel):
 
 
 class BaseSink(ABC):
+    store: WorkflowStore = WorkflowStore()
+
     def __init__(self, convertor: Convertor = Convertor()):
         self.convertor = convertor
 
@@ -42,7 +45,6 @@ class BaseSink(ABC):
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: BaseSinkConfig,
-        state: Optional[Dict[str, Any]] = None,
         **kwargs
     ):
         pass

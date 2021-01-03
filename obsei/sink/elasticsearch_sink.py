@@ -87,7 +87,6 @@ class ElasticSearchSink(BaseSink):
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: ElasticSearchSinkConfig,
-        state: Optional[Dict[str, Any]] = None,
         **kwargs
     ):
 

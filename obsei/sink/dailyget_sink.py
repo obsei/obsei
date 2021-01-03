@@ -112,7 +112,6 @@ class DailyGetSink(HttpSink):
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: DailyGetSinkConfig,
-        state: Optional[Dict[str, Any]] = None,
         **kwargs
     ):
         headers = config.headers

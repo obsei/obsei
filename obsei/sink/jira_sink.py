@@ -80,7 +80,6 @@ class JiraSink(BaseSink):
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: JiraSinkConfig,
-        state: Optional[Dict[str, Any]] = None,
         **kwargs
     ):
         responses = []

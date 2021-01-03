@@ -3,6 +3,8 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
+from obsei.workflow.store import WorkflowStore
+
 logger = logging.getLogger(__name__)
 
 
@@ -68,6 +70,8 @@ class TextAnalyzer:
             self.vader_sentiment_analyzer = SentimentIntensityAnalyzer()
             self.sentiment_model = None
 
+        self.store: WorkflowStore = WorkflowStore()
+
     def _init_classifier_model(self, classifier_model_name: str):
         if self.classifier_model is not None:
             raise AttributeError("Classifier already initialized")
@@ -106,7 +110,6 @@ class TextAnalyzer:
         self,
         source_response_list: List[AnalyzerRequest],
         analyzer_config: AnalyzerConfig = None,
-        state: Optional[Dict[str, Any]] = None,
         **kwargs
     ) -> List[AnalyzerResponse]:
         analyzer_config = analyzer_config or self.analyzer_config

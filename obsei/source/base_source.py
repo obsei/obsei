@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from pydantic.main import BaseModel
 
 from obsei.analyzer.text_analyzer import AnalyzerRequest
+from obsei.workflow.store import WorkflowStore
 
 
 class BaseSourceConfig(BaseModel):
@@ -14,12 +15,12 @@ class BaseSourceConfig(BaseModel):
 
 
 class BaseSource(ABC):
+    store: WorkflowStore = WorkflowStore()
 
     @abstractmethod
     def lookup(
         self,
         config: BaseSourceConfig,
-        state: Optional[Dict[str, Any]] = None,
         **kwargs
     ) -> List[AnalyzerRequest]:
         pass
