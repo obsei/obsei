@@ -10,17 +10,18 @@ from fastapi import HTTPException
 from obsei.configuration import ObseiConfiguration
 from obsei.processor import Processor
 from obsei.analyzer.text_analyzer import AnalyzerRequest, TextAnalyzer
-from rest_api.api_request_response import ScheduleResponse, TaskAddResponse, TaskConfig, ClassifierRequest, \
-    ClassifierResponse, TaskDetail
+from rest_api.api_request_response import ScheduleResponse, WorkflowAddResponse, ClassifierRequest, \
+    ClassifierResponse
+from obsei.workflow.workflow import WorkflowConfig, Workflow
 from rest_api.global_utils import get_application, sink_map, source_map
 from rest_api.rate_limiter import RequestLimiter
-from rest_api.task_config_store import TaskConfigStore
+from obsei.workflow.store import WorkflowStore
 
 logger = logging.getLogger(__name__)
 
 obsei_config: ObseiConfiguration
 
-config_store: TaskConfigStore
+workflow_store: WorkflowStore
 scheduler: BaseScheduler
 text_analyzer: TextAnalyzer
 processor: Processor
@@ -30,33 +31,31 @@ rate_limiter: RequestLimiter
 app = get_application()
 
 
-def process_scheduled_job(task_config: TaskConfig):
+def process_scheduled_job(workflow: Workflow):
     try:
-        if task_config:
+        if workflow:
             processor.process(
-                sink=sink_map[task_config.sink_config.TYPE],
-                sink_config=task_config.sink_config,
-                source=source_map[task_config.source_config.TYPE],
-                source_config=task_config.source_config,
-                analyzer_config=task_config.analyzer_config
+                workflow=workflow,
+                sink=sink_map[workflow.config.sink_config.TYPE],
+                source=source_map[workflow.config.source_config.TYPE],
             )
     except Exception as ex:
         logger.error(f'Exception occur: {ex}')
 
 
-def schedule_tasks():
-    tasks = config_store.get_all_tasks()
+def schedule_workflows():
+    workflows = workflow_store.get_all()
     jobs = []
-    for task in tasks:
+    for workflow in workflows:
         jobs.append(
             scheduler.add_job(
                 func=process_scheduled_job,
                 kwargs={
-                    "task_config": task.config
+                    "workflow": workflow
                 },
                 trigger='interval',
-                seconds=task.config.time_in_seconds,
-                id=task.id,
+                seconds=workflow.config.time_in_seconds,
+                id=workflow.id,
             )
         )
 
@@ -65,11 +64,10 @@ def scheduler_init():
     global scheduler
 
     try:
-        scheduler = obsei_config.initialize_instance("task_scheduler")
-
+        scheduler = obsei_config.initialize_instance("workflow_scheduler")
         scheduler.start()
         logger.info("Created Schedule Object")
-        schedule_tasks()
+        schedule_workflows()
     except Exception as ex:
         logger.error(f'Unable to Create Schedule Object, error: {ex.__cause__}')
         raise ex
@@ -88,9 +86,9 @@ def logging_init():
     gunicorn_logger.propagate = True
 
 
-def init_config_store():
-    global config_store
-    config_store = obsei_config.initialize_instance("task_config_store")
+def init_workflow_store():
+    global workflow_store
+    workflow_store = obsei_config.initialize_instance("workflow_store")
 
 
 def init_analyzer():
@@ -122,7 +120,7 @@ def app_init():
     logging_init()
     init_analyzer()
     init_processor()
-    init_config_store()
+    init_workflow_store()
     scheduler_init()
     init_rate_limiter()
 
@@ -130,10 +128,10 @@ def app_init():
 
 
 @app.get(
-    "/tasks/schedules/",
+    "/workflows/schedules/",
     response_model=List[ScheduleResponse],
     response_model_exclude_unset=True,
-    tags=["task"]
+    tags=["workflow"]
 )
 async def get_scheduled_syncs():
     with rate_limiter.run():
@@ -150,101 +148,101 @@ async def get_scheduled_syncs():
 
 
 @app.get(
-    "/tasks/",
-    response_model=List[TaskDetail],
+    "/workflows/",
+    response_model=List[Workflow],
     response_model_exclude_unset=True,
-    tags=["task"]
+    tags=["workflow"]
 )
-async def get_all_tasks():
+async def get_all_workflows():
     with rate_limiter.run():
-        return config_store.get_all_tasks()
+        return workflow_store.get_all()
 
 
 @app.get(
-    "/tasks/{task_id}",
-    response_model=TaskDetail,
+    "/workflows/{workflow_id}",
+    response_model=Workflow,
     response_model_exclude_unset=True,
-    tags=["task"]
+    tags=["workflow"]
 )
-async def get_task(task_id: str):
+async def get_workflow(workflow_id: str):
     with rate_limiter.run():
-        return config_store.get_task_by_id(task_id)
+        return workflow_store.get(workflow_id)
 
 
 @app.delete(
-    "/tasks/{task_id}",
-    response_model=TaskAddResponse,
+    "/workflows/{workflow_id}",
+    response_model=WorkflowAddResponse,
     response_model_exclude_unset=True,
-    tags=["task"]
+    tags=["workflow"]
 )
-async def delete_task(task_id: str):
+async def delete_workflow(workflow_id: str):
     with rate_limiter.run():
         try:
-            scheduler.remove_job(job_id=task_id)
+            scheduler.remove_job(job_id=workflow_id)
         except JobLookupError as ex:
-            logger.warning(f'Job {task_id} not found. Error: {ex.__cause__}')
+            logger.warning(f'Workflow {workflow_id} not found. Error: {ex.__cause__}')
 
         try:
-            config_store.delete_task(task_id)
+            workflow_store.delete_workflow(workflow_id)
         except Exception as ex:
-            logger.warning(f'Task {task_id} not able to delete. Error: {ex.__cause__}')
+            logger.warning(f'Workflow {workflow_id} not able to delete. Error: {ex.__cause__}')
             raise HTTPException(
                 status_code=404,
-                detail=f'Task {task_id} not found'
+                detail=f'Workflow {workflow_id} not found'
             )
 
-        return TaskAddResponse(id=task_id)
+        return WorkflowAddResponse(id=workflow_id)
 
 
 @app.post(
-    "/tasks/{task_id}",
-    response_model=TaskAddResponse,
+    "/workflows/{workflow_id}",
+    response_model=WorkflowAddResponse,
     response_model_exclude_unset=True,
-    tags=["task"]
+    tags=["workflow"]
 )
-async def update_task(task_id: str, request: TaskConfig):
+async def update_workflow(workflow_id: str, request: WorkflowConfig):
     with rate_limiter.run():
         try:
-            scheduler.remove_job(job_id=task_id)
+            scheduler.remove_job(job_id=workflow_id)
         except JobLookupError as ex:
-            logger.warning(f'Job {task_id} not found. Error: {ex.__cause__}')
+            logger.warning(f'Job {workflow_id} not found. Error: {ex.__cause__}')
 
-        task_detail = TaskDetail(id=task_id, config=request)
-        config_store.update_task(task_detail)
+        workflow_detail = Workflow(id=workflow_id, config=request)
+        workflow_store.update_workflow(workflow_detail)
         scheduler.add_job(
             func=process_scheduled_job,
             kwargs={
-                "task_config": task_detail.config
+                "workflow": workflow_detail
             },
             trigger='interval',
-            seconds=task_detail.config.time_in_seconds,
-            id=task_detail.id,
+            seconds=workflow_detail.config.time_in_seconds,
+            id=workflow_detail.id,
         )
 
-        return TaskAddResponse(id=task_detail.id)
+        return WorkflowAddResponse(id=workflow_detail.id)
 
 
 @app.post(
-    "/tasks/",
-    response_model=TaskAddResponse,
+    "/workflows/",
+    response_model=WorkflowAddResponse,
     response_model_exclude_unset=True,
-    tags=["task"]
+    tags=["workflow"]
 )
-async def add_task(request: TaskConfig):
+async def add_workflow(request: WorkflowConfig):
     with rate_limiter.run():
-        task_detail = TaskDetail(id=str(uuid4()), config=request)
-        config_store.add_task(task_detail)
+        workflow_detail = Workflow(config=request)
+        workflow_store.add_workflow(workflow_detail)
         scheduler.add_job(
             func=process_scheduled_job,
             kwargs={
-                "task_config": task_detail.config
+                "workflow": workflow_detail
             },
             trigger='interval',
-            seconds=task_detail.config.time_in_seconds,
-            id=task_detail.id,
+            seconds=workflow_detail.config.time_in_seconds,
+            id=workflow_detail.id,
         )
 
-        return TaskAddResponse(id=task_detail.id)
+        return WorkflowAddResponse(id=workflow_detail.id)
 
 
 @app.post(

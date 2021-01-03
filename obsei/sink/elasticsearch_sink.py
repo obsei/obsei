@@ -83,7 +83,12 @@ class ElasticSearchSink(BaseSink):
     def __init__(self, convertor: Convertor = Convertor()):
         super().__init__(convertor)
 
-    def send_data(self, analyzer_responses: List[AnalyzerResponse], config: ElasticSearchSinkConfig, **kwargs):
+    def send_data(
+        self,
+        analyzer_responses: List[AnalyzerResponse],
+        config: ElasticSearchSinkConfig,
+        **kwargs
+    ):
 
         payloads = []
         for analyzer_response in analyzer_responses:

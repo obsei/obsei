@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from google.auth.credentials import Credentials
 from google.oauth2 import service_account
@@ -51,7 +51,11 @@ class PlayStoreConfig(BaseSourceConfig):
 class PlayStoreSource(BaseSource):
     NAME: str = "PlayStore"
 
-    def lookup(self, config: PlayStoreConfig) -> List[AnalyzerRequest]:
+    def lookup(
+        self,
+        config: PlayStoreConfig,
+        **kwargs
+    ) -> List[AnalyzerRequest]:
         source_responses: List[AnalyzerRequest] = []
         # Refer https://github.com/googleapis/google-api-python-client/blob/master/docs/start.md
         with build(
@@ -63,12 +67,20 @@ class PlayStoreSource(BaseSource):
             reviews = service.reviews()
             pagination_token: Optional[str] = None
 
+            # Get data from state
+            id: str = kwargs.get("id", None)
+            state: Dict[str, Any] = None if id is None else self.store.get_source_state(id)
+            start_index: Optional[str] = config.start_index or None if state is None else state.get("start_index", None)
+            update_state: bool = True if id else False
+            state = state or dict()
+            review_id = start_index
+
             while True:
                 # Refer https://googleapis.github.io/google-api-python-client/docs/dyn/androidpublisher_v3.reviews.html#list
                 responses = reviews.list(
                     package_name=config.package_name,
                     max_results=config.max_results,
-                    start_index=config.start_index,
+                    start_index=start_index,
                     token=pagination_token
                 )
 
@@ -77,6 +89,9 @@ class PlayStoreSource(BaseSource):
                     for review in reviews:
                         if "comments" not in review:
                             continue
+
+                        review_id = review["reviewId"]
+
                         # Currently only one user comment is supported
                         text = review["comments"][0]["userComment"]["text"]
                         source_responses.append(AnalyzerRequest(
@@ -93,5 +108,9 @@ class PlayStoreSource(BaseSource):
 
                 if pagination_token is None:
                     break
+
+        if update_state:
+            state["start_index"] = review_id
+            self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses

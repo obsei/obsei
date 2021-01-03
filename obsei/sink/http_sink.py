@@ -25,10 +25,15 @@ class HttpSinkConfig(BaseSinkConfig):
 
 
 class HttpSink(BaseSink):
-    def __init__(self, convertor: Convertor = Convertor()):
-        super().__init__(convertor)
+    def __init__(self, convertor: Convertor = Convertor(), **data: Any):
+        super().__init__(convertor=convertor, **data)
 
-    def send_data(self, analyzer_responses: List[AnalyzerResponse], config: HttpSinkConfig):
+    def send_data(
+        self,
+        analyzer_responses: List[AnalyzerResponse],
+        config: HttpSinkConfig,
+        **kwargs
+    ):
 
         headers = config.headers or DEFAULT_HEADERS
 

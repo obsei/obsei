@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class AnalyzerConfig(BaseModel):
+    TYPE: str = "Classification"
     labels: List[str] = ["positive", "negative"]
     use_sentiment_model: bool = False
     multi_class_classification: bool = True
@@ -105,6 +106,7 @@ class TextAnalyzer:
         self,
         source_response_list: List[AnalyzerRequest],
         analyzer_config: AnalyzerConfig = None,
+        **kwargs
     ) -> List[AnalyzerResponse]:
         analyzer_config = analyzer_config or self.analyzer_config
         analyzer_output: List[AnalyzerResponse] = []

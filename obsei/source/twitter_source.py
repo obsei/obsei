@@ -12,6 +12,8 @@ from obsei.analyzer.text_analyzer import AnalyzerRequest
 
 import preprocessor as cleaning_processor
 
+from obsei.utils import flatten_dict
+
 logger = logging.getLogger(__name__)
 
 TWITTER_OAUTH_ENDPOINT = 'https://api.twitter.com/oauth2/token'
@@ -112,7 +114,11 @@ class TwitterSourceConfig(BaseSourceConfig):
 class TwitterSource(BaseSource):
     NAME: str = "Twitter"
 
-    def lookup(self, config: TwitterSourceConfig) -> List[AnalyzerRequest]:
+    def lookup(
+        self,
+        config: TwitterSourceConfig,
+        **kwargs
+    ) -> List[AnalyzerRequest]:
         if not config.query and not config.keywords and not config.hashtags and config.usernames:
             raise AttributeError("At least one non empty parameter required (query, keywords, hashtags, and usernames)")
 
@@ -120,6 +126,13 @@ class TwitterSource(BaseSource):
         user_fields = ",".join(config.user_fields) if config.user_fields is not None else None
         expansions = ",".join(config.expansions) if config.expansions is not None else None
         tweet_fields = ",".join(config.tweet_fields) if config.tweet_fields is not None else None
+
+        # Get data from state
+        id: str = kwargs.get("id", None)
+        state: Dict[str, Any] = None if id is None else self.store.get_source_state(id)
+        since_id: Optional[int] = config.since_id or None if state is None else state.get("since_id", None)
+        update_state: bool = True if id else False
+        state = state or dict()
 
         query = self._generate_query_string(
             query=config.query,
@@ -136,7 +149,7 @@ class TwitterSource(BaseSource):
             expansions=expansions,
             user_fields=user_fields,
             tweet_fields=tweet_fields,
-            since_id=config.since_id,
+            since_id=since_id,
             until_id=config.until_id,
             start_time=config.lookup_period
         )
@@ -177,6 +190,11 @@ class TwitterSource(BaseSource):
                 tweet["author_info"] = user_map.get(tweet["author_id"])
 
             source_responses.append(self._get_source_output(tweet))
+
+        if len(tweets) > 0 and update_state:
+            tweet_id = self._get_tweet_id(tweets[-1])
+            state["since_id"] = tweet_id
+            self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses
 
@@ -229,6 +247,13 @@ class TwitterSource(BaseSource):
             meta=tweet,
             source_name=self.NAME
         )
+
+    @staticmethod
+    def _get_tweet_id(tweet: Dict[str, Any]) -> Optional[int]:
+        flat_dict = flatten_dict(tweet)
+        for k, v in flat_dict.items():
+            if "meta_id" in k:
+                return int(v)
 
     @staticmethod
     def clean_tweet_text(tweet_text: str):

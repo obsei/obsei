@@ -4,6 +4,7 @@ from typing import Optional
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.text_analyzer import AnalyzerConfig, TextAnalyzer
+from obsei.workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,7 @@ class Processor:
     def __init__(
         self,
         text_analyzer: TextAnalyzer,
+        analyzer_config: AnalyzerConfig,
         source: BaseSource = None,
         source_config: BaseSourceConfig = None,
         sink: BaseSink = None,
@@ -22,34 +24,49 @@ class Processor:
         self.sink = sink
         self.sink_config = sink_config
         self.text_analyzer = text_analyzer
+        self.analyzer_config = analyzer_config
 
     def process(
         self,
+        workflow: Optional[Workflow] = None,
         source: Optional[BaseSource] = None,
-        source_config: Optional[BaseSourceConfig] = None,
         sink: Optional[BaseSink] = None,
-        sink_config: Optional[BaseSinkConfig] = None,
-        analyzer_config: AnalyzerConfig = None
+        text_analyzer: Optional[TextAnalyzer] = None
     ):
         source = source or self.source
-        source_config = source_config or self.source_config
         sink = sink or self.sink
-        sink_config = sink_config or self.sink_config
+        text_analyzer = text_analyzer or self.text_analyzer
 
-        source_response_list = source.lookup(config=source_config)
+        id: Optional[str] = None
+        if workflow:
+            sink_config = workflow.config.sink_config
+            source_config = workflow.config.source_config
+            analyzer_config = workflow.config.analyzer_config
+            id = workflow.id
+        else:
+            sink_config = self.sink_config
+            source_config = self.source_config
+            analyzer_config = self.analyzer_config
+
+        source_response_list = source.lookup(
+            config=source_config,
+            id=id
+        )
         for idx, source_response in enumerate(source_response_list):
             logger.info(f"source_response#'{idx}'='{source_response}'")
 
-        analyzer_response_list = self.text_analyzer.analyze_input(
+        analyzer_response_list = text_analyzer.analyze_input(
             source_response_list=source_response_list,
-            analyzer_config=analyzer_config
+            analyzer_config=analyzer_config,
+            id=id
         )
         for idx, analyzer_response in enumerate(analyzer_response_list):
             logger.info(f"source_response#'{idx}'='{analyzer_response}'")
 
         sink_response_list = sink.send_data(
             analyzer_responses=analyzer_response_list,
-            config=sink_config
+            config=sink_config,
+            id=id
         )
         for idx, sink_response in enumerate(sink_response_list):
             logger.info(f"source_response#'{idx}'='{sink_response}'")

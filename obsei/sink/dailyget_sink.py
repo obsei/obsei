@@ -105,10 +105,15 @@ class DailyGetSinkConfig(HttpSinkConfig):
 
 
 class DailyGetSink(HttpSink):
-    def __init__(self, convertor: Convertor = PayloadConvertor()):
-        super().__init__(convertor)
+    def __init__(self, convertor: Convertor = PayloadConvertor(), **data: Any):
+        super().__init__(convertor=convertor, **data)
 
-    def send_data(self, analyzer_responses: List[AnalyzerResponse], config: DailyGetSinkConfig):
+    def send_data(
+        self,
+        analyzer_responses: List[AnalyzerResponse],
+        config: DailyGetSinkConfig,
+        **kwargs
+    ):
         headers = config.headers
 
         payloads = []

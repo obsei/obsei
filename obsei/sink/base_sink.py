@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Any, Dict, List, Optional
 
 from pydantic.main import BaseModel
@@ -33,10 +33,23 @@ class BaseSinkConfig(BaseModel):
         arbitrary_types_allowed = True
 
 
-class BaseSink(ABC):
-    def __init__(self, convertor: Convertor = Convertor()):
-        self.convertor = convertor
+class BaseSink(BaseModel):
+    from obsei.workflow.store import BaseStore
+    convertor: Convertor
+    store: BaseStore
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self.convertor = self.convertor or Convertor()
 
     @abstractmethod
-    def send_data(self, analyzer_responses: List[AnalyzerResponse], config: BaseSinkConfig):
+    def send_data(
+        self,
+        analyzer_responses: List[AnalyzerResponse],
+        config: BaseSinkConfig,
+        **kwargs
+    ):
         pass
+
+    class Config:
+        arbitrary_types_allowed = True
