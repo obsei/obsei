@@ -76,7 +76,13 @@ class JiraSink(BaseSink):
     def __init__(self, convertor: Convertor = JiraPayloadConvertor()):
         super().__init__(convertor)
 
-    def send_data(self, analyzer_responses: List[AnalyzerResponse], config: JiraSinkConfig):
+    def send_data(
+        self,
+        analyzer_responses: List[AnalyzerResponse],
+        config: JiraSinkConfig,
+        state: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ):
         responses = []
         payloads = []
         for analyzer_response in analyzer_responses:

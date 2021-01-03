@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import logging
 import requests
@@ -28,7 +28,13 @@ class HttpSink(BaseSink):
     def __init__(self, convertor: Convertor = Convertor()):
         super().__init__(convertor)
 
-    def send_data(self, analyzer_responses: List[AnalyzerResponse], config: HttpSinkConfig):
+    def send_data(
+        self,
+        analyzer_responses: List[AnalyzerResponse],
+        config: HttpSinkConfig,
+        state: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ):
 
         headers = config.headers or DEFAULT_HEADERS
 

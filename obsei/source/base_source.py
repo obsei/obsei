@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Any, Dict, List, Optional
 
 from pydantic.main import BaseModel
 
@@ -13,15 +13,15 @@ class BaseSourceConfig(BaseModel):
         arbitrary_types_allowed = True
 
 
-class BaseSourceState(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
-
 class BaseSource(ABC):
 
     @abstractmethod
-    def lookup(self, config: BaseSourceConfig) -> List[AnalyzerRequest]:
+    def lookup(
+        self,
+        config: BaseSourceConfig,
+        state: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ) -> List[AnalyzerRequest]:
         pass
 
     class Config:

@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from google.auth.credentials import Credentials
 from google.oauth2 import service_account
@@ -26,6 +26,7 @@ class PlayStoreConfig(BaseSourceConfig):
     with_quota_project_id: Optional[str] = None
     with_subject: Optional[str] = None
     cred_info: Optional[GoogleCredInfo] = None
+    state_param_list: Optional[List[str]] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -51,7 +52,12 @@ class PlayStoreConfig(BaseSourceConfig):
 class PlayStoreSource(BaseSource):
     NAME: str = "PlayStore"
 
-    def lookup(self, config: PlayStoreConfig) -> List[AnalyzerRequest]:
+    def lookup(
+        self,
+        config: PlayStoreConfig,
+        state: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ) -> List[AnalyzerRequest]:
         source_responses: List[AnalyzerRequest] = []
         # Refer https://github.com/googleapis/google-api-python-client/blob/master/docs/start.md
         with build(

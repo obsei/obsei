@@ -1,14 +1,13 @@
-from typing import Any, Optional, Union
+from typing import Any, Dict, Optional, Union
+from uuid import uuid4
 
 from pydantic import BaseModel
 
-from obsei.analyzer.text_analyzer import AnalyzerConfig, AnalyzerState
-from obsei.sink.base_sink import BaseSinkState
+from obsei.analyzer.text_analyzer import AnalyzerConfig
 from obsei.sink.dailyget_sink import DailyGetSinkConfig
 from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
 from obsei.sink.http_sink import HttpSinkConfig
 from obsei.sink.jira_sink import JiraSinkConfig
-from obsei.source.base_source import BaseSourceState
 from obsei.source.playstore_reviews import PlayStoreConfig
 from obsei.source.twitter_source import TwitterCredentials, TwitterSourceConfig
 
@@ -60,15 +59,20 @@ class WorkflowConfig(BaseModel):
         }
 
 
-class Workflow(BaseModel):
-    id: Optional[str]
-    config: WorkflowConfig
-    source_state: Optional[BaseSourceState]
-    sink_state: Optional[BaseSinkState]
-    analyzer_state: Optional[AnalyzerState]
+class WorkflowState(BaseModel):
+    source_state: Optional[Dict[str, Any]]
+    sink_state: Optional[Dict[str, Any]]
+    analyzer_state: Optional[Dict[str, Any]]
 
-    def __init__(self, **data: Any):
-        super().__init__(**data)
+    class Config:
+        arbitrary_types_allowed = True
+        response_model_exclude_unset = True
+
+
+class Workflow(BaseModel):
+    id: str = str(uuid4())
+    config: WorkflowConfig
+    states: Optional[WorkflowState]
 
     class Config:
         arbitrary_types_allowed = True

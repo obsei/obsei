@@ -31,29 +31,27 @@ rate_limiter: RequestLimiter
 app = get_application()
 
 
-def process_scheduled_job(workflow_config: WorkflowConfig):
+def process_scheduled_job(workflow: Workflow):
     try:
-        if workflow_config:
+        if workflow:
             processor.process(
-                sink=sink_map[workflow_config.sink_config.TYPE],
-                sink_config=workflow_config.sink_config,
-                source=source_map[workflow_config.source_config.TYPE],
-                source_config=workflow_config.source_config,
-                analyzer_config=workflow_config.analyzer_config
+                workflow=workflow,
+                sink=sink_map[workflow.config.sink_config.TYPE],
+                source=source_map[workflow.config.source_config.TYPE],
             )
     except Exception as ex:
         logger.error(f'Exception occur: {ex}')
 
 
 def schedule_workflows():
-    workflows = config_store.get_all()
+    workflows = workflow_store.get_all()
     jobs = []
     for workflow in workflows:
         jobs.append(
             scheduler.add_job(
                 func=process_scheduled_job,
                 kwargs={
-                    "workflow_config": workflow.config
+                    "workflow": workflow
                 },
                 trigger='interval',
                 seconds=workflow.config.time_in_seconds,
@@ -89,8 +87,8 @@ def logging_init():
 
 
 def init_workflow_store():
-    global config_store
-    config_store = obsei_config.initialize_instance("workflow_store")
+    global workflow_store
+    workflow_store = obsei_config.initialize_instance("workflow_store")
 
 
 def init_analyzer():
@@ -157,7 +155,7 @@ async def get_scheduled_syncs():
 )
 async def get_all_workflows():
     with rate_limiter.run():
-        return config_store.get_all()
+        return workflow_store.get_all()
 
 
 @app.get(
@@ -168,7 +166,7 @@ async def get_all_workflows():
 )
 async def get_workflow(workflow_id: str):
     with rate_limiter.run():
-        return config_store.get(workflow_id)
+        return workflow_store.get(workflow_id)
 
 
 @app.delete(
@@ -185,7 +183,7 @@ async def delete_workflow(workflow_id: str):
             logger.warning(f'Workflow {workflow_id} not found. Error: {ex.__cause__}')
 
         try:
-            config_store.delete_workflow(workflow_id)
+            workflow_store.delete_workflow(workflow_id)
         except Exception as ex:
             logger.warning(f'Workflow {workflow_id} not able to delete. Error: {ex.__cause__}')
             raise HTTPException(
@@ -210,11 +208,11 @@ async def update_workflow(workflow_id: str, request: WorkflowConfig):
             logger.warning(f'Job {workflow_id} not found. Error: {ex.__cause__}')
 
         workflow_detail = Workflow(id=workflow_id, config=request)
-        config_store.update_workflow(workflow_detail)
+        workflow_store.update_workflow(workflow_detail)
         scheduler.add_job(
             func=process_scheduled_job,
             kwargs={
-                "workflow_config": workflow_detail.config
+                "workflow": workflow_detail
             },
             trigger='interval',
             seconds=workflow_detail.config.time_in_seconds,
@@ -232,12 +230,12 @@ async def update_workflow(workflow_id: str, request: WorkflowConfig):
 )
 async def add_workflow(request: WorkflowConfig):
     with rate_limiter.run():
-        workflow_detail = Workflow(id=str(uuid4()), config=request)
-        config_store.add_workflow(workflow_detail)
+        workflow_detail = Workflow(config=request)
+        workflow_store.add_workflow(workflow_detail)
         scheduler.add_job(
             func=process_scheduled_job,
             kwargs={
-                "workflow_config": workflow_detail.config
+                "workflow": workflow_detail
             },
             trigger='interval',
             seconds=workflow_detail.config.time_in_seconds,

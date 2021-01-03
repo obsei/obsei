@@ -13,11 +13,6 @@ class AnalyzerConfig(BaseModel):
     multi_class_classification: bool = True
 
 
-class AnalyzerState(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
-
 class AnalyzerRequest:
     def __init__(
         self,
@@ -111,6 +106,8 @@ class TextAnalyzer:
         self,
         source_response_list: List[AnalyzerRequest],
         analyzer_config: AnalyzerConfig = None,
+        state: Optional[Dict[str, Any]] = None,
+        **kwargs
     ) -> List[AnalyzerResponse]:
         analyzer_config = analyzer_config or self.analyzer_config
         analyzer_output: List[AnalyzerResponse] = []

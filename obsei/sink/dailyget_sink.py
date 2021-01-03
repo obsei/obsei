@@ -108,7 +108,13 @@ class DailyGetSink(HttpSink):
     def __init__(self, convertor: Convertor = PayloadConvertor()):
         super().__init__(convertor)
 
-    def send_data(self, analyzer_responses: List[AnalyzerResponse], config: DailyGetSinkConfig):
+    def send_data(
+        self,
+        analyzer_responses: List[AnalyzerResponse],
+        config: DailyGetSinkConfig,
+        state: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ):
         headers = config.headers
 
         payloads = []

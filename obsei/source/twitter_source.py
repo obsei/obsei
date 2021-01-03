@@ -102,6 +102,7 @@ class TwitterSourceConfig(BaseSourceConfig):
     place_fields: Optional[List[str]] = Field(DEFAULT_PLACE_FIELDS)
     max_tweets: Optional[int] = DEFAULT_MAX_TWEETS
     credential: Optional[TwitterCredentials] = None
+    state_param_list: Optional[List[str]] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -112,7 +113,12 @@ class TwitterSourceConfig(BaseSourceConfig):
 class TwitterSource(BaseSource):
     NAME: str = "Twitter"
 
-    def lookup(self, config: TwitterSourceConfig) -> List[AnalyzerRequest]:
+    def lookup(
+        self,
+        config: TwitterSourceConfig,
+        state: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ) -> List[AnalyzerRequest]:
         if not config.query and not config.keywords and not config.hashtags and config.usernames:
             raise AttributeError("At least one non empty parameter required (query, keywords, hashtags, and usernames)")
 
