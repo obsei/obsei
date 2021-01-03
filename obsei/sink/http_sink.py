@@ -25,8 +25,8 @@ class HttpSinkConfig(BaseSinkConfig):
 
 
 class HttpSink(BaseSink):
-    def __init__(self, convertor: Convertor = Convertor()):
-        super().__init__(convertor)
+    def __init__(self, convertor: Convertor = Convertor(), **data: Any):
+        super().__init__(convertor=convertor, **data)
 
     def send_data(
         self,

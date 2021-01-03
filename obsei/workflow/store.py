@@ -9,11 +9,18 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from obsei.utils import obj_to_json
-from obsei.workflow.workflow import WorkflowConfig, Workflow, WorkflowState
 
 logger = logging.getLogger(__name__)
 
 Base = declarative_base()  # type: Any
+
+
+class BaseStore(ABC):
+    def get_source_state(self, id: str) -> Optional[Dict[str, Any]]:
+        pass
+
+    def update_source_state(self, workflow_id: str, state: Dict[str, Any]):
+        pass
 
 
 class ORMBase(Base):
@@ -33,7 +40,9 @@ class WorkflowTable(ORMBase):
     analyzer_state = Column(String(500), nullable=True)
 
 
-class WorkflowStore(ABC):
+class WorkflowStore(BaseStore):
+    from obsei.workflow.workflow import Workflow, WorkflowState
+
     def __init__(
             self,
             url: str = "sqlite:///obsei.db"
@@ -44,8 +53,8 @@ class WorkflowStore(ABC):
         self.session = local_session()
 
     def get(self, id: str) -> Optional[Workflow]:
-        row = self.session.query(WorkflowTable).filter_by(id=id).one()
-        return self._convert_sql_row_to_workflow_data(row)
+        row = self.session.query(WorkflowTable).filter_by(id=id).all()
+        return None if row is None or len(row) == 0 else self._convert_sql_row_to_workflow_data(row[0])
 
     def get_all(self) -> List[Workflow]:
         rows = self.session.query(WorkflowTable).all()
@@ -56,20 +65,21 @@ class WorkflowStore(ABC):
             WorkflowTable.source_state,
             WorkflowTable.analyzer_state,
             WorkflowTable.sink_state
-        ).filter_by(id=id).one()
-        return self._convert_sql_row_to_workflow_state(row)
+        ).filter(id=id).all()
+
+        return None if row is None or len(row) == 0 else self._convert_sql_row_to_workflow_state(row[0])
 
     def get_source_state(self, id: str) -> Optional[Dict[str, Any]]:
-        row = self.session.query(WorkflowTable.source_state).filter_by(id=id).one()
-        return json.loads(row.source_state)
+        row = self.session.query(WorkflowTable.source_state).filter(WorkflowTable.id == id).all()
+        return None if row[0].source_state is None else json.loads(row[0].source_state)
 
     def get_sink_state(self, id: str) -> Optional[Dict[str, Any]]:
-        row = self.session.query(WorkflowTable.sink_state).filter_by(id=id).one()
-        return json.loads(row.sink_state)
+        row = self.session.query(WorkflowTable.sink_state).filter(id=id).all()
+        return None if row[0].sink_state is None else json.loads(row[0].sink_state)
 
     def get_analyzer_state(self, id: str) -> Optional[Dict[str, Any]]:
-        row = self.session.query(WorkflowTable.analyzer_state).filter_by(id=id).one()
-        return json.loads(row.analyzer_state)
+        row = self.session.query(WorkflowTable.analyzer_state).filter(id=id).all()
+        return None if row[0].analyzer_state is None else json.loads(row[0].analyzer_state)
 
     def add_workflow(self, workflow: Workflow):
         self.session.add(
@@ -133,6 +143,8 @@ class WorkflowStore(ABC):
 
     @staticmethod
     def _convert_sql_row_to_workflow_state(row) -> Optional[WorkflowState]:
+        from obsei.workflow.workflow import WorkflowState
+
         if row is None:
             return None
 
@@ -152,6 +164,8 @@ class WorkflowStore(ABC):
 
     @staticmethod
     def _convert_sql_row_to_workflow_data(row) -> Optional[Workflow]:
+        from obsei.workflow.workflow import WorkflowConfig, Workflow
+
         if row is None:
             return None
         config_dict = json.loads(row.config)

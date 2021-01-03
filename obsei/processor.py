@@ -1,11 +1,10 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.text_analyzer import AnalyzerConfig, TextAnalyzer
-from obsei.workflow.store import WorkflowStore
-from obsei.workflow.workflow import Workflow, WorkflowState
+from obsei.workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
 

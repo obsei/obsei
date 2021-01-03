@@ -105,8 +105,8 @@ class DailyGetSinkConfig(HttpSinkConfig):
 
 
 class DailyGetSink(HttpSink):
-    def __init__(self, convertor: Convertor = PayloadConvertor()):
-        super().__init__(convertor)
+    def __init__(self, convertor: Convertor = PayloadConvertor(), **data: Any):
+        super().__init__(convertor=convertor, **data)
 
     def send_data(
         self,

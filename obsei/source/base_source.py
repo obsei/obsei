@@ -1,10 +1,10 @@
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from abc import abstractmethod
+from typing import List
 
 from pydantic.main import BaseModel
 
 from obsei.analyzer.text_analyzer import AnalyzerRequest
-from obsei.workflow.store import WorkflowStore
+from obsei.workflow.store import BaseStore
 
 
 class BaseSourceConfig(BaseModel):
@@ -14,8 +14,8 @@ class BaseSourceConfig(BaseModel):
         arbitrary_types_allowed = True
 
 
-class BaseSource(ABC):
-    store: WorkflowStore = WorkflowStore()
+class BaseSource(BaseModel):
+    store: BaseStore
 
     @abstractmethod
     def lookup(
