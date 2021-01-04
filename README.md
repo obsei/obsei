@@ -24,6 +24,9 @@
     </a>
 </p>
 
+**Note: There are major breaking changes ([persistent store](https://github.com/lalitpagaria/obsei/issues/6) and [DAG support](https://github.com/lalitpagaria/obsei/issues/8)) are on the way. Please use released version instead of master branch. To track progress of next release refer [Project Release 0.0.4](https://github.com/lalitpagaria/obsei/projects/2).**
+
+
 `Obsei` is intended to be a workflow automation tool for text segmentation need. `Obsei` consist of -
  - **OBserver**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews and feed that information to,
  - **SEgmenter**, which perform text classification and sentiment analysis and feed that information to,
