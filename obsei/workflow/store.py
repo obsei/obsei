@@ -1,6 +1,5 @@
 import json
 import logging
-from abc import ABC
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
@@ -9,18 +8,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from obsei.utils import obj_to_json
+from obsei.workflow.base_store import BaseStore
 
 logger = logging.getLogger(__name__)
 
 Base = declarative_base()  # type: Any
-
-
-class BaseStore(ABC):
-    def get_source_state(self, id: str) -> Optional[Dict[str, Any]]:
-        pass
-
-    def update_source_state(self, workflow_id: str, state: Dict[str, Any]):
-        pass
 
 
 class ORMBase(Base):

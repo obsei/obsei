@@ -1,5 +1,8 @@
 import json
+from datetime import datetime
 from typing import Any, Dict, Optional
+
+from dateutil.relativedelta import relativedelta
 
 
 # Used from https://stackoverflow.com/a/52081812 and modified
@@ -36,7 +39,7 @@ def obj_to_markdown(
     str_enclose_start: Optional[str] = None,
     str_enclose_end: Optional[str] = None
 ) -> str:
-    key_prefix = "*"*level
+    key_prefix = "*" * level
 
     markdowns = []
     if is_collection(obj):
@@ -76,3 +79,53 @@ def obj_to_markdown(
 
 def is_collection(obj: Any):
     return isinstance(obj, (dict, list)) or hasattr(obj, '__dict__')
+
+
+# Copied from searchtweets-v2 and bit modified
+def convert_utc_time(datetime_str):
+    """
+    Handles datetime argument conversion to the Labs API format, which is
+    `YYYY-MM-DDTHH:mm:ssZ`.
+    Flexible passing of date formats in the following types::
+
+        - YYYYmmDDHHMM
+        - YYYY-mm-DD
+        - YYYY-mm-DD HH:MM
+        - YYYY-mm-DDTHH:MM
+        - 3d (set start_time to three days ago)
+        - 12h (set start_time to twelve hours ago)
+        - 15m (set start_time to fifteen minutes ago)
+
+    Args:
+        datetime_str (str): valid formats are listed above.
+
+    Returns:
+        string of ISO formatted date.
+    """
+
+    if not datetime_str:
+        return None
+    try:
+        if len(datetime_str) <= 5:
+            _date = datetime.utcnow()
+            # parse out numeric character.
+            num = int(datetime_str[:-1])
+            if 'd' in datetime_str:
+                _date = (_date + relativedelta(days=-num))
+            elif 'h' in datetime_str:
+                _date = (_date + relativedelta(hours=-num))
+            elif 'm' in datetime_str:
+                _date = (_date + relativedelta(minutes=-num))
+        elif not {'-', ':'} & set(datetime_str):
+            _date = datetime.strptime(datetime_str, "%Y%m%d%H%M")
+        elif 'T' in datetime_str:
+            # command line with 'T'
+            datetime_str = datetime_str.replace('T', ' ')
+            _date = datetime.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+        else:
+            _date = datetime.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+
+    except ValueError:
+        _date = datetime.datetime.strptime(datetime_str, "%Y-%m-%d")
+
+    return _date.strftime("%Y-%m-%dT%H:%M:%SZ")
