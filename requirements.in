@@ -21,5 +21,6 @@ gunicorn
 uvloop
 httptools
 google-api-python-client
+feedparser
 
 git+https://github.com/facebookresearch/hydra.git#egg=hydra-core

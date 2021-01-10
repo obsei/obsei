@@ -24,7 +24,7 @@
     </a>
 </p>
 
-**Note: There are major breaking changes ([persistent store](https://github.com/lalitpagaria/obsei/issues/6) and [DAG support](https://github.com/lalitpagaria/obsei/issues/8)) are on the way. Please use released version instead of master branch. To track progress of next release refer [Project Release 0.0.4](https://github.com/lalitpagaria/obsei/projects/2).**
+**Note: There are major breaking changes are on the way. Please use released version instead of master branch. To track progress of next release refer [Release Progress](#release-progress).**
 
 
 `Obsei` is intended to be a workflow automation tool for text segmentation need. `Obsei` consist of -
@@ -40,6 +40,11 @@ A future concept (Coming Soon! :slightly_smiling_face:)
 
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
 
+
+## Release Progress
+Following releases are on the way -
+- [**v0.0.4**](https://github.com/lalitpagaria/obsei/projects/2): App store reviews, state storage and few improvements 
+- [**v0.1.0**](https://github.com/lalitpagaria/obsei/projects/3): DAG support, documentation and many more
 
 ## Installation
 
@@ -89,7 +94,7 @@ Following environment variables are useful to customize various parameters -
 
 ## Components and Integrations
 
-- **Source/Observer**: Twitter, Play Store Reviews (Facebook, Instagram, Google reviews, Amazon reviews, App Store reviews, Slack, Microsoft Team, Chat-bots etc planned in future)
+- **Source/Observer**: Twitter, Play Store Reviews, Apple App Store Reviews (Facebook, Instagram, Google reviews, Amazon reviews, Slack, Microsoft Team, Chat-bots etc planned in future)
 - **Analyzer/Segmenter**: Sentiment and Text classification (QA, Natural Search, FAQ, Summarization etc planned in future)
 - **Sink/Informer**: HTTP API, ElasticSearch, DailyGet, and Jira (Salesforce, Zendesk, Hubspot, Slack, Microsoft Team, etc planned in future)
 - **Processor/WorkflowEngine**: Simple integration between Source, Analyser and Sink (Rich workflows using rule engine planned in future)
@@ -118,6 +123,7 @@ This could not have been possible without following open source software -
 - [pydantic](https://github.com/samuelcolvin/pydantic): For data validation
 - [sqlalchemy](https://github.com/sqlalchemy/sqlalchemy): As SQL toolkit to access DB storage
 - [fastapi](https://fastapi.tiangolo.com/) & [gunicorn](https://gunicorn.org/): For HTTP server and API interface
+- [feedparser](https://github.com/kurtmckee/feedparser): To parse rss feed to fetch app store reviews
 
 ## Contribution
 Currently, we are not accepting any pull requests. If you want a feature or something doesn't work, please create an issue.

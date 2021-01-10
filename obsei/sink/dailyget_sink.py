@@ -10,7 +10,7 @@ from dateutil import parser
 from obsei.sink.base_sink import Convertor
 from obsei.sink.http_sink import HttpSink, HttpSinkConfig
 from obsei.analyzer.text_analyzer import AnalyzerResponse
-from obsei.utils import flatten_dict
+from obsei.misc.utils import flatten_dict
 
 logger = logging.getLogger(__name__)
 

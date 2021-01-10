@@ -8,7 +8,7 @@ from pydantic import SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.analyzer.text_analyzer import AnalyzerResponse
-from obsei.utils import obj_to_markdown
+from obsei.misc.utils import obj_to_markdown
 
 logger = logging.getLogger(__name__)
 

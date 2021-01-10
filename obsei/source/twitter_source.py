@@ -7,12 +7,14 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseSettings, Field
 from pydantic.types import SecretStr
-from searchtweets import collect_results, convert_utc_time, gen_request_parameters
+from searchtweets import collect_results, gen_request_parameters
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.text_analyzer import AnalyzerRequest
 
 import preprocessor as cleaning_processor
+
+from obsei.misc.utils import convert_utc_time
 
 logger = logging.getLogger(__name__)
 
