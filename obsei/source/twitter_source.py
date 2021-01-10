@@ -14,7 +14,7 @@ from obsei.analyzer.text_analyzer import AnalyzerRequest
 
 import preprocessor as cleaning_processor
 
-from obsei.utils import convert_utc_time
+from obsei.misc.utils import convert_utc_time
 
 logger = logging.getLogger(__name__)
 

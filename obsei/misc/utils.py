@@ -4,6 +4,8 @@ from typing import Any, Dict, Optional
 
 from dateutil.relativedelta import relativedelta
 
+DATETIME_STRING_PATTERN = "%Y-%m-%dT%H:%M:%SZ"
+
 
 # Used from https://stackoverflow.com/a/52081812 and modified
 def flatten_dict(
@@ -119,13 +121,11 @@ def convert_utc_time(datetime_str):
         elif not {'-', ':'} & set(datetime_str):
             _date = datetime.strptime(datetime_str, "%Y%m%d%H%M")
         elif 'T' in datetime_str:
-            # command line with 'T'
-            datetime_str = datetime_str.replace('T', ' ')
-            _date = datetime.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+            _date = datetime.strptime(datetime_str, DATETIME_STRING_PATTERN)
         else:
-            _date = datetime.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+            _date = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
 
     except ValueError:
-        _date = datetime.datetime.strptime(datetime_str, "%Y-%m-%d")
+        _date = datetime.strptime(datetime_str, "%Y-%m-%d")
 
-    return _date.strftime("%Y-%m-%dT%H:%M:%SZ")
+    return _date.strftime(DATETIME_STRING_PATTERN)

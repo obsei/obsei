@@ -7,7 +7,7 @@ from sqlalchemy import Column, DateTime, String, create_engine, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from obsei.utils import obj_to_json
+from obsei.misc.utils import obj_to_json
 from obsei.workflow.base_store import BaseStore
 
 logger = logging.getLogger(__name__)
