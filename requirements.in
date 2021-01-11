@@ -22,5 +22,4 @@ uvloop
 httptools
 google-api-python-client
 feedparser
-
-git+https://github.com/facebookresearch/hydra.git#egg=hydra-core
+hydra-core>=1.1.0.dev2

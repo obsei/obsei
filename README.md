@@ -43,8 +43,9 @@ A future concept (Coming Soon! :slightly_smiling_face:)
 
 ## Release Progress
 Following releases are on the way -
-- [**v0.0.4**](https://github.com/lalitpagaria/obsei/projects/2): App store reviews, state storage and few improvements 
-- [**v0.1.0**](https://github.com/lalitpagaria/obsei/projects/3): DAG support, documentation and many more
+- [**v0.0.4**](https://github.com/lalitpagaria/obsei/projects/2): App store reviews, state storage and few improvements
+- [**v0.0.5**](https://github.com/lalitpagaria/obsei/projects/4): Documentation focused release  
+- [**v0.1.0**](https://github.com/lalitpagaria/obsei/projects/3): DAG support, CI improvements and few more (suggestions are welcome)
 
 ## Installation
 
