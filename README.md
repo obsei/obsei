@@ -125,6 +125,7 @@ This could not have been possible without following open source software -
 - [sqlalchemy](https://github.com/sqlalchemy/sqlalchemy): As SQL toolkit to access DB storage
 - [fastapi](https://fastapi.tiangolo.com/) & [gunicorn](https://gunicorn.org/): For HTTP server and API interface
 - [feedparser](https://github.com/kurtmckee/feedparser): To parse rss feed to fetch app store reviews
+- [google-play-scraper](https://github.com/JoMingyu/google-play-scraper): To fetch the Google Play Store review without authentication
 
 ## Contribution
 Currently, we are not accepting any pull requests. If you want a feature or something doesn't work, please create an issue.
