@@ -43,7 +43,6 @@ A future concept (Coming Soon! :slightly_smiling_face:)
 
 ## Release Progress
 Following releases are on the way -
-- [**v0.0.4**](https://github.com/lalitpagaria/obsei/projects/2): App store reviews, state storage and few improvements
 - [**v0.0.5**](https://github.com/lalitpagaria/obsei/projects/4): Documentation focused release  
 - [**v0.1.0**](https://github.com/lalitpagaria/obsei/projects/3): DAG support, CI improvements and few more (suggestions are welcome)
 
@@ -130,6 +129,8 @@ This could not have been possible without following open source software -
 ## Contribution
 Currently, we are not accepting any pull requests. If you want a feature or something doesn't work, please create an issue.
 
+## Changelog
+Refer [releases](https://github.com/lalitpagaria/obsei/releases) and [projects](https://github.com/lalitpagaria/obsei/projects).
 
 ## Citing Obsei
 If you use `obsei` in your research please use the following BibTeX entry:
