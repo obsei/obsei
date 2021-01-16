@@ -144,6 +144,10 @@ If you use `obsei` in your research please use the following BibTeX entry:
 }
 ```
 
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/lalitpagaria/obsei.svg)](https://starchart.cc/lalitpagaria/obsei)
+
 ## Acknowledgement
 
 We would like to thank [DailyGet](https://dailyget.in/) for continuous support and encouragement.
