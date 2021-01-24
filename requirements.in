@@ -22,5 +22,6 @@ uvloop
 httptools
 google-api-python-client
 feedparser
-hydra-core>=1.1.0.dev2
+hydra-core>=1.1.0.dev3
 google-play-scraper
+app-store-reviews-reader
