@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from obsei.misc.appstore_review_reader import AppStoreReviewsReader
+from app_store.app_store_reviews_reader import AppStoreReviewsReader
+
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.text_analyzer import AnalyzerRequest
 from obsei.misc.utils import DATETIME_STRING_PATTERN, convert_utc_time
