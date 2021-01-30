@@ -73,8 +73,8 @@ class JiraSinkConfig(BaseSinkConfig):
 
 
 class JiraSink(BaseSink):
-    def __init__(self, convertor: Convertor = JiraPayloadConvertor()):
-        super().__init__(convertor)
+    def __init__(self, convertor: Convertor = JiraPayloadConvertor(), **data: Any):
+        super().__init__(convertor=convertor, **data)
 
     def send_data(
         self,

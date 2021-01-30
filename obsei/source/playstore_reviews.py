@@ -62,7 +62,7 @@ class PlayStoreSource(BaseSource):
             serviceName='androidpublisher',
             version='v3',
             credentials=config.get_google_credentials(),
-            developerKey=config.cred_info.developer_key
+            developerKey=config.cred_info.developer_key.get_secret_value()
         ) as service:
             reviews = service.reviews()
             pagination_token: Optional[str] = None

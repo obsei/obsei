@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 from dateutil.relativedelta import relativedelta
 
 DATETIME_STRING_PATTERN = "%Y-%m-%dT%H:%M:%SZ"
+DEFAULT_LOOKUP_PERIOD = "1h"
 
 
 # Used from https://stackoverflow.com/a/52081812 and modified

@@ -5,7 +5,7 @@ from google_play_scraper import Sort, reviews
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.text_analyzer import AnalyzerRequest
-from obsei.misc.utils import DATETIME_STRING_PATTERN, convert_utc_time
+from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time
 
 
 class PlayStoreScrapperConfig(BaseSourceConfig):
@@ -41,7 +41,7 @@ class PlayStoreScrapperSource(BaseSource):
                 "since_time",
                 config.lookup_period
             )
-            lookup_period = lookup_period or "1h"
+            lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
             if len(lookup_period) <= 5:
                 since_time = convert_utc_time(lookup_period)
             else:
@@ -70,6 +70,8 @@ class PlayStoreScrapperSource(BaseSource):
                     )
                 )
 
+                if review.date < review["at"]:
+                    break
                 if last_since_time is None or last_since_time < review["at"]:
                     last_since_time = review["at"]
                 # if last_index is None or last_index < review.id:
