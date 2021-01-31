@@ -12,12 +12,8 @@ workflow_scheduler:
       _convert_: all
 
 text_analyzer:
-  _target_: obsei.analyzer.text_analyzer.TextAnalyzer
+  _target_: obsei.analyzer.sentiment_analyzer.VaderSentimentAnalyzer
   _convert_: all
-  # model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers",
-  # model_name_or_path: "/home/user/models/bart-large-mnli-yahoo-answers",
-  # model_name_or_path: '../../models/bart-large-mnli-yahoo-answers'
-  initialize_model: false
 
 rate_limiter:
   _target_: rest_api.rate_limiter.RequestLimiter

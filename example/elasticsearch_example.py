@@ -4,7 +4,7 @@ from pathlib import Path
 
 from obsei.sink.elasticsearch_sink import ElasticSearchSink, ElasticSearchSinkConfig
 from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig
-from obsei.analyzer.text_analyzer import AnalyzerConfig, TextAnalyzer
+from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig, ZeroShotClassificationAnalyzer
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -21,13 +21,12 @@ source_config = TwitterSourceConfig(
 )
 
 source = TwitterSource()
-text_analyzer = TextAnalyzer(
+text_analyzer = ZeroShotClassificationAnalyzer(
     model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
 #   model_name_or_path="joeddav/xlm-roberta-large-xnli",
     initialize_model=True,
-    analyzer_config=AnalyzerConfig(
+    analyzer_config=ClassificationAnalyzerConfig(
         labels=["service", "delay", "tracking", "no response", "missing items", "delivery", "mask"],
-        use_sentiment_model=True
     )
 )
 

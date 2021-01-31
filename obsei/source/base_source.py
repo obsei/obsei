@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic.main import BaseModel
 
-from obsei.analyzer.text_analyzer import AnalyzerRequest
+from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.workflow.base_store import BaseStore
 
 

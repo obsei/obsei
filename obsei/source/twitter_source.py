@@ -10,7 +10,7 @@ from pydantic.types import SecretStr
 from searchtweets import collect_results, gen_request_parameters
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
-from obsei.analyzer.text_analyzer import AnalyzerRequest
+from obsei.analyzer.base_analyzer import AnalyzerRequest
 
 import preprocessor as cleaning_processor
 

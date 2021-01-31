@@ -1,41 +1,34 @@
 import logging
 from typing import Optional
 
+from pydantic import BaseModel
+
+from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig
 from obsei.source.base_source import BaseSource, BaseSourceConfig
-from obsei.analyzer.text_analyzer import AnalyzerConfig, TextAnalyzer
 from obsei.workflow.workflow import Workflow
 
 logger = logging.getLogger(__name__)
 
 
-class Processor:
-    def __init__(
-        self,
-        text_analyzer: TextAnalyzer,
-        analyzer_config: AnalyzerConfig,
-        source: BaseSource = None,
-        source_config: BaseSourceConfig = None,
-        sink: BaseSink = None,
-        sink_config: BaseSinkConfig = None,
-    ):
-        self.source = source
-        self.source_config = source_config
-        self.sink = sink
-        self.sink_config = sink_config
-        self.text_analyzer = text_analyzer
-        self.analyzer_config = analyzer_config
+class Processor(BaseModel):
+    analyzer: BaseAnalyzer
+    analyzer_config: BaseAnalyzerConfig
+    source: Optional[BaseSource] = None
+    source_config: Optional[BaseSourceConfig] = None
+    sink: Optional[BaseSink] = None
+    sink_config: Optional[BaseSinkConfig] = None
 
     def process(
         self,
         workflow: Optional[Workflow] = None,
         source: Optional[BaseSource] = None,
         sink: Optional[BaseSink] = None,
-        text_analyzer: Optional[TextAnalyzer] = None
+        analyzer: Optional[BaseAnalyzer] = None
     ):
         source = source or self.source
         sink = sink or self.sink
-        text_analyzer = text_analyzer or self.text_analyzer
+        analyzer = analyzer or self.analyzer
 
         id: Optional[str] = None
         if workflow:
@@ -55,7 +48,7 @@ class Processor:
         for idx, source_response in enumerate(source_response_list):
             logger.info(f"source_response#'{idx}'='{source_response}'")
 
-        analyzer_response_list = text_analyzer.analyze_input(
+        analyzer_response_list = analyzer.analyze_input(
             source_response_list=source_response_list,
             analyzer_config=analyzer_config,
             id=id

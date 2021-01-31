@@ -7,7 +7,7 @@ from elasticsearch.exceptions import RequestError
 from pydantic import Field, SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from obsei.analyzer.text_analyzer import AnalyzerResponse
+from obsei.analyzer.base_analyzer import AnalyzerResponse
 
 
 class ElasticSearchSinkConfig(BaseSinkConfig):

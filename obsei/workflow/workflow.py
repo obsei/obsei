@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel
 
-from obsei.analyzer.text_analyzer import AnalyzerConfig
+from obsei.analyzer.base_analyzer import BaseAnalyzerConfig
 from obsei.sink.base_sink import BaseSinkConfig
 from obsei.source.base_source import BaseSourceConfig
 
@@ -11,12 +11,8 @@ from obsei.source.base_source import BaseSourceConfig
 class WorkflowConfig(BaseModel):
     source_config: Optional[BaseSourceConfig]
     sink_config: Optional[BaseSinkConfig]
-    analyzer_config: Optional[AnalyzerConfig]
+    analyzer_config: Optional[BaseAnalyzerConfig]
     time_in_seconds: Optional[int]
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        self.analyzer_config = self.analyzer_config or AnalyzerConfig(use_sentiment_model=False)
 
     class Config:
         arbitrary_types_allowed = True

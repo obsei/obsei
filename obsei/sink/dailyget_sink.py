@@ -9,7 +9,7 @@ from dateutil import parser
 
 from obsei.sink.base_sink import Convertor
 from obsei.sink.http_sink import HttpSink, HttpSinkConfig
-from obsei.analyzer.text_analyzer import AnalyzerResponse
+from obsei.analyzer.base_analyzer import AnalyzerResponse
 from obsei.misc.utils import flatten_dict
 
 logger = logging.getLogger(__name__)
@@ -55,7 +55,7 @@ class PayloadConvertor(Convertor):
                 tweet_id = v
             elif "created_at" in k:
                 created_at_str = v
-            elif "classification" in k and len(classification_list) < 2:
+            elif "segmented_data" in k and len(classification_list) < 2:
                 classification_list.append(k.rsplit("_", 1)[1])
 
         if created_at_str:
