@@ -6,7 +6,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from pydantic import BaseSettings, Field, constr
 
-from obsei.analyzer.base_analyzer import BaseAnalyzer
+from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig
 from obsei.sink.dailyget_sink import DailyGetSinkConfig
 from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
 from obsei.sink.http_sink import HttpSinkConfig
