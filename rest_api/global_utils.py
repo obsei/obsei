@@ -11,15 +11,23 @@ from obsei.sink.dailyget_sink import DailyGetSink
 from obsei.sink.elasticsearch_sink import ElasticSearchSink
 from obsei.sink.http_sink import HttpSink
 from obsei.sink.jira_sink import JiraSink
+from obsei.source.appstore_scrapper import AppStoreScrapperSource
 from obsei.source.base_source import BaseSource
 from obsei.source.playstore_reviews import PlayStoreSource
+from obsei.source.playstore_scrapper import PlayStoreScrapperSource
+from obsei.source.reddit_scrapper import RedditScrapperSource
+from obsei.source.reddit_source import RedditSource
 from obsei.source.twitter_source import TwitterSource
 
 logger = logging.getLogger(__name__)
 
 source_map: Dict[str, BaseSource] = {
     "Twitter": TwitterSource(),
-    "PlayStore": PlayStoreSource()
+    "PlayStore": PlayStoreSource(),
+    "PlayStoreScrapper": PlayStoreScrapperSource(),
+    "AppStoreScrapper": AppStoreScrapperSource(),
+    "RedditScrapper": RedditScrapperSource(),
+    "Reddit": RedditSource()
 }
 
 sink_map: Dict[str, BaseSink] = {
@@ -40,7 +48,6 @@ def get_application() -> FastAPI:
     application = FastAPI(
         title="Obsei-APIs",
         debug=True,
-        version="0.1",
         description="Observe, Segment and Inform"
     )
 

@@ -1,7 +1,6 @@
 import logging
 import os
 from typing import List
-from uuid import uuid4
 
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.base import BaseScheduler

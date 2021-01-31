@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import pytz
 
 from obsei.misc.utils import DATETIME_STRING_PATTERN
-from obsei.source.reddit import RedditConfig, RedditSource
+from obsei.source.reddit_source import RedditConfig, RedditSource
 from obsei.workflow.store import WorkflowStore
 from obsei.workflow.workflow import Workflow, WorkflowConfig
 
