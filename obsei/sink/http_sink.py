@@ -5,7 +5,7 @@ import logging
 import requests
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from obsei.analyzer.text_analyzer import AnalyzerResponse
+from obsei.analyzer.base_analyzer import AnalyzerResponse
 
 logger = logging.getLogger(__name__)
 

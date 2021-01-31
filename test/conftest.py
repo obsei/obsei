@@ -1,18 +1,25 @@
 import pytest
 
-from obsei.analyzer.text_analyzer import TextAnalyzer
+from obsei.analyzer.classification_analyzer import ZeroShotClassificationAnalyzer
+from obsei.analyzer.ner_analyzer import NERAnalyzer
+from obsei.analyzer.sentiment_analyzer import VaderSentimentAnalyzer
 
 
 @pytest.fixture(scope="session")
-def text_analyzer_with_model():
-    return TextAnalyzer(
-        # model_name_or_path="joeddav/xlm-roberta-large-xnli",
-        # model_name_or_path="facebook/bart-large-mnli",
+def zero_shot_analyzer():
+    return ZeroShotClassificationAnalyzer(
         model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
-        initialize_model=True,
     )
 
 
 @pytest.fixture(scope="session")
-def text_analyzer_with_vader():
-    return TextAnalyzer()
+def vader_analyzer():
+    return VaderSentimentAnalyzer()
+
+
+@pytest.fixture(scope="session")
+def ner_analyzer():
+    return NERAnalyzer(
+        model_name_or_path="dbmdz/bert-large-cased-finetuned-conll03-english",
+        tokenizer_name="bert-base-cased"
+    )

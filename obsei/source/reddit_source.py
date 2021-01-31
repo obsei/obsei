@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from praw import Reddit
 from pydantic import BaseSettings, Field, SecretStr
 
-from obsei.analyzer.text_analyzer import AnalyzerRequest
+from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 

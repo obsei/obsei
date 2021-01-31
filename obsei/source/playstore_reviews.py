@@ -5,7 +5,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from pydantic import BaseSettings, Field, SecretStr
 
-from obsei.analyzer.text_analyzer import AnalyzerRequest
+from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 
 

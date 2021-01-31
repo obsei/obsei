@@ -7,7 +7,7 @@ from atlassian import Jira
 from pydantic import SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from obsei.analyzer.text_analyzer import AnalyzerResponse
+from obsei.analyzer.base_analyzer import AnalyzerResponse
 from obsei.misc.utils import obj_to_markdown
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class JiraPayloadConvertor(Convertor):
 
         # TODO: Find correct payload to update labels fields
         labels_count = kwargs.get("labels_count", 1)
-        # labels = [v for k, v in sorted(analyzer_response.classification.items(), key=lambda item: item[1])]
+        # labels = [v for k, v in sorted(analyzer_response.segmented_data.items(), key=lambda item: item[1])]
         # payload['labels'] = [{"name": label} for label in labels[:labels_count]]
 
         return payload

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from google_play_scraper import Sort, reviews
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
-from obsei.analyzer.text_analyzer import AnalyzerRequest
+from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time
 
 

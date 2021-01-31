@@ -8,7 +8,7 @@ from pydantic import SecretStr
 
 from obsei.sink.jira_sink import JiraSink, JiraSinkConfig
 from obsei.source.twitter_source import TwitterCredentials, TwitterSource, TwitterSourceConfig
-from obsei.analyzer.text_analyzer import AnalyzerConfig, TextAnalyzer
+from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig, ZeroShotClassificationAnalyzer
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -40,12 +40,11 @@ jira_sink_config = JiraSinkConfig(
 )
 jira_sink = JiraSink()
 
-text_analyzer = TextAnalyzer(
+text_analyzer = ZeroShotClassificationAnalyzer(
     model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
     initialize_model=True,
-    analyzer_config=AnalyzerConfig(
+    analyzer_config=ClassificationAnalyzerConfig(
         labels=["service", "delay", "performance"],
-        use_sentiment_model=True
     )
 )
 

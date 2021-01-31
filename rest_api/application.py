@@ -8,7 +8,7 @@ from fastapi import HTTPException
 
 from obsei.configuration import ObseiConfiguration
 from obsei.processor import Processor
-from obsei.analyzer.text_analyzer import AnalyzerRequest, TextAnalyzer
+from obsei.analyzer.base_analyzer import AnalyzerRequest, BaseAnalyzer
 from rest_api.api_request_response import ScheduleResponse, WorkflowAddResponse, ClassifierRequest, \
     ClassifierResponse
 from obsei.workflow.workflow import WorkflowConfig, Workflow
@@ -22,7 +22,7 @@ obsei_config: ObseiConfiguration
 
 workflow_store: WorkflowStore
 scheduler: BaseScheduler
-text_analyzer: TextAnalyzer
+analyzer: BaseAnalyzer
 processor: Processor
 rate_limiter: RequestLimiter
 
@@ -91,13 +91,14 @@ def init_workflow_store():
 
 
 def init_analyzer():
-    global text_analyzer
-    text_analyzer = obsei_config.initialize_instance("text_analyzer")
+    global analyzer
+    analyzer = obsei_config.initialize_instance("analyzer")
 
 
 def init_processor():
     global processor
-    processor = Processor(text_analyzer)
+    # TODO generalize it, so based on analyzer config it initialise
+    processor = Processor(analyzer=analyzer)
 
 
 def init_rate_limiter():
@@ -259,14 +260,14 @@ def classify_texts(request: ClassifierRequest):
             )
             for text in request.texts
         ]
-        analyzer_responses = text_analyzer.analyze_input(
+        analyzer_responses = analyzer.analyze_input(
             source_response_list=analyzer_requests,
             analyzer_config=request.analyzer_config,
         )
 
         response = []
         for analyzer_response in analyzer_responses:
-            response.append(analyzer_response.classification)
+            response.append(analyzer_response.segmented_data)
 
         return ClassifierResponse(data=response)
 

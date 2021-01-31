@@ -6,7 +6,7 @@ import mmh3
 from reddit_rss_reader.reader import RedditContent, RedditRSSReader
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
-from obsei.analyzer.text_analyzer import AnalyzerRequest
+from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time
 
 logger = logging.getLogger(__name__)

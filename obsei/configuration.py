@@ -6,13 +6,13 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from pydantic import BaseSettings, Field, constr
 
+from obsei.analyzer.base_analyzer import BaseAnalyzer
 from obsei.sink.dailyget_sink import DailyGetSinkConfig
 from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
 from obsei.sink.http_sink import HttpSinkConfig
 from obsei.sink.jira_sink import JiraSinkConfig
 from obsei.source.playstore_reviews import PlayStoreConfig
 from obsei.source.twitter_source import TwitterSourceConfig
-from obsei.analyzer.text_analyzer import AnalyzerConfig, TextAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +53,10 @@ class ObseiConfiguration(BaseSettings):
     def get_jira_sink_config(self, key_name: str = "jira_sink") -> JiraSinkConfig:
         return self.initialize_instance(key_name)
 
-    def get_text_analyzer(self, key_name: str = "text_analyzer") -> TextAnalyzer:
+    def get_text_analyzer(self, key_name: str = "analyzer") -> BaseAnalyzer:
         return self.initialize_instance(key_name)
 
-    def get_analyzer_config(self, key_name: str = "analyzer_config") -> AnalyzerConfig:
+    def get_analyzer_config(self, key_name: str = "analyzer_config") -> BaseAnalyzerConfig:
         return self.initialize_instance(key_name)
 
     def get_logging_config(self, key_name: str = "logging") -> DictConfig:
