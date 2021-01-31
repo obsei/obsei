@@ -43,7 +43,7 @@ A future concept (Coming Soon! :slightly_smiling_face:)
 
 ## Release Progress
 Following releases are on the way -
-- [**v0.0.5**](https://github.com/lalitpagaria/obsei/projects/4): New integrations (Facebook, Whatsapp, Telegram and Slack), documentation website and Conda release
+- [**v0.0.5**](https://github.com/lalitpagaria/obsei/projects/4): New integrations (Reddit, Facebook, Whatsapp, Telegram and Slack), documentation website and Conda release
 - [**v0.1.0**](https://github.com/lalitpagaria/obsei/projects/3): DAG support, CI improvements and few more (suggestions are welcome)
 
 ## Installation
@@ -94,8 +94,8 @@ Following environment variables are useful to customize various parameters -
 
 ## Components and Integrations
 
-- **Source/Observer**: Twitter, Play Store Reviews, Apple App Store Reviews (Facebook, Instagram, Google reviews, Amazon reviews, Slack, Microsoft Team, Chat-bots etc planned in future)
-- **Analyzer/Segmenter**: Sentiment and Text classification (QA, Natural Search, FAQ, Summarization etc planned in future)
+- **Source/Observer**: Twitter, Play Store Reviews, Apple App Store Reviews, Sub Reddit (Facebook, Instagram, Google reviews, Amazon reviews, Slack, Microsoft Team, Chat-bots etc planned in future)
+- **Analyzer/Segmenter**: Sentiment and Text classification (QA, Natural Search, FAQ, NER etc planned in future)
 - **Sink/Informer**: HTTP API, ElasticSearch, DailyGet, and Jira (Salesforce, Zendesk, Hubspot, Slack, Microsoft Team, etc planned in future)
 - **Processor/WorkflowEngine**: Simple integration between Source, Analyser and Sink (Rich workflows using rule engine planned in future)
 - **Convertor**: Very important part, which convert data from analyzer format to the format sink understand. It is very helpful in any customizations, refer `dailyget_sink.py` and `jira_sink.py`.
@@ -103,6 +103,7 @@ Following environment variables are useful to customize various parameters -
 **Note:** In order to use some integrations you would need credentials, refer following list -
 - [Twitter](https://twitter.com/): To make authorized API call, get access from [dev portal](https://developer.twitter.com/en/apply-for-access). Read about [search api](https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction) for more details. 
 - [Play Store](https://play.google.com/): To make authorized API calls, get [service account's credentials](https://developers.google.com/identity/protocols/oauth2/service-account). Read about [review api](https://googleapis.github.io/google-api-python-client/docs/dyn/androidpublisher_v3.reviews.html) for more details.
+- [Reddit](https://praw.readthedocs.io/en/latest/getting_started/authentication.html): To make authorized API calls, create [client app](https://www.reddit.com/prefs/apps).
 
 ## Model selection
 Any model listed in [Text Classification](https://huggingface.co/models?filter=text-classification) or [Zero-Shot Classification](https://huggingface.co/models?filter=zero-shot-classification) can be used in Segmenter.
@@ -114,20 +115,7 @@ Refer [example](https://github.com/lalitpagaria/obsei/tree/master/example) and [
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/jira_screenshot.png)
 
 ## Attribution
-This could not have been possible without following open source software -
-- [searchtweets-v2](https://github.com/twitterdev/search-tweets-python): For Twitter's API v2 wrapper
-- [vaderSentiment](https://github.com/cjhutto/vaderSentiment): For rule-based sentiment analysis
-- [transformers](https://github.com/huggingface/transformers): For text-classification pipeline
-- [tweet-preprocessor](https://github.com/s/preprocessor): For tweets preprocessing and cleaning
-- [atlassian-python-api](https://github.com/atlassian-api/atlassian-python-api): To interact with Jira
-- [elasticsearch](https://github.com/elastic/elasticsearch-py): To interact with Elasticsearch
-- [hydra](https://github.com/facebookresearch/hydra.git): To elegantly configuring Obsei
-- [apscheduler](https://github.com/agronholm/apscheduler): To schedule task to execute desired workflow
-- [pydantic](https://github.com/samuelcolvin/pydantic): For data validation
-- [sqlalchemy](https://github.com/sqlalchemy/sqlalchemy): As SQL toolkit to access DB storage
-- [fastapi](https://fastapi.tiangolo.com/) & [gunicorn](https://gunicorn.org/): For HTTP server and API interface
-- [feedparser](https://github.com/kurtmckee/feedparser): To parse rss feed to fetch app store reviews
-- [google-play-scraper](https://github.com/JoMingyu/google-play-scraper): To fetch the Google Play Store review without authentication
+Refer [link](https://raw.githubusercontent.com/lalitpagaria/obsei/master/ATTRIBUTION.md) for attribution.
 
 ## Contribution
 Currently, we are not accepting any pull requests. If you want a feature or something doesn't work, please create an issue.
