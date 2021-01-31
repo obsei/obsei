@@ -25,3 +25,7 @@ feedparser
 hydra-core>=1.1.0.dev3
 google-play-scraper
 app-store-reviews-reader
+reddit-rss-reader
+praw
+mmh3
+beautifulsoup4

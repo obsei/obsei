@@ -9,18 +9,19 @@
 antlr4-python3-runtime==4.8  # via hydra-core
 app-store-reviews-reader==1.0  # via -r requirements.in
 apscheduler==3.7.0        # via -r requirements.in
-atlassian-python-api==3.1.0  # via -r requirements.in
-cachetools==4.2.0         # via google-auth
+atlassian-python-api==3.4.0  # via -r requirements.in
+beautifulsoup4==4.9.3     # via -r requirements.in, reddit-rss-reader
+cachetools==4.2.1         # via google-auth
 certifi==2020.12.5        # via elasticsearch, requests
 chardet==4.0.0            # via requests
 click==7.1.2              # via flask, sacremoses, uvicorn
 deprecated==1.2.11        # via atlassian-python-api
 elasticsearch==7.10.1     # via -r requirements.in
 fastapi==0.63.0           # via -r requirements.in
-feedparser==6.0.2         # via -r requirements.in, app-store-reviews-reader
+feedparser==6.0.2         # via -r requirements.in, app-store-reviews-reader, reddit-rss-reader
 filelock==3.0.12          # via transformers
 flask==1.1.2              # via -r requirements.in
-google-api-core==1.25.0   # via google-api-python-client
+google-api-core==1.25.1   # via google-api-python-client
 google-api-python-client==1.12.8  # via -r requirements.in
 google-auth-httplib2==0.0.4  # via google-api-python-client
 google-auth==1.24.0       # via google-api-core, google-api-python-client, google-auth-httplib2
@@ -38,10 +39,13 @@ itsdangerous==1.1.0       # via flask
 jinja2==2.11.2            # via flask
 joblib==1.0.0             # via sacremoses
 markupsafe==1.1.1         # via jinja2
-numpy==1.19.5             # via torch, transformers
+mmh3==2.5.1               # via -r requirements.in
+numpy==1.20.0             # via torch, transformers
 oauthlib==3.1.0           # via atlassian-python-api, requests-oauthlib
 omegaconf==2.1.0.dev17    # via hydra-core
-packaging==20.8           # via transformers
+packaging==20.9           # via transformers
+praw==7.1.0               # via -r requirements.in
+prawcore==1.5.0           # via praw
 protobuf==3.14.0          # via google-api-core, googleapis-common-protos
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, rsa
@@ -50,14 +54,16 @@ pyparsing==2.4.7          # via packaging
 python-dateutil==2.8.1    # via -r requirements.in, searchtweets-v2
 pytz==2020.5              # via -r requirements.in, apscheduler, google-api-core, tzlocal
 pyyaml==5.4.1             # via omegaconf, searchtweets-v2
+reddit-rss-reader==1.1    # via -r requirements.in
 regex==2020.11.13         # via sacremoses, transformers
 requests-oauthlib==1.3.0  # via -r requirements.in, atlassian-python-api
-requests==2.25.1          # via -r requirements.in, app-store-reviews-reader, atlassian-python-api, google-api-core, requests-oauthlib, searchtweets-v2, transformers, vadersentiment
+requests==2.25.1          # via -r requirements.in, app-store-reviews-reader, atlassian-python-api, google-api-core, prawcore, reddit-rss-reader, requests-oauthlib, searchtweets-v2, transformers, update-checker, vadersentiment
 rsa==4.7                  # via google-auth
 sacremoses==0.0.43        # via transformers
 searchtweets-v2==1.0.4    # via -r requirements.in
 sgmllib3k==1.0.0          # via feedparser
-six==1.15.0               # via apscheduler, atlassian-python-api, google-api-core, google-api-python-client, google-auth, google-auth-httplib2, protobuf, python-dateutil, sacremoses
+six==1.15.0               # via apscheduler, atlassian-python-api, google-api-core, google-api-python-client, google-auth, google-auth-httplib2, protobuf, python-dateutil, sacremoses, websocket-client
+soupsieve==2.1            # via beautifulsoup4
 sqlalchemy==1.3.22        # via -r requirements.in
 starlette==0.13.6         # via fastapi
 tokenizers==0.9.4         # via transformers
@@ -67,11 +73,13 @@ transformers==4.2.2       # via -r requirements.in
 tweet-preprocessor==0.6.0  # via -r requirements.in
 typing-extensions==3.7.4.3  # via importlib-metadata, omegaconf, torch, uvicorn
 tzlocal==2.1              # via apscheduler
+update-checker==0.18.0    # via praw
 uritemplate==3.0.1        # via google-api-python-client
-urllib3==1.26.2           # via elasticsearch, requests
+urllib3==1.26.3           # via elasticsearch, requests
 uvicorn==0.13.3           # via -r requirements.in
 uvloop==0.14.0            # via -r requirements.in
 vadersentiment==3.3.2     # via -r requirements.in
+websocket-client==0.57.0  # via praw
 werkzeug==1.0.1           # via flask
 wrapt==1.12.1             # via deprecated
 zipp==3.4.0               # via importlib-metadata, importlib-resources

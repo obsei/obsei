@@ -5,7 +5,7 @@ from app_store.app_store_reviews_reader import AppStoreReviewsReader
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.text_analyzer import AnalyzerRequest
-from obsei.misc.utils import DATETIME_STRING_PATTERN, convert_utc_time
+from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time
 
 
 class AppStoreScrapperConfig(BaseSourceConfig):
@@ -54,7 +54,7 @@ class AppStoreScrapperSource(BaseSource):
                 "since_time",
                 config.lookup_period
             )
-            lookup_period = lookup_period or "1h"
+            lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
             if len(lookup_period) <= 5:
                 since_time = convert_utc_time(lookup_period)
             else:
@@ -62,7 +62,7 @@ class AppStoreScrapperSource(BaseSource):
 
             last_since_time: datetime = since_time
 
-            since_id: Optional[str] = country_stat.get("since_id", None)
+            since_id: Optional[int] = country_stat.get("since_id", None)
             last_index = since_id
             state[scrapper.country] = country_stat
 
@@ -80,6 +80,8 @@ class AppStoreScrapperSource(BaseSource):
                     )
                 )
 
+                if review.date < since_time:
+                    break
                 if last_since_time is None or last_since_time < review.date:
                     last_since_time = review.date
                 if last_index is None or last_index < review.id:
