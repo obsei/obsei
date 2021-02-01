@@ -4,7 +4,7 @@ import time
 
 from obsei.workflow.store import WorkflowStore
 from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig
-from obsei.workflow.workflow import Workflow, WorkflowConfig, WorkflowState
+from obsei.workflow.workflow import Workflow, WorkflowConfig
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)

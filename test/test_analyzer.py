@@ -58,7 +58,7 @@ def test_ner_analyzer(ner_analyzer):
 
     assert len(analyzer_responses) == 1
 
-    entities = analyzer_responses[0].segmented_data["entities"]
+    entities = analyzer_responses[0].segmented_data["data"]
     matched_count = 0
     for entity in entities:
         if entity["word"] == 'Lalit' and entity["entity_group"] == "PER":

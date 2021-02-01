@@ -37,10 +37,8 @@ sink = DailyGetSink()
 text_analyzer = ZeroShotClassificationAnalyzer(
     model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
  #   model_name_or_path="joeddav/xlm-roberta-large-xnli",
-    initialize_model=True,
     analyzer_config=ClassificationAnalyzerConfig(
         labels=["service", "delay", "tracking", "no response", "missing items", "delivery", "mask"],
-        use_sentiment_model=True
     )
 )
 
