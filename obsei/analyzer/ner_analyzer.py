@@ -51,7 +51,7 @@ class NERAnalyzer(BaseAnalyzer):
                 AnalyzerResponse(
                     processed_text=source_response.processed_text,
                     meta=source_response.meta,
-                    segmented_data={"entities": ner_list},
+                    segmented_data={"data": ner_list},
                     source_name=source_response.source_name,
                 )
             )

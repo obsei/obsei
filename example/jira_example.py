@@ -42,7 +42,6 @@ jira_sink = JiraSink()
 
 text_analyzer = ZeroShotClassificationAnalyzer(
     model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
-    initialize_model=True,
     analyzer_config=ClassificationAnalyzerConfig(
         labels=["service", "delay", "performance"],
     )
