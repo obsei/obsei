@@ -1,6 +1,7 @@
 import logging
 from typing import Any, List
 
+from pydantic import PrivateAttr
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest, AnalyzerResponse, BaseAnalyzer, BaseAnalyzerConfig
@@ -10,15 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class VaderSentimentAnalyzer(BaseAnalyzer):
-    __slots__ = ('_model',)
+    _model: SentimentIntensityAnalyzer = PrivateAttr()
     TYPE: str = "Sentiment"
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        object.__setattr__(
-            self,
-            '_model', SentimentIntensityAnalyzer()
-        )
+        self._model = SentimentIntensityAnalyzer()
 
     def _get_sentiment_score_from_vader(self, text: str) -> float:
         scores = self._model.polarity_scores(text)

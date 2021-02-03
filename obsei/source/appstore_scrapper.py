@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from app_store.app_store_reviews_reader import AppStoreReviewsReader
+from pydantic import PrivateAttr
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.base_analyzer import AnalyzerRequest
@@ -9,7 +10,7 @@ from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, con
 
 
 class AppStoreScrapperConfig(BaseSourceConfig):
-    __slots__ = ('_scrappers',)
+    _scrappers: List[AppStoreReviewsReader] = PrivateAttr()
     TYPE: str = "AppStoreScrapper"
     countries: List[str]
     app_id: str
@@ -18,19 +19,14 @@ class AppStoreScrapperConfig(BaseSourceConfig):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-        scrappers: List[AppStoreReviewsReader] = []
+        self._scrappers = []
         for country in self.countries:
-            scrappers.append(
+            self._scrappers.append(
                 AppStoreReviewsReader(
                     country=country,
                     app_id=self.app_id
                 )
             )
-        object.__setattr__(
-            self,
-            '_scrappers',
-            scrappers
-        )
 
     def get_review_readers(self) -> List[AppStoreReviewsReader]:
         return self._scrappers

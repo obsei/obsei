@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from bs4 import BeautifulSoup
 from praw import Reddit
-from pydantic import BaseSettings, Field, SecretStr
+from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time
@@ -26,7 +26,7 @@ class RedditCredInfo(BaseSettings):
 
 class RedditConfig(BaseSourceConfig):
     # This is done to avoid exposing member to API response
-    __slots__ = ('_reddit_client',)
+    _reddit_client: Reddit = PrivateAttr()
     TYPE: str = "Reddit"
     subreddits: List[str]
     post_ids: Optional[List[str]] = None
@@ -41,19 +41,14 @@ class RedditConfig(BaseSourceConfig):
         if self.cred_info is None:
             self.cred_info = RedditCredInfo()
 
-        object.__setattr__(
-            self,
-            '_reddit_client',
-            Reddit(
-                client_id=self.cred_info.client_id.get_secret_value(),
-                client_secret=self.cred_info.client_secret.get_secret_value(),
-                redirect_uri=self.cred_info.redirect_uri,
-                user_agent=self.cred_info.user_agent,
-                refresh_token=self.cred_info.refresh_token.get_secret_value() if self.cred_info.refresh_token else None,
-                username=self.cred_info.username if self.cred_info.username else None,
-                password=self.cred_info.password.get_secret_value() if self.cred_info.password else None,
-
-            )
+        self._reddit_client = Reddit(
+            client_id=self.cred_info.client_id.get_secret_value(),
+            client_secret=self.cred_info.client_secret.get_secret_value(),
+            redirect_uri=self.cred_info.redirect_uri,
+            user_agent=self.cred_info.user_agent,
+            refresh_token=self.cred_info.refresh_token.get_secret_value() if self.cred_info.refresh_token else None,
+            username=self.cred_info.username if self.cred_info.username else None,
+            password=self.cred_info.password.get_secret_value() if self.cred_info.password else None,
         )
 
         self._reddit_client.read_only = self.cred_info.read_only

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from elasticsearch.exceptions import RequestError
-from pydantic import Field, SecretStr
+from pydantic import Field, PrivateAttr, SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.analyzer.base_analyzer import AnalyzerResponse
@@ -12,7 +12,7 @@ from obsei.analyzer.base_analyzer import AnalyzerResponse
 
 class ElasticSearchSinkConfig(BaseSinkConfig):
     # This is done to avoid exposing member to API response
-    __slots__ = ('_es_client',)
+    _es_client: Elasticsearch = PrivateAttr()
     TYPE: str = "Elasticsearch"
     host: str
     port: int
@@ -30,17 +30,13 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        object.__setattr__(
-            self,
-            '_es_client',
-            Elasticsearch(
-                hosts=[{"host": self.host, "port": self.port}],
-                http_auth=(self.username.get_secret_value(), self.password.get_secret_value()),
-                scheme=self.scheme,
-                ca_certs=self.ca_certs,
-                verify_certs=self.verify_certs,
-                timeout=self.timeout
-            )
+        self._es_client = Elasticsearch(
+            hosts=[{"host": self.host, "port": self.port}],
+            http_auth=(self.username.get_secret_value(), self.password.get_secret_value()),
+            scheme=self.scheme,
+            ca_certs=self.ca_certs,
+            verify_certs=self.verify_certs,
+            timeout=self.timeout
         )
         self.base_payload = self.base_payload or {
             "_op_type": "create",  # TODO update exiting support?

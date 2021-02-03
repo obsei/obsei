@@ -4,7 +4,7 @@ from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
 from atlassian import Jira
-from pydantic import SecretStr
+from pydantic import PrivateAttr, SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.analyzer.base_analyzer import AnalyzerResponse
@@ -43,7 +43,7 @@ class JiraPayloadConvertor(Convertor):
 
 class JiraSinkConfig(BaseSinkConfig):
     # This is done to avoid exposing member to API response
-    __slots__ = ('_jira_client',)
+    _jira_client: Jira = PrivateAttr()
     TYPE: str = "Jira"
     url: str
     username: SecretStr
@@ -57,15 +57,11 @@ class JiraSinkConfig(BaseSinkConfig):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        object.__setattr__(
-            self,
-            '_jira_client',
-            Jira(
-                url=self.url,
-                username=self.username.get_secret_value(),
-                password=self.password.get_secret_value(),
-                verify_ssl=self.verify_ssl,
-            )
+        self._jira_client = Jira(
+            url=self.url,
+            username=self.username.get_secret_value(),
+            password=self.password.get_secret_value(),
+            verify_ssl=self.verify_ssl,
         )
 
     def get_jira_client(self):

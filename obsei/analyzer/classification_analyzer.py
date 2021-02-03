@@ -1,7 +1,8 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from transformers import pipeline
+from pydantic import PrivateAttr
+from transformers import Pipeline, pipeline
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest, AnalyzerResponse, BaseAnalyzer, BaseAnalyzerConfig
 
@@ -15,16 +16,13 @@ class ClassificationAnalyzerConfig(BaseAnalyzerConfig):
 
 
 class ZeroShotClassificationAnalyzer(BaseAnalyzer):
-    __slots__ = ('_pipeline',)
+    _pipeline: Pipeline = PrivateAttr()
     TYPE: str = "Classification"
     model_name_or_path: str
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        object.__setattr__(
-            self,
-            '_pipeline', pipeline("zero-shot-classification", model=self.model_name_or_path)
-        )
+        self._pipeline = pipeline("zero-shot-classification", model=self.model_name_or_path)
 
     def _classify_text_from_model(
         self, text: str,
