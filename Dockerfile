@@ -13,7 +13,7 @@ ENV OBSEI_WORKER_TYPE uvicorn.workers.UvicornWorker
 RUN mkdir -p /usr/share/man/man1
 
 # install few required tools
-RUN apt-get update && apt-get upgrade -y && apt-get install -y curl git pkg-config cmake default-jre
+RUN apt-get update && apt-get upgrade -y && apt-get install -y curl git pkg-config cmake default-jre build-essential g++
 RUN apt-get clean autoclean && apt-get autoremove -y
 RUN rm -rf /var/lib/{apt,dpkg,cache,log}/
 
