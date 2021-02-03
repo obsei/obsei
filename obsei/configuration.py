@@ -4,7 +4,7 @@ from typing import Any
 from hydra.experimental import compose, initialize
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
-from pydantic import BaseSettings, Field, constr
+from pydantic import BaseSettings, Field, PrivateAttr, constr
 
 from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig
 from obsei.sink.dailyget_sink import DailyGetSinkConfig
@@ -18,18 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 class ObseiConfiguration(BaseSettings):
-    __slots__ = ('configuration',)
+    configuration: DictConfig = PrivateAttr()
     config_path: constr(min_length=1) = Field(None, env='obsei_config_path')
     config_filename: constr(min_length=1) = Field(None, env='obsei_config_filename')
 
     def __init__(self, **data: Any):
         super().__init__(**data)
         with initialize(config_path=self.config_path):
-            object.__setattr__(
-                self,
-                'configuration',
-                compose(self.config_filename)
-            )
+            self.configuration = compose(self.config_filename)
             logger.debug("Configuration: \n" + OmegaConf.to_yaml(self.configuration))
 
     def initialize_instance(self, key_name: str = None):

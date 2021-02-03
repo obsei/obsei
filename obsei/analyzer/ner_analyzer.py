@@ -1,7 +1,8 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from transformers import AutoModelForTokenClassification, AutoTokenizer, pipeline
+from pydantic import PrivateAttr
+from transformers import AutoModelForTokenClassification, AutoTokenizer, Pipeline, pipeline
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest, AnalyzerResponse, BaseAnalyzer, BaseAnalyzerConfig
 
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class NERAnalyzer(BaseAnalyzer):
-    __slots__ = ('_pipeline',)
+    _pipeline: Pipeline = PrivateAttr()
     TYPE: str = "NER"
     model_name_or_path: str
     tokenizer_name: Optional[str] = None
@@ -23,14 +24,12 @@ class NERAnalyzer(BaseAnalyzer):
             tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_name, use_fast=True)
         else:
             tokenizer = None
-        object.__setattr__(
-            self,
-            '_pipeline', pipeline(
-                'ner',
-                model=model,
-                tokenizer=tokenizer,
-                grouped_entities=self.grouped_entities
-            )
+
+        self._pipeline = pipeline(
+            'ner',
+            model=model,
+            tokenizer=tokenizer,
+            grouped_entities=self.grouped_entities
         )
 
     def _classify_text_from_model(self, text: str) -> Dict[str, float]:

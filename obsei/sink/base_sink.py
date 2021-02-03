@@ -35,8 +35,8 @@ class BaseSinkConfig(BaseModel):
 
 
 class BaseSink(BaseModel):
-    convertor: Convertor
-    store: BaseStore
+    convertor: Optional[Convertor] = None
+    store: Optional[BaseStore] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)

@@ -96,17 +96,18 @@ Following environment variables are useful to customize various parameters -
 
 - **Source/Observer**: Twitter, Play Store Reviews, Apple App Store Reviews, Sub Reddit (Facebook, Instagram, Google reviews, Amazon reviews, Slack, Microsoft Team, Chat-bots etc planned in future)
 - **Analyzer/Segmenter**: Sentiment and Text classification (QA, Natural Search, FAQ, NER etc planned in future)
-- **Sink/Informer**: HTTP API, ElasticSearch, DailyGet, and Jira (Salesforce, Zendesk, Hubspot, Slack, Microsoft Team, etc planned in future)
+- **Sink/Informer**: HTTP API, ElasticSearch, DailyGet, Slack and Jira (Salesforce, Zendesk, Hubspot, Slack, Microsoft Team, etc planned in future)
 - **Processor/WorkflowEngine**: Simple integration between Source, Analyser and Sink (Rich workflows using rule engine planned in future)
 - **Convertor**: Very important part, which convert data from analyzer format to the format sink understand. It is very helpful in any customizations, refer `dailyget_sink.py` and `jira_sink.py`.
 
 **Note:** In order to use some integrations you would need credentials, refer following list -
 - [Twitter](https://twitter.com/): To make authorized API call, get access from [dev portal](https://developer.twitter.com/en/apply-for-access). Read about [search api](https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction) for more details. 
 - [Play Store](https://play.google.com/): To make authorized API calls, get [service account's credentials](https://developers.google.com/identity/protocols/oauth2/service-account). Read about [review api](https://googleapis.github.io/google-api-python-client/docs/dyn/androidpublisher_v3.reviews.html) for more details.
-- [Reddit](https://praw.readthedocs.io/en/latest/getting_started/authentication.html): To make authorized API calls, create [client app](https://www.reddit.com/prefs/apps).
+- [Reddit](https://www.reddit.com/): To make authorized API calls, create [client app](https://www.reddit.com/prefs/apps). For more detail refer [link](https://praw.readthedocs.io/en/latest/getting_started/authentication.html).
+- [Slack](https://slack.com/): To send message to Slack channel, get bot or user token. Refer [link](https://api.slack.com/authentication/token-types#bot).
 
 ## Model selection
-Any model listed in [Text Classification](https://huggingface.co/models?filter=text-classification) or [Zero-Shot Classification](https://huggingface.co/models?filter=zero-shot-classification) can be used in Segmenter.
+Any model listed in [Named Entity Recognition](https://huggingface.co/models?filter=token-classification), [Text Classification](https://huggingface.co/models?filter=text-classification) and [Zero-Shot Classification](https://huggingface.co/models?filter=zero-shot-classification) can be used in Segmenter.
 
 ## Examples and Screenshots
 Refer [example](https://github.com/lalitpagaria/obsei/tree/master/example) and [config](https://github.com/lalitpagaria/obsei/tree/master/config) folders for `obsei` usage and configurations.

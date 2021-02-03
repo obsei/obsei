@@ -18,10 +18,10 @@ def print_state(id: str):
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-since_time = datetime.utcnow().astimezone(pytz.utc) + timedelta(days=1)
+since_time = datetime.utcnow().astimezone(pytz.utc) + timedelta(days=-1)
 
 source_config = RedditScrapperConfig(
-    urls=["https://www.reddit.com/r/wallstreetbets/comments/.rss?sort=new"],
+    url="https://www.reddit.com/r/wallstreetbets/comments/.rss?sort=new",
     user_agent="testscript by u/FitStatistician7378",
     lookup_period=since_time.strftime(DATETIME_STRING_PATTERN)
 )

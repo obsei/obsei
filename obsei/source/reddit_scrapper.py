@@ -1,8 +1,9 @@
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import mmh3
+from pydantic import PrivateAttr
 from reddit_rss_reader.reader import RedditContent, RedditRSSReader
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
@@ -13,9 +14,10 @@ logger = logging.getLogger(__name__)
 
 
 class RedditScrapperConfig(BaseSourceConfig):
-    __slots__ = ('_scrappers',)
+    _scrapper: RedditRSSReader = PrivateAttr()
     TYPE: str = "RedditScrapper"
-    urls: List[str]
+    url: str
+    url_id: Optional[str] = None
     user_agent: Optional[str] = None
     lookup_period: Optional[str] = None
 
@@ -23,21 +25,15 @@ class RedditScrapperConfig(BaseSourceConfig):
         super().__init__(**data)
 
         # Using 32 bit hash
-        scrappers: Dict[str, RedditRSSReader] = dict()
-        for url in self.urls:
-            url_hash = '{:02x}'.format(mmh3.hash(url, signed=False))
-            scrappers[url_hash] = RedditRSSReader(
-                url=url,
-                user_agent=self.user_agent if self.user_agent else 'testscript {url_hash}'.format(url_hash=url_hash)
-            )
-        object.__setattr__(
-            self,
-            '_scrappers',
-            scrappers
+        self.url_id = self.url_id or '{:02x}'.format(mmh3.hash(self.url, signed=False))
+
+        self._scrapper = RedditRSSReader(
+            url=self.url,
+            user_agent=self.user_agent if self.user_agent else 'script {url_hash}'.format(url_hash=self.url_id)
         )
 
-    def get_readers(self) -> Dict[str, RedditRSSReader]:
-        return self._scrappers
+    def get_readers(self) -> RedditRSSReader:
+        return self._scrapper
 
 
 class RedditScrapperSource(BaseSource):
@@ -52,51 +48,51 @@ class RedditScrapperSource(BaseSource):
         update_state: bool = True if id else False
         state = state or dict()
 
-        for scrapper_id, scrapper in config.get_readers().items():
-            scrapper_stat: Dict[str, Any] = state.get(scrapper_id, dict())
-            lookup_period: str = scrapper_stat.get(
-                "since_time",
-                config.lookup_period
+        scrapper_stat: Dict[str, Any] = state.get(config.url_id, dict())
+        lookup_period: str = scrapper_stat.get(
+            "since_time",
+            config.lookup_period
+        )
+        lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
+        if len(lookup_period) <= 5:
+            since_time = convert_utc_time(lookup_period)
+        else:
+            since_time = datetime.strptime(lookup_period, DATETIME_STRING_PATTERN)
+
+        last_since_time: datetime = since_time
+
+        since_id: Optional[str] = scrapper_stat.get("since_id", None)
+        last_index = since_id
+        state[config.url_id] = scrapper_stat
+
+        reddit_data: Optional[List[RedditContent]] = None
+        try:
+            reddit_data = config.get_readers().fetch_content(
+                after=since_time,
+                since_id=since_id
             )
-            lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
-            if len(lookup_period) <= 5:
-                since_time = convert_utc_time(lookup_period)
-            else:
-                since_time = datetime.strptime(lookup_period, DATETIME_STRING_PATTERN)
+        except RuntimeError as ex:
+            logger.warning(ex.__cause__)
 
-            last_since_time: datetime = since_time
+        reddit_data = reddit_data or []
 
-            since_id: Optional[str] = scrapper_stat.get("since_id", None)
-            last_index = since_id
-            state[scrapper_id] = scrapper_stat
-
-            reddit_data: Optional[List[RedditContent]] = None
-            try:
-                reddit_data = scrapper.fetch_content(
-                    after=since_time,
-                    since_id=since_id
+        for reddit in reddit_data:
+            source_responses.append(
+                AnalyzerRequest(
+                    processed_text=f"{reddit.title}. {reddit.extracted_text}",
+                    meta=reddit.__dict__,
+                    source_name=self.NAME
                 )
-            except RuntimeError as ex:
-                logger.warning(ex.__cause__)
+            )
 
-            reddit_data = reddit_data or []
+            if last_since_time is None or last_since_time < reddit.updated:
+                last_since_time = reddit.updated
+            if last_index is None:
+                # Assuming list is sorted based on time
+                last_index = reddit.id
 
-            for reddit in reddit_data:
-                source_responses.append(AnalyzerRequest(
-                        processed_text=f"{reddit.title}. {reddit.extracted_text}",
-                        meta=reddit.__dict__,
-                        source_name=self.NAME
-                    )
-                )
-
-                if last_since_time is None or last_since_time < reddit.updated:
-                    last_since_time = reddit.updated
-                if last_index is None:
-                    # Assuming list is sorted based on time
-                    last_index = reddit.id
-
-            scrapper_stat["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
-            scrapper_stat["since_id"] = last_index
+        scrapper_stat["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
+        scrapper_stat["since_id"] = last_index
 
         if update_state:
             self.store.update_source_state(workflow_id=id, state=state)
