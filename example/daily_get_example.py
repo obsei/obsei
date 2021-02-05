@@ -37,9 +37,6 @@ sink = DailyGetSink()
 text_analyzer = ZeroShotClassificationAnalyzer(
     model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
  #   model_name_or_path="joeddav/xlm-roberta-large-xnli",
-    analyzer_config=ClassificationAnalyzerConfig(
-        labels=["service", "delay", "tracking", "no response", "missing items", "delivery", "mask"],
-    )
 )
 
 source_response_list = source.lookup(source_config)
@@ -47,7 +44,10 @@ for idx, source_response in enumerate(source_response_list):
     logger.info(f"source_response#'{idx}'='{source_response.__dict__}'")
 
 analyzer_response_list = text_analyzer.analyze_input(
-    source_response_list=source_response_list
+    source_response_list=source_response_list,
+    analyzer_config=ClassificationAnalyzerConfig(
+            labels=["service", "delay", "tracking", "no response", "missing items", "delivery", "mask"],
+        )
 )
 for idx, an_response in enumerate(analyzer_response_list):
     logger.info(f"analyzer_response#'{idx}'='{an_response.__dict__}'")

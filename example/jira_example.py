@@ -41,10 +41,7 @@ jira_sink_config = JiraSinkConfig(
 jira_sink = JiraSink()
 
 text_analyzer = ZeroShotClassificationAnalyzer(
-    model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
-    analyzer_config=ClassificationAnalyzerConfig(
-        labels=["service", "delay", "performance"],
-    )
+    model_name_or_path="joeddav/bart-large-mnli-yahoo-answers"
 )
 
 source_response_list = source.lookup(source_config)
@@ -52,7 +49,10 @@ for idx, source_response in enumerate(source_response_list):
     logger.info(f"source_response#'{idx}'='{source_response.__dict__}'")
 
 analyzer_response_list = text_analyzer.analyze_input(
-    source_response_list=source_response_list
+    source_response_list=source_response_list,
+    analyzer_config=ClassificationAnalyzerConfig(
+            labels=["service", "delay", "performance"],
+        )
 )
 for idx, an_response in enumerate(analyzer_response_list):
     logger.info(f"analyzer_response#'{idx}'='{an_response.__dict__}'")

@@ -1,51 +1,40 @@
 import logging
 import sys
-import time
 from datetime import datetime, timedelta
 
 import pytz
 
+from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig, ZeroShotClassificationAnalyzer
 from obsei.misc.utils import DATETIME_STRING_PATTERN
 from obsei.source.playstore_scrapper import PlayStoreScrapperConfig, PlayStoreScrapperSource
-from obsei.workflow.store import WorkflowStore
-from obsei.workflow.workflow import Workflow, WorkflowConfig
-
-
-def print_state(id: str):
-    logger.info(f'Source State: {source.store.get_source_state(id)}')
 
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-since_time = datetime.utcnow().astimezone(pytz.utc) + timedelta(days=-5)
+since_time = datetime.utcnow().astimezone(pytz.utc) + timedelta(days=-4)
 source_config = PlayStoreScrapperConfig(
     countries=["us"],
-    package_name="com.careem.acma",
+    package_name="com.apcoaconnect",
     lookup_period=since_time.strftime(DATETIME_STRING_PATTERN)
 )
 
-source = PlayStoreScrapperSource(store=WorkflowStore())
+source = PlayStoreScrapperSource()
 
-# This example also
-workflow = Workflow(
-    config=WorkflowConfig(
-        source_config=source_config,
-    ),
+text_analyzer = ZeroShotClassificationAnalyzer(
+    model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
 )
-source.store.add_workflow(workflow)
 
+source_response_list = source.lookup(source_config)
+for idx, source_response in enumerate(source_response_list):
+    logger.info(f"source_response#'{idx}'='{source_response.__dict__}'")
 
-for i in range(1, 4):
-    print_state(workflow.id)
-    source_response_list = source.lookup(source_config, id=workflow.id)
+analyzer_response_list = text_analyzer.analyze_input(
+    source_response_list=source_response_list,
+    analyzer_config=ClassificationAnalyzerConfig(
+        labels=["no parking", "registration issue", "app issue", "payment issue"],
+    )
+)
+for idx, an_response in enumerate(analyzer_response_list):
+    logger.info(f"analyzer_response#'{idx}'='{an_response.__dict__}'")
 
-    if source_response_list is None or len(source_response_list) == 0:
-        break
-
-    for source_response in source_response_list:
-        logger.info(source_response.__dict__)
-
-    time.sleep(10)
-
-print_state(workflow.id)
