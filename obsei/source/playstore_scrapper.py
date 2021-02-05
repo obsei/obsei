@@ -70,8 +70,6 @@ class PlayStoreScrapperSource(BaseSource):
                     )
                 )
 
-                if review.date < review["at"]:
-                    break
                 if last_since_time is None or last_since_time < review["at"]:
                     last_since_time = review["at"]
                 # if last_index is None or last_index < review.id:
