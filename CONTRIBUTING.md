@@ -1,1 +1,2 @@
-Currently, we are not accepting any pull requests. If you want a feature or something doesn't work, please create an issue.
+Currently, as project is very early stages, we are not accepting any pull requests. 
+We would love community's active contribution after few releases, first we want to shape the project with suggestion and feedback. If you want a feature or something doesn't work, please create an issue.

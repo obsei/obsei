@@ -62,7 +62,8 @@ For detailed installation instructions, usages and example refer [documentation]
 Refer [link](ATTRIBUTION.md) for attribution.
 
 ## Contribution
-Currently, we are not accepting any pull requests. If you want a feature or something doesn't work, please create an issue.
+Currently, as project is very early stages, we are not accepting any pull requests. 
+We would love community's active contribution after few releases, first we want to shape the project with suggestion and feedback. If you want a feature or something doesn't work, please create an issue.
 
 ## Changelog
 Refer [releases](https://github.com/lalitpagaria/obsei/releases) and [projects](https://github.com/lalitpagaria/obsei/projects).
