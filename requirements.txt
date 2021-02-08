@@ -21,15 +21,15 @@ fastapi==0.63.0           # via -r requirements.in
 feedparser==6.0.2         # via -r requirements.in, app-store-reviews-reader, reddit-rss-reader
 filelock==3.0.12          # via transformers
 flask==1.1.2              # via -r requirements.in
-google-api-core==1.25.1   # via google-api-python-client
+google-api-core==1.26.0   # via google-api-python-client
 google-api-python-client==1.12.8  # via -r requirements.in
 google-auth-httplib2==0.0.4  # via google-api-python-client
-google-auth==1.24.0       # via google-api-core, google-api-python-client, google-auth-httplib2
+google-auth==1.25.0       # via google-api-core, google-api-python-client, google-auth-httplib2
 google-play-scraper==0.1.2  # via -r requirements.in
 googleapis-common-protos==1.52.0  # via google-api-core
 gunicorn==20.0.4          # via -r requirements.in
 h11==0.12.0               # via uvicorn
-httplib2==0.18.1          # via google-api-python-client, google-auth-httplib2
+httplib2==0.19.0          # via google-api-python-client, google-auth-httplib2
 httptools==0.1.1          # via -r requirements.in
 hydra-core==1.1.0.dev3    # via -r requirements.in
 idna==2.10                # via requests
@@ -40,17 +40,17 @@ jinja2==2.11.3            # via flask
 joblib==1.0.0             # via sacremoses
 markupsafe==1.1.1         # via jinja2
 mmh3==2.5.1               # via -r requirements.in
-numpy==1.20.0             # via torch, transformers
+numpy==1.20.1             # via torch, transformers
 oauthlib==3.1.0           # via atlassian-python-api, requests-oauthlib
 omegaconf==2.1.0.dev18    # via hydra-core
-packaging==20.9           # via transformers
-praw==7.1.0               # via -r requirements.in
+packaging==20.9           # via google-api-core, transformers
+praw==7.1.4               # via -r requirements.in
 prawcore==1.5.0           # via praw
 protobuf==3.14.0          # via google-api-core, googleapis-common-protos
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, rsa
 pydantic==1.7.3           # via -r requirements.in, fastapi
-pyparsing==2.4.7          # via packaging
+pyparsing==2.4.7          # via httplib2, packaging
 python-dateutil==2.8.1    # via -r requirements.in, searchtweets-v2
 pytz==2021.1              # via -r requirements.in, apscheduler, google-api-core, tzlocal
 pyyaml==5.4.1             # via omegaconf, searchtweets-v2
@@ -63,14 +63,14 @@ sacremoses==0.0.43        # via transformers
 searchtweets-v2==1.0.4    # via -r requirements.in
 sgmllib3k==1.0.0          # via feedparser
 six==1.15.0               # via apscheduler, atlassian-python-api, google-api-core, google-api-python-client, google-auth, google-auth-httplib2, protobuf, python-dateutil, sacremoses, websocket-client
-slack-sdk==3.2.1          # via -r requirements.in
+slack-sdk==3.3.0          # via -r requirements.in
 soupsieve==2.1            # via beautifulsoup4
 sqlalchemy==1.3.23        # via -r requirements.in
 starlette==0.13.6         # via fastapi
-tokenizers==0.9.4         # via transformers
+tokenizers==0.10.1        # via transformers
 torch==1.7.1              # via -r requirements.in
 tqdm==4.56.0              # via sacremoses, transformers
-transformers==4.2.2       # via -r requirements.in
+transformers==4.3.0       # via -r requirements.in
 tweet-preprocessor==0.6.0  # via -r requirements.in
 typing-extensions==3.7.4.3  # via importlib-metadata, omegaconf, torch, uvicorn
 tzlocal==2.1              # via apscheduler
