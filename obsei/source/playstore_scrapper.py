@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from google_play_scraper import Sort, reviews
+from google_play_scraper.features.reviews import ContinuationToken
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.base_analyzer import AnalyzerRequest
@@ -15,6 +16,7 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
     language: Optional[str]
     filter_score_with: Optional[int] = None
     lookup_period: Optional[str] = None
+    max_count: Optional[int] = 200
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -53,27 +55,38 @@ class PlayStoreScrapperSource(BaseSource):
             # last_index = since_id
             # state[scrapper.country] = country_stat
 
-            store_reviews, continuation_token = reviews(
-                app_id=config.package_name,
-                lang=config.language,
-                country=country,
-                sort=Sort.NEWEST,
-                filter_score_with=config.filter_score_with
-            )
-            store_reviews = store_reviews or []
-
-            for review in store_reviews:
-                source_responses.append(AnalyzerRequest(
-                        processed_text=review["content"],
-                        meta=review,
-                        source_name=self.NAME
-                    )
+            continuation_token: Optional[ContinuationToken] = None
+            while True:
+                store_reviews, continuation_token = reviews(
+                    app_id=config.package_name,
+                    lang=config.language,
+                    country=country,
+                    sort=Sort.NEWEST,
+                    filter_score_with=config.filter_score_with,
+                    continuation_token=continuation_token,
+                    count=config.max_count
                 )
+                store_reviews = store_reviews or []
 
-                if last_since_time is None or last_since_time < review["at"]:
-                    last_since_time = review["at"]
-                # if last_index is None or last_index < review.id:
-                #    last_index = review.id
+                for review in store_reviews:
+                    source_responses.append(AnalyzerRequest(
+                            processed_text=review["content"],
+                            meta=review,
+                            source_name=self.NAME
+                        )
+                    )
+
+                    if since_time > review["at"]:
+                        break
+
+                    if last_since_time is None or last_since_time < review["at"]:
+                        last_since_time = review["at"]
+                    # if last_index is None or last_index < review.id:
+                    #    last_index = review.id
+
+                if continuation_token is None or continuation_token.token is None or \
+                        continuation_token.count <= len(source_responses):
+                    break
 
             country_stat["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
             # country_stat["since_id"] = last_index
