@@ -6,7 +6,7 @@ from praw import Reddit
 from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest
-from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time
+from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time, text_from_html
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 
 
@@ -124,7 +124,7 @@ class RedditSource(BaseSource):
                     last_index = comment_id
                     first_comment = False
 
-                text = ''.join(BeautifulSoup(comment_data["body_html"], "html.parser").findAll(text=True))
+                text = ''.join(text_from_html(comment_data["body_html"]))
 
                 source_responses.append(
                     AnalyzerRequest(
