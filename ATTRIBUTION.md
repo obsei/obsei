@@ -12,3 +12,7 @@ This could not have been possible without following open source software -
 - [fastapi](https://fastapi.tiangolo.com/) & [gunicorn](https://gunicorn.org/): For HTTP server and API interface
 - [google-play-scraper](https://github.com/JoMingyu/google-play-scraper): To fetch the Google Play Store review without authentication
 - [praw](https://github.com/praw-dev/praw): For Reddit client
+- [reddit-rss-reader](https://github.com/lalitpagaria/reddit-rss-reader): For Reddit scrapping
+- [app-store-reviews-reader](https://github.com/lalitpagaria/app_store_reviews_reader): For App Store reviews scrapping  
+- [slack-sdk](https://github.com/slackapi/python-slack-sdk): For slack integration
+- [zenpy](https://github.com/facetoe/zenpy): For Zendesk integration

@@ -121,7 +121,7 @@ class DailyGetSink(HttpSink):
         for analyzer_response in analyzer_responses:
             payloads.append(self.convertor.convert(
                 analyzer_response=analyzer_response,
-                base_payload=deepcopy(config.base_payload),
+                base_payload=dict() if config.base_payload is None else deepcopy(config.base_payload),
                 source_information=config.source_information,
             ))
 
