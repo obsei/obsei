@@ -15,7 +15,7 @@ class Convertor(BaseModel):
         base_payload: Optional[Dict[str, Any]] = None,
         **kwargs
     ) -> dict:
-
+        base_payload = base_payload or dict()
         return {**base_payload, **analyzer_response.to_dict()} \
             if base_payload is not None else analyzer_response.to_dict()
 

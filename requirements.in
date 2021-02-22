@@ -21,7 +21,6 @@ gunicorn
 uvloop
 httptools
 google-api-python-client
-feedparser
 hydra-core>=1.1.0.dev3
 google-play-scraper
 app-store-reviews-reader
@@ -30,3 +29,4 @@ praw
 mmh3
 beautifulsoup4
 slack-sdk
+zenpy

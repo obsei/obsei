@@ -1,6 +1,5 @@
 import logging
 import textwrap
-from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
 from atlassian import Jira
@@ -22,7 +21,7 @@ class JiraPayloadConvertor(Convertor):
     ) -> dict:
         summary_max_length = kwargs.get("summary_max_length", 50)
 
-        payload = deepcopy(base_payload)
+        payload = base_payload or dict()
         payload["description"] = obj_to_markdown(
             obj=analyzer_response,
             str_enclose_start="{quote}",
