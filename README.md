@@ -24,7 +24,7 @@
     </a>
 </p>
 
-**Note: There are major breaking changes are on the way. Please use released version instead of master branch. To track progress of next release refer [release tracker](https://github.com/lalitpagaria/obsei/projects).**
+**Note: Please use released version instead of master branch as master might have some breaking changes. To track progress of next release refer [release tracker](https://github.com/lalitpagaria/obsei/projects).**
 
 
 `Obsei` is intended to be a workflow automation tool for text segmentation need. `Obsei` consist of -
