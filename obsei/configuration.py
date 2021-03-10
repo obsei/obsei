@@ -1,9 +1,7 @@
 import logging
-from typing import Any
+from typing import Any, Dict
 
-from hydra.experimental import compose, initialize
-from hydra.utils import instantiate
-from omegaconf import DictConfig, OmegaConf
+import yaml
 from pydantic import BaseSettings, Field, PrivateAttr, constr
 
 from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig
@@ -18,15 +16,15 @@ logger = logging.getLogger(__name__)
 
 
 class ObseiConfiguration(BaseSettings):
-    configuration: DictConfig = PrivateAttr()
+    configuration: Dict[str, Any] = PrivateAttr()
     config_path: constr(min_length=1) = Field(None, env='obsei_config_path')
     config_filename: constr(min_length=1) = Field(None, env='obsei_config_filename')
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        with initialize(config_path=self.config_path):
-            self.configuration = compose(self.config_filename)
-            logger.debug("Configuration: \n" + OmegaConf.to_yaml(self.configuration))
+        with open("tutswiki.yaml", "r") as yamlfile:
+            self.configuration = yaml.load(f"{self.config_path}/{self.config_filename}", Loader=yaml.FullLoader)
+            logger.debug("Configuration: \n" + self.configuration)
 
     def initialize_instance(self, key_name: str = None):
         return instantiate(self.configuration[key_name], _recursive_=True)
@@ -55,5 +53,5 @@ class ObseiConfiguration(BaseSettings):
     def get_analyzer_config(self, key_name: str = "analyzer_config") -> BaseAnalyzerConfig:
         return self.initialize_instance(key_name)
 
-    def get_logging_config(self, key_name: str = "logging") -> DictConfig:
+    def get_logging_config(self, key_name: str = "logging") -> Dict[str, Any]:
         return self.configuration[key_name]
