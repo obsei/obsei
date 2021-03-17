@@ -21,7 +21,7 @@ fastapi==0.63.0           # via -r requirements.in
 feedparser==6.0.2         # via app-store-reviews-reader, reddit-rss-reader
 filelock==3.0.12          # via transformers
 flask==1.1.2              # via -r requirements.in
-google-api-core==1.26.0   # via google-api-python-client
+google-api-core==1.26.1   # via google-api-python-client
 google-api-python-client==1.12.8  # via -r requirements.in
 google-auth-httplib2==0.0.4  # via google-api-python-client
 google-auth==1.27.0       # via google-api-core, google-api-python-client, google-auth-httplib2
