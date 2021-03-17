@@ -49,7 +49,7 @@ prawcore==1.5.0           # via praw
 protobuf==3.15.1          # via google-api-core, googleapis-common-protos
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, rsa
-pydantic==1.7.3           # via -r requirements.in, fastapi
+pydantic==1.8.1           # via -r requirements.in, fastapi
 pyparsing==2.4.7          # via httplib2, packaging
 python-dateutil==2.8.1    # via -r requirements.in, searchtweets-v2, zenpy
 pytz==2021.1              # via -r requirements.in, apscheduler, google-api-core, tzlocal, zenpy
