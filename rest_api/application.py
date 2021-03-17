@@ -97,6 +97,7 @@ def init_analyzer():
 
 def init_processor():
     global processor
+    global analyzer
     # TODO generalize it, so based on analyzer config it initialise
     processor = Processor(analyzer=analyzer)
 
@@ -134,6 +135,8 @@ def app_init():
     tags=["workflow"]
 )
 async def get_scheduled_syncs():
+    global rate_limiter
+    global scheduler
     with rate_limiter.run():
         schedules = []
         for job in scheduler.get_jobs():
@@ -154,6 +157,8 @@ async def get_scheduled_syncs():
     tags=["workflow"]
 )
 async def get_all_workflows():
+    global rate_limiter
+    global workflow_store
     with rate_limiter.run():
         return workflow_store.get_all()
 
@@ -165,6 +170,8 @@ async def get_all_workflows():
     tags=["workflow"]
 )
 async def get_workflow(workflow_id: str):
+    global rate_limiter
+    global workflow_store
     with rate_limiter.run():
         return workflow_store.get(workflow_id)
 
@@ -176,6 +183,9 @@ async def get_workflow(workflow_id: str):
     tags=["workflow"]
 )
 async def delete_workflow(workflow_id: str):
+    global rate_limiter
+    global workflow_store
+    global scheduler
     with rate_limiter.run():
         try:
             scheduler.remove_job(job_id=workflow_id)
@@ -201,6 +211,9 @@ async def delete_workflow(workflow_id: str):
     tags=["workflow"]
 )
 async def update_workflow(workflow_id: str, request: WorkflowConfig):
+    global rate_limiter
+    global workflow_store
+    global scheduler
     with rate_limiter.run():
         try:
             scheduler.remove_job(job_id=workflow_id)
@@ -229,6 +242,9 @@ async def update_workflow(workflow_id: str, request: WorkflowConfig):
     tags=["workflow"]
 )
 async def add_workflow(request: WorkflowConfig):
+    global rate_limiter
+    global workflow_store
+    global scheduler
     with rate_limiter.run():
         workflow_detail = Workflow(config=request)
         workflow_store.add_workflow(workflow_detail)
@@ -252,6 +268,8 @@ async def add_workflow(request: WorkflowConfig):
     tags=["api"]
 )
 def classify_texts(request: ClassifierRequest):
+    global rate_limiter
+    global analyzer
     with rate_limiter.run():
         analyzer_requests: List[AnalyzerRequest] = [
             AnalyzerRequest(
