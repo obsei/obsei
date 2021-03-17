@@ -65,7 +65,7 @@ sgmllib3k==1.0.0          # via feedparser
 six==1.15.0               # via apscheduler, atlassian-python-api, google-api-core, google-api-python-client, google-auth, google-auth-httplib2, protobuf, python-dateutil, sacremoses, websocket-client, zenpy
 slack-sdk==3.4.0          # via -r requirements.in
 soupsieve==2.2            # via beautifulsoup4
-sqlalchemy==1.3.23        # via -r requirements.in
+sqlalchemy==1.4.1        # via -r requirements.in
 starlette==0.13.6         # via fastapi
 tokenizers==0.10.1        # via transformers
 torch==1.7.1              # via -r requirements.in
