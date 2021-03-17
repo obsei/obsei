@@ -6,7 +6,7 @@
 #
 --find-links=https://download.pytorch.org/whl/torch_stable.html
 
-antlr4-python3-runtime==4.8  # via hydra-core
+antlr4-python3-runtime==4.9.2  # via hydra-core
 app-store-reviews-reader==1.0  # via -r requirements.in
 apscheduler==3.7.0        # via -r requirements.in
 atlassian-python-api==3.5.2  # via -r requirements.in
