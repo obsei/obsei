@@ -46,7 +46,7 @@ omegaconf==2.1.0.dev19    # via hydra-core
 packaging==20.9           # via google-api-core, transformers
 praw==7.1.4               # via -r requirements.in
 prawcore==1.5.0           # via praw
-protobuf==3.15.1          # via google-api-core, googleapis-common-protos
+protobuf==3.15.6          # via google-api-core, googleapis-common-protos
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, rsa
 pydantic==1.7.3           # via -r requirements.in, fastapi
