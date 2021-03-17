@@ -80,7 +80,7 @@ urllib3==1.26.3           # via elasticsearch, requests
 uvicorn==0.13.4           # via -r requirements.in
 uvloop==0.15.2            # via -r requirements.in
 vadersentiment==3.3.2     # via -r requirements.in
-websocket-client==0.57.0  # via praw
+websocket-client==0.58.0  # via praw
 werkzeug==1.0.1           # via flask
 wrapt==1.12.1             # via deprecated
 zenpy==2.0.24             # via -r requirements.in
