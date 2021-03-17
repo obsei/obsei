@@ -15,7 +15,7 @@ cachetools==4.2.1         # via google-auth, zenpy
 certifi==2020.12.5        # via elasticsearch, requests
 chardet==4.0.0            # via requests
 click==7.1.2              # via flask, sacremoses, uvicorn
-deprecated==1.2.11        # via atlassian-python-api
+deprecated==1.2.12        # via atlassian-python-api
 elasticsearch==7.10.1     # via -r requirements.in
 fastapi==0.63.0           # via -r requirements.in
 feedparser==6.0.2         # via app-store-reviews-reader, reddit-rss-reader
