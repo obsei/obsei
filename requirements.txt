@@ -76,7 +76,7 @@ typing-extensions==3.7.4.3  # via importlib-metadata, omegaconf, torch, uvicorn
 tzlocal==2.1              # via apscheduler
 update-checker==0.18.0    # via praw
 uritemplate==3.0.1        # via google-api-python-client
-urllib3==1.26.3           # via elasticsearch, requests
+urllib3==1.26.4           # via elasticsearch, requests
 uvicorn==0.13.4           # via -r requirements.in
 uvloop==0.15.2            # via -r requirements.in
 vadersentiment==3.3.2     # via -r requirements.in
