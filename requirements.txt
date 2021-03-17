@@ -84,7 +84,7 @@ websocket-client==0.57.0  # via praw
 werkzeug==1.0.1           # via flask
 wrapt==1.12.1             # via deprecated
 zenpy==2.0.24             # via -r requirements.in
-zipp==3.4.0               # via importlib-metadata, importlib-resources
+zipp==3.4.1               # via importlib-metadata, importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
