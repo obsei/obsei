@@ -25,7 +25,7 @@ google-api-core==1.26.0   # via google-api-python-client
 google-api-python-client==1.12.8  # via -r requirements.in
 google-auth-httplib2==0.0.4  # via google-api-python-client
 google-auth==1.27.0       # via google-api-core, google-api-python-client, google-auth-httplib2
-google-play-scraper==0.1.2  # via -r requirements.in
+google-play-scraper==0.2  # via -r requirements.in
 googleapis-common-protos==1.52.0  # via google-api-core
 gunicorn==20.0.4          # via -r requirements.in
 h11==0.12.0               # via uvicorn
