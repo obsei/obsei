@@ -33,7 +33,7 @@ httplib2==0.19.0          # via google-api-python-client, google-auth-httplib2
 httptools==0.1.1          # via -r requirements.in
 hydra-core==1.1.0.dev3    # via -r requirements.in
 idna==2.10                # via requests
-importlib-metadata==3.4.0  # via transformers
+importlib-metadata==3.7.3  # via transformers
 importlib-resources==5.1.0  # via hydra-core
 itsdangerous==1.1.0       # via flask
 jinja2==2.11.3            # via flask
