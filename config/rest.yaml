@@ -1,23 +1,18 @@
 workflow_store:
   _target_: obsei.workflow.store.WorkflowStore
-  _convert_: all
   url: sqlite:///obsei.db
 
 workflow_scheduler:
   _target_: apscheduler.schedulers.asyncio.AsyncIOScheduler
-  _convert_: all
   jobstores:
     default:
       _target_: apscheduler.jobstores.memory.MemoryJobStore
-      _convert_: all
 
-text_analyzer:
+analyzer:
   _target_: obsei.analyzer.sentiment_analyzer.VaderSentimentAnalyzer
-  _convert_: all
 
 rate_limiter:
   _target_: rest_api.rate_limiter.RequestLimiter
-  _convert_: all
   concurrent_request_per_worker: 2
 
 logging:

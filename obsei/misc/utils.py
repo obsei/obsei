@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
-from typing import Any, Dict, Optional
+from importlib import import_module
+from typing import Any, Dict, Mapping, Optional, Tuple
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment
@@ -147,3 +148,26 @@ def text_from_html(body):
     texts = soup.findAll(text=True)
     visible_texts = filter(tag_visible, texts)
     return u" ".join(t.strip() for t in visible_texts)
+
+
+def dict_to_object(
+        dictionary: Dict[str, Any],
+        class_name_key: Optional[str] = "_target_",
+        full_class_name: Optional[str] = None
+) -> Any:
+    new_dict: Dict[str, Any] = dict()
+    for k, v in dictionary.items():
+        if k == class_name_key:
+            full_class_name = v
+        elif isinstance(v, Dict):
+            new_dict[k] = dict_to_object(dictionary=v, class_name_key=class_name_key)
+        else:
+            new_dict[k] = v
+
+    if full_class_name is None:
+        return new_dict
+
+    module_name, class_name = tuple(full_class_name.rsplit(".", 1))
+    module = import_module(module_name)
+    class_ref = getattr(module, class_name)
+    return class_ref(**new_dict)

@@ -1,12 +1,11 @@
 import logging
-from typing import Any
+from typing import Any, Dict
 
-from hydra.experimental import compose, initialize
-from hydra.utils import instantiate
-from omegaconf import DictConfig, OmegaConf
+import yaml
 from pydantic import BaseSettings, Field, PrivateAttr, constr
 
 from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig
+from obsei.misc.utils import dict_to_object
 from obsei.sink.dailyget_sink import DailyGetSinkConfig
 from obsei.sink.elasticsearch_sink import ElasticSearchSinkConfig
 from obsei.sink.http_sink import HttpSinkConfig
@@ -18,18 +17,20 @@ logger = logging.getLogger(__name__)
 
 
 class ObseiConfiguration(BaseSettings):
-    configuration: DictConfig = PrivateAttr()
+    _configuration: Dict[str, Any] = PrivateAttr()
     config_path: constr(min_length=1) = Field(None, env='obsei_config_path')
     config_filename: constr(min_length=1) = Field(None, env='obsei_config_filename')
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        with initialize(config_path=self.config_path):
-            self.configuration = compose(self.config_filename)
-            logger.debug("Configuration: \n" + OmegaConf.to_yaml(self.configuration))
+        self._configuration = yaml.load(
+            open(f"{self.config_path}/{self.config_filename}", "r"),
+            Loader=yaml.FullLoader
+        )
+        logger.debug(f"Configuration: {self._configuration}")
 
     def initialize_instance(self, key_name: str = None):
-        return instantiate(self.configuration[key_name], _recursive_=True)
+        return dict_to_object(self._configuration[key_name])
 
     def get_twitter_source_config(self, key_name: str = "twitter_source") -> TwitterSourceConfig:
         return self.initialize_instance(key_name)
@@ -49,11 +50,11 @@ class ObseiConfiguration(BaseSettings):
     def get_jira_sink_config(self, key_name: str = "jira_sink") -> JiraSinkConfig:
         return self.initialize_instance(key_name)
 
-    def get_text_analyzer(self, key_name: str = "analyzer") -> BaseAnalyzer:
+    def get_analyzer(self, key_name: str = "analyzer") -> BaseAnalyzer:
         return self.initialize_instance(key_name)
 
     def get_analyzer_config(self, key_name: str = "analyzer_config") -> BaseAnalyzerConfig:
         return self.initialize_instance(key_name)
 
-    def get_logging_config(self, key_name: str = "logging") -> DictConfig:
-        return self.configuration[key_name]
+    def get_logging_config(self, key_name: str = "logging") -> Dict[str, Any]:
+        return self._configuration[key_name]

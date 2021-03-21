@@ -21,7 +21,6 @@ gunicorn
 uvloop
 httptools
 google-api-python-client
-hydra-core>=1.1.0.dev3
 google-play-scraper
 app-store-reviews-reader
 reddit-rss-reader
