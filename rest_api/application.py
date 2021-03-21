@@ -75,13 +75,13 @@ def scheduler_init():
 def logging_init():
     log_config = obsei_config.get_logging_config()
 
-    logging.basicConfig(**log_config.base_config)
+    logging.basicConfig(**log_config["base_config"])
 
-    logging.root.setLevel(log_config.base_config.level)
+    logging.root.setLevel(log_config["base_config"]["level"])
     logging.root.propagate = True
 
     gunicorn_logger = logging.getLogger('gunicorn.error')
-    gunicorn_logger.setLevel(log_config.base_config.level)
+    gunicorn_logger.setLevel(log_config["base_config"]["level"])
     gunicorn_logger.propagate = True
 
 

@@ -6,10 +6,6 @@
 #
 --find-links=https://download.pytorch.org/whl/torch_stable.html
 
-antlr4-python3-runtime==4.8
-    # via
-    #   hydra-core
-    #   omegaconf
 app-store-reviews-reader==1.0
     # via -r requirements.in
 apscheduler==3.7.0
@@ -76,16 +72,12 @@ httplib2==0.19.0
     #   google-auth-httplib2
 httptools==0.1.1
     # via -r requirements.in
-hydra-core==1.1.0.dev4
-    # via -r requirements.in
 idna==2.10
     # via requests
 importlib-metadata==3.7.3
     # via
     #   sqlalchemy
     #   transformers
-importlib-resources==5.1.2
-    # via hydra-core
 itsdangerous==1.1.0
     # via flask
 jinja2==2.11.3
@@ -104,8 +96,6 @@ oauthlib==3.1.0
     # via
     #   atlassian-python-api
     #   requests-oauthlib
-omegaconf==2.1.0.dev22
-    # via hydra-core
 packaging==20.9
     # via
     #   google-api-core
@@ -145,9 +135,7 @@ pytz==2021.1
     #   tzlocal
     #   zenpy
 pyyaml==5.4.1
-    # via
-    #   omegaconf
-    #   searchtweets-v2
+    # via searchtweets-v2
 reddit-rss-reader==1.1
     # via -r requirements.in
 regex==2021.3.17
@@ -244,9 +232,7 @@ wrapt==1.12.1
 zenpy==2.0.24
     # via -r requirements.in
 zipp==3.4.1
-    # via
-    #   importlib-metadata
-    #   importlib-resources
+    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
