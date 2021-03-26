@@ -1,13 +1,11 @@
 from copy import deepcopy
 from typing import Any, Dict, List
 
-import logging
 import requests
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.analyzer.base_analyzer import AnalyzerResponse
 
-logger = logging.getLogger(__name__)
 
 DEFAULT_HEADERS = {
     "Content-type": "application/json"
@@ -51,8 +49,6 @@ class HttpSink(BaseSink):
                 json=payload,
                 headers=headers,
             )
-
-            logger.info(f"response='{response.__dict__}'")
             responses.append(response)
 
         return responses
