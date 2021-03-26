@@ -29,7 +29,7 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         labels: List[str],
         multi_class_classification: bool = True
     ) -> Dict[str, float]:
-        scores_data = self._pipeline(text, labels, multi_class=multi_class_classification)
+        scores_data = self._pipeline(text, labels, multi_label=multi_class_classification)
 
         score_dict = {label: score for label, score in zip(scores_data["labels"], scores_data["scores"])}
         return dict(sorted(score_dict.items(), key=lambda x: x[1], reverse=True))
