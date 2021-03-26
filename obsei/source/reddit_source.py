@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from bs4 import BeautifulSoup
 from praw import Reddit
 from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
 

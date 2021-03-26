@@ -20,7 +20,7 @@ class SlackSinkConfig(BaseSinkConfig):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self._slack_client=WebClient(token=self.slack_token.get_secret_value())
+        self._slack_client = WebClient(token=self.slack_token.get_secret_value())
 
     def get_slack_client(self):
         return self._slack_client
@@ -31,10 +31,10 @@ class SlackSink(BaseSink):
         super().__init__(**data)
 
     def send_data(
-        self,
-        analyzer_responses: List[AnalyzerResponse],
-        config: SlackSinkConfig,
-        **kwargs
+            self,
+            analyzer_responses: List[AnalyzerResponse],
+            config: SlackSinkConfig,
+            **kwargs
     ):
         responses = []
         payloads = []

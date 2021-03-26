@@ -53,7 +53,7 @@ class ZendeskSinkConfig(BaseSinkConfig):
     # This is done to avoid exposing member to API response
     _client: Zenpy = PrivateAttr()
     TYPE: str = "Zendesk"
-    # For customer domain refer http://docs.facetoe.com.au/zenpy.html#custom-domains
+    # For custom domain refer http://docs.facetoe.com.au/zenpy.html#custom-domains
     # Mainly you can do this by setting the environment variables:
     # ZENPY_FORCE_NETLOC
     # ZENPY_FORCE_SCHEME (default to https)
