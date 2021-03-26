@@ -132,7 +132,7 @@ def convert_utc_time(datetime_str):
     except ValueError:
         _date = datetime.strptime(datetime_str, "%Y-%m-%d")
 
-    return _date.strftime(DATETIME_STRING_PATTERN)
+    return _date
 
 
 def tag_visible(element):
