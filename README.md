@@ -46,7 +46,9 @@ For detailed installation instructions, usages and example refer [documentation]
 
 ## How to use
 
-Expend following steps and run your first workflow -
+To try in Colab Notebook click: <a href="https://colab.research.google.com/github/lalitpagaria/obsei/blob/master/example/Obsei_playstore_classification_logger_example.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+
+Expend following steps and create your workflow -
 
 <details><summary><b>Step 1: Prerequisite</b></summary>
 
