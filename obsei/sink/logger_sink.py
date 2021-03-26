@@ -34,5 +34,6 @@ class LoggerSink(BaseSink):
                 analyzer_response=analyzer_response
             ))
 
-        for converted_response in converted_responses:
-            config.logger.log(level=config.level, msg=f'{converted_response.__dict__}')
+        for response in converted_responses:
+            dict_to_print = response.__dict__ if hasattr(response, "__dict__") else response
+            config.logger.log(level=config.level, msg=f'{response}')
