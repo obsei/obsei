@@ -48,7 +48,7 @@ For detailed installation instructions, usages and example refer [documentation]
 
 To try in Colab Notebook click: [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lalitpagaria/obsei/blob/master/example/Obsei_playstore_classification_logger_example.ipynb)
 
-To try in Binder click: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lalitpagaria/obsei/master?urlpath=https%3A%2F%2Fgithub.com%2Flalitpagaria%2Fobsei%2Fblob%2Fmaster%2Fexample%2FObsei_playstore_classification_logger_example.ipynb)
+To try in Binder click: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lalitpagaria/obsei/master?filepath=example%2FObsei_playstore_classification_logger_example.ipynb)
 
 Expend following steps and create your workflow -
 
