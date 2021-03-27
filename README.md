@@ -13,14 +13,11 @@
     <a href="https://pypi.org/project/obsei/">
         <img alt="Release" src="https://img.shields.io/pypi/v/obsei">
     </a>
-    <a href="https://pepy.tech/project/obsei">
-        <img src="https://pepy.tech/badge/obsei/month" alt="Downloads" />
-    </a>
-    <a href="https://hub.docker.com/r/lalitpagaria/obsei">
-        <img src="https://img.shields.io/docker/pulls/lalitpagaria/obsei" alt="Docker Pulls" />
-    </a>
     <a href="https://github.com/lalitpagaria/obsei/commits/master">
         <img alt="Last commit" src="https://img.shields.io/github/last-commit/lalitpagaria/obsei">
+    </a>
+    <a href="https://github.com/lalitpagaria/obsei/issues">
+        <img alt="Open Issues" src="https://img.shields.io/github/issues/lalitpagaria/obsei">
     </a>
 </p>
 
