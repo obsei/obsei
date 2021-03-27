@@ -528,14 +528,13 @@ python example.py
 ## Upcoming Release
 Upcoming release plan and progress can be tracked at [link](https://github.com/lalitpagaria/obsei/projects) (Suggestions are welcome).
 
-
 ## Discussion Forum
 Discussion about *Obsei* can be done at [community forum](https://github.com/lalitpagaria/obsei/discussions)
 
 ## Use cases
-`Obsei` use cases are following, but not limited to -
-- Automatic customer issue ticketing based on sentiment analysis
-- Proper tagging of ticket like login issue, signup issue, delivery issue etc for faster disposal
+*Obsei* use cases are following, but not limited to -
+- Automatic customer issue creation based on sentiment analysis (reduction of MTTD)
+- Proper tagging of ticket based for example login issue, signup issue, delivery issue etc (reduction of MTTR)
 - Checking effectiveness of social media marketing campaign
 - Extraction of deeper insight from feedbacks on various platforms
 - Research purpose
@@ -544,11 +543,15 @@ Discussion about *Obsei* can be done at [community forum](https://github.com/lal
 Refer [link](ATTRIBUTION.md) for attribution.
 
 ## Contribution
-Currently, as project is very early stages, we are not accepting any pull requests. 
-We would love community's active contribution after few releases, first we want to shape the project with suggestion and feedback. If you want a feature or something doesn't work, please create an issue.
+As project is in very early stage, so we are not accepting any pull requests. First we want to shape the project with community's active suggestion and feedback.
+If you want a feature or something doesn't work, please create an issue.
 
 ## Changelog
 Refer [releases](https://github.com/lalitpagaria/obsei/releases) and [projects](https://github.com/lalitpagaria/obsei/projects).
+
+## Security Issue
+For any security issue please contact us via [email](mailto:obsei.tool@gmail.com)
+
 
 ## Citing Obsei
 If you use `obsei` in your research please use the following BibTeX entry:
