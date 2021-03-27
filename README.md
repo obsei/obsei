@@ -1,11 +1,11 @@
 
 <p align="center">
-    <table style="width:100%">
-        <tr>
-            <th align="center" style="white-space:nowrap;width=100px;height=100px">
+    <table style="border-collapse: collapse; border: none;">
+        <tr style="border-collapse: collapse; border: none;">
+            <th style="border-collapse: collapse; border: none;">
                 <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/obsei_200x200.png" width="100" height="100" />
             </th>
-            <th align="center" style="white-space:nowrap;height=100px">
+            <th style="border-collapse: collapse; border: none;">
                 <h1>Obsei: OBserve, SEgment and Inform</h1>
             </th>
         </tr>
