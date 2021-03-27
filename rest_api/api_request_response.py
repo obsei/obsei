@@ -8,7 +8,7 @@ from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig
 
 class ClassifierRequest(BaseModel):
     texts: List[str]
-    analyzer_config: BaseAnalyzerConfig = ClassificationAnalyzerConfig()
+    analyzer_config: BaseAnalyzerConfig
 
     class Config:
         arbitrary_types_allowed = True

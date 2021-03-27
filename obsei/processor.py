@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class Processor(BaseModel):
     analyzer: BaseAnalyzer
-    analyzer_config: BaseAnalyzerConfig
+    analyzer_config: Optional[BaseAnalyzerConfig] = None
     source: Optional[BaseSource] = None
     source_config: Optional[BaseSourceConfig] = None
     sink: Optional[BaseSink] = None
@@ -23,8 +23,11 @@ class Processor(BaseModel):
         self,
         workflow: Optional[Workflow] = None,
         source: Optional[BaseSource] = None,
+        source_config: Optional[BaseSourceConfig] = None,
         sink: Optional[BaseSink] = None,
-        analyzer: Optional[BaseAnalyzer] = None
+        sink_config: Optional[BaseSinkConfig] = None,
+        analyzer: Optional[BaseAnalyzer] = None,
+        analyzer_config: Optional[BaseAnalyzerConfig] = None
     ):
         source = source or self.source
         sink = sink or self.sink
@@ -37,9 +40,9 @@ class Processor(BaseModel):
             analyzer_config = workflow.config.analyzer_config
             id = workflow.id
         else:
-            sink_config = self.sink_config
-            source_config = self.source_config
-            analyzer_config = self.analyzer_config
+            sink_config = sink_config or self.sink_config
+            source_config = source_config or self.source_config
+            analyzer_config = analyzer_config or self.analyzer_config
 
         source_response_list = source.lookup(
             config=source_config,
