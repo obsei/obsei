@@ -1,4 +1,16 @@
-# Obsei: OBserve, SEgment and Inform
+
+<p align="center">
+    <table style="width:100%">
+        <tr>
+            <th align="center" style="white-space:nowrap;width=100px;height=100px">
+                <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/obsei_200x200.png" width="100" height="100" />
+            </th>
+            <th align="center" style="white-space:nowrap;height=100px">
+                <h1>Obsei: OBserve, SEgment and Inform</h1>
+            </th>
+        </tr>
+    </table>
+</p>
 
 <p align="center">
     <a href="https://github.com/lalitpagaria/obsei/actions">
@@ -21,12 +33,10 @@
     </a>
 </p>
 
-**Note: Please use released version instead of master branch as master might have some breaking changes. To track progress of next release refer [release tracker](https://github.com/lalitpagaria/obsei/projects).**
 
-
-`Obsei` is intended to be a workflow automation tool for text segmentation need. `Obsei` consist of -
- - **OBserver**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews and feed that information to,
- - **SEgmenter**, which perform text classification and sentiment analysis and feed that information to,
+**Obsei** is intended to be a workflow automation tool for text segmentation need. *Obsei* consist of -
+ - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews and feed that information to,
+ - **Segmenter**, which perform text classification and sentiment analysis and feed that information to,
  - **Informer**, which send it to ticketing system, data store or other places for further action and analysis.
 
 Current flow -
