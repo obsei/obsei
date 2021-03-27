@@ -20,8 +20,3 @@ logging:
     level: DEBUG
     format: '%(asctime)s %(name)s:%(funcName)s [%(processName)s:%(threadName)s] %(message)s'
     datefmt: '%d/%m/%Y %H:%M:%S %Z'
-
-hydra:
-  run:
-    # Output directory for normal runs
-    dir: /tmp/outputs/${now:%Y-%m-%d_%H-%M-%S}
