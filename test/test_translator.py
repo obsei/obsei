@@ -2,7 +2,7 @@ import logging, sys
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.analyzer.translation_analyzer import TranslationAnalyzerConfig
 
-GOOD_TEXT = '''मुझे सब चीजे बहुत अच्छि लगी ।'''
+GOOD_TEXT = '''मुझे सब चीजे बहुत अच्छी लगी ।'''
 
 BAD_TEXT = '''यह जीवन का सबसे बुरा अनुभव था । खराब कारें, नकद में भुगतान करने के लिए कह रहे हैं, पर्याप्त ईंधन नहीं है,
 एसी न खोलें, मेरे स्थान से बहुत दूर तक प्रतीक्षा करें जब तक कि यात्रा रद्द न हो जाए, कॉल करें और गंतव्य के बारे में पूछें, फिर रद्द करें, और बहुत कुछ।सबसे खराब सेवा। '''
