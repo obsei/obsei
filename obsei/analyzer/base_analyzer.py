@@ -27,11 +27,6 @@ class AnalyzerResponse(BaseModel):
         }
 
 
-class AnalyzerData(BaseModel):
-    source_name: str = "Undefined"
-    data: Optional[Dict[str, Any]] = None
-
-
 class BaseAnalyzerConfig(BaseModel):
     TYPE: str = "Base"
 
