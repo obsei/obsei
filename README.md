@@ -298,6 +298,23 @@ text_analyzer = NERAnalyzer(
 </td>
 </tr>
 <tr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/translator.png" width="20" height="20"><b>Translator</b></summary><hr>
+
+ ```python
+from obsei.analyzer.translation_analyzer import TranslationAnalyzer
+
+# Translator does not need analyzer config
+analyzer_config = None
+
+# initialize translator
+analyzer = TranslationAnalyzer(
+    model_name_or_path="Helsinki-NLP/opus-mt-hi-en"
+)
+```
+</details>
+</td>
+</tr>
+<tr>
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/dummy.png" width="20" height="20"><b>Dummy Analyzer</b></summary><hr>
 
 Dummy Analyzer, do nothing it simply used for transforming input (AnalyzerRequest) to output (AnalyzerResponse) also adding user supplied dummy data.
