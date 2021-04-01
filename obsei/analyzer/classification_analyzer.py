@@ -31,11 +31,8 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
     ) -> Dict[str, float]:
         scores_data = self._pipeline(text, labels, multi_label=multi_class_classification)
 
-        score_dict = {label: self.__round__(score) for label, score in zip(scores_data["labels"], scores_data["scores"])}
+        score_dict = {label: score for label, score in zip(scores_data["labels"], scores_data["scores"])}
         return dict(sorted(score_dict.items(), key=lambda x: x[1], reverse=True))
-
-    def __round__(self, n=None):
-        return int(100 * n)
 
     def analyze_input(
         self,

@@ -1,6 +1,6 @@
-import logging, sys
+import logging
+
 from obsei.analyzer.base_analyzer import AnalyzerRequest
-from obsei.analyzer.translation_analyzer import TranslationAnalyzerConfig
 
 GOOD_TEXT = '''मुझे सब चीजे बहुत अच्छी लगी ।'''
 
@@ -12,6 +12,8 @@ HINGLISH_TEXT = '''mera naam joker, tera naam kya ?'''
 
 TEXTS = [GOOD_TEXT, BAD_TEXT, MIXED_TEXT, EMOTICONS_TEXT, HINGLISH_TEXT]
 
+# for running in offline mode - https://huggingface.co/transformers/installation.html#offline-mode
+
 # logging.StreamHandler.terminator = ''
 # logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,10 +22,7 @@ logger.setLevel(logging.INFO)
 
 def test_translate_analyzer(translate_analyzer):
     source_responses = [AnalyzerRequest(processed_text=text, source_name="sample") for text in TEXTS]
-    analyzer_responses = translate_analyzer.analyze_input(
-        source_response_list=source_responses,
-        analyzer_config=TranslationAnalyzerConfig()
-    )
+    analyzer_responses = translate_analyzer.analyze_input(source_response_list=source_responses)
     assert len(analyzer_responses) == len(TEXTS)
 
     logger.info("Result:")

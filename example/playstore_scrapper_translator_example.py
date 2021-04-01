@@ -1,12 +1,13 @@
+import json
 import logging
-import sys, json
+import sys
 from datetime import datetime, timedelta
 
 import pytz
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig, ZeroShotClassificationAnalyzer
-from obsei.analyzer.translation_analyzer import TranslationAnalyzer, TranslationAnalyzerConfig
+from obsei.analyzer.translation_analyzer import TranslationAnalyzer
 from obsei.misc.utils import DATETIME_STRING_PATTERN
 from obsei.source.playstore_scrapper import PlayStoreScrapperConfig, PlayStoreScrapperSource
 
@@ -32,10 +33,7 @@ def translate_text(text_list):
         model_name_or_path="Helsinki-NLP/opus-mt-hi-en"
     )
     source_responses = [AnalyzerRequest(processed_text=text.processed_text, source_name="sample") for text in text_list]
-    analyzer_responses = translate_analyzer.analyze_input(
-        source_response_list=source_responses,
-        analyzer_config=TranslationAnalyzerConfig()
-    )
+    analyzer_responses = translate_analyzer.analyze_input(source_response_list=source_responses)
     return [
         AnalyzerRequest(processed_text=response.segmented_data['data'][0]['translation_text'], source_name="translator")
         for response in analyzer_responses

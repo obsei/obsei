@@ -78,6 +78,8 @@ git clone https://github.com/lalitpagaria/obsei.git
 cd obsei
 pip install --editable .
 ```
+
+To run transformers in an offline mode, check [transformers offline mode](https://huggingface.co/transformers/installation.html#offline-mode).
 </details>
 <details><summary><b>Step 3: Configure Source/Observer</b></summary>
 
