@@ -78,6 +78,7 @@ git clone https://github.com/lalitpagaria/obsei.git
 cd obsei
 pip install --editable .
 ```
+
 </details>
 <details><summary><b>Step 3: Configure Source/Observer</b></summary>
 
@@ -236,6 +237,8 @@ source = RedditScrapperSource()
 </details>
 
 <details><summary><b>Step 4: Configure Analyzer/Segmenter</b></summary>
+
+<i>Note: To run transformers in an offline mode, check [transformers offline mode](https://huggingface.co/transformers/installation.html#offline-mode).</i>
 
 <table ><tbody ><tr></tr><tr>
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/classification.png" width="20" height="20"><b>Text Classification</b></summary><hr>

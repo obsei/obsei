@@ -166,6 +166,7 @@ sacremoses==0.0.43
     # via transformers
 searchtweets-v2==1.0.7
     # via -r requirements.in
+sentencepiece==0.1.95
 sgmllib3k==1.0.0
     # via feedparser
 six==1.15.0
