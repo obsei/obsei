@@ -1,4 +1,3 @@
-
 <p align="center">
     <table style="border-collapse: collapse; border: none;">
         <tr style="border-collapse: collapse; border: none;">
@@ -47,6 +46,9 @@ A future concept (Coming Soon! :slightly_smiling_face:)
 
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
 
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Flalitpagaria%2Fobsei.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Flalitpagaria%2Fobsei?ref=badge_large)
 
 ## Documentation
 For detailed installation instructions, usages and example refer [documentation](https://lalitpagaria.github.io/obsei/).
@@ -588,6 +590,7 @@ If you use `obsei` in your research please use the following BibTeX entry:
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/lalitpagaria/obsei.svg)](https://starchart.cc/lalitpagaria/obsei)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Flalitpagaria%2Fobsei.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Flalitpagaria%2Fobsei?ref=badge_shield)
 
 ## Acknowledgement
 
