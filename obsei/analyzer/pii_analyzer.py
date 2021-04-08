@@ -28,10 +28,18 @@ class PresidioEngineConfig(BaseModel):
             self.models = [PresidioModelConfig()]
 
 
+class PresidioAnonymizerConfig(AnonymizerConfig, BaseModel):
+    def __init__(self, anonymizer_name: str, params: Optional[Dict[str, Any]] = None):
+        super().__init__(anonymizer_name=anonymizer_name, params=params)
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class PresidioPIIAnalyzerConfig(BaseAnalyzerConfig):
     TYPE: str = "PresidioPII"
     # To find more details refer https://microsoft.github.io/presidio/anonymizer/
-    anonymizers_config: Optional[Dict[str, AnonymizerConfig]] = None
+    anonymizers_config: Optional[Dict[str, PresidioAnonymizerConfig]] = None
     # To see list of supported entities refer https://microsoft.github.io/presidio/supported_entities/
     # By default it will search for all the supported entities
     entities: Optional[List[str]] = None
