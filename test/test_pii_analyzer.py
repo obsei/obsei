@@ -1,8 +1,8 @@
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.analyzer.pii_analyzer import PresidioPIIAnalyzerConfig
 
-text_to_anonymize = "His name is Mr. Jones and his phone number is 212-555-5555"
-PII_LIST = ["Jones", "212-555-5555"]
+text_to_anonymize = "His name is Mr. Jones. His phone number is 212-555-5555 and email is jones@email.com"
+PII_LIST = ["Jones", "212-555-5555", "jones@email.com"]
 TEXTS = [text_to_anonymize]
 
 
@@ -25,13 +25,13 @@ def test_pii_analyzer_replace_original(pii_analyzer):
         assert analyzer_response.segmented_data is not None
         assert analyzer_response.segmented_data["analyzer_result"] is not None
         assert analyzer_response.segmented_data["anonymized_result"] is not None
+        assert analyzer_response.segmented_data["anonymized_text"] is not None
 
-        assert text != analyzer_response.analyzer_response.segmented_data["anonymized_result"]["text"]
         for pii_info in PII_LIST:
-            assert pii_info not in analyzer_response.analyzer_response.segmented_data["anonymized_result"]["text"]
+            assert pii_info not in analyzer_response.segmented_data["anonymized_text"]
 
-        anonymized_result = analyzer_response.analyzer_response.segmented_data["anonymized_result"]
-        assert anonymized_result["text"] == analyzer_response.processed_text
+        assert analyzer_response.segmented_data["anonymized_text"] == analyzer_response.processed_text
+        assert analyzer_response.segmented_data["anonymized_text"] != text
 
 
 def test_pii_analyzer_not_replace_original(pii_analyzer):
@@ -53,14 +53,13 @@ def test_pii_analyzer_not_replace_original(pii_analyzer):
         assert analyzer_response.segmented_data is not None
         assert analyzer_response.segmented_data["analyzer_result"] is not None
         assert analyzer_response.segmented_data["anonymized_result"] is not None
+        assert analyzer_response.segmented_data["anonymized_text"] is not None
 
-        assert text != analyzer_response.analyzer_response.segmented_data["anonymized_result"]["text"]
         for pii_info in PII_LIST:
-            assert pii_info not in analyzer_response.analyzer_response.segmented_data["anonymized_result"]["text"]
+            assert pii_info not in analyzer_response.segmented_data["anonymized_text"]
 
-        anonymized_result = analyzer_response.analyzer_response.segmented_data["anonymized_result"]
-        assert anonymized_result["text"] != analyzer_response.processed_text
-        assert text == analyzer_response.processed_text
+        assert analyzer_response.processed_text == text
+        assert analyzer_response.segmented_data["anonymized_text"] != text
 
 
 def test_pii_analyzer_analyze_only(pii_analyzer):
