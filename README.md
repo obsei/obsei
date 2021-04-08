@@ -31,6 +31,13 @@
     <a href="https://github.com/lalitpagaria/obsei/issues">
         <img alt="Open Issues" src="https://img.shields.io/github/issues/lalitpagaria/obsei">
     </a>
+    <a href="https://pyup.io/repos/github/lalitpagaria/obsei/">
+        <img alt="pyup" src="https://pyup.io/repos/github/lalitpagaria/obsei/shield.svg">
+    </a>
+   <a href="https://pyup.io/repos/github/lalitpagaria/obsei/">
+        <img src="https://pyup.io/repos/github/lalitpagaria/obsei/python-3-shield.svg" alt="Python 3" />
+    </a>
+
 </p>
 
 
