@@ -557,6 +557,11 @@ analyzer_response_list = text_analyzer.analyze_input(
 # for idx, an_response in enumerate(analyzer_response_list):
 #    logger.info(f"analyzer_response#'{idx}'='{an_response.__dict__}'")
 
+# Analyzer output added to segmented_data
+# Uncomment inorder to log it
+# for idx, an_response in enumerate(analyzer_response_list):
+#    logger.info(f"analyzed_data#'{idx}'='{an_response.segmented_data.__dict__}'")
+
 # This will send analyzed output to configure sink ie Slack, Zendesk etc
 sink_response_list = sink.send_data(analyzer_response_list, sink_config)
 

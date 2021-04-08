@@ -36,6 +36,7 @@ class PresidioPIIAnalyzerConfig(BaseAnalyzerConfig):
     # By default it will search for all the supported entities
     entities: Optional[List[str]] = None
     analyze_only: Optional[bool] = False
+    replace_original_text: Optional[bool] = True
     # Whether the analysis decision process steps returned in the response
     return_decision_process: Optional[bool] = False
 
@@ -119,9 +120,14 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
                     analyzer_results=analyzer_result
                 )
 
+            if analyzer_config.replace_original_text and anonymized_result is not None:
+                text = anonymized_result.text
+            else:
+                text = source_response.processed_text
+
             analyzer_output.append(
                 AnalyzerResponse(
-                    processed_text=source_response.processed_text if not anonymized_result else anonymized_result.text,
+                    processed_text=text,
                     meta=source_response.meta,
                     segmented_data={
                         "analyzer_result": [vars(result) for result in analyzer_result],
