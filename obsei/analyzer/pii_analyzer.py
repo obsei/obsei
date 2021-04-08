@@ -133,7 +133,8 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
                         "analyzer_result": [vars(result) for result in analyzer_result],
                         "anonymized_result": None if not anonymized_result else [
                             vars(item) for item in anonymized_result.items
-                        ]
+                        ],
+                        "anonymized_text": None if not anonymized_result else anonymized_result.text
                     },
                     source_name=source_response.source_name,
                 )
