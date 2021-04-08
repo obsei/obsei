@@ -41,7 +41,6 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         add_positive_negative_labels: Optional[bool] = True,
         **kwargs
     ) -> List[AnalyzerResponse]:
-        analyzer_config = analyzer_config
         analyzer_output: List[AnalyzerResponse] = []
 
         labels = analyzer_config.labels or []

@@ -6,7 +6,7 @@
                 <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/obsei_200x200.png" width="100" height="100" />
             </th>
             <th style="border-collapse: collapse; border: none;">
-                <h1>Obsei: OBserve, SEgment and Inform</h1>
+                <h1>Obsei: Observe, Analyze and Inform</h1>
             </th>
         </tr>
     </table>
@@ -34,10 +34,10 @@
 </p>
 
 
-**Obsei** is intended to be a workflow automation tool for text segmentation need. *Obsei* consist of -
- - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews and feed that information to,
- - **Segmenter**, which perform text classification and sentiment analysis and feed that information to,
- - **Informer**, which send it to ticketing system, data store or other places for further action and analysis.
+**Obsei** is intended to be a workflow automation tool for text analysis need. *Obsei* consist of -
+ - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews etc and feed that information to,
+ - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
+ - **Informer**, which send it to ticketing system, data store etc for further action and analysis.
 
 Current flow -
 
@@ -236,7 +236,7 @@ source = RedditScrapperSource()
 
 </details>
 
-<details><summary><b>Step 4: Configure Analyzer/Segmenter</b></summary>
+<details><summary><b>Step 4: Configure Analyzer</b></summary>
 
 <i>Note: To run transformers in an offline mode, check [transformers offline mode](https://huggingface.co/transformers/installation.html#offline-mode).</i>
 
@@ -309,6 +309,36 @@ analyzer_config = None
 # initialize translator
 analyzer = TranslationAnalyzer(
     model_name_or_path="Helsinki-NLP/opus-mt-hi-en"
+)
+```
+</details>
+</td>
+</tr>
+<tr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/pii.png" width="20" height="20"><b>PII Anonymizer</b></summary><hr>
+
+ ```python
+from obsei.analyzer.pii_analyzer import PresidioEngineConfig, PresidioModelConfig, \ 
+    PresidioPIIAnalyzer, PresidioPIIAnalyzerConfig
+
+# initialize pii analyzer's config
+analyzer_config = PresidioPIIAnalyzerConfig(
+    # Whether to return only pii analysis or anonymize text
+    analyze_only=False,
+    # Whether to return detail information about anonymization decision
+    return_decision_process=True
+)
+
+# initialize pii analyzer
+analyzer = PresidioPIIAnalyzer(
+    engine_config=PresidioEngineConfig(
+        # spacy and stanza nlp engines are supported
+        # For more info refer 
+        # https://microsoft.github.io/presidio/analyzer/developing_recognizers/#utilize-spacy-or-stanza
+        nlp_engine_name="spacy",
+        # Update desired spacy model and language
+        models=[PresidioModelConfig(model_name="en_core_web_lg", lang_code="en")]
+    )
 )
 ```
 </details>
@@ -578,7 +608,7 @@ If you use `obsei` in your research please use the following BibTeX entry:
 ```text
 @Misc{Pagaria2020Obsei,
   author =       {Lalit Pagaria},
-  title =        {Obsei - A workflow automation tool for text segmentation need},
+  title =        {Obsei - A workflow automation tool for text analysis need},
   howpublished = {Github},
   year =         {2020},
   url =          {https://github.com/lalitpagaria/obsei}
