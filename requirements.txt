@@ -62,7 +62,7 @@ google-auth==1.28.1
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
-google-play-scraper==0.1.2
+google-play-scraper==0.2
     # via -r requirements.in
 googleapis-common-protos==1.53.0
     # via google-api-core
@@ -209,7 +209,7 @@ soupsieve==2.2.1
     # via beautifulsoup4
 spacy==2.3
     # via presidio-analyzer
-sqlalchemy==1.4.6
+sqlalchemy==1.4.7
     # via -r requirements.in
 srsly==1.0.5
     # via
