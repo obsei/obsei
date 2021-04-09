@@ -11,8 +11,12 @@ from obsei.sink.dailyget_sink import DailyGetSink
 from obsei.sink.elasticsearch_sink import ElasticSearchSink
 from obsei.sink.http_sink import HttpSink
 from obsei.sink.jira_sink import JiraSink
+from obsei.sink.logger_sink import LoggerSink
+from obsei.sink.slack_sink import SlackSink
+from obsei.sink.zendesk_sink import ZendeskCredInfo
 from obsei.source.appstore_scrapper import AppStoreScrapperSource
 from obsei.source.base_source import BaseSource
+from obsei.source.email_source import EmailSource
 from obsei.source.playstore_reviews import PlayStoreSource
 from obsei.source.playstore_scrapper import PlayStoreScrapperSource
 from obsei.source.reddit_scrapper import RedditScrapperSource
@@ -27,7 +31,8 @@ source_map: Dict[str, BaseSource] = {
     "PlayStoreScrapper": PlayStoreScrapperSource(),
     "AppStoreScrapper": AppStoreScrapperSource(),
     "RedditScrapper": RedditScrapperSource(),
-    "Reddit": RedditSource()
+    "Reddit": RedditSource(),
+    "Email": EmailSource()
 }
 
 sink_map: Dict[str, BaseSink] = {
@@ -35,6 +40,9 @@ sink_map: Dict[str, BaseSink] = {
     "Jira": JiraSink(),
     "DailyGet": DailyGetSink(),
     "Elasticsearch": ElasticSearchSink(),
+    "Zendesk": ZendeskCredInfo(),
+    "Slack": SlackSink(),
+    "Logging": LoggerSink()
 }
 
 router = APIRouter()
@@ -48,7 +56,7 @@ def get_application() -> FastAPI:
     application = FastAPI(
         title="Obsei-APIs",
         debug=True,
-        description="Observe, Segment and Inform"
+        description="Observe, Analyze and Inform"
     )
 
     application.add_middleware(

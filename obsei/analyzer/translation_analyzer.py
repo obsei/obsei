@@ -23,13 +23,13 @@ class TranslationAnalyzer(BaseAnalyzer):
     ) -> List[AnalyzerResponse]:
         responses = []
         for source_response in source_response_list:
-            text_hi = self._pipeline(source_response.processed_text)
+            translated_text = self._pipeline(source_response.processed_text)
             responses.append(
                 AnalyzerResponse(
                     processed_text=source_response.processed_text,
                     meta=source_response.meta,
                     source_name=source_response.source_name,
-                    segmented_data={"data": text_hi}
+                    segmented_data={"translated_text": translated_text}
                 )
             )
 

@@ -2,6 +2,7 @@ import pytest
 
 from obsei.analyzer.classification_analyzer import ZeroShotClassificationAnalyzer
 from obsei.analyzer.ner_analyzer import NERAnalyzer
+from obsei.analyzer.pii_analyzer import PresidioEngineConfig, PresidioModelConfig, PresidioPIIAnalyzer
 from obsei.analyzer.sentiment_analyzer import VaderSentimentAnalyzer
 from obsei.analyzer.translation_analyzer import TranslationAnalyzer
 
@@ -29,3 +30,13 @@ def ner_analyzer():
 @pytest.fixture(scope="session")
 def translate_analyzer():
     return TranslationAnalyzer(model_name_or_path = "Helsinki-NLP/opus-mt-hi-en")
+
+
+@pytest.fixture(scope="session")
+def pii_analyzer():
+    return PresidioPIIAnalyzer(
+        engine_config=PresidioEngineConfig(
+            nlp_engine_name="spacy",
+            models=[PresidioModelConfig(model_name="en_core_web_lg", lang_code="en")]
+        )
+    )

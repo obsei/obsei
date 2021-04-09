@@ -30,3 +30,5 @@ beautifulsoup4
 slack-sdk
 zenpy
 sentencepiece
+presidio-analyzer
+presidio-anonymizer
