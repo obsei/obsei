@@ -587,6 +587,17 @@ python example.py
 ```
 </details>
 
+## Demo UI
+We have a minimal UI that can spin up to test Obsei. It's based on streamlit and is very easy to extend for your purposes. 
+
+![Screenshot](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-ui-demo.png)
+
+Just run
+```
+docker run -d --name obesi-ui -p 8501:8501 lalitpagaria/obsei-ui-demo
+``` 
+You can find the UI at `http://localhost:8501`
+
 ## Upcoming Release
 Upcoming release plan and progress can be tracked at [link](https://github.com/lalitpagaria/obsei/projects) (Suggestions are welcome).
 

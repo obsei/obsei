@@ -15,8 +15,8 @@ st.title("Obsei Demo").markdown(
     get_icon_name(
         "Obsei Demo",
         "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/obsei_200x200.png",
-        50,
-        25
+        60,
+        35
     ), unsafe_allow_html=True
 )
 

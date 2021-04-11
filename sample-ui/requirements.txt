@@ -1,3 +1,2 @@
 obsei
 streamlit
-st-annotated-text
