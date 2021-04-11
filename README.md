@@ -195,7 +195,6 @@ source = PlayStoreScrapperSource()
 from obsei.source.reddit_source import RedditConfig, RedditSource, RedditCredInfo
 
 # initialize reddit source config
-# Credentials will be fetched from env variable named reddit_client_id and reddit_client_secret
 source_config = RedditConfig(
     subreddits=["wallstreetbets"], # List of subreddits
     # Reddit account username and password
@@ -314,6 +313,7 @@ from obsei.analyzer.translation_analyzer import TranslationAnalyzer
 analyzer_config = None
 
 # initialize translator
+# For supported models refer https://huggingface.co/models?pipeline_tag=translation
 analyzer = TranslationAnalyzer(
     model_name_or_path="Helsinki-NLP/opus-mt-hi-en"
 )
@@ -491,7 +491,7 @@ from obsei.sink.http_sink import HttpSink, HttpSinkConfig
 
 # initialize http sink config (Currently only POST call is supported)
 sink_config = HttpSinkConfig(
-    # provide http server uri
+    # provide http server url
     url="https://localhost:8080/api/path",
     # Here you can add headers you would like to pass with request
     headers={

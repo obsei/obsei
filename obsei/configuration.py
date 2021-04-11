@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, Optional
 
 import yaml
-from pydantic import BaseSettings, Field, PrivateAttr, constr
+from pydantic import BaseSettings, Field, constr
 
 from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig
 from obsei.misc.utils import dict_to_object
@@ -32,7 +32,7 @@ class ObseiConfiguration(BaseSettings):
         logger.debug(f"Configuration: {self.configuration}")
 
     def initialize_instance(self, key_name: str = None):
-        if key_name is None or key_name not in self.configuration:
+        if key_name is None or key_name not in self.configuration or not self.configuration[key_name]:
             logger.warning(f"{key_name} not exist in configuration")
             return None
         return dict_to_object(self.configuration[key_name])

@@ -1,10 +1,11 @@
+import json
 import logging
 from typing import Any, List
 
 from pydantic import Field, PrivateAttr, SecretStr
 from slack_sdk import WebClient
 
-from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
+from obsei.sink.base_sink import BaseSink, BaseSinkConfig
 from obsei.analyzer.base_analyzer import AnalyzerResponse
 
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class SlackSink(BaseSink):
         for payload in payloads:
             response = config.get_slack_client().chat_postMessage(
                 channel=config.channel_id,
-                text=f'```\n{payload["processed_text"]}\n```'
+                text=f'Message: `{payload["processed_text"]}` ```{json.dumps(payload["segmented_data"], indent=2)}```'
             )
             logger.info(f"response='{response}'")
             responses.append(response)
