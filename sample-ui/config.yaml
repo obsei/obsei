@@ -1,0 +1,54 @@
+source:
+  Twitter:
+    icon: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/twitter.png"
+    source:
+      _target_: obsei.source.twitter_source.TwitterSource
+    config:
+      _target_: obsei.source.twitter_source.TwitterSourceConfig
+      keywords: "twitter issue"
+      lookup_period: "1h"
+      max_tweets: 5
+      credential:
+        _target_: obsei.source.twitter_source.TwitterCredentials
+        consumer_key: ""
+        consumer_secret: ""
+  Appstore Scrapper:
+    icon: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/appstore.png"
+    source:
+      _target_: obsei.source.appstore_scrapper.AppStoreScrapperSource
+    config:
+      _target_: obsei.source.appstore_scrapper.AppStoreScrapperConfig
+      countries:
+        - "us"
+      app_id: "310633997"
+      lookup_period: "1h"
+
+sink:
+  Slack:
+    icon: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/slack.png"
+    source:
+      _target_: obsei.sink.slack_sink.SlackSink
+    config:
+      _target_: obsei.sink.slack_sink.SlackSinkConfig
+      slack_token: ""
+      channel_id: ""
+
+
+analyzer:
+  Sentiment:
+    icon: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/sentiment.png"
+    analyzer:
+      __target__: obsei.analyzer.sentiment_analyzer.VaderSentimentAnalyzer
+  Classification:
+    icon: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/classification.png"
+    config:
+      _target_: obsei.analyzer.classification_analyzer.ClassificationAnalyzerConfig
+      labels:
+        - "service"
+        - "content"
+        - "interface"
+      use_sentiment_model: true
+    analyzer:
+      _target_: obsei.analyzer.classification_analyzer.ZeroShotClassificationAnalyzer
+      model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
+      initialize_model: true
