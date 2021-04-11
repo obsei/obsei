@@ -32,6 +32,9 @@ class ObseiConfiguration(BaseSettings):
         logger.debug(f"Configuration: {self.configuration}")
 
     def initialize_instance(self, key_name: str = None):
+        if key_name is None or key_name not in self.configuration:
+            logger.warning(f"{key_name} not exist in configuration")
+            return None
         return dict_to_object(self.configuration[key_name])
 
     def get_twitter_source_config(self, key_name: str = "twitter_source") -> TwitterSourceConfig:
@@ -59,4 +62,4 @@ class ObseiConfiguration(BaseSettings):
         return self.initialize_instance(key_name)
 
     def get_logging_config(self, key_name: str = "logging") -> Dict[str, Any]:
-        return self._configuration[key_name]
+        return self.configuration[key_name]
