@@ -54,6 +54,7 @@ A future concept (Coming Soon! :slightly_smiling_face:)
 
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
 
+**Watch demo:** [video link](https://www.youtube.com/watch?v=V351W-ipuFQ)
 
 ## Documentation
 For detailed installation instructions, usages and example refer [documentation](https://lalitpagaria.github.io/obsei/).
@@ -591,6 +592,8 @@ python example.py
 We have a minimal UI that can spin up to test Obsei. It's based on streamlit and is very easy to extend for your purposes. 
 
 ![Screenshot](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-ui-demo.png)
+
+**Watch demo:** [video link](https://www.youtube.com/watch?v=V351W-ipuFQ)
 
 Just run
 ```

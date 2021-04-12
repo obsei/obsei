@@ -198,9 +198,7 @@ def execute_workflow(generate_config, component=None):
         source = obsei_configuration.initialize_instance("source")
 
         analyzer = obsei_configuration.initialize_instance("analyzer")
-        logger.info(type(analyzer))
         analyzer_config = obsei_configuration.initialize_instance("analyzer_config")
-        logger.info(analyzer_config)
 
         sink_config = obsei_configuration.initialize_instance("sink_config")
         sink = obsei_configuration.initialize_instance("sink")
@@ -219,3 +217,5 @@ def execute_workflow(generate_config, component=None):
     except Exception as ex:
         if progress_show:
             progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 ({str(ex)})")
+
+        raise ex

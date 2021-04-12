@@ -55,7 +55,7 @@ source:
         - "twitter issue"
         - "@Twitter"
       lookup_period: "1h"
-      max_tweets: 5
+      max_tweets: 10
       credential:
         _target_: obsei.source.twitter_source.TwitterCredentials
         consumer_key: ''

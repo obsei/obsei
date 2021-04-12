@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+import pytz
 import requests
 
 from typing import Any, Dict, List, Optional
@@ -139,9 +140,12 @@ class TwitterSource(BaseSource):
         max_tweet_id = since_id
         min_tweet_id = until_id
         lookup_period = config.lookup_period
-        start_time = None if lookup_period is None else datetime.strptime(
-            convert_utc_time(lookup_period), "%Y-%m-%dT%H:%M:%S%z"
-        )
+        if lookup_period is None:
+            start_time = None
+        elif len(lookup_period) <= 5:
+            start_time = convert_utc_time(lookup_period).replace(tzinfo=pytz.UTC)
+        else:
+            start_time = datetime.strptime(lookup_period, "%Y-%m-%dT%H:%M:%S%z")
 
         if since_id or until_id:
             lookup_period = None
