@@ -586,7 +586,7 @@ We have a minimal UI that can spin up to test Obsei. It's based on [streamlit](h
 
 ![Screenshot](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-ui-demo.png)
 
-**Watch demo:** [video link](https://www.youtube.com/watch?v=GTF-Hy96gvY)
+**Watch:** [Obsei UI Demo](https://www.youtube.com/watch?v=GTF-Hy96gvY)
 
 Just run
 ```
