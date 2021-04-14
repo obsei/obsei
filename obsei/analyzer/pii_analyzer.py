@@ -122,11 +122,12 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
             if not analyzer_config.analyze_only:
                 anonymizers_config = analyzer_config.anonymizers_config or self.anonymizers_config
 
-                anonymized_result = self._anonymizer.anonymize(
-                    text=source_response.processed_text,
-                    anonymizers_config=anonymizers_config,
-                    analyzer_results=analyzer_result
-                )
+                if source_response.processed_text is not None and len(source_response.processed_text) > 0:
+                    anonymized_result = self._anonymizer.anonymize(
+                        text=source_response.processed_text,
+                        anonymizers_config=anonymizers_config,
+                        analyzer_results=analyzer_result
+                    )
 
             if analyzer_config.replace_original_text and anonymized_result is not None:
                 text = anonymized_result.text
