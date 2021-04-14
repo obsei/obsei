@@ -130,19 +130,17 @@ def render_config(config, component, help_str=None, parent_key=None):
 
 def generate_python(generate_config):
     return f'''
-import logging
-import sys
 import json
 
 from obsei.configuration import ObseiConfiguration
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-
+# This is Obsei config
 configuration = {json.dumps(generate_config, indent=2, sort_keys=True)}
 
+# Better way to pass config via yaml file using `config_path` and `config_filename` parameters instead of `configuration`
 obsei_configuration = ObseiConfiguration(configuration=json.load(configuration))
 
+# Initialize objects using configuration
 source_config = obsei_configuration.initialize_instance("source_config")
 source = obsei_configuration.initialize_instance("source")
 analyzer = obsei_configuration.initialize_instance("analyzer")
@@ -153,32 +151,15 @@ sink = obsei_configuration.initialize_instance("sink")
 # This will fetch information from configured source ie twitter, app store etc
 source_response_list = source.lookup(source_config)
 
-# Uncomment if you want to log source response
-# for idx, source_response in enumerate(source_response_list):
-#     logger.info(f"source_response#'{{idx}}'='{{source_response.__dict__}}'")
-
 # This will execute analyzer (Sentiment, classification etc) on source data with provided analyzer_config
+# Analyzer will it's output to `segmented_data` inside `analyzer_response`
 analyzer_response_list = analyzer.analyze_input(
     source_response_list=source_response_list,
     analyzer_config=analyzer_config
 )
 
-# Uncomment if you want to log analyzer response
-# for idx, an_response in enumerate(analyzer_response_list):
-#    logger.info(f"analyzer_response#'{{idx}}'='{{an_response.__dict__}}'")
-
-# Analyzer output added to segmented_data
-# Uncomment inorder to log it
-# for idx, an_response in enumerate(analyzer_response_list):
-#    logger.info(f"analyzed_data#'{{idx}}'='{{an_response.segmented_data.__dict__}}'")
-
 # This will send analyzed output to configure sink ie Slack, Zendesk etc
 sink_response_list = sink.send_data(analyzer_response_list, sink_config)
-
-# Uncomment if you want to log sink response
-# for idx, sink_response in enumerate(sink_response_list):
-#     if sink_response is not None:
-#         logger.info(f"sink_response#'{{idx}}'='{{sink_response.__dict__}}'")
 '''
 
 

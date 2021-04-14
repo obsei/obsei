@@ -32,7 +32,7 @@ source_col, analyzer_col, sink_col = st.beta_columns([1, 1, 1])
 
 source_list = [k for k in configuration["source"].keys()]
 selected_source = source_col.selectbox(
-    "Select Observer/Source",
+    "Select Observer",
     source_list
 )
 
@@ -44,7 +44,7 @@ selected_analyzer = analyzer_col.selectbox(
 
 sink_list = [k for k in configuration["sink"].keys()]
 selected_sink = sink_col.selectbox(
-    "Select Informer/Sink",
+    "Select Informer",
     sink_list
 )
 

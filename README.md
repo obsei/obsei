@@ -28,14 +28,8 @@
     <a href="https://github.com/lalitpagaria/obsei/commits/master">
         <img alt="Last commit" src="https://img.shields.io/github/last-commit/lalitpagaria/obsei">
     </a>
-    <a href="https://github.com/lalitpagaria/obsei/issues">
-        <img alt="Open Issues" src="https://img.shields.io/github/issues/lalitpagaria/obsei">
-    </a>
-    <a href="https://pyup.io/repos/github/lalitpagaria/obsei/">
-        <img alt="pyup" src="https://pyup.io/repos/github/lalitpagaria/obsei/shield.svg">
-    </a>
-   <a href="https://pyup.io/repos/github/lalitpagaria/obsei/">
-        <img src="https://pyup.io/repos/github/lalitpagaria/obsei/python-3-shield.svg" alt="Python 3" />
+    <a href="https://www.youtube.com/channel/UCqdvgro1BzU13tkAfX3jCJA">
+        <img alt="YouTube Channel Subscribers" src="https://img.shields.io/youtube/channel/subscribers/UCqdvgro1BzU13tkAfX3jCJA?style=social">
     </a>
 
 </p>
@@ -54,7 +48,6 @@ A future concept (Coming Soon! :slightly_smiling_face:)
 
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
 
-**Watch demo:** [video link](https://www.youtube.com/watch?v=V351W-ipuFQ)
 
 ## Documentation
 For detailed installation instructions, usages and example refer [documentation](https://lalitpagaria.github.io/obsei/).
@@ -589,11 +582,11 @@ python example.py
 </details>
 
 ## Demo UI
-We have a minimal UI that can spin up to test Obsei. It's based on streamlit and is very easy to extend for your purposes. 
+We have a minimal UI that can spin up to test Obsei. It's based on [streamlit](https://streamlit.io/) and is very easy to extend for your purposes. 
 
 ![Screenshot](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-ui-demo.png)
 
-**Watch demo:** [video link](https://www.youtube.com/watch?v=V351W-ipuFQ)
+**Watch demo:** [video link](https://www.youtube.com/watch?v=GTF-Hy96gvY)
 
 Just run
 ```
