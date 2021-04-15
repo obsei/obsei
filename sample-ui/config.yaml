@@ -52,7 +52,6 @@ source:
     config:
       _target_: obsei.source.twitter_source.TwitterSourceConfig
       keywords:
-        - "twitter issue"
         - "@Twitter"
       lookup_period: "1h"
       max_tweets: 10

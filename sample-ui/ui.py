@@ -1,24 +1,19 @@
+import requests
 from PIL import Image
 from utils import *
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
 configuration = get_obsei_config(current_path, "config.yaml")
+logo_url = 'https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/obsei_200x200.png'
 
-favicon = Image.open(f"{current_path}/../images/logos/obsei_200x200.png")
+favicon = Image.open(requests.get(logo_url, stream=True).raw)
 st.set_page_config(
     page_title="Obsei Demo",
     layout="wide",
     page_icon=favicon
 )
 
-st.title("Obsei Demo").markdown(
-    get_icon_name(
-        "Obsei Demo",
-        "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/obsei_200x200.png",
-        60,
-        35
-    ), unsafe_allow_html=True
-)
+st.title("Obsei Demo").markdown(get_icon_name("Obsei Demo", logo_url, 60, 35), unsafe_allow_html=True)
 
 st.error('''
 **Note:** Demo run will require some secure information based on source or sink selected,
