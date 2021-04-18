@@ -22,7 +22,7 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self._pipeline = pipeline("zero-shot-classification", model=self.model_name_or_path)
+        self._pipeline = pipeline("zero-shot-classification", model=self.model_name_or_path, device=self.gpu_device)
 
     def _classify_text_from_model(
         self, text: str,

@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
+from obsei.misc import gpu_util
 from obsei.workflow.base_store import BaseStore
 
 
@@ -37,6 +38,14 @@ class BaseAnalyzerConfig(BaseModel):
 class BaseAnalyzer(BaseModel):
     TYPE: str = "Base"
     store: Optional[BaseStore] = None
+    gpu_device: Optional[int] = 0
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self.gpu_device = gpu_util.get_gpu_device(self.gpu_device)
+
+    def is_using_gpu(self):
+        gpu_util.is_valid_gpu_device(self.gpu_device)
 
     @abstractmethod
     def analyze_input(
