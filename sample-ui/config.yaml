@@ -1,0 +1,277 @@
+source:
+  Appstore Scrapper:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/appstore.png"
+    _help_:
+      - '`app id` and `countries` can be found at the end of the url of app in app store.'
+      - ''
+      - 'For example - https://apps.apple.com/us/app/xcode/id497799835'
+      - '`310633997` is the `app id` for xcode and `us` is `country`.'
+    source:
+      _target_: obsei.source.appstore_scrapper.AppStoreScrapperSource
+    config:
+      _target_: obsei.source.appstore_scrapper.AppStoreScrapperConfig
+      countries:
+        - "us"
+      app_id: "310633997"
+      lookup_period: "1h"
+  Playstore Scrapper:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/playstore.png"
+    _help_:
+      - '`package name` can be found at the end of the url of app in play store.'
+      - ''
+      - 'For example - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en&gl=US'
+      - '`com.google.android.gm` is the `package name` for xcode and `us` is `country`.'
+    source:
+      _target_: obsei.source.playstore_scrapper.PlayStoreScrapperSource
+    config:
+      _target_: obsei.source.playstore_scrapper.PlayStoreScrapperConfig
+      countries:
+        - "us"
+      package_name: "com.google.android.gm"
+      max_count: 3
+      lookup_period: "1h"
+  Reddit Scrapper:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/reddit.png"
+    _help_:
+      - 'Reddit subreddit, search etc rss url. For proper url refer following link -'
+      - 'https://www.reddit.com/r/pathogendavid/comments/tv8m9/pathogendavids_guide_to_rss_and_reddit/'
+    source:
+      _target_: obsei.source.reddit_scrapper.RedditScrapperSource
+    config:
+      _target_: obsei.source.reddit_scrapper.RedditScrapperConfig
+      url: 'https://www.reddit.com/r/wallstreetbets/comments/.rss?sort=new'
+      lookup_period: "1h"
+  Twitter:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/twitter.png"
+    _help_:
+      - '`Keywords` accept search string, @user or #hashtags'
+      - ''
+      - 'Need twitter `consumer key` and `secret`, get it from https://developer.twitter.com/en/apply-for-access'
+    source:
+      _target_: obsei.source.twitter_source.TwitterSource
+    config:
+      _target_: obsei.source.twitter_source.TwitterSourceConfig
+      keywords:
+        - "@Twitter"
+      lookup_period: "1h"
+      max_tweets: 10
+      credential:
+        _target_: obsei.source.twitter_source.TwitterCredentials
+        consumer_key: ''
+        consumer_secret: ''
+  Email:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/gmail.png"
+    _help_:
+      - 'List of IMAP servers for most commonly used email providers https://www.systoolsgroup.com/imap/'
+      - ''
+      - 'Also, if you are using a `Gmail` account then make sure you allow less secure apps on your account'
+      - 'https://myaccount.google.com/lesssecureapps?pli=1'
+      - 'Also enable IMAP access - https://mail.google.com/mail/u/0/#settings/fwdandpop'
+    source:
+      _target_: obsei.source.email_source.EmailSource
+    config:
+      _target_: obsei.source.email_source.EmailConfig
+      imap_server: 'imap.gmail.com'
+      cred_info:
+        _target_: obsei.source.email_source.EmailCredInfo
+        username: ''
+        password: ''
+      lookup_period: "1h"
+  Reddit:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/reddit.png"
+    _help_:
+      - 'Reddit account `username` and `password` require'
+      - 'Enter list of `subreddits`'
+    source:
+      _target_: obsei.source.reddit_source.RedditSource
+    config:
+      _target_: obsei.source.reddit_source.RedditConfig
+      subreddits:
+        - 'wallstreetbets'
+      cred_info:
+        _target_: obsei.source.reddit_source.RedditCredInfo
+        username: ''
+        password: ''
+      lookup_period: "1h"
+
+sink:
+  Jira:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/jira.png"
+    _help_:
+      - 'For testing purpose you can start jira server locally'
+      - 'Refer https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-run-standalone/'
+      - ''
+      - 'Provide `server url`, `username`  and `password` of the user'
+      - ''
+      - '`type` of issue to be created, for more information refer -'
+      - 'https://support.atlassian.com/jira-cloud-administration/docs/what-are-issue-types/'
+      - ''
+      - '`project` in which issue to be created, for more information refer -'
+      - 'https://support.atlassian.com/jira-software-cloud/docs/what-is-a-jira-software-project/'
+    sink:
+      _target_: obsei.sink.jira_sink.JiraSink
+    config:
+      _target_: obsei.sink.jira_sink.JiraSinkConfig
+      url: 'http://localhost:2990/jira'
+      username: ''
+      password: ''
+      issue_type:
+        name: "Task"
+      project:
+        key: ""
+  Zendesk:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/zendesk.png"
+    _help_:
+      - 'For custom domain refer http://docs.facetoe.com.au/zenpy.html#custom-domains'
+      - 'Provide zendesk `domain`'
+      - ''
+      - 'Provide `subdomain` if you have one'
+      - ''
+      - 'Provide zendesk account `email` and `password`'
+    sink:
+      _target_: obsei.sink.zendesk_sink.ZendeskSink
+    config:
+      _target_: obsei.sink.zendesk_sink.ZendeskSinkConfig
+      domain: "zendesk.com"
+      subdomain: null
+      cred_info:
+        _target_: obsei.sink.zendesk_sink.ZendeskCredInfo
+        email: ''
+        password: ''
+  Slack:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/slack.png"
+    _help_:
+      - 'Provide slack bot/app `token`, for more detail refer -'
+      - 'https://slack.com/intl/en-de/help/articles/215770388-Create-and-regenerate-API-tokens'
+      - ''
+      - 'To get `channel id` refer -'
+      - 'https://stackoverflow.com/questions/40940327/what-is-the-simplest-way-to-find-a-slack-team-id-and-a-channel-id'
+    sink:
+      _target_: obsei.sink.slack_sink.SlackSink
+    config:
+      _target_: obsei.sink.slack_sink.SlackSinkConfig
+      slack_token: ''
+      channel_id: ''
+  Elastic:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/elastic.png"
+    _help_:
+      - 'For testing purpose you can start Elasticsearch server locally via docker'
+      - '`docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" elasticsearch:7.9.2`'
+      - ''
+      - ' Provide server `hostname`, `port` alogn with `index` to be used'
+    sink:
+      _target_: obsei.sink.elasticsearch_sink.ElasticSearchSink
+    config:
+      _target_: obsei.sink.elasticsearch_sink.ElasticSearchSinkConfig
+      host: "localhost"
+      port: 9200
+      index_name: "test"
+  Http:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/http_api.png"
+    _help_:
+      - 'For testing purpose you can create mock http server via postman, refer -'
+      - 'https://learning.postman.com/docs/designing-and-developing-your-api/mocking-data/setting-up-mock/'
+      - ''
+      - 'Provide http server `url` and `headers`'
+    sink:
+      _target_: obsei.sink.http_sink.HttpSink
+    config:
+      _target_: obsei.sink.http_sink.HttpSinkConfig
+      url: '"https://localhost:8080/api/path'
+      headers:
+        Content-type: "application/json"
+  Logger:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/logger.png"
+    _help_: null
+    sink:
+      _target_: obsei.sink.logger_sink.LoggerSink
+    config:
+      _target_: obsei.sink.logger_sink.LoggerSinkConfig
+
+analyzer:
+  Classification:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/classification.png"
+    Transformer:
+      _help_:
+        - 'For supported models refer https://huggingface.co/models?filter=zero-shot-classification'
+        - ''
+        - 'Provide classification `labels`, two labels "positive" and "negative" are added by default'
+      config:
+        _target_: obsei.analyzer.classification_analyzer.ClassificationAnalyzerConfig
+        labels:
+          - "service"
+          - "content"
+          - "interface"
+        multi_class_classification: true
+      analyzer:
+        _target_: obsei.analyzer.classification_analyzer.ZeroShotClassificationAnalyzer
+        model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
+  Sentiment:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/sentiment.png"
+    Vader:
+      _help_:
+        - 'Vader is less resource hungry dictionary based Vader Sentiment detector'
+      analyzer:
+        _target_: obsei.analyzer.sentiment_analyzer.VaderSentimentAnalyzer
+    Transformer:
+      _help_:
+        - 'For supported models refer https://huggingface.co/models?filter=zero-shot-classification'
+      config:
+        _target_: obsei.analyzer.sentiment_analyzer.TransformersSentimentAnalyzerConfig
+        labels:
+          - "positive"
+          - "negative"
+        multi_class_classification: false
+      analyzer:
+        _target_: obsei.analyzer.sentiment_analyzer.TransformersSentimentAnalyzer
+        model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
+  Named Entity Recognition:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/ner.png"
+    Transformer:
+      _help_:
+        - 'For supported models refer https://huggingface.co/models?filter=token-classification'
+      analyzer:
+        _target_: obsei.analyzer.ner_analyzer.NERAnalyzer
+        model_name_or_path: "elastic/distilbert-base-cased-finetuned-conll03-english"
+  Translation:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/translator.png"
+    Transformer:
+      _help_:
+        - 'For supported models refer https://huggingface.co/models?pipeline_tag=translation'
+      analyzer:
+        _target_: obsei.analyzer.translation_analyzer.TranslationAnalyzer
+        model_name_or_path: "Helsinki-NLP/opus-mt-en-hi"
+  PII Anonymizer:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/pii.png"
+    Presidio:
+      _help_:
+        - '`analyze_only` decide whether to return only pii analysis or anonymize text'
+        - ''
+        - '`return_decision_process` decide whether to return detail information about anonymization decision'
+        - ''
+        - 'For `nlp_engine_name` spacy and stanza nlp engines are supported, For more info refer -'
+        - 'https://microsoft.github.io/presidio/analyzer/developing_recognizers/#utilize-spacy-or-stanza'
+        - ''
+        - 'Provide `model_name` and `lang_code` of the model'
+      config:
+        _target_: obsei.analyzer.pii_analyzer.PresidioPIIAnalyzerConfig
+        analyze_only: false
+        return_decision_process: false
+      analyzer:
+        _target_: obsei.analyzer.pii_analyzer.PresidioPIIAnalyzer
+        engine_config:
+          _target_: obsei.analyzer.pii_analyzer.PresidioEngineConfig
+          nlp_engine_name: "spacy"
+          models:
+            - _target_: obsei.analyzer.pii_analyzer.PresidioModelConfig
+              model_name: "en_core_web_lg"
+              lang_code: "en"
+  Dummy:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/dummy.png"
+    Dummy:
+      _help_:
+        - 'Dummy Analyzer, do nothing it simply used for transforming input to output'
+      config:
+        _target_: obsei.analyzer.dummy_analyzer.DummyAnalyzerConfig
+      analyzer:
+        _target_: obsei.analyzer.dummy_analyzer.DummyAnalyzer

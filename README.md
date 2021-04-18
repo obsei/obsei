@@ -28,14 +28,8 @@
     <a href="https://github.com/lalitpagaria/obsei/commits/master">
         <img alt="Last commit" src="https://img.shields.io/github/last-commit/lalitpagaria/obsei">
     </a>
-    <a href="https://github.com/lalitpagaria/obsei/issues">
-        <img alt="Open Issues" src="https://img.shields.io/github/issues/lalitpagaria/obsei">
-    </a>
-    <a href="https://pyup.io/repos/github/lalitpagaria/obsei/">
-        <img alt="pyup" src="https://pyup.io/repos/github/lalitpagaria/obsei/shield.svg">
-    </a>
-   <a href="https://pyup.io/repos/github/lalitpagaria/obsei/">
-        <img src="https://pyup.io/repos/github/lalitpagaria/obsei/python-3-shield.svg" alt="Python 3" />
+    <a href="https://www.youtube.com/channel/UCqdvgro1BzU13tkAfX3jCJA">
+        <img alt="YouTube Channel Subscribers" src="https://img.shields.io/youtube/channel/subscribers/UCqdvgro1BzU13tkAfX3jCJA?style=social">
     </a>
 
 </p>
@@ -195,7 +189,6 @@ source = PlayStoreScrapperSource()
 from obsei.source.reddit_source import RedditConfig, RedditSource, RedditCredInfo
 
 # initialize reddit source config
-# Credentials will be fetched from env variable named reddit_client_id and reddit_client_secret
 source_config = RedditConfig(
     subreddits=["wallstreetbets"], # List of subreddits
     # Reddit account username and password
@@ -314,6 +307,7 @@ from obsei.analyzer.translation_analyzer import TranslationAnalyzer
 analyzer_config = None
 
 # initialize translator
+# For supported models refer https://huggingface.co/models?pipeline_tag=translation
 analyzer = TranslationAnalyzer(
     model_name_or_path="Helsinki-NLP/opus-mt-hi-en"
 )
@@ -491,7 +485,7 @@ from obsei.sink.http_sink import HttpSink, HttpSinkConfig
 
 # initialize http sink config (Currently only POST call is supported)
 sink_config = HttpSinkConfig(
-    # provide http server uri
+    # provide http server url
     url="https://localhost:8080/api/path",
     # Here you can add headers you would like to pass with request
     headers={
@@ -586,6 +580,19 @@ Copy code snippets from <b>Step 3</b> to <b>Step 6</b> into python file for exam
 python example.py
 ```
 </details>
+
+## Demo UI
+We have a minimal UI that can spin up to test Obsei. It's based on [streamlit](https://streamlit.io/) and is very easy to extend for your purposes. 
+
+![Screenshot](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-ui-demo.png)
+
+**Watch:** [Obsei UI Demo](https://www.youtube.com/watch?v=GTF-Hy96gvY)
+
+Just run
+```
+docker run -d --name obesi-ui -p 8501:8501 lalitpagaria/obsei-ui-demo
+``` 
+You can find the UI at `http://localhost:8501`
 
 ## Upcoming Release
 Upcoming release plan and progress can be tracked at [link](https://github.com/lalitpagaria/obsei/projects) (Suggestions are welcome).

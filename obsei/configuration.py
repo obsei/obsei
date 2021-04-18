@@ -1,8 +1,8 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import yaml
-from pydantic import BaseSettings, Field, PrivateAttr, constr
+from pydantic import BaseSettings, Field, constr
 
 from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig
 from obsei.misc.utils import dict_to_object
@@ -17,20 +17,25 @@ logger = logging.getLogger(__name__)
 
 
 class ObseiConfiguration(BaseSettings):
-    _configuration: Dict[str, Any] = PrivateAttr()
-    config_path: constr(min_length=1) = Field(None, env='obsei_config_path')
-    config_filename: constr(min_length=1) = Field(None, env='obsei_config_filename')
+    configuration: Optional[Dict[str, Any]] = None
+    config_path: Optional[constr(min_length=1)] = Field(None, env='obsei_config_path')
+    config_filename: Optional[constr(min_length=1)] = Field(None, env='obsei_config_filename')
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self._configuration = yaml.load(
-            open(f"{self.config_path}/{self.config_filename}", "r"),
-            Loader=yaml.FullLoader
-        )
-        logger.debug(f"Configuration: {self._configuration}")
+
+        if self.configuration is None:
+            self.configuration = yaml.load(
+                open(f"{self.config_path}/{self.config_filename}", "r"),
+                Loader=yaml.FullLoader
+            )
+        logger.debug(f"Configuration: {self.configuration}")
 
     def initialize_instance(self, key_name: str = None):
-        return dict_to_object(self._configuration[key_name])
+        if key_name is None or key_name not in self.configuration or not self.configuration[key_name]:
+            logger.warning(f"{key_name} not exist in configuration")
+            return None
+        return dict_to_object(self.configuration[key_name])
 
     def get_twitter_source_config(self, key_name: str = "twitter_source") -> TwitterSourceConfig:
         return self.initialize_instance(key_name)
@@ -57,4 +62,4 @@ class ObseiConfiguration(BaseSettings):
         return self.initialize_instance(key_name)
 
     def get_logging_config(self, key_name: str = "logging") -> Dict[str, Any]:
-        return self._configuration[key_name]
+        return self.configuration[key_name]
