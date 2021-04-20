@@ -242,9 +242,9 @@ source = RedditScrapperSource()
 <p>Some analyzer support GPU and to utilize pass <b>device</b> parameter.
 List of possible values of <b>device</b> parameter (default value <i>auto</i>):
 <ol>
-    <li> <b>auto</b>: choose gpu if present else use cpu
-    <li> <b>cpu</b>: use cpu
-    <li> <b>cuda:{id}</b> - use gpu with provided cuda device id
+    <li> <b>auto</b>: If available it will select GPU (cuda:0) otherwise CPU
+    <li> <b>cpu</b>: It is select CPU
+    <li> <b>cuda:{id}</b> - It will use GPU with provided CUDA device id
 </ol>
 </p>
 
