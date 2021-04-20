@@ -76,5 +76,6 @@ analyzer_config:
 analyzer:
   _target_: obsei.analyzer.classification_analyzer.ZeroShotClassificationAnalyzer
   model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
+  device: "auto"
   initialize_model: true
   analyzer_config: ${analyzer_config}

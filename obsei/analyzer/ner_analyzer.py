@@ -29,7 +29,8 @@ class NERAnalyzer(BaseAnalyzer):
             'ner',
             model=model,
             tokenizer=tokenizer,
-            grouped_entities=self.grouped_entities
+            grouped_entities=self.grouped_entities,
+            device=self._device_id
         )
 
     def _classify_text_from_model(self, text: str) -> Dict[str, float]:

@@ -1,8 +1,9 @@
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr
 
+from obsei.misc import gpu_util
 from obsei.workflow.base_store import BaseStore
 
 
@@ -35,8 +36,20 @@ class BaseAnalyzerConfig(BaseModel):
 
 
 class BaseAnalyzer(BaseModel):
+    _device_id: int = PrivateAttr()
     TYPE: str = "Base"
     store: Optional[BaseStore] = None
+    device: str = 'auto'
+
+    """
+        auto: choose gpu if present else use cpu
+        cpu: use cpu
+        cuda:{id} - cuda device id
+    """
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self._device_id = gpu_util.get_device_id(self.device)
 
     @abstractmethod
     def analyze_input(

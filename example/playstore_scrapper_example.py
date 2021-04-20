@@ -23,6 +23,7 @@ source = PlayStoreScrapperSource()
 
 text_analyzer = ZeroShotClassificationAnalyzer(
     model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
+    device="auto"
 )
 
 source_response_list = source.lookup(source_config)
