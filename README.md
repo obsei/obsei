@@ -239,8 +239,8 @@ source = RedditScrapperSource()
 <details><summary><b>Step 4: Configure Analyzer</b></summary>
 
 <i>Note: To run transformers in an offline mode, check [transformers offline mode](https://huggingface.co/transformers/installation.html#offline-mode).</i>
-<p>For running models on GPU, give parameter <b>device</b>. Not all analyzers support it. Respective analyzer with support shows <b>device</b> as parameter in constructor below.
-List of possible values of <b>device</b> parameter:
+<p>Some analyzer support GPU and to utilize pass <b>device</b> parameter.
+List of possible values of <b>device</b> parameter (default value <i>auto</i>):
 <ol>
     <li> <b>auto</b>: choose gpu if present else use cpu
     <li> <b>cpu</b>: use cpu
