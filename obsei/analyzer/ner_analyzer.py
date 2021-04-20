@@ -30,7 +30,7 @@ class NERAnalyzer(BaseAnalyzer):
             model=model,
             tokenizer=tokenizer,
             grouped_entities=self.grouped_entities,
-            device=self.gpu_device
+            device=self._device_id
         )
 
     def _classify_text_from_model(self, text: str) -> Dict[str, float]:

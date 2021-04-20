@@ -23,12 +23,8 @@ source = PlayStoreScrapperSource()
 
 text_analyzer = ZeroShotClassificationAnalyzer(
     model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
-    gpu_device=0
+    device="auto"
 )
-if text_analyzer.is_using_gpu():
-    print("Using GPU device: " + str(text_analyzer.gpu_device))
-else:
-    print("Not using GPU")
 
 source_response_list = source.lookup(source_config)
 for idx, source_response in enumerate(source_response_list):

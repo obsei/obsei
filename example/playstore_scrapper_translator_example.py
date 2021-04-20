@@ -30,12 +30,13 @@ def source_fetch():
 
 def translate_text(text_list):
     translate_analyzer = TranslationAnalyzer(
-        model_name_or_path="Helsinki-NLP/opus-mt-hi-en"
+        model_name_or_path="Helsinki-NLP/opus-mt-hi-en",
+        device="auto"
     )
     source_responses = [AnalyzerRequest(processed_text=text.processed_text, source_name="sample") for text in text_list]
     analyzer_responses = translate_analyzer.analyze_input(source_response_list=source_responses)
     return [
-        AnalyzerRequest(processed_text=response.segmented_data['data'][0]['translation_text'], source_name="translator")
+        AnalyzerRequest(processed_text=response.segmented_data['translated_text'], source_name="translator")
         for response in analyzer_responses
     ]
 
@@ -43,6 +44,7 @@ def translate_text(text_list):
 def classify_text(text_list):
     text_analyzer = ZeroShotClassificationAnalyzer(
         model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
+        device="cpu"
     )
 
     return text_analyzer.analyze_input(
@@ -58,6 +60,8 @@ def print_list(text_name, text_list):
         json_response = json.dumps(text.__dict__, indent=4, sort_keys=True, default=str)
         logger.info(f"\n{text_name}#'{idx}'='{json_response}'")
 
+
+logger.info("Started...")
 
 source_responses_list = source_fetch()
 translated_text_list = translate_text(source_responses_list)

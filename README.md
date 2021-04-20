@@ -242,6 +242,11 @@ source = RedditScrapperSource()
 
 <table ><tbody ><tr></tr><tr>
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/classification.png" width="20" height="20"><b>Text Classification</b></summary><hr>
+For running models on GPU, give parameter **device**. Not all analyzers support it. Respective analyzer with support shows **device** as parameter in constructor below.
+List of possible values of **device** parameter:
+1. **auto**: choose gpu if present else use cpu
+2. **cpu**: use cpu
+3. **cuda:{id}** - use gpu with provided cuda device id
 
 Text classification, classify text into user provided categories.
  ```python
@@ -256,7 +261,8 @@ analyzer_config=ClassificationAnalyzerConfig(
 # initialize classification analyzer
 # For supported models refer https://huggingface.co/models?filter=zero-shot-classification
 text_analyzer = ZeroShotClassificationAnalyzer(
-    model_name_or_path="joeddav/bart-large-mnli-yahoo-answers"
+    model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
+    device = "auto"
 )
 ```
 </details>
@@ -291,7 +297,8 @@ analyzer_config=None
 # initialize ner analyzer
 # For supported models refer https://huggingface.co/models?filter=token-classification
 text_analyzer = NERAnalyzer(
-    model_name_or_path="elastic/distilbert-base-cased-finetuned-conll03-english"
+    model_name_or_path="elastic/distilbert-base-cased-finetuned-conll03-english",
+    device = "auto"
 )
 ```
 </details>
@@ -309,7 +316,8 @@ analyzer_config = None
 # initialize translator
 # For supported models refer https://huggingface.co/models?pipeline_tag=translation
 analyzer = TranslationAnalyzer(
-    model_name_or_path="Helsinki-NLP/opus-mt-hi-en"
+    model_name_or_path="Helsinki-NLP/opus-mt-hi-en",
+    device = "auto"
 )
 ```
 </details>

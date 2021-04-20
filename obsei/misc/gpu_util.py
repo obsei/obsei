@@ -5,15 +5,14 @@ def is_gpu_available():
     return torch.cuda.is_available()
 
 
-def is_valid_gpu_device(gpu_device):
-    return gpu_device is not None and gpu_device > 0
-
-
-def get_gpu_device(gpu_device):
-    if gpu_device is None or gpu_device < 0:
+def get_device_id(device):
+    if device == 'cpu':
         return -1
+    elif device == 'auto':
+        return 0 if is_gpu_available() else -1
+    elif device.startswith('cuda:'):
+        device_no = device.replace('cuda:', '')
+        if device_no.isnumeric():
+            return int(device_no)
 
-    if not is_gpu_available():
-        return -1
-
-    return gpu_device
+    raise Exception(f"Invalid device: '{device}'")

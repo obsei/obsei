@@ -15,7 +15,7 @@ class TranslationAnalyzer(BaseAnalyzer):
         super().__init__(**data)
         tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path)
         model = AutoModelForSeq2SeqLM.from_pretrained(self.model_name_or_path)
-        self._pipeline = pipeline("translation", model=model, tokenizer=tokenizer, device=self.gpu_device)
+        self._pipeline = pipeline("translation", model=model, tokenizer=tokenizer, device=self._device_id)
 
     def analyze_input(
             self, source_response_list: List[AnalyzerRequest],
@@ -29,7 +29,7 @@ class TranslationAnalyzer(BaseAnalyzer):
                     processed_text=source_response.processed_text,
                     meta=source_response.meta,
                     source_name=source_response.source_name,
-                    segmented_data={"translated_text": translated_text}
+                    segmented_data={"translated_text": translated_text[0]['translation_text']}
                 )
             )
 
