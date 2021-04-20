@@ -250,6 +250,11 @@ List of possible values of <b>device</b> parameter:
 
 <table ><tbody ><tr></tr><tr>
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/classification.png" width="20" height="20"><b>Text Classification</b></summary><hr>
+For running models on GPU, give parameter **device**. Not all analyzers support it. Respective analyzer with support shows **device** as parameter in constructor below.
+List of possible values of **device** parameter:
+1. **auto**: choose gpu if present else use cpu
+2. **cpu**: use cpu
+3. **cuda:{id}** - use gpu with provided cuda device id
 
 Text classification, classify text into user provided categories.
  ```python
