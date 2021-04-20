@@ -239,14 +239,17 @@ source = RedditScrapperSource()
 <details><summary><b>Step 4: Configure Analyzer</b></summary>
 
 <i>Note: To run transformers in an offline mode, check [transformers offline mode](https://huggingface.co/transformers/installation.html#offline-mode).</i>
+<p>Some analyzer support GPU and to utilize pass <b>device</b> parameter.
+List of possible values of <b>device</b> parameter (default value <i>auto</i>):
+<ol>
+    <li> <b>auto</b>: GPU (cuda:0) will be used if available otherwise CPU will be used
+    <li> <b>cpu</b>: CPU will be used
+    <li> <b>cuda:{id}</b> - GPU will be used with provided CUDA device id
+</ol>
+</p>
 
 <table ><tbody ><tr></tr><tr>
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/classification.png" width="20" height="20"><b>Text Classification</b></summary><hr>
-For running models on GPU, give parameter **device**. Not all analyzers support it. Respective analyzer with support shows **device** as parameter in constructor below.
-List of possible values of **device** parameter:
-1. **auto**: choose gpu if present else use cpu
-2. **cpu**: use cpu
-3. **cuda:{id}** - use gpu with provided cuda device id
 
 Text classification, classify text into user provided categories.
  ```python
