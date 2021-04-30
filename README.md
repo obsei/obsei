@@ -25,6 +25,15 @@
     <a href="https://pypi.org/project/obsei/">
         <img alt="Release" src="https://img.shields.io/pypi/v/obsei">
     </a>
+    <a href="https://pepy.tech/project/obsei">
+        <img src="https://pepy.tech/badge/obsei/month" alt="Downloads" />
+    </a>
+    <a href="https://anaconda.org/lalitpagaria/obsei">
+        <img src="https://anaconda.org/lalitpagaria/obsei/badges/version.svg" alt="Conda" />
+    </a>
+    <a href="https://anaconda.org/lalitpagaria/obsei">
+        <img src="https://anaconda.org/lalitpagaria/obsei/badges/downloads.svg" alt="Downloads" />
+    </a>
     <a href="https://github.com/lalitpagaria/obsei/commits/master">
         <img alt="Last commit" src="https://img.shields.io/github/last-commit/lalitpagaria/obsei">
     </a>
@@ -35,7 +44,7 @@
 </p>
 
 
-**Obsei** is intended to be a workflow automation tool for text analysis need. *Obsei* consist of -
+**Obsei** is intended to be an automation tool for text analysis need. *Obsei* consist of -
  - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews etc and feed that information to,
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
  - **Informer**, which send it to ticketing system, data store etc for further action and analysis.
@@ -638,7 +647,7 @@ If you use `obsei` in your research please use the following BibTeX entry:
 ```text
 @Misc{Pagaria2020Obsei,
   author =       {Lalit Pagaria},
-  title =        {Obsei - A workflow automation tool for text analysis need},
+  title =        {Obsei - An automation tool for text analysis need},
   howpublished = {Github},
   year =         {2020},
   url =          {https://github.com/lalitpagaria/obsei}

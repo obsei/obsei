@@ -1,0 +1,43 @@
+{% set name = "obsei" %}
+{% set data = load_setup_py_data() %}
+
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ data['version'] }}"
+
+source:
+  path: ..
+
+build:
+  number: 0
+  script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record=record.txt"
+
+requirements:
+  build:
+    - python
+  {% for package in data[ 'install_requires' ] %}
+    - {{ "py{}".format(package) if "torch" in package else package }}
+  {% endfor %}
+  run:
+    - python
+  {% for package in data[ 'install_requires' ] %}
+    - {{ "py{}".format(package) if "torch" in package else package }}
+  {% endfor %}
+
+test:
+  requires:
+    - pytest
+
+about:
+  home: "{{ data[ 'url' ] }}"
+  license: "{{ data[ 'license' ] }}"
+  license_file: 'LICENSE'
+  summary: "{{ data[ 'description' ] }}"
+  description: "{{ data[ 'description' ] }}"
+  dev_url: "{{ data[ 'url' ] }}"
+  doc_url: lalitpagaria.github.io/obsei/
+
+extra:
+  recipe-maintainers:
+    - lalitpagaria
