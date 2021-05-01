@@ -24,7 +24,7 @@ jobs:
           conda-channels: anaconda, conda-forge, lalitpagaria
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-        run: |
+      - run: |
           conda --version
           which python
           conda install -y anaconda-client conda-build conda-verify
