@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from importlib import import_module
-from typing import Any, Dict, Mapping, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment

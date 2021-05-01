@@ -33,7 +33,7 @@ class PlayStoreConfig(BaseSourceConfig):
             self.cred_info = GoogleCredInfo()
 
     def get_google_credentials(self) -> Credentials:
-        service_account.Credentials.from_service_account_info()
+        # service_account.Credentials.from_service_account_info()
         credentials = service_account.Credentials.from_service_account_file(
             filename=self.cred_info.service_cred_file,
             scopes=self.cred_info.scopes
@@ -76,7 +76,8 @@ class PlayStoreSource(BaseSource):
             review_id = start_index
 
             while True:
-                # Refer https://googleapis.github.io/google-api-python-client/docs/dyn/androidpublisher_v3.reviews.html#list
+                # Refer following link -
+                # https://googleapis.github.io/google-api-python-client/docs/dyn/androidpublisher_v3.reviews.html#list
                 responses = reviews.list(
                     package_name=config.package_name,
                     max_results=config.max_results,
