@@ -76,14 +76,19 @@ about:
   description: >
     {{ data[ 'description' ] }}
 
+
     In order to use PIIAnalyzer, PlayStoreScrapperSource, TwitterSource and ZendeskSink
     You need to install following packages via pip -
+
+
         pip install presidio-analyzer
         pip install presidio-anonymizer
         pip install zenpy
         pip install searchtweets-v2
         pip install google-play-scraper
         pip install tweet-preprocessor
+
+    Visit {{ data[ 'url' ] }} for feedback
   dev_url: "{{ data[ 'url' ] }}"
   doc_url: lalitpagaria.github.io/obsei/
 
