@@ -1,0 +1,2 @@
+conda config --add channels lalitpagaria
+conda config --add channels saidozcan

@@ -16,16 +16,55 @@ build:
 requirements:
   build:
     - python
-  {% for package in data[ 'install_requires' ] %}
-    - {{ "py{}".format(package) if "torch" in package else package }}
-  {% endfor %}
+    - pytorch
+    - tweet-preprocessor
+    - pytz
+    - atlassian-python-api
+    - elasticsearch
+    - pydantic
+    - python-dateutil
+    - sqlalchemy
+    - google-api-python-client
+    - app-store-reviews-reader
+    - reddit-rss-reader
+    - praw
+    - mmh3
+    - beautifulsoup4
+    - slack-sdk
+    - sentencepiece
+#    - presidio-analyzer
+#    - presidio-anonymizer
+#    - zenpy
+#    - searchtweets-v2
+#    - google-play-scraper
   run:
     - python
-  {% for package in data[ 'install_requires' ] %}
-    - {{ "py{}".format(package) if "torch" in package else package }}
-  {% endfor %}
+    - pytorch
+    - tweet-preprocessor
+    - pytz
+    - atlassian-python-api
+    - elasticsearch
+    - pydantic
+    - python-dateutil
+    - sqlalchemy
+    - google-api-python-client
+    - app-store-reviews-reader
+    - reddit-rss-reader
+    - praw
+    - mmh3
+    - beautifulsoup4
+    - slack-sdk
+    - sentencepiece
+#    - presidio-analyzer
+#    - presidio-anonymizer
+#    - zenpy
+#    - searchtweets-v2
+#    - google-play-scraper
 
 test:
+  imports:
+    - obsei
+    - obsei.analyzer
   requires:
     - pytest
 
@@ -33,8 +72,19 @@ about:
   home: "{{ data[ 'url' ] }}"
   license: "{{ data[ 'license' ] }}"
   license_file: 'LICENSE'
-  summary: "{{ data[ 'description' ] }}"
-  description: "{{ data[ 'description' ] }}"
+  summary: >
+    {{ data[ 'description' ] }}
+
+    In order to use PIIAnalyzer, PlayStoreScrapperSource, TwitterSource and ZendeskSink
+    You need to install following packages via pip -
+    pip install presidio-analyzer
+    pip install presidio-anonymizer
+    pip install zenpy
+    pip install searchtweets-v2
+    pip install google-play-scraper
+  description: "{{ data[ 'description' ] }}
+
+  "
   dev_url: "{{ data[ 'url' ] }}"
   doc_url: lalitpagaria.github.io/obsei/
 
