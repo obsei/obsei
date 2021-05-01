@@ -22,7 +22,9 @@ jobs:
           update-conda: true
           python-version: ${{ matrix.python-version }}
           conda-channels: anaconda, conda-forge, lalitpagaria, saidozcan
-      - run: conda --version
-      - run: which python
-      - run: cd conda
-      - run: conda build --output-folder . .
+      - run: |
+          conda --version
+          which python
+          conda install -y anaconda-client conda-build conda-verify
+          cd conda
+          conda build --output-folder . .
