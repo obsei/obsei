@@ -1,4 +1,4 @@
-name: Conda Package
+name: Publish Conda Package
 
 on:
   push:
@@ -7,16 +7,31 @@ on:
     types: [published]
 
 jobs:
-  publish:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.7, 3.8, 3.9]
+    name: ${{ matrix.python-version }}
     steps:
-    - uses: actions/checkout@master
-    - name: publish-to-conda
-      uses: fcakyon/conda-publish-action@master
-      with:
-        subdir: 'conda'
-        anacondatoken: ${{ secrets.ANACONDA_TOKEN }}
-        platforms: 'win osx linux'
-      run: |
-        conda config --add channels lalitpagaria
-        sh /entrypoint.sh
+      - uses: actions/checkout@v2
+      - name: Setup conda
+        uses: s-weigand/setup-conda@v1
+        with:
+          update-conda: true
+          python-version: ${{ matrix.python-version }}
+          conda-channels: anaconda, conda-forge, lalitpagaria
+          anacondatoken: ${{ secrets.ANACONDA_TOKEN }}
+      - run: |
+          conda --version
+          which python
+          conda install -y anaconda-client conda-build conda-verify
+          cd conda
+          conda build --output-folder . .
+          conda convert -p osx-64 linux-64/*.tar.bz2
+          conda convert -p win-64 linux-64/*.tar.bz2
+          export ANACONDA_API_TOKEN=$INPUT_ANACONDATOKEN
+          anaconda upload --label main osx-64/*.tar.bz2
+          anaconda upload --label main linux-64/*.tar.bz2
+          anaconda upload --label main win-64/*.tar.bz2
