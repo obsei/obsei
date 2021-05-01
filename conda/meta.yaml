@@ -17,7 +17,6 @@ requirements:
   build:
     - python
     - pytorch
-    - tweet-preprocessor
     - pytz
     - atlassian-python-api
     - elasticsearch
@@ -37,10 +36,10 @@ requirements:
 #    - zenpy
 #    - searchtweets-v2
 #    - google-play-scraper
+#    - tweet-preprocessor
   run:
     - python
     - pytorch
-    - tweet-preprocessor
     - pytz
     - atlassian-python-api
     - elasticsearch
@@ -60,6 +59,7 @@ requirements:
 #    - zenpy
 #    - searchtweets-v2
 #    - google-play-scraper
+#    - tweet-preprocessor
 
 test:
   imports:
@@ -72,19 +72,18 @@ about:
   home: "{{ data[ 'url' ] }}"
   license: "{{ data[ 'license' ] }}"
   license_file: 'LICENSE'
-  summary: >
+  summary: "{{ data[ 'description' ] }}"
+  description: >
     {{ data[ 'description' ] }}
 
     In order to use PIIAnalyzer, PlayStoreScrapperSource, TwitterSource and ZendeskSink
     You need to install following packages via pip -
-    pip install presidio-analyzer
-    pip install presidio-anonymizer
-    pip install zenpy
-    pip install searchtweets-v2
-    pip install google-play-scraper
-  description: "{{ data[ 'description' ] }}
-
-  "
+        pip install presidio-analyzer
+        pip install presidio-anonymizer
+        pip install zenpy
+        pip install searchtweets-v2
+        pip install google-play-scraper
+        pip install tweet-preprocessor
   dev_url: "{{ data[ 'url' ] }}"
   doc_url: lalitpagaria.github.io/obsei/
 
