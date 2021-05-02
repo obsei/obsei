@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from presidio_analyzer import AnalyzerEngine, EntityRecognizer
 from presidio_anonymizer import AnonymizerEngine
 from presidio_analyzer.nlp_engine import NlpEngineProvider
-from presidio_anonymizer.entities import AnonymizerConfig
+from presidio_anonymizer.entities.engine import OperatorConfig
 from pydantic import BaseModel, Field, PrivateAttr
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest, AnalyzerResponse, BaseAnalyzer, BaseAnalyzerConfig
@@ -28,7 +28,7 @@ class PresidioEngineConfig(BaseModel):
             self.models = [PresidioModelConfig()]
 
 
-class PresidioAnonymizerConfig(AnonymizerConfig, BaseModel):
+class PresidioAnonymizerConfig(OperatorConfig, BaseModel):
     def __init__(self, anonymizer_name: str, params: Optional[Dict[str, Any]] = None):
         super().__init__(anonymizer_name=anonymizer_name, params=params)
 
@@ -58,7 +58,7 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
     # To add customer recognizers refer https://microsoft.github.io/presidio/analyzer/adding_recognizers/
     entity_recognizers: Optional[List[EntityRecognizer]] = None
     # To find more details refer https://microsoft.github.io/presidio/anonymizer/
-    anonymizers_config: Optional[Dict[str, AnonymizerConfig]] = None
+    anonymizers_config: Optional[Dict[str, OperatorConfig]] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -102,11 +102,11 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
         self._anonymizer = AnonymizerEngine()
 
     def analyze_input(
-        self,
-        source_response_list: List[AnalyzerRequest],
-        analyzer_config: PresidioPIIAnalyzerConfig,
-        language: Optional[str] = "en",
-        **kwargs
+            self,
+            source_response_list: List[AnalyzerRequest],
+            analyzer_config: PresidioPIIAnalyzerConfig,
+            language: Optional[str] = "en",
+            **kwargs
     ) -> List[AnalyzerResponse]:
         analyzer_output: List[AnalyzerResponse] = []
 
@@ -125,7 +125,7 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
                 if source_response.processed_text is not None and len(source_response.processed_text) > 0:
                     anonymized_result = self._anonymizer.anonymize(
                         text=source_response.processed_text,
-                        anonymizers_config=anonymizers_config,
+                        operators=anonymizers_config,
                         analyzer_results=analyzer_result
                     )
 

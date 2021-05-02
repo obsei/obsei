@@ -1,0 +1,97 @@
+{% set name = "obsei" %}
+{% set data = load_setup_py_data() %}
+
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ data['version'] }}"
+
+source:
+  path: ..
+
+build:
+  number: 0
+  script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record=record.txt"
+
+requirements:
+  build:
+    - python
+    - pytorch
+    - pytz
+    - atlassian-python-api
+    - elasticsearch
+    - pydantic
+    - python-dateutil
+    - sqlalchemy
+    - google-api-python-client
+    - app-store-reviews-reader
+    - reddit-rss-reader
+    - praw
+    - mmh3
+    - beautifulsoup4
+    - slack-sdk
+    - sentencepiece
+#    - presidio-analyzer
+#    - presidio-anonymizer
+#    - zenpy
+#    - searchtweets-v2
+#    - google-play-scraper
+#    - tweet-preprocessor
+  run:
+    - python
+    - pytorch
+    - pytz
+    - atlassian-python-api
+    - elasticsearch
+    - pydantic
+    - python-dateutil
+    - sqlalchemy
+    - google-api-python-client
+    - app-store-reviews-reader
+    - reddit-rss-reader
+    - praw
+    - mmh3
+    - beautifulsoup4
+    - slack-sdk
+    - sentencepiece
+#    - presidio-analyzer
+#    - presidio-anonymizer
+#    - zenpy
+#    - searchtweets-v2
+#    - google-play-scraper
+#    - tweet-preprocessor
+
+test:
+  imports:
+    - obsei
+    - obsei.analyzer
+  requires:
+    - pytest
+
+about:
+  home: "{{ data[ 'url' ] }}"
+  license: "{{ data[ 'license' ] }}"
+  license_file: 'LICENSE'
+  summary: "{{ data[ 'description' ] }}"
+  description: >
+    {{ data[ 'description' ] }}
+
+
+    In order to use PIIAnalyzer, PlayStoreScrapperSource, TwitterSource and ZendeskSink
+    You need to install following packages via pip -
+
+
+        pip install presidio-analyzer
+        pip install presidio-anonymizer
+        pip install zenpy
+        pip install searchtweets-v2
+        pip install google-play-scraper
+        pip install tweet-preprocessor
+
+    Visit {{ data[ 'url' ] }} for feedback
+  dev_url: "{{ data[ 'url' ] }}"
+  doc_url: lalitpagaria.github.io/obsei/
+
+extra:
+  recipe-maintainers:
+    - lalitpagaria

@@ -43,10 +43,10 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="obsei",
-    version="0.0.7",
+    version="0.0.8",
     author="Lalit Pagaria",
     author_email="pagaria.lalit@gmail.com",
-    description="Observe PoI text data from the various sources, segment it and then inform about it",
+    description="Obsei is an automation tool for text analysis need",
     long_description=README,
     long_description_content_type="text/markdown",
     license="Apache Version 2.0",

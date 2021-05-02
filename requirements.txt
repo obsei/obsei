@@ -6,7 +6,7 @@
 #
 --find-links=https://download.pytorch.org/whl/torch_stable.html
 
-app-store-reviews-reader==1.0
+app-store-reviews-reader==1.1
     # via -r requirements.in
 atlassian-python-api==3.8.0
     # via -r requirements.in
@@ -14,17 +14,18 @@ beautifulsoup4==4.9.3
     # via
     #   -r requirements.in
     #   reddit-rss-reader
-blis==0.4.1
+blis==0.7.4
     # via
     #   spacy
     #   thinc
-cachetools==4.2.1
+cachetools==4.2.2
     # via
     #   google-auth
     #   zenpy
-catalogue==1.0.0
+catalogue==2.0.4
     # via
     #   spacy
+    #   srsly
     #   thinc
 certifi==2020.12.5
     # via
@@ -33,7 +34,9 @@ certifi==2020.12.5
 chardet==4.0.0
     # via requests
 click==7.1.2
-    # via sacremoses
+    # via
+    #   sacremoses
+    #   typer
 cymem==2.0.5
     # via
     #   preshed
@@ -41,7 +44,7 @@ cymem==2.0.5
     #   thinc
 deprecated==1.2.12
     # via atlassian-python-api
-elasticsearch==7.12.0
+elasticsearch==7.12.1
     # via -r requirements.in
 feedparser==6.0.2
     # via
@@ -53,16 +56,16 @@ filelock==3.0.12
     #   transformers
 google-api-core==1.26.3
     # via google-api-python-client
-google-api-python-client==2.1.0
+google-api-python-client==2.3.0
     # via -r requirements.in
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-google-auth==1.28.1
+google-auth==1.30.0
     # via
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
-google-play-scraper==0.1.2
+google-play-scraper==0.2.1
     # via -r requirements.in
 googleapis-common-protos==1.53.0
     # via google-api-core
@@ -76,13 +79,17 @@ idna==2.10
     # via
     #   requests
     #   tldextract
-importlib-metadata==3.10.0
+importlib-metadata==4.0.1
     # via
-    #   catalogue
+    #   spacy
     #   sqlalchemy
     #   transformers
+jinja2==2.11.3
+    # via spacy
 joblib==1.0.1
     # via sacremoses
+markupsafe==1.1.1
+    # via jinja2
 mmh3==3.0.0
     # via -r requirements.in
 murmurhash==1.0.5
@@ -104,11 +111,10 @@ oauthlib==3.1.0
 packaging==20.9
     # via
     #   google-api-core
-    #   transformers
-plac==1.1.3
-    # via
     #   spacy
-    #   thinc
+    #   transformers
+pathy==0.5.2
+    # via spacy
 praw==7.2.0
     # via -r requirements.in
 prawcore==2.0.0
@@ -117,9 +123,9 @@ preshed==3.0.5
     # via
     #   spacy
     #   thinc
-presidio-analyzer==2.1.0
+presidio-analyzer==2.2.0
     # via -r requirements.in
-presidio-anonymizer==2.1.0
+presidio-anonymizer==2.2.0
     # via -r requirements.in
 protobuf==3.15.8
     # via
@@ -133,8 +139,11 @@ pyasn1==0.4.8
     #   rsa
 pycryptodome==3.10.1
     # via presidio-anonymizer
-pydantic==1.8.1
-    # via -r requirements.in
+pydantic==1.7.3
+    # via
+    #   -r requirements.in
+    #   spacy
+    #   thinc
 pyparsing==2.4.7
     # via
     #   httplib2
@@ -153,7 +162,7 @@ pyyaml==5.4.1
     # via
     #   presidio-analyzer
     #   searchtweets-v2
-reddit-rss-reader==1.1
+reddit-rss-reader==1.3.2
     # via -r requirements.in
 regex==2020.11.13
     # via
@@ -182,7 +191,7 @@ requests==2.25.1
     #   zenpy
 rsa==4.7.2
     # via google-auth
-sacremoses==0.0.44
+sacremoses==0.0.45
     # via transformers
 searchtweets-v2==1.0.7
     # via -r requirements.in
@@ -203,19 +212,23 @@ six==1.15.0
     #   sacremoses
     #   websocket-client
     #   zenpy
-slack-sdk==3.4.2
+slack-sdk==3.5.0
     # via -r requirements.in
+smart-open==3.0.0
+    # via pathy
 soupsieve==2.2.1
     # via beautifulsoup4
-spacy==2.3
+spacy-legacy==3.0.5
+    # via spacy
+spacy==3.0.5
     # via presidio-analyzer
-sqlalchemy==1.4.7
+sqlalchemy==1.4.12
     # via -r requirements.in
-srsly==1.0.5
+srsly==2.4.1
     # via
     #   spacy
     #   thinc
-thinc==7.4.1
+thinc==8.0.3
     # via spacy
 tldextract==3.1.0
     # via presidio-analyzer
@@ -227,16 +240,21 @@ tqdm==4.60.0
     # via
     #   sacremoses
     #   spacy
-    #   thinc
     #   transformers
-transformers==4.5.0
+transformers==4.5.1
     # via -r requirements.in
 tweet-preprocessor==0.6.0
     # via -r requirements.in
+typer==0.3.2
+    # via
+    #   pathy
+    #   spacy
 typing-extensions==3.7.4.3
     # via
+    #   catalogue
     #   importlib-metadata
-    #   pydantic
+    #   spacy
+    #   thinc
     #   torch
 update-checker==0.18.0
     # via praw
@@ -259,7 +277,9 @@ wrapt==1.12.1
 zenpy==2.0.24
     # via -r requirements.in
 zipp==3.4.1
-    # via importlib-metadata
+    # via
+    #   catalogue
+    #   importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

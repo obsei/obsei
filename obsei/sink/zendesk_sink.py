@@ -63,7 +63,7 @@ class ZendeskSinkConfig(BaseSinkConfig):
     subdomain: Optional[str] = Field(None, env='zendesk_subdomain')
     cred_info: Optional[ZendeskCredInfo] = None
     summary_max_length: int = 50
-    labels_count = 3 # Number of labels to fetch
+    labels_count = 3  # Number of labels to fetch
     base_payload: Dict[str, Any] = None
 
     def __init__(self, **data: Any):
