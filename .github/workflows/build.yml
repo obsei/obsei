@@ -12,20 +12,11 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
         python-version: [3.7, 3.8, 3.9]
-        experimental: [false]
-        include:
-          - os: ubuntu-latest
-            python-version: "3.10.0-beta.1 - 3.10.0"
-            experimental: true
-          - os: macos-latest
-            python-version: 3.10.0-beta.1
-            experimental: true
 
     steps:
       - uses: actions/checkout@v2

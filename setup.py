@@ -1,8 +1,11 @@
+import logging
 import pathlib
 from io import open
 from sys import platform
 
 from setuptools import find_packages, setup
+
+logger = logging.getLogger(__name__)
 
 
 def parse_requirements(filename):
@@ -10,9 +13,11 @@ def parse_requirements(filename):
         lines = file.read().splitlines()
 
     if not platform.startswith("linux") and not platform.startswith("darwin"):
-        print("------------------------------------------------------------------------------------------------")
-        print("NOTE: For windows platform install torch manually refer https://pytorch.org/get-started/locally/")
-        print("------------------------------------------------------------------------------------------------")
+        logger.warning("""
+        ------------------------------------------------------------------------------------------------
+        NOTE: For windows platform install torch manually. Refer https://pytorch.org/get-started/locally/
+        ------------------------------------------------------------------------------------------------
+        """)
     return [
         line.strip()
         for line in lines
