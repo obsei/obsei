@@ -1,5 +1,6 @@
 import pathlib
 from io import open
+from sys import platform
 
 from setuptools import find_packages, setup
 
@@ -8,6 +9,10 @@ def parse_requirements(filename):
     with open(filename) as file:
         lines = file.read().splitlines()
 
+    if not platform.startswith("linux") and not platform.startswith("darwin"):
+        print("------------------------------------------------------------------------------------------------")
+        print("NOTE: For windows platform install torch manually refer https://pytorch.org/get-started/locally/")
+        print("------------------------------------------------------------------------------------------------")
     return [
         line.strip()
         for line in lines
