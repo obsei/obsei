@@ -42,9 +42,9 @@ jobs:
           pip install --editable .
 
       - name: Install Pytorch on windows
-          if: ${{ matrix.os == 'windows-latest' }}
-          run: |
-            pip install torch==1.8.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          pip install torch==1.8.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
       - name: Lint with flake8
         run: |
