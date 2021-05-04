@@ -22,7 +22,7 @@ jobs:
           - python: 3.10
             experimental: true
 
-        continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: ${{ matrix.experimental }}
 
     steps:
       - uses: actions/checkout@v2
