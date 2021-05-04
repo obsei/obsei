@@ -74,8 +74,8 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
             # Check SpacyNlpEngine.engine_name
             if self.engine_config.nlp_engine_name == "spacy":
                 try:
-                    import spacy
-                    spacy.load(model_config.model_name)
+                    spacy_model = __import__(model_config.model_name)
+                    spacy_model.load()
                     logger.info(f"Spacy model {model_config.model_name} is already downloaded")
                 except:
                     logger.warning(f"Spacy model {model_config.model_name} is not downloaded")
