@@ -10,7 +10,7 @@ from obsei.analyzer.translation_analyzer import TranslationAnalyzer
 @pytest.fixture(scope="session")
 def zero_shot_analyzer():
     return ZeroShotClassificationAnalyzer(
-        model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
+        model_name_or_path="typeform/mobilebert-uncased-mnli",
     )
 
 
