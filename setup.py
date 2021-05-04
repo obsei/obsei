@@ -7,17 +7,20 @@ from setuptools import find_packages, setup
 
 logger = logging.getLogger(__name__)
 
+if "win" in platform:
+    warning_message = """
+    ------------------------------------------------------------------------------------------------
+    NOTE: For windows platform install torch manually. Refer https://pytorch.org/get-started/locally/
+    ------------------------------------------------------------------------------------------------
+    """
+    logger.warning(warning_message)
+    print(warning_message)
+
 
 def parse_requirements(filename):
     with open(filename) as file:
         lines = file.read().splitlines()
 
-    if not platform.startswith("linux") and not platform.startswith("darwin"):
-        logger.warning("""
-        ------------------------------------------------------------------------------------------------
-        NOTE: For windows platform install torch manually. Refer https://pytorch.org/get-started/locally/
-        ------------------------------------------------------------------------------------------------
-        """)
     return [
         line.strip()
         for line in lines
