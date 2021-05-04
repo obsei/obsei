@@ -1,7 +1,20 @@
+import logging
 import pathlib
 from io import open
+from sys import platform
 
 from setuptools import find_packages, setup
+
+logger = logging.getLogger(__name__)
+
+if "win" in platform:
+    warning_message = """
+    ------------------------------------------------------------------------------------------------
+    NOTE: For windows platform install torch manually. Refer https://pytorch.org/get-started/locally/
+    ------------------------------------------------------------------------------------------------
+    """
+    logger.warning(warning_message)
+    print(warning_message)
 
 
 def parse_requirements(filename):
