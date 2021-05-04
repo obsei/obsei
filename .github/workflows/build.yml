@@ -10,19 +10,18 @@ on:
     branches: [ master ]
 
 jobs:
-  tests:
+  build:
     runs-on: ${{ matrix.os }}
-#    continue-on-error: ${{ matrix.experimental }}
-
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
         python-version: [3.7, 3.8, 3.9]
-        experimental: [ false ]
-        include:
-          - python-version: 3.10
-            experimental: true
+#        experimental: [ false ]
+#        include:
+#          - python-version: 3.10
+#            experimental: true
+#    continue-on-error: ${{ matrix.experimental }}
 
     steps:
       - uses: actions/checkout@v2
