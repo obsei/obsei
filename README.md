@@ -14,7 +14,7 @@
 
 <p align="center">
     <a href="https://github.com/lalitpagaria/obsei/actions">
-        <img alt="CI" src="https://github.com/lalitpagaria/obsei/workflows/CI/badge.svg?branch=master">
+        <img alt="Test" src="https://github.com/lalitpagaria/obsei/workflows/CI/badge.svg?branch=master">
     </a>
     <a href="https://github.com/lalitpagaria/obsei/blob/master/LICENSE">
         <img alt="License" src="https://img.shields.io/github/license/lalitpagaria/obsei?color=blue">
@@ -22,17 +22,20 @@
     <a href="https://pypi.org/project/obsei">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
     </a>
-    <a href="https://pypi.org/project/obsei/">
-        <img alt="Release" src="https://img.shields.io/pypi/v/obsei">
-    </a>
-    <a href="https://pepy.tech/project/obsei">
-        <img src="https://pepy.tech/badge/obsei/month" alt="Downloads" />
+    <a href="https://anaconda.org/lalitpagaria/obsei">
+        <img src="https://img.shields.io/conda/pn/lalitpagaria/obsei" alt="Platform" />
     </a>
     <a href="https://anaconda.org/lalitpagaria/obsei">
         <img src="https://anaconda.org/lalitpagaria/obsei/badges/version.svg" alt="Conda" />
     </a>
     <a href="https://anaconda.org/lalitpagaria/obsei">
         <img src="https://anaconda.org/lalitpagaria/obsei/badges/downloads.svg" alt="Downloads" />
+    </a>
+    <a href="https://pypi.org/project/obsei/">
+        <img alt="Release" src="https://img.shields.io/pypi/v/obsei">
+    </a>
+    <a href="https://pepy.tech/project/obsei">
+        <img src="https://pepy.tech/badge/obsei/month" alt="Downloads" />
     </a>
     <a href="https://github.com/lalitpagaria/obsei/commits/master">
         <img alt="Last commit" src="https://img.shields.io/github/last-commit/lalitpagaria/obsei">
@@ -88,6 +91,7 @@ git clone https://github.com/lalitpagaria/obsei.git
 cd obsei
 pip install --editable .
 ```
+**NOTE**: On Windows you have to install pytorch manually. Refer https://pytorch.org/get-started/locally/
 
 </details>
 <details><summary><b>Step 3: Configure Source/Observer</b></summary>
