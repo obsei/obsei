@@ -46,7 +46,7 @@ class HttpSink(BaseSink):
         for payload in payloads:
             response = requests.post(
                 url=config.url,
-                json=payload,
+                data=payload,
                 headers=headers,
             )
             responses.append(response)
