@@ -1,8 +1,10 @@
+import json
 from copy import deepcopy
 from typing import Any, Dict, List
 
 import requests
 
+from obsei.misc.utils import datetime_handler
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.analyzer.base_analyzer import AnalyzerResponse
 
@@ -46,7 +48,7 @@ class HttpSink(BaseSink):
         for payload in payloads:
             response = requests.post(
                 url=config.url,
-                json=payload,
+                json=json.dumps(payload, default=datetime_handler, ensure_ascii=False),
                 headers=headers,
             )
             responses.append(response)

@@ -171,3 +171,9 @@ def dict_to_object(
     module = import_module(module_name)
     class_ref = getattr(module, class_name)
     return class_ref(**new_dict)
+
+
+def datetime_handler(x):
+    if isinstance(x, datetime):
+        return x.isoformat()
+    raise TypeError("Unknown type")
