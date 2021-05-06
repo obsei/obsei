@@ -45,11 +45,10 @@ class SlackSink(BaseSink):
             ))
 
         for payload in payloads:
-            slack_message = f'Message: `{payload["processed_text"]}` ' \
-                            f'```{json.dumps(payload["segmented_data"], indent=2)}```'
             response = config.get_slack_client().chat_postMessage(
                 channel=config.channel_id,
-                text=slack_message.encode("utf-8", 'ignore')
+                text=f'Message: `{str(payload["processed_text"])}` '
+                     f'```{json.dumps(payload["segmented_data"], indent=2, ensure_ascii=False)}```'
             )
             logger.info(f"response='{response}'")
             responses.append(response)
