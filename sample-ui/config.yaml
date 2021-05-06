@@ -177,7 +177,7 @@ sink:
       _target_: obsei.sink.http_sink.HttpSink
     config:
       _target_: obsei.sink.http_sink.HttpSinkConfig
-      url: '"https://localhost:8080/api/path'
+      url: 'https://localhost:8080/api/path'
       headers:
         Content-type: "application/json"
   Logger:
@@ -196,6 +196,8 @@ analyzer:
         - 'For supported models refer https://huggingface.co/models?filter=zero-shot-classification'
         - ''
         - 'Provide classification `labels`, two labels "positive" and "negative" are added by default'
+        - ''
+        - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
       config:
         _target_: obsei.analyzer.classification_analyzer.ClassificationAnalyzerConfig
         labels:
@@ -206,6 +208,7 @@ analyzer:
       analyzer:
         _target_: obsei.analyzer.classification_analyzer.ZeroShotClassificationAnalyzer
         model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
+        device: "auto"
   Sentiment:
     _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/sentiment.png"
     Vader:
@@ -216,6 +219,8 @@ analyzer:
     Transformer:
       _help_:
         - 'For supported models refer https://huggingface.co/models?filter=zero-shot-classification'
+        - ''
+        - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
       config:
         _target_: obsei.analyzer.sentiment_analyzer.TransformersSentimentAnalyzerConfig
         labels:
@@ -224,23 +229,30 @@ analyzer:
         multi_class_classification: false
       analyzer:
         _target_: obsei.analyzer.sentiment_analyzer.TransformersSentimentAnalyzer
-        model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
+        model_name_or_path: "typeform/mobilebert-uncased-mnli"
+        device: "auto"
   Named Entity Recognition:
     _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/ner.png"
     Transformer:
       _help_:
         - 'For supported models refer https://huggingface.co/models?filter=token-classification'
+        - ''
+        - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
       analyzer:
         _target_: obsei.analyzer.ner_analyzer.NERAnalyzer
         model_name_or_path: "elastic/distilbert-base-cased-finetuned-conll03-english"
+        device: "auto"
   Translation:
     _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/translator.png"
     Transformer:
       _help_:
         - 'For supported models refer https://huggingface.co/models?pipeline_tag=translation'
+        - ''
+        - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
       analyzer:
         _target_: obsei.analyzer.translation_analyzer.TranslationAnalyzer
         model_name_or_path: "Helsinki-NLP/opus-mt-en-hi"
+        device: "auto"
   PII Anonymizer:
     _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/pii.png"
     Presidio:
