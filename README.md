@@ -1,6 +1,6 @@
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/obsei-flyer.png" />
+    <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-flyer.png" />
 </p>
 
 <p align="center">
