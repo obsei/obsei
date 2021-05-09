@@ -1,15 +1,6 @@
 
 <p align="center">
-    <table style="border-collapse: collapse; border: none;">
-        <tr style="border-collapse: collapse; border: none;">
-            <th style="border-collapse: collapse; border: none;">
-                <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/obsei_200x200.png" width="100" height="100" />
-            </th>
-            <th style="border-collapse: collapse; border: none;">
-                <h1>Obsei: Observe, Analyze and Inform</h1>
-            </th>
-        </tr>
-    </table>
+    <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/obsei-flyer.png" />
 </p>
 
 <p align="center">
@@ -22,6 +13,7 @@
     <a href="https://pypi.org/project/obsei">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
     </a>
+<!--
     <a href="https://anaconda.org/lalitpagaria/obsei">
         <img src="https://img.shields.io/conda/pn/lalitpagaria/obsei" alt="Platform" />
     </a>
@@ -31,6 +23,7 @@
     <a href="https://anaconda.org/lalitpagaria/obsei">
         <img src="https://anaconda.org/lalitpagaria/obsei/badges/downloads.svg" alt="Downloads" />
     </a>
+-->
     <a href="https://pypi.org/project/obsei/">
         <img alt="Release" src="https://img.shields.io/pypi/v/obsei">
     </a>
