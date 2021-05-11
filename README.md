@@ -59,7 +59,7 @@ For detailed installation instructions, usages and example refer [documentation]
 
 ## Support and Release Matrix
 
-| | Linux <br /> (Python3.7+) | Mac <br /> (Python3.7+) | Windows<sup id="a1">[1](#f1)</sup> <br /> (Python3.7+) | Remark |
+| | Linux | Mac | Windows<sup id="a1">[1](#f1)</sup> | Remark |
 |:---:|:---:|:---:|:---:|:---:|
 | Tests | ☑️ | ☑️ | ☑️ | Low Coverage <br /> Difficult to test 3rd party libs |
 | PIP | ✅ | ✅ | ✅ | |
