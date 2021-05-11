@@ -49,13 +49,37 @@ Current flow -
 
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png)
 
-A future concept (Coming Soon! :slightly_smiling_face:)
+A future concept (Coming Soon! 🙂)
 
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
 
 
 ## Documentation
 For detailed installation instructions, usages and example refer [documentation](https://lalitpagaria.github.io/obsei/).
+
+## Support and Release Matrix
+
+| | Linux <br /> (Python3.7+) | Mac <br /> (Python3.7+) | Windows<sup id="a1">[1](#f1)</sup> <br /> (Python3.7+) | Remark
+:---: | :---: | :---: | :---: | :---: |
+Tests | ☑️ | ☑️ | ☑️ | Low Coverage <br /> Difficult to test 3rd party libs |
+PIP | ✅ | ✅ | ✅ | |
+Conda<sup id="a2">[2](#f2)</sup> <br /> | - | - | - | Coming Soon! |
+
+<b id="f1">1</b> On Windows you have to install pytorch manually. Refer Pytorch official [instruction](https://pytorch.org/get-started/locally/). [↩](#a1)
+
+<b id="f2">2</b> Conda channel missing few dependencies, hence install missing dependencies manually - [↩](#a2)
+<details><summary>Missing Conda dependencies -</summary>
+
+ ```shell
+pip install presidio-analyzer
+pip install presidio-anonymizer
+pip install zenpy
+pip install searchtweets-v2
+pip install google-play-scraper
+pip install tweet-preprocessor
+```
+</details>
+
 
 ## How to use
 
