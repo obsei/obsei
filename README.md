@@ -59,11 +59,40 @@ For detailed installation instructions, usages and example refer [documentation]
 
 ## Support and Release Matrix
 
-| | Linux | Mac | Windows<sup id="a1">[1](#f1)</sup> | Remark |
-|:---:|:---:|:---:|:---:|:---:|
-| Tests | ☑️ | ☑️ | ☑️ | Low Coverage as difficult to test 3rd party libs |
-| PIP | ✅ | ✅ | ✅ | |
-| Conda<sup id="a2">[2](#f2)</sup> | - | - | - | Coming Soon! |
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Linux</th>
+<th>Mac</th>
+<th>Windows<sup id="a1"><a href="#f1">1</a></sup></th>
+<th>Remark</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tests</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td>Low Coverage as difficult to test 3rd party libs</td>
+</tr>
+<tr>
+<td>PIP</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td></td>
+</tr>
+<tr>
+<td>Conda<sup id="a2"><a href="#f2">2</a></sup></td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">-</td>
+<td style="text-align:center">-</td>
+<td>Coming Soon!</td>
+</tr>
+</tbody>
+</table>
 
 <b id="f1">1</b> On Windows you have to install pytorch manually. Refer Pytorch official [instruction](https://pytorch.org/get-started/locally/). [↩](#a1)
 
