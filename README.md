@@ -59,11 +59,11 @@ For detailed installation instructions, usages and example refer [documentation]
 
 ## Support and Release Matrix
 
-| | Linux <br /> (Python3.7+) | Mac <br /> (Python3.7+) | Windows<sup id="a1">[1](#f1)</sup> <br /> (Python3.7+) | Remark
-:---: | :---: | :---: | :---: | :---: |
-Tests | ☑️ | ☑️ | ☑️ | Low Coverage <br /> Difficult to test 3rd party libs |
-PIP | ✅ | ✅ | ✅ | |
-Conda<sup id="a2">[2](#f2)</sup> <br /> | - | - | - | Coming Soon! |
+| | Linux <br /> (Python3.7+) | Mac <br /> (Python3.7+) | Windows<sup id="a1">[1](#f1)</sup> <br /> (Python3.7+) | Remark |
+|:---:|:---:|:---:|:---:|:---:|
+| Tests | ☑️ | ☑️ | ☑️ | Low Coverage <br /> Difficult to test 3rd party libs |
+| PIP | ✅ | ✅ | ✅ | |
+| Conda<sup id="a2">[2](#f2)</sup> <br /> | - | - | - | Coming Soon! |
 
 <b id="f1">1</b> On Windows you have to install pytorch manually. Refer Pytorch official [instruction](https://pytorch.org/get-started/locally/). [↩](#a1)
 
