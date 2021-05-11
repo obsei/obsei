@@ -61,9 +61,9 @@ For detailed installation instructions, usages and example refer [documentation]
 
 | | Linux | Mac | Windows<sup id="a1">[1](#f1)</sup> | Remark |
 |:---:|:---:|:---:|:---:|:---:|
-| Tests | ☑️ | ☑️ | ☑️ | Low Coverage <br /> Difficult to test 3rd party libs |
+| Tests | ☑️ | ☑️ | ☑️ | Low Coverage as difficult to test 3rd party libs |
 | PIP | ✅ | ✅ | ✅ | |
-| Conda<sup id="a2">[2](#f2)</sup> <br /> | - | - | - | Coming Soon! |
+| Conda<sup id="a2">[2](#f2)</sup> | - | - | - | Coming Soon! |
 
 <b id="f1">1</b> On Windows you have to install pytorch manually. Refer Pytorch official [instruction](https://pytorch.org/get-started/locally/). [↩](#a1)
 
