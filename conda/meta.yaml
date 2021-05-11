@@ -31,12 +31,16 @@ requirements:
     - beautifulsoup4
     - slack-sdk
     - sentencepiece
-#    - presidio-analyzer
-#    - presidio-anonymizer
-#    - zenpy
-#    - searchtweets-v2
-#    - google-play-scraper
-#    - tweet-preprocessor
+    - vadersentiment
+    - transformers
+    - pip
+    - pip:
+      - presidio-analyzer
+      - presidio-anonymizer
+      - zenpy
+      - searchtweets-v2
+      - google-play-scraper
+      - tweet-preprocessor
   run:
     - python
     - pytorch
@@ -54,12 +58,16 @@ requirements:
     - beautifulsoup4
     - slack-sdk
     - sentencepiece
-#    - presidio-analyzer
-#    - presidio-anonymizer
-#    - zenpy
-#    - searchtweets-v2
-#    - google-play-scraper
-#    - tweet-preprocessor
+    - vadersentiment
+    - transformers
+    - pip
+    - pip:
+      - presidio-analyzer
+      - presidio-anonymizer
+      - zenpy
+      - searchtweets-v2
+      - google-play-scraper
+      - tweet-preprocessor
 
 test:
   imports:
