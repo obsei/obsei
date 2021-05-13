@@ -139,7 +139,7 @@ pyasn1==0.4.8
     #   rsa
 pycryptodome==3.10.1
     # via presidio-anonymizer
-pydantic==1.7.3
+pydantic==1.8.2
     # via
     #   -r requirements.in
     #   spacy
