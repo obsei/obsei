@@ -8,7 +8,7 @@
 
 app-store-reviews-reader==1.1
     # via -r requirements.in
-atlassian-python-api==3.8.0
+atlassian-python-api==3.10.0
     # via -r requirements.in
 beautifulsoup4==4.9.3
     # via
@@ -52,11 +52,12 @@ feedparser==6.0.2
     #   reddit-rss-reader
 filelock==3.0.12
     # via
+    #   huggingface-hub
     #   tldextract
     #   transformers
 google-api-core==1.26.3
     # via google-api-python-client
-google-api-python-client==2.3.0
+google-api-python-client==2.4.0
     # via -r requirements.in
 google-auth-httplib2==0.1.0
     # via google-api-python-client
@@ -69,26 +70,29 @@ google-play-scraper==0.2.1
     # via -r requirements.in
 googleapis-common-protos==1.53.0
     # via google-api-core
-greenlet==1.0.0
+greenlet==1.1.0
     # via sqlalchemy
 httplib2==0.19.1
     # via
     #   google-api-python-client
     #   google-auth-httplib2
+huggingface-hub==0.0.8
+    # via transformers
 idna==2.10
     # via
     #   requests
     #   tldextract
 importlib-metadata==4.0.1
     # via
+    #   huggingface-hub
     #   spacy
     #   sqlalchemy
     #   transformers
-jinja2==2.11.3
+jinja2==3.0.0
     # via spacy
 joblib==1.0.1
     # via sacremoses
-markupsafe==1.1.1
+markupsafe==2.0.0
     # via jinja2
 mmh3==3.0.0
     # via -r requirements.in
@@ -97,7 +101,7 @@ murmurhash==1.0.5
     #   preshed
     #   spacy
     #   thinc
-numpy==1.20.2
+numpy==1.20.3
     # via
     #   blis
     #   spacy
@@ -123,11 +127,11 @@ preshed==3.0.5
     # via
     #   spacy
     #   thinc
-presidio-analyzer==2.2.0
+presidio-analyzer==2.2.1
     # via -r requirements.in
-presidio-anonymizer==2.2.0
+presidio-anonymizer==2.2.1
     # via -r requirements.in
-protobuf==3.15.8
+protobuf==3.17.0
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -139,7 +143,7 @@ pyasn1==0.4.8
     #   rsa
 pycryptodome==3.10.1
     # via presidio-anonymizer
-pydantic==1.7.3
+pydantic==1.7.4
     # via
     #   -r requirements.in
     #   spacy
@@ -178,6 +182,7 @@ requests==2.25.1
     #   app-store-reviews-reader
     #   atlassian-python-api
     #   google-api-core
+    #   huggingface-hub
     #   prawcore
     #   reddit-rss-reader
     #   requests-file
@@ -199,7 +204,7 @@ sentencepiece==0.1.95
     # via -r requirements.in
 sgmllib3k==1.0.0
     # via feedparser
-six==1.15.0
+six==1.16.0
     # via
     #   atlassian-python-api
     #   google-api-core
@@ -212,7 +217,7 @@ six==1.15.0
     #   sacremoses
     #   websocket-client
     #   zenpy
-slack-sdk==3.5.0
+slack-sdk==3.5.1
     # via -r requirements.in
 smart-open==3.0.0
     # via pathy
@@ -222,7 +227,7 @@ spacy-legacy==3.0.5
     # via spacy
 spacy==3.0.5
     # via presidio-analyzer
-sqlalchemy==1.4.12
+sqlalchemy==1.4.15
     # via -r requirements.in
 srsly==2.4.1
     # via
@@ -238,10 +243,11 @@ torch==1.8.1; sys_platform != '*win*'
     # via -r requirements.in
 tqdm==4.60.0
     # via
+    #   huggingface-hub
     #   sacremoses
     #   spacy
     #   transformers
-transformers==4.5.1
+transformers==4.6.0
     # via -r requirements.in
 tweet-preprocessor==0.6.0
     # via -r requirements.in
@@ -249,7 +255,7 @@ typer==0.3.2
     # via
     #   pathy
     #   spacy
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.0
     # via
     #   catalogue
     #   importlib-metadata
@@ -270,7 +276,7 @@ wasabi==0.8.2
     # via
     #   spacy
     #   thinc
-websocket-client==0.58.0
+websocket-client==0.59.0
     # via praw
 wrapt==1.12.1
     # via deprecated
