@@ -55,7 +55,7 @@ A future concept (Coming Soon! 🙂)
 
 
 ## Demo
-We have a minimal [streamlit]((https://streamlit.io/) based UI that you can use to test Obsei.
+We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
 
 ![Screenshot](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-ui-demo.png)
 
