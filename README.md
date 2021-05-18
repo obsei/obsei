@@ -54,6 +54,23 @@ A future concept (Coming Soon! 🙂)
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
 
 
+## Demo
+We have a minimal [streamlit]((https://streamlit.io/) based UI that you can use to test Obsei.
+
+![Screenshot](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-ui-demo.png)
+
+**Watch:** [Obsei UI Demo](https://www.youtube.com/watch?v=GTF-Hy96gvY)
+
+To test remotely, just open: [Obsei Demo Link](https://share.streamlit.io/lalitpagaria/obsei/sample-ui/ui.py)
+
+To test locally, just run
+```
+docker run -d --name obesi-ui -p 8501:8501 lalitpagaria/obsei-ui-demo
+
+# You can find the UI at http://localhost:8501
+``` 
+
+
 ## Documentation
 For detailed installation instructions, usages and example refer [documentation](https://lalitpagaria.github.io/obsei/).
 
@@ -650,19 +667,6 @@ Copy code snippets from <b>Step 3</b> to <b>Step 6</b> into python file for exam
 python example.py
 ```
 </details>
-
-## Demo UI
-We have a minimal UI that can spin up to test Obsei. It's based on [streamlit](https://streamlit.io/) and is very easy to extend for your purposes. 
-
-![Screenshot](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-ui-demo.png)
-
-**Watch:** [Obsei UI Demo](https://www.youtube.com/watch?v=GTF-Hy96gvY)
-
-Just run
-```
-docker run -d --name obesi-ui -p 8501:8501 lalitpagaria/obsei-ui-demo
-``` 
-You can find the UI at `http://localhost:8501`
 
 ## Upcoming Release
 Upcoming release plan and progress can be tracked at [link](https://github.com/lalitpagaria/obsei/projects) (Suggestions are welcome).
