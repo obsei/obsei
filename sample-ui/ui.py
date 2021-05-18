@@ -1,16 +1,14 @@
 import requests
-from PIL import Image
 from utils import *
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
 configuration = get_obsei_config(current_path, "config.yaml")
 logo_url = 'https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/obsei_200x200.png'
 
-favicon = Image.open(requests.get(logo_url, stream=True).raw)
 st.set_page_config(
     page_title="Obsei Demo",
     layout="wide",
-    page_icon=favicon
+    page_icon=logo_url
 )
 
 st.title("Obsei Demo").markdown(get_icon_name("Obsei Demo", logo_url, 60, 35), unsafe_allow_html=True)
