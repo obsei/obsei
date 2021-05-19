@@ -1,4 +1,3 @@
-import requests
 from utils import *
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
