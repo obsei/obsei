@@ -6,12 +6,12 @@ def is_gpu_available():
 
 
 def get_device_id(device):
-    if device == 'cpu':
+    if device == "cpu":
         return -1
-    elif device == 'auto':
+    elif device == "auto":
         return 0 if is_gpu_available() else -1
-    elif device.startswith('cuda:'):
-        device_no = device.replace('cuda:', '')
+    elif device.startswith("cuda:"):
+        device_no = device.replace("cuda:", "")
         if device_no.isnumeric():
             return int(device_no)
 

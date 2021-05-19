@@ -17,8 +17,8 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
     host: str
     port: int
     index_name: str = "es_index"
-    username: SecretStr = Field(SecretStr(""), env='elasticsearch_username')
-    password: SecretStr = Field(SecretStr(""), env='elasticsearch_password')
+    username: SecretStr = Field(SecretStr(""), env="elasticsearch_username")
+    password: SecretStr = Field(SecretStr(""), env="elasticsearch_password")
     scheme: str = "http"
     ca_certs: bool = False
     verify_certs: bool = True
@@ -32,11 +32,14 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
         super().__init__(**data)
         self._es_client = Elasticsearch(
             hosts=[{"host": self.host, "port": self.port}],
-            http_auth=(self.username.get_secret_value(), self.password.get_secret_value()),
+            http_auth=(
+                self.username.get_secret_value(),
+                self.password.get_secret_value(),
+            ),
             scheme=self.scheme,
             ca_certs=self.ca_certs,
             verify_certs=self.verify_certs,
-            timeout=self.timeout
+            timeout=self.timeout,
         )
         self.base_payload = self.base_payload or {
             "_op_type": "create",  # TODO update exiting support?
@@ -56,7 +59,9 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
                             "strings": {
                                 "path_match": "*",
                                 "match_mapping_type": "string",
-                                "mapping": {"type": "keyword"}}}
+                                "mapping": {"type": "keyword"},
+                            }
+                        }
                     ],
                 }
             }
@@ -72,7 +77,9 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
                 raise e
 
     def bulk(self, payloads):
-        return bulk(self._es_client, payloads, request_timeout=300, refresh=self.refresh_type)
+        return bulk(
+            self._es_client, payloads, request_timeout=300, refresh=self.refresh_type
+        )
 
 
 class ElasticSearchSink(BaseSink):
@@ -88,9 +95,11 @@ class ElasticSearchSink(BaseSink):
 
         payloads = []
         for analyzer_response in analyzer_responses:
-            payloads.append(self.convertor.convert(
-                analyzer_response=analyzer_response,
-                base_payload=deepcopy(config.base_payload)
-            ))
+            payloads.append(
+                self.convertor.convert(
+                    analyzer_response=analyzer_response,
+                    base_payload=deepcopy(config.base_payload),
+                )
+            )
 
         return config.bulk(payloads)

@@ -2,7 +2,11 @@ import pytest
 
 from obsei.analyzer.classification_analyzer import ZeroShotClassificationAnalyzer
 from obsei.analyzer.ner_analyzer import NERAnalyzer
-from obsei.analyzer.pii_analyzer import PresidioEngineConfig, PresidioModelConfig, PresidioPIIAnalyzer
+from obsei.analyzer.pii_analyzer import (
+    PresidioEngineConfig,
+    PresidioModelConfig,
+    PresidioPIIAnalyzer,
+)
 from obsei.analyzer.sentiment_analyzer import VaderSentimentAnalyzer
 from obsei.analyzer.translation_analyzer import TranslationAnalyzer
 
@@ -23,13 +27,13 @@ def vader_analyzer():
 def ner_analyzer():
     return NERAnalyzer(
         model_name_or_path="dbmdz/bert-large-cased-finetuned-conll03-english",
-        tokenizer_name="bert-base-cased"
+        tokenizer_name="bert-base-cased",
     )
 
 
 @pytest.fixture(scope="session")
 def translate_analyzer():
-    return TranslationAnalyzer(model_name_or_path = "Helsinki-NLP/opus-mt-hi-en")
+    return TranslationAnalyzer(model_name_or_path="Helsinki-NLP/opus-mt-hi-en")
 
 
 @pytest.fixture(scope="session")
@@ -37,6 +41,6 @@ def pii_analyzer():
     return PresidioPIIAnalyzer(
         engine_config=PresidioEngineConfig(
             nlp_engine_name="spacy",
-            models=[PresidioModelConfig(model_name="en_core_web_lg", lang_code="en")]
+            models=[PresidioModelConfig(model_name="en_core_web_lg", lang_code="en")],
         )
     )

@@ -13,13 +13,20 @@ source = TwitterSource(store=WorkflowStore())
 
 
 def print_state(id: str):
-    logger.info(f'Source State: {source.store.get_source_state(id)}')
+    logger.info(f"Source State: {source.store.get_source_state(id)}")
 
 
 source_config = TwitterSourceConfig(
     keywords=["india"],
     lookup_period="2m",
-    tweet_fields=["author_id", "conversation_id", "created_at", "id", "public_metrics", "text"],
+    tweet_fields=[
+        "author_id",
+        "conversation_id",
+        "created_at",
+        "id",
+        "public_metrics",
+        "text",
+    ],
     user_fields=["id", "name", "public_metrics", "username", "verified"],
     expansions=["author_id"],
     place_fields=None,

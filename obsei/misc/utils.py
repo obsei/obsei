@@ -15,7 +15,7 @@ DEFAULT_LOOKUP_PERIOD = "1h"
 def flatten_dict(
     dictionary: Dict[str, Any],
     round_the_float: bool = True,
-    float_round_format_str: str = '.2f',
+    float_round_format_str: str = ".2f",
     separator: str = "_",
 ):
     out: Dict[str, Any] = {}
@@ -43,14 +43,14 @@ def obj_to_markdown(
     obj: Any,
     level: int = 1,
     str_enclose_start: Optional[str] = None,
-    str_enclose_end: Optional[str] = None
+    str_enclose_end: Optional[str] = None,
 ) -> str:
     key_prefix = "*" * level
 
     markdowns = []
     if is_collection(obj):
         add_key = True
-        if hasattr(obj, '__dict__'):
+        if hasattr(obj, "__dict__"):
             item_view = obj.__dict__.items()
         elif isinstance(obj, dict):
             item_view = obj.items()
@@ -60,7 +60,7 @@ def obj_to_markdown(
 
         for key, val in item_view:
             if add_key:
-                header = f'{key_prefix} {key}'
+                header = f"{key_prefix} {key}"
             else:
                 header = key_prefix
             if is_collection(val):
@@ -68,23 +68,25 @@ def obj_to_markdown(
                     obj=val,
                     level=level + 1,
                     str_enclose_start=str_enclose_start,
-                    str_enclose_end=str_enclose_end
+                    str_enclose_end=str_enclose_end,
                 )
-                markdowns.append(f'{header}\n{child_markdown}')
+                markdowns.append(f"{header}\n{child_markdown}")
             elif str_enclose_start is not None and isinstance(val, str):
-                markdowns.append(f'{header}:\n{str_enclose_start}{val}{str_enclose_end}')
+                markdowns.append(
+                    f"{header}:\n{str_enclose_start}{val}{str_enclose_end}"
+                )
             else:
-                markdowns.append(f'{header}: {val}')
+                markdowns.append(f"{header}: {val}")
     elif str_enclose_start is not None and isinstance(obj, str):
-        markdowns.append(f'{key_prefix}:\n{str_enclose_start}{obj}{str_enclose_end}')
+        markdowns.append(f"{key_prefix}:\n{str_enclose_start}{obj}{str_enclose_end}")
     else:
-        markdowns.append(f'{key_prefix}: {obj}')
+        markdowns.append(f"{key_prefix}: {obj}")
 
     return "\n".join(markdowns)
 
 
 def is_collection(obj: Any):
-    return isinstance(obj, (dict, list)) or hasattr(obj, '__dict__')
+    return isinstance(obj, (dict, list)) or hasattr(obj, "__dict__")
 
 
 # Copied from searchtweets-v2 and bit modified
@@ -116,15 +118,15 @@ def convert_utc_time(datetime_str):
             _date = datetime.utcnow()
             # parse out numeric character.
             num = int(datetime_str[:-1])
-            if 'd' in datetime_str:
-                _date = (_date + relativedelta(days=-num))
-            elif 'h' in datetime_str:
-                _date = (_date + relativedelta(hours=-num))
-            elif 'm' in datetime_str:
-                _date = (_date + relativedelta(minutes=-num))
-        elif not {'-', ':'} & set(datetime_str):
+            if "d" in datetime_str:
+                _date = _date + relativedelta(days=-num)
+            elif "h" in datetime_str:
+                _date = _date + relativedelta(hours=-num)
+            elif "m" in datetime_str:
+                _date = _date + relativedelta(minutes=-num)
+        elif not {"-", ":"} & set(datetime_str):
             _date = datetime.strptime(datetime_str, "%Y%m%d%H%M")
-        elif 'T' in datetime_str:
+        elif "T" in datetime_str:
             _date = datetime.strptime(datetime_str, DATETIME_STRING_PATTERN)
         else:
             _date = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
@@ -136,7 +138,14 @@ def convert_utc_time(datetime_str):
 
 
 def tag_visible(element):
-    if element.parent.name in ['style', 'script', 'head', 'title', 'meta', '[document]']:
+    if element.parent.name in [
+        "style",
+        "script",
+        "head",
+        "title",
+        "meta",
+        "[document]",
+    ]:
         return False
     if isinstance(element, Comment):
         return False
@@ -144,16 +153,16 @@ def tag_visible(element):
 
 
 def text_from_html(body):
-    soup = BeautifulSoup(body, 'html.parser')
+    soup = BeautifulSoup(body, "html.parser")
     texts = soup.findAll(text=True)
     visible_texts = filter(tag_visible, texts)
-    return u" ".join(t.strip() for t in visible_texts)
+    return " ".join(t.strip() for t in visible_texts)
 
 
 def dict_to_object(
-        dictionary: Dict[str, Any],
-        class_name_key: Optional[str] = "_target_",
-        full_class_name: Optional[str] = None
+    dictionary: Dict[str, Any],
+    class_name_key: Optional[str] = "_target_",
+    full_class_name: Optional[str] = None,
 ) -> Any:
     new_dict: Dict[str, Any] = dict()
     for k, v in dictionary.items():

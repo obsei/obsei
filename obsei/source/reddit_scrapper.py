@@ -8,7 +8,11 @@ from reddit_rss_reader.reader import RedditContent, RedditRSSReader
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.base_analyzer import AnalyzerRequest
-from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time
+from obsei.misc.utils import (
+    DATETIME_STRING_PATTERN,
+    DEFAULT_LOOKUP_PERIOD,
+    convert_utc_time,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +29,13 @@ class RedditScrapperConfig(BaseSourceConfig):
         super().__init__(**data)
 
         # Using 32 bit hash
-        self.url_id = self.url_id or '{:02x}'.format(mmh3.hash(self.url, signed=False))
+        self.url_id = self.url_id or "{:02x}".format(mmh3.hash(self.url, signed=False))
 
         self._scrapper = RedditRSSReader(
             url=self.url,
-            user_agent=self.user_agent if self.user_agent else 'script {url_hash}'.format(url_hash=self.url_id)
+            user_agent=self.user_agent
+            if self.user_agent
+            else "script {url_hash}".format(url_hash=self.url_id),
         )
 
     def get_readers(self) -> RedditRSSReader:
@@ -49,10 +55,7 @@ class RedditScrapperSource(BaseSource):
         state = state or dict()
 
         scrapper_stat: Dict[str, Any] = state.get(config.url_id, dict())
-        lookup_period: str = scrapper_stat.get(
-            "since_time",
-            config.lookup_period
-        )
+        lookup_period: str = scrapper_stat.get("since_time", config.lookup_period)
         lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
         if len(lookup_period) <= 5:
             since_time = convert_utc_time(lookup_period)
@@ -68,8 +71,7 @@ class RedditScrapperSource(BaseSource):
         reddit_data: Optional[List[RedditContent]] = None
         try:
             reddit_data = config.get_readers().fetch_content(
-                after=since_time,
-                since_id=since_id
+                after=since_time, since_id=since_id
             )
         except RuntimeError as ex:
             logger.warning(ex.__cause__)
@@ -81,7 +83,7 @@ class RedditScrapperSource(BaseSource):
                 AnalyzerRequest(
                     processed_text=f"{reddit.title}. {reddit.extracted_text}",
                     meta=reddit.__dict__,
-                    source_name=self.NAME
+                    source_name=self.NAME,
                 )
             )
 

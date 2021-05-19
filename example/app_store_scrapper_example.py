@@ -6,13 +6,16 @@ from datetime import datetime, timedelta
 import pytz
 
 from obsei.misc.utils import DATETIME_STRING_PATTERN
-from obsei.source.appstore_scrapper import AppStoreScrapperConfig, AppStoreScrapperSource
+from obsei.source.appstore_scrapper import (
+    AppStoreScrapperConfig,
+    AppStoreScrapperSource,
+)
 from obsei.workflow.store import WorkflowStore
 from obsei.workflow.workflow import Workflow, WorkflowConfig
 
 
 def print_state(id: str):
-    logger.info(f'Source State: {source.store.get_source_state(id)}')
+    logger.info(f"Source State: {source.store.get_source_state(id)}")
 
 
 logger = logging.getLogger(__name__)
@@ -22,7 +25,7 @@ since_time = datetime.utcnow().astimezone(pytz.utc) + timedelta(days=-5)
 source_config = AppStoreScrapperConfig(
     countries=["us", "de"],
     app_id="497799835",
-    lookup_period=since_time.strftime(DATETIME_STRING_PATTERN)
+    lookup_period=since_time.strftime(DATETIME_STRING_PATTERN),
 )
 
 source = AppStoreScrapperSource(store=WorkflowStore())

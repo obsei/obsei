@@ -18,11 +18,7 @@ class BaseSource(BaseModel):
     store: Optional[BaseStore] = None
 
     @abstractmethod
-    def lookup(
-        self,
-        config: BaseSourceConfig,
-        **kwargs
-    ) -> List[AnalyzerRequest]:
+    def lookup(self, config: BaseSourceConfig, **kwargs) -> List[AnalyzerRequest]:
         pass
 
     class Config:

@@ -21,10 +21,10 @@ def parse_requirements(filename):
         line.strip()
         for line in lines
         if not (
-            (not line) or
-            (line.strip()[0] == "#") or
-            (line.strip().startswith('--find-links')) or
-            ("git+https" in line)
+            (not line)
+            or (line.strip()[0] == "#")
+            or (line.strip().startswith("--find-links"))
+            or ("git+https" in line)
         )
     ]
 
@@ -34,14 +34,14 @@ def get_dependency_links(filename):
         lines = file.read().splitlines()
 
     return [
-        line.strip().split('=')[1]
+        line.strip().split("=")[1]
         for line in lines
-        if line.strip().startswith('--find-links')
+        if line.strip().startswith("--find-links")
     ]
 
 
-dependency_links = get_dependency_links('requirements.txt')
-parsed_requirements = parse_requirements('requirements.txt')
+dependency_links = get_dependency_links("requirements.txt")
+parsed_requirements = parse_requirements("requirements.txt")
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent

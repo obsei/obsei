@@ -5,7 +5,12 @@ from praw import Reddit
 from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest
-from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time, text_from_html
+from obsei.misc.utils import (
+    DATETIME_STRING_PATTERN,
+    DEFAULT_LOOKUP_PERIOD,
+    convert_utc_time,
+    text_from_html,
+)
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 
 
@@ -13,13 +18,13 @@ class RedditCredInfo(BaseSettings):
     # Create credential at https://www.reddit.com/prefs/apps
     # Also refer https://praw.readthedocs.io/en/latest/getting_started/authentication.html
     # Currently Password Flow, Read Only Mode and Saved Refresh Token Mode are supported
-    client_id: SecretStr = Field(None, env='reddit_client_id')
-    client_secret: SecretStr = Field(None, env='reddit_client_secret')
+    client_id: SecretStr = Field(None, env="reddit_client_id")
+    client_secret: SecretStr = Field(None, env="reddit_client_secret")
     user_agent: str = "Test User Agent"
     redirect_uri: Optional[str] = None
-    refresh_token: Optional[SecretStr] = Field(None, env='reddit_refresh_token')
-    username: Optional[str] = Field(None, env='reddit_username')
-    password: Optional[SecretStr] = Field(None, env='reddit_password')
+    refresh_token: Optional[SecretStr] = Field(None, env="reddit_refresh_token")
+    username: Optional[str] = Field(None, env="reddit_username")
+    password: Optional[SecretStr] = Field(None, env="reddit_password")
     read_only: bool = True
 
 
@@ -45,9 +50,13 @@ class RedditConfig(BaseSourceConfig):
             client_secret=self.cred_info.client_secret.get_secret_value(),
             redirect_uri=self.cred_info.redirect_uri,
             user_agent=self.cred_info.user_agent,
-            refresh_token=self.cred_info.refresh_token.get_secret_value() if self.cred_info.refresh_token else None,
+            refresh_token=self.cred_info.refresh_token.get_secret_value()
+            if self.cred_info.refresh_token
+            else None,
             username=self.cred_info.username if self.cred_info.username else None,
-            password=self.cred_info.password.get_secret_value() if self.cred_info.password else None,
+            password=self.cred_info.password.get_secret_value()
+            if self.cred_info.password
+            else None,
         )
 
         self._reddit_client.read_only = self.cred_info.read_only
@@ -59,11 +68,7 @@ class RedditConfig(BaseSourceConfig):
 class RedditSource(BaseSource):
     NAME: str = "Reddit"
 
-    def lookup(
-        self,
-        config: RedditConfig,
-        **kwargs
-    ) -> List[AnalyzerRequest]:
+    def lookup(self, config: RedditConfig, **kwargs) -> List[AnalyzerRequest]:
         source_responses: List[AnalyzerRequest] = []
 
         # Get data from state
@@ -72,7 +77,9 @@ class RedditSource(BaseSource):
         update_state: bool = True if id else False
         state = state or dict()
 
-        subreddit_reference = config.get_reddit_client().subreddit("+".join(config.subreddits))
+        subreddit_reference = config.get_reddit_client().subreddit(
+            "+".join(config.subreddits)
+        )
         post_stream = subreddit_reference.stream.submissions(pause_after=-1)
         for post in post_stream:
             if post is None:
@@ -84,10 +91,7 @@ class RedditSource(BaseSource):
                 continue
 
             post_stat: Dict[str, Any] = state.get(post_id, dict())
-            lookup_period: str = post_stat.get(
-                "since_time",
-                config.lookup_period
-            )
+            lookup_period: str = post_stat.get("since_time", config.lookup_period)
             lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
             if len(lookup_period) <= 5:
                 since_time = convert_utc_time(lookup_period)
@@ -110,7 +114,9 @@ class RedditSource(BaseSource):
                 if config.include_post_meta:
                     comment_data[config.post_meta_field] = post_data
 
-                comment_time = datetime.utcfromtimestamp(int(comment_data["created_utc"]))
+                comment_time = datetime.utcfromtimestamp(
+                    int(comment_data["created_utc"])
+                )
                 comment_id = comment_data["id"]
 
                 if comment_time < since_time:
@@ -123,13 +129,11 @@ class RedditSource(BaseSource):
                     last_index = comment_id
                     first_comment = False
 
-                text = ''.join(text_from_html(comment_data["body_html"]))
+                text = "".join(text_from_html(comment_data["body_html"]))
 
                 source_responses.append(
                     AnalyzerRequest(
-                        processed_text=text,
-                        meta=comment_data,
-                        source_name=self.NAME
+                        processed_text=text, meta=comment_data, source_name=self.NAME
                     )
                 )
 

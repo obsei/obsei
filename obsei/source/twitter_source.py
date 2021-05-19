@@ -19,40 +19,73 @@ from obsei.misc.utils import convert_utc_time
 
 logger = logging.getLogger(__name__)
 
-TWITTER_OAUTH_ENDPOINT = 'https://api.twitter.com/oauth2/token'
+TWITTER_OAUTH_ENDPOINT = "https://api.twitter.com/oauth2/token"
 
 DEFAULT_MAX_TWEETS = 10
 
 DEFAULT_TWEET_FIELDS = [
-    "author_id", "conversation_id", "created_at", "entities", "geo", "id", "in_reply_to_user_id", "lang",
-    "public_metrics", "referenced_tweets", "source", "text"
+    "author_id",
+    "conversation_id",
+    "created_at",
+    "entities",
+    "geo",
+    "id",
+    "in_reply_to_user_id",
+    "lang",
+    "public_metrics",
+    "referenced_tweets",
+    "source",
+    "text",
 ]
 DEFAULT_EXPANSIONS = [
-    "author_id", "entities.mentions.username", "geo.place_id", "in_reply_to_user_id", "referenced_tweets.id",
-    "referenced_tweets.id.author_id"
+    "author_id",
+    "entities.mentions.username",
+    "geo.place_id",
+    "in_reply_to_user_id",
+    "referenced_tweets.id",
+    "referenced_tweets.id.author_id",
 ]
-DEFAULT_PLACE_FIELDS = ["contained_within", "country", "country_code", "full_name", "geo", "id", "name", "place_type"]
+DEFAULT_PLACE_FIELDS = [
+    "contained_within",
+    "country",
+    "country_code",
+    "full_name",
+    "geo",
+    "id",
+    "name",
+    "place_type",
+]
 DEFAULT_USER_FIELDS = [
-    "created_at", "description", "entities", "id", "location", "name", "public_metrics", "url", "username", "verified"
+    "created_at",
+    "description",
+    "entities",
+    "id",
+    "location",
+    "name",
+    "public_metrics",
+    "url",
+    "username",
+    "verified",
 ]
-DEFAULT_OPERATORS = [
-    "-is:reply",
-    "-is:retweet"
-]
+DEFAULT_OPERATORS = ["-is:reply", "-is:retweet"]
 
 
 class TwitterCredentials(BaseSettings):
-    bearer_token: Optional[SecretStr] = Field(None, env='twitter_bearer_token')
-    consumer_key: Optional[SecretStr] = Field(None, env='twitter_consumer_key')
-    consumer_secret: Optional[SecretStr] = Field(None, env='twitter_consumer_secret')
-    endpoint: str = Field("https://api.twitter.com/2/tweets/search/recent", env='twitter_endpoint')
+    bearer_token: Optional[SecretStr] = Field(None, env="twitter_bearer_token")
+    consumer_key: Optional[SecretStr] = Field(None, env="twitter_consumer_key")
+    consumer_secret: Optional[SecretStr] = Field(None, env="twitter_consumer_secret")
+    endpoint: str = Field(
+        "https://api.twitter.com/2/tweets/search/recent", env="twitter_endpoint"
+    )
     extra_headers_dict: Optional[Dict[str, Any]] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
         if self.bearer_token is None:
             if self.consumer_key is None and self.consumer_secret is None:
-                raise AttributeError("consumer_key and consumer_secret required to generate bearer_token via Twitter")
+                raise AttributeError(
+                    "consumer_key and consumer_secret required to generate bearer_token via Twitter"
+                )
 
             self.bearer_token = SecretStr(self.generate_bearer_token())
 
@@ -71,21 +104,21 @@ class TwitterCredentials(BaseSettings):
         """
         Return the bearer token for a given pair of consumer key and secret values.
         """
-        data = [('grant_type', 'client_credentials')]
+        data = [("grant_type", "client_credentials")]
         resp = requests.post(
             TWITTER_OAUTH_ENDPOINT,
             data=data,
             auth=(
                 self.consumer_key.get_secret_value(),
-                self.consumer_secret.get_secret_value()
-            )
+                self.consumer_secret.get_secret_value(),
+            ),
         )
         logger.warning("Grabbing bearer token from OAUTH")
         if resp.status_code >= 400:
             logger.error(resp.text)
             resp.raise_for_status()
 
-        return resp.json()['access_token']
+        return resp.json()["access_token"]
 
     class Config:
         arbitrary_types_allowed = True
@@ -117,24 +150,39 @@ class TwitterSourceConfig(BaseSourceConfig):
 class TwitterSource(BaseSource):
     NAME: str = "Twitter"
 
-    def lookup(
-        self,
-        config: TwitterSourceConfig,
-        **kwargs
-    ) -> List[AnalyzerRequest]:
-        if not config.query and not config.keywords and not config.hashtags and config.usernames:
-            raise AttributeError("At least one non empty parameter required (query, keywords, hashtags, and usernames)")
+    def lookup(self, config: TwitterSourceConfig, **kwargs) -> List[AnalyzerRequest]:
+        if (
+            not config.query
+            and not config.keywords
+            and not config.hashtags
+            and config.usernames
+        ):
+            raise AttributeError(
+                "At least one non empty parameter required (query, keywords, hashtags, and usernames)"
+            )
 
-        place_fields = ",".join(config.place_fields) if config.place_fields is not None else None
-        user_fields = ",".join(config.user_fields) if config.user_fields is not None else None
-        expansions = ",".join(config.expansions) if config.expansions is not None else None
-        tweet_fields = ",".join(config.tweet_fields) if config.tweet_fields is not None else None
+        place_fields = (
+            ",".join(config.place_fields) if config.place_fields is not None else None
+        )
+        user_fields = (
+            ",".join(config.user_fields) if config.user_fields is not None else None
+        )
+        expansions = (
+            ",".join(config.expansions) if config.expansions is not None else None
+        )
+        tweet_fields = (
+            ",".join(config.tweet_fields) if config.tweet_fields is not None else None
+        )
 
         # Get data from state
         id: str = kwargs.get("id", None)
         state: Dict[str, Any] = None if id is None else self.store.get_source_state(id)
-        since_id: Optional[int] = config.since_id or None if state is None else state.get("since_id", None)
-        until_id: Optional[int] = config.until_id or None if state is None else state.get("until_id", None)
+        since_id: Optional[int] = (
+            config.since_id or None if state is None else state.get("since_id", None)
+        )
+        until_id: Optional[int] = (
+            config.until_id or None if state is None else state.get("until_id", None)
+        )
         update_state: bool = True if id else False
         state = state or dict()
         max_tweet_id = since_id
@@ -155,7 +203,7 @@ class TwitterSource(BaseSource):
             keywords=config.keywords,
             hashtags=config.hashtags,
             usernames=config.usernames,
-            operators=config.operators
+            operators=config.operators,
         )
 
         source_responses: List[AnalyzerRequest] = []
@@ -170,14 +218,14 @@ class TwitterSource(BaseSource):
                 tweet_fields=tweet_fields,
                 since_id=since_id,
                 until_id=until_id,
-                start_time=lookup_period
+                start_time=lookup_period,
             )
             logger.info(search_query)
 
             tweets_output = collect_results(
                 query=search_query,
                 max_tweets=config.max_tweets,
-                result_stream_args=config.credential.get_twitter_credentials()
+                result_stream_args=config.credential.get_twitter_credentials(),
             )
 
             if not tweets_output:
@@ -214,10 +262,14 @@ class TwitterSource(BaseSource):
                 # Get latest tweet id
                 current_tweet_id = int(tweet["id"])
 
-                logger.info(f'{tweet["created_at"]}:{current_tweet_id}:{since_id}:{until_id}')
+                logger.info(
+                    f'{tweet["created_at"]}:{current_tweet_id}:{since_id}:{until_id}'
+                )
 
                 if start_time:
-                    created_date = datetime.strptime(tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                    created_date = datetime.strptime(
+                        tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
+                    )
                     if start_time > created_date:
                         need_more_lookup = False
                         break
@@ -231,7 +283,7 @@ class TwitterSource(BaseSource):
                 if min_tweet_id > current_tweet_id:
                     min_tweet_id = current_tweet_id
 
-            logger.info(f'{max_tweet_id}:{min_tweet_id}')
+            logger.info(f"{max_tweet_id}:{min_tweet_id}")
             until_id = min_tweet_id
             lookup_period = None
 
@@ -243,11 +295,11 @@ class TwitterSource(BaseSource):
 
     @staticmethod
     def _generate_query_string(
-            query: str = None,
-            keywords: List[str] = None,
-            hashtags: List[str] = None,
-            usernames: List[str] = None,
-            operators: List[str] = None,
+        query: str = None,
+        keywords: List[str] = None,
+        hashtags: List[str] = None,
+        usernames: List[str] = None,
+        operators: List[str] = None,
     ) -> str:
         if query:
             return query
@@ -276,7 +328,7 @@ class TwitterSource(BaseSource):
             and_tokens.append(f'{" ".join(operators)}')
 
         if and_tokens:
-            and_query_str = f' ({" ".join(and_tokens)})' if and_tokens else ''
+            and_query_str = f' ({" ".join(and_tokens)})' if and_tokens else ""
 
         return or_query_str + and_query_str
 
@@ -286,9 +338,7 @@ class TwitterSource(BaseSource):
 
         tweet["tweet_url"] = tweet_url
         return AnalyzerRequest(
-            processed_text=processed_text,
-            meta=tweet,
-            source_name=self.NAME
+            processed_text=processed_text, meta=tweet, source_name=self.NAME
         )
 
     @staticmethod

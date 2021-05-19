@@ -24,7 +24,7 @@ class AnalyzerResponse(BaseModel):
             "processed_text": self.processed_text,
             "segmented_data": self.segmented_data,
             "meta": self.meta,
-            "source_name": self.source_name
+            "source_name": self.source_name,
         }
 
 
@@ -39,7 +39,7 @@ class BaseAnalyzer(BaseModel):
     _device_id: int = PrivateAttr()
     TYPE: str = "Base"
     store: Optional[BaseStore] = None
-    device: str = 'auto'
+    device: str = "auto"
 
     """
         auto: choose gpu if present else use cpu
@@ -53,10 +53,10 @@ class BaseAnalyzer(BaseModel):
 
     @abstractmethod
     def analyze_input(
-            self,
-            source_response_list: List[AnalyzerRequest],
-            analyzer_config: BaseAnalyzerConfig,
-            **kwargs
+        self,
+        source_response_list: List[AnalyzerRequest],
+        analyzer_config: BaseAnalyzerConfig,
+        **kwargs
     ) -> List[AnalyzerResponse]:
         pass
 

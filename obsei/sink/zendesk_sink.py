@@ -19,7 +19,7 @@ class ZendeskPayloadConvertor(Convertor):
         self,
         analyzer_response: AnalyzerResponse,
         base_payload: Optional[Dict[str, Any]] = None,
-        **kwargs
+        **kwargs,
     ) -> dict:
         summary_max_length = kwargs.get("summary_max_length", 50)
 
@@ -27,26 +27,32 @@ class ZendeskPayloadConvertor(Convertor):
         payload["description"] = obj_to_markdown(
             obj=analyzer_response,
             str_enclose_start="{quote}",
-            str_enclose_end="{quote}"
+            str_enclose_end="{quote}",
         )
         payload["subject"] = textwrap.shorten(
-            text=analyzer_response.processed_text,
-            width=summary_max_length
+            text=analyzer_response.processed_text, width=summary_max_length
         )
 
-        if analyzer_response.segmented_data is not None and isinstance(analyzer_response.segmented_data, Mapping):
+        if analyzer_response.segmented_data is not None and isinstance(
+            analyzer_response.segmented_data, Mapping
+        ):
             labels_count = kwargs.get("labels_count", 1)
-            labels = [v for k, v in sorted(analyzer_response.segmented_data.items(), key=lambda item: item[1])]
-            payload['tags'] = [label for label in labels[:labels_count]]
+            labels = [
+                v
+                for k, v in sorted(
+                    analyzer_response.segmented_data.items(), key=lambda item: item[1]
+                )
+            ]
+            payload["tags"] = [label for label in labels[:labels_count]]
 
         return payload
 
 
 class ZendeskCredInfo(BaseSettings):
-    email: Optional[str] = Field(None, env='zendesk_email')
-    password: Optional[SecretStr] = Field(None, env='zendesk_password')
-    oauth_token: Optional[SecretStr] = Field(None, env='zendesk_oauth_token')
-    token: Optional[SecretStr] = Field(None, env='zendesk_token')
+    email: Optional[str] = Field(None, env="zendesk_email")
+    password: Optional[SecretStr] = Field(None, env="zendesk_password")
+    oauth_token: Optional[SecretStr] = Field(None, env="zendesk_oauth_token")
+    token: Optional[SecretStr] = Field(None, env="zendesk_token")
 
 
 class ZendeskSinkConfig(BaseSinkConfig):
@@ -60,7 +66,7 @@ class ZendeskSinkConfig(BaseSinkConfig):
     # when set it will force request on:
     # {scheme}://{netloc}/endpoint
     domain: str = Field("zendesk.com")
-    subdomain: Optional[str] = Field(None, env='zendesk_subdomain')
+    subdomain: Optional[str] = Field(None, env="zendesk_subdomain")
     cred_info: Optional[ZendeskCredInfo] = None
     summary_max_length: int = 50
     labels_count = 3  # Number of labels to fetch
@@ -93,22 +99,24 @@ class ZendeskSink(BaseSink):
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: ZendeskSinkConfig,
-        **kwargs
+        **kwargs,
     ):
         responses = []
         payloads = []
         for analyzer_response in analyzer_responses:
-            payloads.append(self.convertor.convert(
-                analyzer_response=analyzer_response,
-                base_payload=dict() if config.base_payload is None else deepcopy(config.base_payload),
-                summary_max_length=config.summary_max_length,
-                labels_count=config.labels_count
-            ))
+            payloads.append(
+                self.convertor.convert(
+                    analyzer_response=analyzer_response,
+                    base_payload=dict()
+                    if config.base_payload is None
+                    else deepcopy(config.base_payload),
+                    summary_max_length=config.summary_max_length,
+                    labels_count=config.labels_count,
+                )
+            )
 
         for payload in payloads:
-            response = config.get_client().tickets.create(
-                Ticket(**payload)
-            )
+            response = config.get_client().tickets.create(Ticket(**payload))
             logger.info(f"response='{response}'")
             responses.append(response)
 

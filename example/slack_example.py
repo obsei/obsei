@@ -15,7 +15,7 @@ from obsei.workflow.workflow import Workflow, WorkflowConfig
 
 
 def print_state(id: str):
-    logger.info(f'Source State: {source.store.get_source_state(id)}')
+    logger.info(f"Source State: {source.store.get_source_state(id)}")
 
 
 logger = logging.getLogger(__name__)
@@ -27,14 +27,13 @@ workflow_store = WorkflowStore()
 
 source_config = RedditConfig(
     subreddits=["wallstreetbets"],
-    lookup_period=since_time.strftime(DATETIME_STRING_PATTERN)
+    lookup_period=since_time.strftime(DATETIME_STRING_PATTERN),
 )
 
 source = RedditSource(store=workflow_store)
 
 sink_config = SlackSinkConfig(
-    slack_token=os.environ['SLACK_TOKEN'],
-    channel_id="C01LRS6CT9Q"
+    slack_token=os.environ["SLACK_TOKEN"], channel_id="C01LRS6CT9Q"
 )
 sink = SlackSink(store=workflow_store)
 
@@ -45,16 +44,13 @@ workflow = Workflow(
     config=WorkflowConfig(
         source_config=source_config,
         sink_config=sink_config,
-        analyzer_config=analyzer_config
+        analyzer_config=analyzer_config,
     ),
 )
 workflow_store.add_workflow(workflow)
 
 processor = Processor(
-    analyzer=analyzer,
-    sink=sink,
-    source=source,
-    analyzer_config=analyzer_config
+    analyzer=analyzer, sink=sink, source=source, analyzer_config=analyzer_config
 )
 
 processor.process(workflow=workflow)

@@ -7,7 +7,12 @@ from presidio_analyzer.nlp_engine import NlpEngineProvider
 from presidio_anonymizer.entities.engine import OperatorConfig
 from pydantic import BaseModel, Field, PrivateAttr
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest, AnalyzerResponse, BaseAnalyzer, BaseAnalyzerConfig
+from obsei.analyzer.base_analyzer import (
+    AnalyzerRequest,
+    AnalyzerResponse,
+    BaseAnalyzer,
+    BaseAnalyzerConfig,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -76,11 +81,18 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
                 try:
                     spacy_model = __import__(model_config.model_name)
                     spacy_model.load()
-                    logger.info(f"Spacy model {model_config.model_name} is already downloaded")
+                    logger.info(
+                        f"Spacy model {model_config.model_name} is already downloaded"
+                    )
                 except:
-                    logger.warning(f"Spacy model {model_config.model_name} is not downloaded")
-                    logger.warning(f"Downloading spacy model {model_config.model_name}, it might take some time")
+                    logger.warning(
+                        f"Spacy model {model_config.model_name} is not downloaded"
+                    )
+                    logger.warning(
+                        f"Downloading spacy model {model_config.model_name}, it might take some time"
+                    )
                     from spacy.cli import download
+
                     download(model_config.model_name)
 
         # Create NLP engine based on configuration
@@ -89,8 +101,7 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
 
         # Pass the created NLP engine and supported_languages to the AnalyzerEngine
         self._analyzer = AnalyzerEngine(
-            nlp_engine=nlp_engine,
-            supported_languages=languages
+            nlp_engine=nlp_engine, supported_languages=languages
         )
 
         # self._analyzer.registry.load_predefined_recognizers()
@@ -102,11 +113,11 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
         self._anonymizer = AnonymizerEngine()
 
     def analyze_input(
-            self,
-            source_response_list: List[AnalyzerRequest],
-            analyzer_config: PresidioPIIAnalyzerConfig,
-            language: Optional[str] = "en",
-            **kwargs
+        self,
+        source_response_list: List[AnalyzerRequest],
+        analyzer_config: PresidioPIIAnalyzerConfig,
+        language: Optional[str] = "en",
+        **kwargs,
     ) -> List[AnalyzerResponse]:
         analyzer_output: List[AnalyzerResponse] = []
 
@@ -115,18 +126,23 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
                 text=source_response.processed_text,
                 entities=analyzer_config.entities,
                 return_decision_process=analyzer_config.return_decision_process,
-                language=language
+                language=language,
             )
 
             anonymized_result = None
             if not analyzer_config.analyze_only:
-                anonymizers_config = analyzer_config.anonymizers_config or self.anonymizers_config
+                anonymizers_config = (
+                    analyzer_config.anonymizers_config or self.anonymizers_config
+                )
 
-                if source_response.processed_text is not None and len(source_response.processed_text) > 0:
+                if (
+                    source_response.processed_text is not None
+                    and len(source_response.processed_text) > 0
+                ):
                     anonymized_result = self._anonymizer.anonymize(
                         text=source_response.processed_text,
                         operators=anonymizers_config,
-                        analyzer_results=analyzer_result
+                        analyzer_results=analyzer_result,
                     )
 
             if analyzer_config.replace_original_text and anonymized_result is not None:
@@ -140,10 +156,12 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
                     meta=source_response.meta,
                     segmented_data={
                         "analyzer_result": [vars(result) for result in analyzer_result],
-                        "anonymized_result": None if not anonymized_result else [
-                            vars(item) for item in anonymized_result.items
-                        ],
-                        "anonymized_text": None if not anonymized_result else anonymized_result.text
+                        "anonymized_result": None
+                        if not anonymized_result
+                        else [vars(item) for item in anonymized_result.items],
+                        "anonymized_text": None
+                        if not anonymized_result
+                        else anonymized_result.text,
                     },
                     source_name=source_response.source_name,
                 )

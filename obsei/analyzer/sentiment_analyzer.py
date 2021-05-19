@@ -4,8 +4,16 @@ from typing import Any, List
 from pydantic import PrivateAttr
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest, AnalyzerResponse, BaseAnalyzer, BaseAnalyzerConfig
-from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig, ZeroShotClassificationAnalyzer
+from obsei.analyzer.base_analyzer import (
+    AnalyzerRequest,
+    AnalyzerResponse,
+    BaseAnalyzer,
+    BaseAnalyzerConfig,
+)
+from obsei.analyzer.classification_analyzer import (
+    ClassificationAnalyzerConfig,
+    ZeroShotClassificationAnalyzer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,16 +31,18 @@ class VaderSentimentAnalyzer(BaseAnalyzer):
         return scores["compound"]
 
     def analyze_input(
-            self,
-            source_response_list: List[AnalyzerRequest],
-            analyzer_config: BaseAnalyzerConfig = None,
-            **kwargs
+        self,
+        source_response_list: List[AnalyzerRequest],
+        analyzer_config: BaseAnalyzerConfig = None,
+        **kwargs
     ) -> List[AnalyzerResponse]:
         analyzer_output: List[AnalyzerResponse] = []
 
         for source_response in source_response_list:
             classification_map = {}
-            sentiment_value = self._get_sentiment_score_from_vader(source_response.processed_text)
+            sentiment_value = self._get_sentiment_score_from_vader(
+                source_response.processed_text
+            )
             if sentiment_value < 0.0:
                 classification_map["negative"] = -sentiment_value
                 classification_map["positive"] = 1.0 - classification_map["negative"]
@@ -60,10 +70,10 @@ class TransformersSentimentAnalyzerConfig(ClassificationAnalyzerConfig):
 
 class TransformersSentimentAnalyzer(ZeroShotClassificationAnalyzer):
     def analyze_input(
-            self,
-            source_response_list: List[AnalyzerRequest],
-            analyzer_config: TransformersSentimentAnalyzerConfig,
-            **kwargs
+        self,
+        source_response_list: List[AnalyzerRequest],
+        analyzer_config: TransformersSentimentAnalyzerConfig,
+        **kwargs
     ) -> List[AnalyzerResponse]:
         return super().analyze_input(
             source_response_list=source_response_list,

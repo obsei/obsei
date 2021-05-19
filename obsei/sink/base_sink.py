@@ -8,7 +8,6 @@ from obsei.workflow.base_store import BaseStore
 
 
 class Convertor(BaseModel):
-
     def convert(
         self,
         analyzer_response: AnalyzerResponse,
@@ -16,8 +15,11 @@ class Convertor(BaseModel):
         **kwargs
     ) -> dict:
         base_payload = base_payload or dict()
-        return {**base_payload, **analyzer_response.to_dict()} \
-            if base_payload is not None else analyzer_response.to_dict()
+        return (
+            {**base_payload, **analyzer_response.to_dict()}
+            if base_payload is not None
+            else analyzer_response.to_dict()
+        )
 
     class Config:
         arbitrary_types_allowed = True

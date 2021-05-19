@@ -12,7 +12,7 @@ from obsei.workflow.workflow import Workflow, WorkflowConfig
 
 
 def print_state(id: str):
-    logger.info(f'Source State: {source.store.get_source_state(id)}')
+    logger.info(f"Source State: {source.store.get_source_state(id)}")
 
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ since_time = datetime.utcnow().astimezone(pytz.utc) + timedelta(hours=-2)
 # Credentials will be fetched from env variable named reddit_client_id and reddit_client_secret
 source_config = RedditConfig(
     subreddits=["wallstreetbets"],
-    lookup_period=since_time.strftime(DATETIME_STRING_PATTERN)
+    lookup_period=since_time.strftime(DATETIME_STRING_PATTERN),
 )
 
 source = RedditSource(store=WorkflowStore())

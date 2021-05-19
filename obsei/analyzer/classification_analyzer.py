@@ -4,7 +4,12 @@ from typing import Any, Dict, List, Optional
 from pydantic import PrivateAttr
 from transformers import Pipeline, pipeline
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest, AnalyzerResponse, BaseAnalyzer, BaseAnalyzerConfig
+from obsei.analyzer.base_analyzer import (
+    AnalyzerRequest,
+    AnalyzerResponse,
+    BaseAnalyzer,
+    BaseAnalyzerConfig,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,16 +27,23 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self._pipeline = pipeline("zero-shot-classification", model=self.model_name_or_path, device=self._device_id)
+        self._pipeline = pipeline(
+            "zero-shot-classification",
+            model=self.model_name_or_path,
+            device=self._device_id,
+        )
 
     def _classify_text_from_model(
-        self, text: str,
-        labels: List[str],
-        multi_class_classification: bool = True
+        self, text: str, labels: List[str], multi_class_classification: bool = True
     ) -> Dict[str, float]:
-        scores_data = self._pipeline(text, labels, multi_label=multi_class_classification)
+        scores_data = self._pipeline(
+            text, labels, multi_label=multi_class_classification
+        )
 
-        score_dict = {label: score for label, score in zip(scores_data["labels"], scores_data["scores"])}
+        score_dict = {
+            label: score
+            for label, score in zip(scores_data["labels"], scores_data["scores"])
+        }
         return dict(sorted(score_dict.items(), key=lambda x: x[1], reverse=True))
 
     def analyze_input(
@@ -54,7 +66,7 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
             classification_map = self._classify_text_from_model(
                 source_response.processed_text,
                 labels,
-                analyzer_config.multi_class_classification
+                analyzer_config.multi_class_classification,
             )
 
             analyzer_output.append(

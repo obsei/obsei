@@ -6,7 +6,11 @@ from google_play_scraper.features.reviews import ContinuationToken
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.base_analyzer import AnalyzerRequest
-from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time
+from obsei.misc.utils import (
+    DATETIME_STRING_PATTERN,
+    DEFAULT_LOOKUP_PERIOD,
+    convert_utc_time,
+)
 
 
 class PlayStoreScrapperConfig(BaseSourceConfig):
@@ -28,7 +32,9 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
 class PlayStoreScrapperSource(BaseSource):
     NAME: Optional[str] = "PlayStoreScrapper"
 
-    def lookup(self, config: PlayStoreScrapperConfig, **kwargs) -> List[AnalyzerRequest]:
+    def lookup(
+        self, config: PlayStoreScrapperConfig, **kwargs
+    ) -> List[AnalyzerRequest]:
         source_responses: List[AnalyzerRequest] = []
 
         # Get data from state
@@ -39,10 +45,7 @@ class PlayStoreScrapperSource(BaseSource):
 
         for country in config.countries:
             country_stat: Dict[str, Any] = state.get(country, dict())
-            lookup_period: str = country_stat.get(
-                "since_time",
-                config.lookup_period
-            )
+            lookup_period: str = country_stat.get("since_time", config.lookup_period)
             lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
             if len(lookup_period) <= 5:
                 since_time = convert_utc_time(lookup_period)
@@ -64,15 +67,16 @@ class PlayStoreScrapperSource(BaseSource):
                     sort=Sort.NEWEST,
                     filter_score_with=config.filter_score_with,
                     continuation_token=continuation_token,
-                    count=config.max_count
+                    count=config.max_count,
                 )
                 store_reviews = store_reviews or []
 
                 for review in store_reviews:
-                    source_responses.append(AnalyzerRequest(
+                    source_responses.append(
+                        AnalyzerRequest(
                             processed_text=review["content"],
                             meta=review,
-                            source_name=self.NAME
+                            source_name=self.NAME,
                         )
                     )
 
@@ -84,11 +88,16 @@ class PlayStoreScrapperSource(BaseSource):
                     # if last_index is None or last_index < review.id:
                     #    last_index = review.id
 
-                if continuation_token is None or continuation_token.token is None or \
-                        continuation_token.count <= len(source_responses):
+                if (
+                    continuation_token is None
+                    or continuation_token.token is None
+                    or continuation_token.count <= len(source_responses)
+                ):
                     break
 
-            country_stat["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
+            country_stat["since_time"] = last_since_time.strftime(
+                DATETIME_STRING_PATTERN
+            )
             # country_stat["since_id"] = last_index
 
         if update_state:

@@ -23,17 +23,19 @@ class LoggerSink(BaseSink):
         super().__init__(convertor=convertor, **data)
 
     def send_data(
-            self,
-            analyzer_responses: List[AnalyzerResponse],
-            config: LoggerSinkConfig,
-            **kwargs
+        self,
+        analyzer_responses: List[AnalyzerResponse],
+        config: LoggerSinkConfig,
+        **kwargs,
     ):
         converted_responses = []
         for analyzer_response in analyzer_responses:
-            converted_responses.append(self.convertor.convert(
-                analyzer_response=analyzer_response
-            ))
+            converted_responses.append(
+                self.convertor.convert(analyzer_response=analyzer_response)
+            )
 
         for response in converted_responses:
-            dict_to_print = response.__dict__ if hasattr(response, "__dict__") else response
-            config.logger.log(level=config.level, msg=f'{dict_to_print}')
+            dict_to_print = (
+                response.__dict__ if hasattr(response, "__dict__") else response
+            )
+            config.logger.log(level=config.level, msg=f"{dict_to_print}")

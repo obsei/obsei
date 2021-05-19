@@ -27,7 +27,7 @@ class Processor(BaseModel):
         sink: Optional[BaseSink] = None,
         sink_config: Optional[BaseSinkConfig] = None,
         analyzer: Optional[BaseAnalyzer] = None,
-        analyzer_config: Optional[BaseAnalyzerConfig] = None
+        analyzer_config: Optional[BaseAnalyzerConfig] = None,
     ):
         source = source or self.source
         sink = sink or self.sink
@@ -44,25 +44,20 @@ class Processor(BaseModel):
             source_config = source_config or self.source_config
             analyzer_config = analyzer_config or self.analyzer_config
 
-        source_response_list = source.lookup(
-            config=source_config,
-            id=id
-        )
+        source_response_list = source.lookup(config=source_config, id=id)
         for idx, source_response in enumerate(source_response_list):
             logger.info(f"source_response#'{idx}'='{source_response}'")
 
         analyzer_response_list = analyzer.analyze_input(
             source_response_list=source_response_list,
             analyzer_config=analyzer_config,
-            id=id
+            id=id,
         )
         for idx, analyzer_response in enumerate(analyzer_response_list):
             logger.info(f"source_response#'{idx}'='{analyzer_response}'")
 
         sink_response_list = sink.send_data(
-            analyzer_responses=analyzer_response_list,
-            config=sink_config,
-            id=id
+            analyzer_responses=analyzer_response_list, config=sink_config, id=id
         )
         for idx, sink_response in enumerate(sink_response_list):
             logger.info(f"source_response#'{idx}'='{sink_response}'")

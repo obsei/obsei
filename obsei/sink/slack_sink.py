@@ -16,7 +16,7 @@ class SlackSinkConfig(BaseSinkConfig):
     _slack_client: WebClient = PrivateAttr()
     TYPE: str = "Slack"
 
-    slack_token: SecretStr = Field(None, env='SLACK_TOKEN')
+    slack_token: SecretStr = Field(None, env="SLACK_TOKEN")
     channel_id: str
 
     def __init__(self, **data: Any):
@@ -32,23 +32,21 @@ class SlackSink(BaseSink):
         super().__init__(**data)
 
     def send_data(
-            self,
-            analyzer_responses: List[AnalyzerResponse],
-            config: SlackSinkConfig,
-            **kwargs
+        self,
+        analyzer_responses: List[AnalyzerResponse],
+        config: SlackSinkConfig,
+        **kwargs,
     ):
         responses = []
         payloads = []
         for analyzer_response in analyzer_responses:
-            payloads.append(self.convertor.convert(
-                analyzer_response=analyzer_response
-            ))
+            payloads.append(self.convertor.convert(analyzer_response=analyzer_response))
 
         for payload in payloads:
             response = config.get_slack_client().chat_postMessage(
                 channel=config.channel_id,
                 text=f'Message: `{str(payload["processed_text"])}` '
-                     f'```{json.dumps(payload["segmented_data"], indent=2, ensure_ascii=False)}```'
+                f'```{json.dumps(payload["segmented_data"], indent=2, ensure_ascii=False)}```',
             )
             logger.info(f"response='{response}'")
             responses.append(response)

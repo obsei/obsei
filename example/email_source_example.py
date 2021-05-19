@@ -24,9 +24,9 @@ source_config = EmailConfig(
     cred_info=EmailCredInfo(
         # It will fetch username and password from environment variable
         username=os.environ.get("email_username"),
-        password=os.environ.get("email_password")
+        password=os.environ.get("email_password"),
     ),
-    lookup_period=since_time.strftime(DATETIME_STRING_PATTERN)
+    lookup_period=since_time.strftime(DATETIME_STRING_PATTERN),
 )
 
 source = EmailSource()
@@ -34,4 +34,3 @@ source_response_list = source.lookup(source_config)
 
 for source_response in source_response_list:
     logger.info(source_response.__dict__)
-

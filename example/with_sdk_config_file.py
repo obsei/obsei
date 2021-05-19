@@ -21,7 +21,3 @@ analyzer_config = obsei_configuration.get_analyzer_config()
 elasticsearch_sink_config = obsei_configuration.get_elasticsearch_sink_config()
 # Start jira server locally `atlas-run-standalone --product jira`
 jira_sink_config = obsei_configuration.get_jira_sink_config()
-
-
-
-

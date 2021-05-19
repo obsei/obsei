@@ -6,10 +6,16 @@ from datetime import datetime, timedelta
 import pytz
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest
-from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig, ZeroShotClassificationAnalyzer
+from obsei.analyzer.classification_analyzer import (
+    ClassificationAnalyzerConfig,
+    ZeroShotClassificationAnalyzer,
+)
 from obsei.analyzer.translation_analyzer import TranslationAnalyzer
 from obsei.misc.utils import DATETIME_STRING_PATTERN
-from obsei.source.playstore_scrapper import PlayStoreScrapperConfig, PlayStoreScrapperSource
+from obsei.source.playstore_scrapper import (
+    PlayStoreScrapperConfig,
+    PlayStoreScrapperSource,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -22,36 +28,44 @@ def source_fetch():
     source_config = PlayStoreScrapperConfig(
         countries=["us"],
         package_name="com.color.apps.hindikeyboard.hindi.language",
-        lookup_period=since_time.strftime(DATETIME_STRING_PATTERN),  # todo should be optional
-        max_count=5
+        lookup_period=since_time.strftime(
+            DATETIME_STRING_PATTERN
+        ),  # todo should be optional
+        max_count=5,
     )
     return source.lookup(source_config)
 
 
 def translate_text(text_list):
     translate_analyzer = TranslationAnalyzer(
-        model_name_or_path="Helsinki-NLP/opus-mt-hi-en",
-        device="auto"
+        model_name_or_path="Helsinki-NLP/opus-mt-hi-en", device="auto"
     )
-    source_responses = [AnalyzerRequest(processed_text=text.processed_text, source_name="sample") for text in text_list]
-    analyzer_responses = translate_analyzer.analyze_input(source_response_list=source_responses)
+    source_responses = [
+        AnalyzerRequest(processed_text=text.processed_text, source_name="sample")
+        for text in text_list
+    ]
+    analyzer_responses = translate_analyzer.analyze_input(
+        source_response_list=source_responses
+    )
     return [
-        AnalyzerRequest(processed_text=response.segmented_data['translated_text'], source_name="translator")
+        AnalyzerRequest(
+            processed_text=response.segmented_data["translated_text"],
+            source_name="translator",
+        )
         for response in analyzer_responses
     ]
 
 
 def classify_text(text_list):
     text_analyzer = ZeroShotClassificationAnalyzer(
-        model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
-        device="cpu"
+        model_name_or_path="joeddav/bart-large-mnli-yahoo-answers", device="cpu"
     )
 
     return text_analyzer.analyze_input(
         source_response_list=text_list,
         analyzer_config=ClassificationAnalyzerConfig(
             labels=["no parking", "registration issue", "app issue", "payment issue"],
-        )
+        ),
     )
 
 

@@ -12,7 +12,7 @@ from obsei.workflow.workflow import Workflow, WorkflowConfig
 
 
 def print_state(id: str):
-    logger.info(f'Source State: {source.store.get_source_state(id)}')
+    logger.info(f"Source State: {source.store.get_source_state(id)}")
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ since_time = datetime.utcnow().astimezone(pytz.utc) + timedelta(days=-1)
 source_config = RedditScrapperConfig(
     url="https://www.reddit.com/r/wallstreetbets/comments/.rss?sort=new",
     user_agent="testscript by u/FitStatistician7378",
-    lookup_period=since_time.strftime(DATETIME_STRING_PATTERN)
+    lookup_period=since_time.strftime(DATETIME_STRING_PATTERN),
 )
 
 source = RedditScrapperSource(store=WorkflowStore())

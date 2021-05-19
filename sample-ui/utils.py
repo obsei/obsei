@@ -23,7 +23,7 @@ def img_to_bytes(img_path):
 
 # Copied from https://github.com/jrieke/traingenerator/blob/main/app/utils.py
 def download_button(
-        object_to_download, download_filename, button_text  # , pickle_it=False
+    object_to_download, download_filename, button_text  # , pickle_it=False
 ):
     try:
         # some strings <-> bytes conversions necessary here
@@ -63,8 +63,8 @@ def download_button(
         </style> """
 
     dl_link = (
-            custom_css
-            + f'<a download="{download_filename}" id="{button_id}" href="data:file/txt;base64,{b64}">{button_text}</a><br><br>'
+        custom_css
+        + f'<a download="{download_filename}" id="{button_id}" href="data:file/txt;base64,{b64}">{button_text}</a><br><br>'
     )
     # dl_link = f'<a download="{download_filename}" id="{button_id}" href="data:file/txt;base64,{b64}"><input type="button" kind="primary" value="{button_text}"></a><br></br>'
 
@@ -82,20 +82,22 @@ def get_obsei_config(current_path, file_name):
 def get_icon_name(name, icon, icon_size=40, font_size=1):
     if not name:
         return f'<img style="vertical-align:middle;margin:5px 5px" src="{icon}" width="{icon_size}" height="{icon_size}">'
-    return f'<p style="font-size:{font_size}px">' \
-           f'<img style="vertical-align:middle;margin:1px 5px" src="{icon}" width="{icon_size}" height="{icon_size}">' \
-           f'{name}</p>'
+    return (
+        f'<p style="font-size:{font_size}px">'
+        f'<img style="vertical-align:middle;margin:1px 5px" src="{icon}" width="{icon_size}" height="{icon_size}">'
+        f"{name}</p>"
+    )
 
 
 def render_config(config, component, help_str=None, parent_key=None):
     if config is None:
         return
 
-    prefix = '' if parent_key is None else f'{parent_key}.'
+    prefix = "" if parent_key is None else f"{parent_key}."
     if help_str is not None:
         with component.beta_expander("Info", False):
-            help_area = '\n'.join(help_str)
-            st.code(f'{help_area}')
+            help_area = "\n".join(help_str)
+            st.code(f"{help_area}")
     for k, v in config.items():
         if k == "_target_":
             continue
@@ -108,28 +110,35 @@ def render_config(config, component, help_str=None, parent_key=None):
             is_object = isinstance(v[0], dict)
             if is_object:
                 for idx, sub_element in enumerate(v):
-                    render_config(sub_element, component, None, f'{k}[{idx}]')
+                    render_config(sub_element, component, None, f"{k}[{idx}]")
             else:
-                text_data = component.text_area(f'{prefix}{k}', ", ".join(v), help="Comma separated list")
+                text_data = component.text_area(
+                    f"{prefix}{k}", ", ".join(v), help="Comma separated list"
+                )
                 text_list = text_data.split(",")
                 config[k] = [text.strip() for text in text_list]
         elif isinstance(v, bool):
             options = [True, False]
-            selected_option = component.radio(f'{prefix}{k}', options, options.index(v))
+            selected_option = component.radio(f"{prefix}{k}", options, options.index(v))
             config[k] = bool(selected_option)
         else:
             tokens = k.split("_")
             is_secret = tokens[-1] in ["key", "password", "token", "secret"]
-            hint = "Enter value" if "lookup" not in tokens else "Format: `<number><d|h|m>` d=day, h=hour & m=minute"
+            hint = (
+                "Enter value"
+                if "lookup" not in tokens
+                else "Format: `<number><d|h|m>` d=day, h=hour & m=minute"
+            )
             config[k] = component.text_input(
-                f'{prefix}{k}', v,
+                f"{prefix}{k}",
+                v,
                 type="password" if is_secret else "default",
-                help=hint
+                help=hint,
             )
 
 
 def generate_python(generate_config):
-    return f'''
+    return f"""
 import json
 
 from obsei.configuration import ObseiConfiguration
@@ -160,7 +169,7 @@ analyzer_response_list = analyzer.analyze_input(
 
 # This will send analyzed output to configure sink ie Slack, Zendesk etc
 sink_response_list = sink.send_data(analyzer_response_list, sink_config)
-'''
+"""
 
 
 def generate_yaml(generate_config):
@@ -187,8 +196,7 @@ def execute_workflow(generate_config, component=None):
         source_response_list = source.lookup(source_config)
 
         analyzer_response_list = analyzer.analyze_input(
-            source_response_list=source_response_list,
-            analyzer_config=analyzer_config
+            source_response_list=source_response_list, analyzer_config=analyzer_config
         )
 
         sink_response_list = sink.send_data(analyzer_response_list, sink_config)

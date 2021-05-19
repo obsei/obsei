@@ -17,7 +17,7 @@ class JiraPayloadConvertor(Convertor):
         self,
         analyzer_response: AnalyzerResponse,
         base_payload: Optional[Dict[str, Any]] = None,
-        **kwargs
+        **kwargs,
     ) -> dict:
         summary_max_length = kwargs.get("summary_max_length", 50)
 
@@ -25,11 +25,10 @@ class JiraPayloadConvertor(Convertor):
         payload["description"] = obj_to_markdown(
             obj=analyzer_response,
             str_enclose_start="{quote}",
-            str_enclose_end="{quote}"
+            str_enclose_end="{quote}",
         )
         payload["summary"] = textwrap.shorten(
-            text=analyzer_response.processed_text,
-            width=summary_max_length
+            text=analyzer_response.processed_text, width=summary_max_length
         )
 
         # TODO: Find correct payload to update labels fields
@@ -75,25 +74,26 @@ class JiraSink(BaseSink):
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: JiraSinkConfig,
-        **kwargs
+        **kwargs,
     ):
         responses = []
         payloads = []
         for analyzer_response in analyzer_responses:
-            payloads.append(self.convertor.convert(
-                analyzer_response=analyzer_response,
-                base_payload={
-                    "project": config.project,
-                    "issuetype": config.issue_type,
-                },
-                summary_max_length=config.summary_max_length,
-                labels_count=config.labels_count
-            ))
+            payloads.append(
+                self.convertor.convert(
+                    analyzer_response=analyzer_response,
+                    base_payload={
+                        "project": config.project,
+                        "issuetype": config.issue_type,
+                    },
+                    summary_max_length=config.summary_max_length,
+                    labels_count=config.labels_count,
+                )
+            )
 
         for payload in payloads:
             response = config.get_jira_client().create_issue(
-                fields=payload,
-                update_history=config.update_history
+                fields=payload, update_history=config.update_history
             )
             logger.info(f"response='{response}'")
             responses.append(response)

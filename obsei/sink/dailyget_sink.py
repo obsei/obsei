@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 TWITTER_URL_PREFIX = "https://twitter.com/"
-IST_TZ = pytz.timezone('Asia/Kolkata')
+IST_TZ = pytz.timezone("Asia/Kolkata")
 
 
 class PayloadConvertor(Convertor):
@@ -24,7 +24,7 @@ class PayloadConvertor(Convertor):
         self,
         analyzer_response: AnalyzerResponse,
         base_payload: Optional[Dict[str, Any]] = None,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         request_payload = base_payload or {}
 
@@ -60,9 +60,11 @@ class PayloadConvertor(Convertor):
 
         if created_at_str:
             created_at = parser.isoparse(created_at_str)
-            created_at_str = created_at.replace(
-                tzinfo=timezone.utc
-            ).astimezone(tz=IST_TZ).strftime('%Y-%m-%d %H:%M:%S')
+            created_at_str = (
+                created_at.replace(tzinfo=timezone.utc)
+                .astimezone(tz=IST_TZ)
+                .strftime("%Y-%m-%d %H:%M:%S")
+            )
 
         tweet_url = user_url + "/status/" + tweet_id
         # Sentiment rules
@@ -99,9 +101,7 @@ class DailyGetSinkConfig(HttpSinkConfig):
     partner_id: str
     consumer_phone_number: str
     source_information: str
-    headers: Dict[str, Any] = {
-        "Content-type": "application/json"
-    }
+    headers: Dict[str, Any] = {"Content-type": "application/json"}
 
 
 class DailyGetSink(HttpSink):
@@ -112,18 +112,22 @@ class DailyGetSink(HttpSink):
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: DailyGetSinkConfig,
-        **kwargs
+        **kwargs,
     ):
         headers = config.headers
 
         payloads = []
         responses = []
         for analyzer_response in analyzer_responses:
-            payloads.append(self.convertor.convert(
-                analyzer_response=analyzer_response,
-                base_payload=dict() if config.base_payload is None else deepcopy(config.base_payload),
-                source_information=config.source_information,
-            ))
+            payloads.append(
+                self.convertor.convert(
+                    analyzer_response=analyzer_response,
+                    base_payload=dict()
+                    if config.base_payload is None
+                    else deepcopy(config.base_payload),
+                    source_information=config.source_information,
+                )
+            )
 
         for payload in payloads:
             response = requests.post(

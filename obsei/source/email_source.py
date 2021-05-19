@@ -10,15 +10,20 @@ import pytz
 from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest
-from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time, text_from_html
+from obsei.misc.utils import (
+    DATETIME_STRING_PATTERN,
+    DEFAULT_LOOKUP_PERIOD,
+    convert_utc_time,
+    text_from_html,
+)
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 
 logger = logging.getLogger(__name__)
 
 
 class EmailCredInfo(BaseSettings):
-    username: Optional[SecretStr] = Field(None, env='email_username')
-    password: Optional[SecretStr] = Field(None, env='email_password')
+    username: Optional[SecretStr] = Field(None, env="email_username")
+    password: Optional[SecretStr] = Field(None, env="email_password")
 
 
 class EmailConfig(BaseSourceConfig):
@@ -46,15 +51,14 @@ class EmailConfig(BaseSourceConfig):
 
         if self.imap_port:
             self._imap_client = imaplib.IMAP4_SSL(
-                host=self.imap_server,
-                port=self.imap_port
+                host=self.imap_server, port=self.imap_port
             )
         else:
             self._imap_client = imaplib.IMAP4_SSL(self.imap_server)
 
         self._imap_client.login(
             user=self.cred_info.username.get_secret_value(),
-            password=self.cred_info.password.get_secret_value()
+            password=self.cred_info.password.get_secret_value(),
         )
 
     def __del__(self):
@@ -73,11 +77,7 @@ class EmailSource(BaseSource):
         # clean text for creating a folder
         return "".join(c if c.isalnum() else "_" for c in text)
 
-    def lookup(
-            self,
-            config: EmailConfig,
-            **kwargs
-    ) -> List[AnalyzerRequest]:
+    def lookup(self, config: EmailConfig, **kwargs) -> List[AnalyzerRequest]:
         source_responses: List[AnalyzerRequest] = []
 
         # Get data from state
@@ -91,18 +91,14 @@ class EmailSource(BaseSource):
         for mailbox in config.mailboxes:
             need_more_lookup = True
 
-            status, messages = imap_client.select(
-                mailbox=mailbox,
-                readonly=True
-            )
-            if status != 'OK':
+            status, messages = imap_client.select(mailbox=mailbox, readonly=True)
+            if status != "OK":
                 logger.warning(f"Not able to connect with {mailbox}: {status}")
                 continue
 
             mailbox_stat: Dict[str, Any] = state.get(mailbox, dict())
             lookup_period: str = mailbox_stat.get(
-                "since_time",
-                config.lookup_period or DEFAULT_LOOKUP_PERIOD
+                "since_time", config.lookup_period or DEFAULT_LOOKUP_PERIOD
             )
             if len(lookup_period) <= 5:
                 since_time = convert_utc_time(lookup_period)
@@ -139,52 +135,77 @@ class EmailSource(BaseSource):
                         msg = email.message_from_bytes(response[1])
 
                         email_meta["subject"] = self._parse_email_header(msg, "Subject")
-                        email_meta["from_address"] = self._parse_email_header(msg, "From")
+                        email_meta["from_address"] = self._parse_email_header(
+                            msg, "From"
+                        )
                         email_meta["to_address"] = self._parse_email_header(msg, "To")
                         date_received_str = self._parse_email_header(msg, "Date")
 
                         try:
-                            date_received = datetime.strptime(date_received_str, "%a, %d %b %Y %H:%M:%S %Z")
+                            date_received = datetime.strptime(
+                                date_received_str, "%a, %d %b %Y %H:%M:%S %Z"
+                            )
                         except Exception:
                             try:
-                                date_received = datetime.strptime(date_received_str, "%a, %d %b %Y %H:%M:%S %z")
+                                date_received = datetime.strptime(
+                                    date_received_str, "%a, %d %b %Y %H:%M:%S %z"
+                                )
                             except Exception:
-                                date_received = datetime.strptime(date_received_str, "%a, %d %b %Y %H:%M:%S %z (%Z)")
+                                date_received = datetime.strptime(
+                                    date_received_str, "%a, %d %b %Y %H:%M:%S %z (%Z)"
+                                )
 
                         if date_received.tzinfo is None:
                             date_received = date_received.replace(tzinfo=pytz.utc)
                         else:
                             date_received = date_received.astimezone(pytz.utc)
                         email_meta["date_received"] = date_received
-                        email_meta["message_id"] = self._parse_email_header(msg, "Message-ID")
+                        email_meta["message_id"] = self._parse_email_header(
+                            msg, "Message-ID"
+                        )
 
                         part_id = 0
                         # if the email message is multipart
                         if msg.is_multipart():
                             # iterate over email parts
                             for part in msg.walk():
-                                part_id_str = f'part_{part_id}'
+                                part_id_str = f"part_{part_id}"
                                 # extract content type of email
                                 content_type = part.get_content_type()
-                                content_disposition = str(part.get("Content-Disposition"))
+                                content_disposition = str(
+                                    part.get("Content-Disposition")
+                                )
 
                                 email_meta[part_id_str] = dict()
                                 email_meta[part_id_str]["content_type"] = content_type
-                                email_meta[part_id_str]["content_disposition"] = content_disposition
+                                email_meta[part_id_str][
+                                    "content_disposition"
+                                ] = content_disposition
 
-                                if "attachment" not in content_disposition and "text/" in content_type:
+                                if (
+                                    "attachment" not in content_disposition
+                                    and "text/" in content_type
+                                ):
                                     try:
                                         # get the email body
-                                        email_body = part.get_payload(decode=True).decode()
+                                        email_body = part.get_payload(
+                                            decode=True
+                                        ).decode()
                                         if content_type == "text/html":
                                             email_body = text_from_html(email_body)
                                         # append email body with existing
-                                        email_meta[part_id_str]["email_body"] = email_body
-                                        email_content = email_content + "\n" + email_body
+                                        email_meta[part_id_str][
+                                            "email_body"
+                                        ] = email_body
+                                        email_content = (
+                                            email_content + "\n" + email_body
+                                        )
                                     except Exception:
                                         logger.error("Unable to parse email body")
                                 elif "attachment" in content_disposition:
-                                    logger.warning("Email attachment download is not supported")
+                                    logger.warning(
+                                        "Email attachment download is not supported"
+                                    )
                                     # Download attachment is commented currently
                                     # # download attachment
                                     # filename = part.get_filename()
@@ -199,7 +220,7 @@ class EmailSource(BaseSource):
 
                                 part_id = part_id + 1
                         else:
-                            part_id_str = f'part_{part_id}'
+                            part_id_str = f"part_{part_id}"
                             email_meta[part_id_str] = dict()
                             # extract content type of email
                             content_type = msg.get_content_type()
@@ -226,16 +247,20 @@ class EmailSource(BaseSource):
 
                         source_responses.append(
                             AnalyzerRequest(
-                                processed_text="\n".join([email_meta.get("subject"), email_content]),
+                                processed_text="\n".join(
+                                    [email_meta.get("subject"), email_content]
+                                ),
                                 meta=email_meta,
-                                source_name=self.NAME
+                                source_name=self.NAME,
                             )
                         )
 
                 if not need_more_lookup:
                     break
 
-            mailbox_stat["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
+            mailbox_stat["since_time"] = last_since_time.strftime(
+                DATETIME_STRING_PATTERN
+            )
             mailbox_stat["since_comment_id"] = last_index
 
         if update_state:

@@ -6,7 +6,11 @@ from pydantic import PrivateAttr
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.base_analyzer import AnalyzerRequest
-from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time
+from obsei.misc.utils import (
+    DATETIME_STRING_PATTERN,
+    DEFAULT_LOOKUP_PERIOD,
+    convert_utc_time,
+)
 
 
 class AppStoreScrapperConfig(BaseSourceConfig):
@@ -22,10 +26,7 @@ class AppStoreScrapperConfig(BaseSourceConfig):
         self._scrappers = []
         for country in self.countries:
             self._scrappers.append(
-                AppStoreReviewsReader(
-                    country=country,
-                    app_id=self.app_id
-                )
+                AppStoreReviewsReader(country=country, app_id=self.app_id)
             )
 
     def get_review_readers(self) -> List[AppStoreReviewsReader]:
@@ -46,10 +47,7 @@ class AppStoreScrapperSource(BaseSource):
 
         for scrapper in config.get_review_readers():
             country_stat: Dict[str, Any] = state.get(scrapper.country, dict())
-            lookup_period: str = country_stat.get(
-                "since_time",
-                config.lookup_period
-            )
+            lookup_period: str = country_stat.get("since_time", config.lookup_period)
             lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
             if len(lookup_period) <= 5:
                 since_time = convert_utc_time(lookup_period)
@@ -62,17 +60,15 @@ class AppStoreScrapperSource(BaseSource):
             last_index = since_id
             state[scrapper.country] = country_stat
 
-            reviews = scrapper.fetch_reviews(
-                after=since_time,
-                since_id=since_id
-            )
+            reviews = scrapper.fetch_reviews(after=since_time, since_id=since_id)
             reviews = reviews or []
 
             for review in reviews:
-                source_responses.append(AnalyzerRequest(
+                source_responses.append(
+                    AnalyzerRequest(
                         processed_text=f"{review.title}. {review.content}",
                         meta=review.__dict__,
-                        source_name=self.NAME
+                        source_name=self.NAME,
                     )
                 )
 
@@ -83,7 +79,9 @@ class AppStoreScrapperSource(BaseSource):
                 if last_index is None or last_index < review.id:
                     last_index = review.id
 
-            country_stat["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
+            country_stat["since_time"] = last_since_time.strftime(
+                DATETIME_STRING_PATTERN
+            )
             country_stat["since_id"] = last_index
 
         if update_state:
