@@ -34,13 +34,7 @@ requirements:
     - vadersentiment
     - transformers
     - pip
-    - pip:
-      - presidio-analyzer
-      - presidio-anonymizer
-      - zenpy
-      - searchtweets-v2
-      - google-play-scraper
-      - tweet-preprocessor
+
   run:
     - python
     - pytorch
@@ -60,14 +54,6 @@ requirements:
     - sentencepiece
     - vadersentiment
     - transformers
-    - pip
-    - pip:
-      - presidio-analyzer
-      - presidio-anonymizer
-      - zenpy
-      - searchtweets-v2
-      - google-play-scraper
-      - tweet-preprocessor
 
 test:
   imports:
