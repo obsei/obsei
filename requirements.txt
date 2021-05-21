@@ -55,9 +55,9 @@ filelock==3.0.12
     #   huggingface-hub
     #   tldextract
     #   transformers
-google-api-core==1.27.0
+google-api-core==1.28.0
     # via google-api-python-client
-google-api-python-client==2.4.0
+google-api-python-client==2.5.0
     # via -r requirements.in
 google-auth-httplib2==0.1.0
     # via google-api-python-client
@@ -84,11 +84,12 @@ idna==2.10
     #   tldextract
 importlib-metadata==4.0.1
     # via
+    #   click
     #   huggingface-hub
     #   spacy
     #   sqlalchemy
     #   transformers
-jinja2==3.0.0
+jinja2==3.0.1
     # via spacy
 joblib==1.0.1
     # via sacremoses
@@ -246,7 +247,7 @@ tqdm==4.60.0
     #   sacremoses
     #   spacy
     #   transformers
-transformers==4.6.0
+transformers==4.6.1
     # via -r requirements.in
 tweet-preprocessor==0.6.0
     # via -r requirements.in
@@ -275,7 +276,7 @@ wasabi==0.8.2
     # via
     #   spacy
     #   thinc
-websocket-client==0.59.0
+websocket-client==1.0.0
     # via praw
 wrapt==1.12.1
     # via deprecated

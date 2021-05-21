@@ -13,7 +13,6 @@
     <a href="https://pypi.org/project/obsei">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
     </a>
-<!--
     <a href="https://anaconda.org/lalitpagaria/obsei">
         <img src="https://img.shields.io/conda/pn/lalitpagaria/obsei" alt="Platform" />
     </a>
@@ -23,7 +22,6 @@
     <a href="https://anaconda.org/lalitpagaria/obsei">
         <img src="https://anaconda.org/lalitpagaria/obsei/badges/downloads.svg" alt="Downloads" />
     </a>
--->
     <a href="https://pypi.org/project/obsei/">
         <img alt="Release" src="https://img.shields.io/pypi/v/obsei">
     </a>
@@ -99,14 +97,14 @@ For detailed installation instructions, usages and example refer [documentation]
 <td style="text-align:center">✅</td>
 <td style="text-align:center">✅</td>
 <td style="text-align:center">✅</td>
-<td></td>
+<td>Fully Supported</td>
 </tr>
 <tr>
 <td>Conda<sup id="a2"><a href="#f2">2</a></sup></td>
-<td style="text-align:center">-</td>
-<td style="text-align:center">-</td>
-<td style="text-align:center">-</td>
-<td>Coming Soon!</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td>Partially Supported</td>
 </tr>
 </tbody>
 </table>
@@ -139,12 +137,18 @@ Expend following steps and create your workflow -
 
 Install following if system do not have -
  - Install [Python 3.7+](https://www.python.org/downloads/)
- - Install [PIP](https://pip.pypa.io/en/stable/installing/)
+ - Install [PIP](https://pip.pypa.io/en/stable/installing/) (*Optional if you prefer Conda*)
+ - Install [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) (*Optional if you prefer PIP*)
 </details>
 
 <details><summary><b>Step 2: Install Obsei</b></summary>
 
-Install via PyPi:
+You can install Obsei either via PIP or Conda based on your preference.
+
+**NOTE**: On Windows you have to install pytorch manually. Refer https://pytorch.org/get-started/locally/
+
+#### Install via PIP:
+To install latest released version -
 ```shell
 pip install obsei
 ```
@@ -154,7 +158,23 @@ git clone https://github.com/lalitpagaria/obsei.git
 cd obsei
 pip install --editable .
 ```
-**NOTE**: On Windows you have to install pytorch manually. Refer https://pytorch.org/get-started/locally/
+#### Install via Conda:
+To install latest released version -
+```shell
+conda install -c lalitpagaria obsei
+```
+Install from master branch (if you want to try the latest features):
+```shell
+git clone https://github.com/lalitpagaria/obsei.git
+cd obsei
+conda env create -f conda/environment.yml
+```
+For GPU based local environment -
+```shell
+git clone https://github.com/lalitpagaria/obsei.git
+cd obsei
+conda env create -f conda/gpu-environment.yml
+```
 
 </details>
 <details><summary><b>Step 3: Configure Source/Observer</b></summary>
