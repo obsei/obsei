@@ -1,8 +1,6 @@
 name: Publish Conda Package
 
 on:
-  push:
-    branches: [ master ]
   release:
     types: [published]
 
