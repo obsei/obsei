@@ -706,8 +706,8 @@ Discussion about *Obsei* can be done at [community forum](https://github.com/lal
 Refer [link](ATTRIBUTION.md) for attribution.
 
 ## Contribution
-As project is in very early stage, so we are not accepting any pull requests. First we want to shape the project with community's active suggestion and feedback.
-If you want a feature or something doesn't work, please create an issue.
+First off, thank you for even considering contributing to this package, every contribution big or small is greatly appreciated.
+Please refer our [Contribution Guideline](https://github.com/lalitpagaria/obsei/blob/master/CONTRIBUTING.md) and [Code of Conduct](https://github.com/lalitpagaria/obsei/blob/master/CODE_OF_CONDUCT.md).
 
 ## Changelog
 Refer [releases](https://github.com/lalitpagaria/obsei/releases) and [projects](https://github.com/lalitpagaria/obsei/projects).
