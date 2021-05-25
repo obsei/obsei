@@ -16,3 +16,4 @@ This could not have been possible without following open source software -
 - [app-store-reviews-reader](https://github.com/lalitpagaria/app_store_reviews_reader): For App Store reviews scrapping  
 - [slack-sdk](https://github.com/slackapi/python-slack-sdk): For slack integration
 - [zenpy](https://github.com/facetoe/zenpy): For Zendesk integration
+- [presidio-anonymizer](https://github.com/microsoft/presidio): Personal information anonymizer

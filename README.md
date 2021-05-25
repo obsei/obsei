@@ -715,19 +715,6 @@ Refer [releases](https://github.com/lalitpagaria/obsei/releases) and [projects](
 ## Security Issue
 For any security issue please contact us via [email](mailto:obsei.tool@gmail.com)
 
-
-## Citing Obsei
-If you use `obsei` in your research please use the following BibTeX entry:
-```text
-@Misc{Pagaria2020Obsei,
-  author =       {Lalit Pagaria},
-  title =        {Obsei - An automation tool for text analysis need},
-  howpublished = {Github},
-  year =         {2020},
-  url =          {https://github.com/lalitpagaria/obsei}
-}
-```
-
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/lalitpagaria/obsei.svg)](https://starchart.cc/lalitpagaria/obsei)
