@@ -22,6 +22,7 @@ dependencies:
 - sentencepiece
 - vadersentiment
 - transformers
+- pandas
 - pip
 - pip:
   - presidio-analyzer

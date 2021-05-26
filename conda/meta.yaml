@@ -33,6 +33,7 @@ requirements:
     - sentencepiece
     - vadersentiment
     - transformers
+    - pandas
     - pip
 
   run:
@@ -54,6 +55,7 @@ requirements:
     - sentencepiece
     - vadersentiment
     - transformers
+    - pandas
 
 test:
   imports:

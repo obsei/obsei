@@ -1,11 +1,14 @@
 import logging
 import sys
 
+from pandas import DataFrame
+
 from obsei.analyzer.classification_analyzer import (
     ClassificationAnalyzerConfig,
     ZeroShotClassificationAnalyzer,
 )
 from obsei.misc.utils import obj_to_json
+from obsei.sink.pandas_sink import PandasSink, PandasSinkConfig
 from obsei.source.playstore_scrapper import (
     PlayStoreScrapperConfig,
     PlayStoreScrapperSource,
@@ -25,9 +28,13 @@ text_analyzer = ZeroShotClassificationAnalyzer(
     model_name_or_path="typeform/mobilebert-uncased-mnli", device="auto"
 )
 
+# initialize pandas sink config
+sink_config = PandasSinkConfig(dataframe=DataFrame())
+
+# initialize pandas sink
+sink = PandasSink()
+
 source_response_list = source.lookup(source_config)
-for idx, source_response in enumerate(source_response_list):
-    logger.info(f"source_response#'{idx}'='{source_response.__dict__}'")
 
 analyzer_response_list = text_analyzer.analyze_input(
     source_response_list=source_response_list,
@@ -35,5 +42,9 @@ analyzer_response_list = text_analyzer.analyze_input(
         labels=["no parking", "registration issue", "app issue", "payment issue"],
     ),
 )
-for idx, an_response in enumerate(analyzer_response_list):
-    logger.info(f"analyzer_response#'{idx}'='{an_response.__dict__}'")
+
+dataframe = sink.send_data(
+    analyzer_responses=analyzer_response_list, config=sink_config
+)
+
+print(dataframe.to_csv())
