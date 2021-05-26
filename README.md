@@ -41,7 +41,7 @@
 **Obsei** is intended to be an automation tool for text analysis need. *Obsei* consist of -
  - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews etc and feed that information to,
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
- - **Informer**, which send it to ticketing system, data store etc for further action and analysis.
+ - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
 
 Current flow -
 
@@ -605,6 +605,24 @@ sink_config = HttpSinkConfig(
 
 # initialize http sink
 sink = HttpSink()
+```
+</details>
+</td>
+</tr>
+<tr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/pandas.svg" width="20" height="20"><b>Pandas DataFrame</b></summary><hr>
+
+ ```python
+from pandas import DataFrame
+from obsei.sink.pandas_sink import PandasSink, PandasSinkConfig
+
+# initialize pandas sink config
+sink_config = PandasSinkConfig(
+    dataframe=DataFrame()
+)
+
+# initialize pandas sink
+sink = PandasSink()
 ```
 </details>
 </td>

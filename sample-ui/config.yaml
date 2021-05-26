@@ -207,7 +207,7 @@ analyzer:
         multi_class_classification: true
       analyzer:
         _target_: obsei.analyzer.classification_analyzer.ZeroShotClassificationAnalyzer
-        model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
+        model_name_or_path: "typeform/mobilebert-uncased-mnli"
         device: "auto"
   Sentiment:
     _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/sentiment.png"
@@ -276,7 +276,7 @@ analyzer:
           nlp_engine_name: "spacy"
           models:
             - _target_: obsei.analyzer.pii_analyzer.PresidioModelConfig
-              model_name: "en_core_web_lg"
+              model_name: "en_core_web_md"
               lang_code: "en"
   Dummy:
     _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/dummy.png"

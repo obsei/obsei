@@ -33,10 +33,16 @@ def flatten_dict(
     return out
 
 
-def obj_to_json(obj: Any):
+def obj_to_json(obj: Any, sort_keys=False, indent=None):
     if obj is None:
         return None
-    return json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+    return json.dumps(
+        obj,
+        default=datetime_handler,
+        ensure_ascii=False,
+        sort_keys=sort_keys,
+        indent=indent,
+    ).encode("utf8")
 
 
 def obj_to_markdown(
@@ -183,6 +189,8 @@ def dict_to_object(
 
 
 def datetime_handler(x):
-    if isinstance(x, datetime):
+    if x is None:
+        return None
+    elif isinstance(x, datetime):
         return x.isoformat()
-    raise TypeError("Unknown type")
+    return vars(x) if hasattr(x, "__dict__") else x
