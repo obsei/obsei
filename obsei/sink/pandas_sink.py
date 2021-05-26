@@ -9,10 +9,10 @@ from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 
 class PandasConvertor(Convertor):
     def convert(
-            self,
-            analyzer_response: AnalyzerResponse,
-            base_payload: Optional[Dict[str, Any]] = None,
-            **kwargs,
+        self,
+        analyzer_response: AnalyzerResponse,
+        base_payload: Optional[Dict[str, Any]] = None,
+        **kwargs,
     ) -> Dict[str, Any]:
         base_payload = base_payload or {}
         merged_dict = {**base_payload, **analyzer_response.to_dict()}
@@ -38,10 +38,17 @@ class PandasSink(BaseSink):
     def __init__(self, convertor: Convertor = PandasConvertor(), **data: Any):
         super().__init__(convertor=convertor, **data)
 
-    def send_data(self, analyzer_responses: List[AnalyzerResponse], config: PandasSinkConfig, **kwargs):
+    def send_data(
+        self,
+        analyzer_responses: List[AnalyzerResponse],
+        config: PandasSinkConfig,
+        **kwargs,
+    ):
         responses = []
         for analyzer_response in analyzer_responses:
-            converted_response = self.convertor.convert(analyzer_response=analyzer_response)
+            converted_response = self.convertor.convert(
+                analyzer_response=analyzer_response
+            )
             response: Optional[Dict[str, Any]]
             if config.include_columns_list:
                 response = dict()

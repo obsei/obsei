@@ -37,4 +37,3 @@ analyzer_response_list = text_analyzer.analyze_input(
 )
 for idx, an_response in enumerate(analyzer_response_list):
     logger.info(f"analyzer_response#'{idx}'='{an_response.__dict__}'")
-

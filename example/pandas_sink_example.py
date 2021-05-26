@@ -29,9 +29,7 @@ text_analyzer = ZeroShotClassificationAnalyzer(
 )
 
 # initialize pandas sink config
-sink_config = PandasSinkConfig(
-    dataframe=DataFrame()
-)
+sink_config = PandasSinkConfig(dataframe=DataFrame())
 
 # initialize pandas sink
 sink = PandasSink()
@@ -46,8 +44,7 @@ analyzer_response_list = text_analyzer.analyze_input(
 )
 
 dataframe = sink.send_data(
-    analyzer_responses=analyzer_response_list,
-    config=sink_config
+    analyzer_responses=analyzer_response_list, config=sink_config
 )
 
 print(dataframe.to_csv())
