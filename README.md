@@ -42,7 +42,7 @@
 
 
 **Obsei** is intended to be an automation tool for text analysis need. *Obsei* consist of -
- - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews etc and feed that information to,
+ - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews, News, Website etc and feed that information to,
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
  - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
 
@@ -56,8 +56,8 @@
 </thead>
 <tbody>
 <tr>
-<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png" width="350" height="225" /></td>
-<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png" width="350" height="225" /></td>
+<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png" width="400" height="225" /></td>
+<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png" width="400" height="225" /></td>
 </tr>
 </tbody>
 </table>
