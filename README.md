@@ -46,21 +46,13 @@
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
  - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
 
-## Architecture
-<table>
-<thead>
-<tr class="header">
-<th>Current flow</th>
-<th>Future concept (Coming Soon! 🙂)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png" width="400" height="250" /></td>
-<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png" width="400" height="250" /></td>
-</tr>
-</tbody>
-</table>
+Current flow -
+
+![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png)
+
+A future concept (Coming Soon! 🙂)
+
+![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
 
 ## Use cases
 *Obsei* use cases are following, but not limited to -
