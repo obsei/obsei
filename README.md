@@ -56,8 +56,8 @@
 </thead>
 <tbody>
 <tr>
-<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png" width="400" height="225" /></td>
-<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png" width="400" height="225" /></td>
+<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png" width="400" height="250" /></td>
+<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png" width="400" height="250" /></td>
 </tr>
 </tbody>
 </table>
