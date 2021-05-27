@@ -24,3 +24,5 @@ sentencepiece
 presidio-analyzer
 presidio-anonymizer
 pandas
+gnews
+trafilatura

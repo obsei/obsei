@@ -31,3 +31,5 @@ dependencies:
   - searchtweets-v2
   - google-play-scraper
   - tweet-preprocessor
+  - gnews
+  - trafilatura
