@@ -42,18 +42,33 @@
 
 
 **Obsei** is intended to be an automation tool for text analysis need. *Obsei* consist of -
- - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews etc and feed that information to,
+ - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews, News, Website etc and feed that information to,
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
  - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
 
-Current flow -
+## Architecture
+<table>
+<thead>
+<tr class="header">
+<th>Current flow</th>
+<th>Future concept (Coming Soon! 🙂)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png" width="400" height="250" /></td>
+<td><img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png" width="400" height="250" /></td>
+</tr>
+</tbody>
+</table>
 
-![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png)
-
-A future concept (Coming Soon! 🙂)
-
-![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
-
+## Use cases
+*Obsei* use cases are following, but not limited to -
+- Automatic customer issue creation based on sentiment analysis (reduction of MTTD)
+- Proper tagging of ticket based for example login issue, signup issue, delivery issue etc (reduction of MTTR)
+- Checking effectiveness of social media marketing campaign
+- Extraction of deeper insight from feedbacks on various platforms
+- Research purpose
 
 ## Demo
 We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
@@ -124,6 +139,8 @@ pip install zenpy
 pip install searchtweets-v2
 pip install google-play-scraper
 pip install tweet-preprocessor
+pip install gnews
+pip install trafilatura
 ```
 </details>
 
@@ -326,6 +343,44 @@ source_config = RedditScrapperConfig(
 
 # initialize reddit retriever
 source = RedditScrapperSource()
+```
+</details>
+</td>
+</tr>
+<tr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/googlenews.png" width="20" height="20"><b>Google News</b></summary><hr>
+
+ ```python
+from obsei.source.google_news_source import GoogleNewsConfig, GoogleNewsSource
+
+# initialize Google News source config
+source_config = GoogleNewsConfig(
+    query='bitcoin',
+    max_results=5,
+    # To fetch full article text enable `fetch_article` flag
+    # By default google news gives title and highlight
+    fetch_article=True,
+)
+
+# initialize Google News retriever
+source = GoogleNewsSource()
+```
+</details>
+</td>
+</tr>
+<tr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/webcrawler.png" width="20" height="20"><b>Web Crawler</b></summary><hr>
+
+ ```python
+from obsei.source.website_crawler_source import TrafilaturaCrawlerConfig, TrafilaturaCrawlerSource
+
+# initialize website crawler source config
+source_config = TrafilaturaCrawlerConfig(
+    urls=['https://lalitpagaria.github.io/obsei/']
+)
+
+# initialize website text retriever
+source = TrafilaturaCrawlerSource()
 ```
 </details>
 </td>
@@ -715,17 +770,6 @@ Upcoming release plan and progress can be tracked at [link](https://github.com/l
 ## Discussion Forum
 Discussion about *Obsei* can be done at [community forum](https://github.com/lalitpagaria/obsei/discussions)
 
-## Use cases
-*Obsei* use cases are following, but not limited to -
-- Automatic customer issue creation based on sentiment analysis (reduction of MTTD)
-- Proper tagging of ticket based for example login issue, signup issue, delivery issue etc (reduction of MTTR)
-- Checking effectiveness of social media marketing campaign
-- Extraction of deeper insight from feedbacks on various platforms
-- Research purpose
-
-## Attribution
-Refer [link](ATTRIBUTION.md) for attribution.
-
 ## Contribution
 First off, thank you for even considering contributing to this package, every contribution big or small is greatly appreciated.
 Please refer our [Contribution Guideline](https://github.com/lalitpagaria/obsei/blob/master/CONTRIBUTING.md) and [Code of Conduct](https://github.com/lalitpagaria/obsei/blob/master/CODE_OF_CONDUCT.md).
@@ -739,6 +783,10 @@ For any security issue please contact us via [email](mailto:obsei.tool@gmail.com
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/lalitpagaria/obsei.svg)](https://starchart.cc/lalitpagaria/obsei)
+
+## Attribution
+
+This could not have been possible without these [open source software](https://github.com/lalitpagaria/obsei/blob/master/ATTRIBUTION.md).
 
 ## Acknowledgement
 
