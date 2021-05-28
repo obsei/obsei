@@ -8,14 +8,15 @@ from obsei.analyzer.base_analyzer import AnalyzerRequest
 
 class BaseTextCleanerConfig(BaseModel):
     TYPE: str = "Base"
-    text_cleaning_functions: Optional[List]
+    text_cleaning_functions: Optional[List[Dict]]
     class Config:
         arbitrary_types_allowed = True
 
 
 class BaseTextCleaner(BaseModel):
     TYPE: str = "Base"
-    stop_words: List[str] = []
+    stop_words: Optional[List[str]] = []
+    domain_keywords: Optional[List[Dict]] = []
     stemmer: Any
     def __init__(self, **data: Any):
         super().__init__(**data)

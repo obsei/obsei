@@ -243,7 +243,7 @@ tldextract==3.1.0
     # via presidio-analyzer
 tokenizers==0.10.3
     # via transformers
-torch==1.8.1
+torch==1.8.1; sys_platform != '*win*'
     # via -r requirements.in
 tqdm==4.61.0
     # via
