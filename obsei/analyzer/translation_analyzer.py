@@ -19,7 +19,7 @@ class TranslationAnalyzer(BaseAnalyzer):
         self._pipeline = pipeline(
             "translation", model=model, tokenizer=tokenizer, device=self._device_id
         )
-        if 'max_position_embeddings' in self._pipeline.model.config:
+        if hasattr(self._pipeline.model.config, 'max_position_embeddings'):
             self._max_length = self._pipeline.model.config.max_position_embeddings
         else:
             self._max_length = 510
