@@ -22,6 +22,7 @@ class ClassificationAnalyzerConfig(BaseAnalyzerConfig):
 
 class ZeroShotClassificationAnalyzer(BaseAnalyzer):
     _pipeline: Pipeline = PrivateAttr()
+    _max_length: int = PrivateAttr()
     TYPE: str = "Classification"
     model_name_or_path: str
 
@@ -33,11 +34,18 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
             device=self._device_id,
         )
 
+        if self._pipeline.model.config.max_position_embeddings:
+            self._max_length = self._pipeline.model.config.max_position_embeddings
+        else:
+            self._max_length = 510
+
     def _classify_text_from_model(
         self, text: str, labels: List[str], multi_class_classification: bool = True
     ) -> Dict[str, float]:
         scores_data = self._pipeline(
-            text, labels, multi_label=multi_class_classification
+            text[: self._max_length] if len(text) > self._max_length else text,
+            labels,
+            multi_label=multi_class_classification,
         )
 
         score_dict = {

@@ -410,8 +410,8 @@ analyzer_config=ClassificationAnalyzerConfig(
 # initialize classification analyzer
 # For supported models refer https://huggingface.co/models?filter=zero-shot-classification
 text_analyzer = ZeroShotClassificationAnalyzer(
-    model_name_or_path="joeddav/bart-large-mnli-yahoo-answers",
-    device = "auto"
+    model_name_or_path="typeform/mobilebert-uncased-mnli",
+    device="auto"
 )
 ```
 </details>
