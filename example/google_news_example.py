@@ -4,6 +4,7 @@ from obsei.source.google_news_source import GoogleNewsConfig, GoogleNewsSource
 source_config_without_full_text = GoogleNewsConfig(
     query="bitcoin",
     max_results=5,
+    lookup_period="1d",
 )
 
 # Fetch full news article
@@ -11,6 +12,7 @@ source_config_with_full_text = GoogleNewsConfig(
     query="bitcoin",
     max_results=5,
     fetch_article=True,
+    lookup_period="1d",
 )
 
 source = GoogleNewsSource()

@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from importlib import import_module
 from typing import Any, Dict, Optional
 
@@ -140,7 +140,7 @@ def convert_utc_time(datetime_str):
     except ValueError:
         _date = datetime.strptime(datetime_str, "%Y-%m-%d")
 
-    return _date
+    return _date.replace(tzinfo=timezone.utc)
 
 
 def tag_visible(element):
