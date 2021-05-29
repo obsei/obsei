@@ -1,8 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from google_play_scraper import Sort, reviews
-from google_play_scraper.features.reviews import ContinuationToken
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.base_analyzer import AnalyzerRequest
@@ -58,7 +57,7 @@ class PlayStoreScrapperSource(BaseSource):
             # last_index = since_id
             # state[scrapper.country] = country_stat
 
-            continuation_token: Optional[ContinuationToken] = None
+            continuation_token = None
             while True:
                 store_reviews, continuation_token = reviews(
                     app_id=config.package_name,
@@ -79,12 +78,13 @@ class PlayStoreScrapperSource(BaseSource):
                             source_name=self.NAME,
                         )
                     )
+                    review_time = review["at"].replace(tzinfo=timezone.utc)
 
-                    if since_time > review["at"]:
+                    if since_time > review_time:
                         break
 
-                    if last_since_time is None or last_since_time < review["at"]:
-                        last_since_time = review["at"]
+                    if last_since_time is None or last_since_time < review_time:
+                        last_since_time = review_time
                     # if last_index is None or last_index < review.id:
                     #    last_index = review.id
 

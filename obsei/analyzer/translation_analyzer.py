@@ -8,6 +8,7 @@ from obsei.analyzer.base_analyzer import AnalyzerRequest, AnalyzerResponse, Base
 
 class TranslationAnalyzer(BaseAnalyzer):
     _pipeline: Pipeline = PrivateAttr()
+    _max_length: int = PrivateAttr()
     TYPE: str = "Translation"
     model_name_or_path: str
 
@@ -18,6 +19,10 @@ class TranslationAnalyzer(BaseAnalyzer):
         self._pipeline = pipeline(
             "translation", model=model, tokenizer=tokenizer, device=self._device_id
         )
+        if hasattr(self._pipeline.model.config, 'max_position_embeddings'):
+            self._max_length = self._pipeline.model.config.max_position_embeddings
+        else:
+            self._max_length = 510
 
     def analyze_input(
         self, source_response_list: List[AnalyzerRequest], **kwargs

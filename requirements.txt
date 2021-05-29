@@ -13,6 +13,7 @@ atlassian-python-api==3.10.0
 beautifulsoup4==4.9.3
     # via
     #   -r requirements.in
+    #   gnews
     #   reddit-rss-reader
 blis==0.7.4
     # via
@@ -31,18 +32,29 @@ certifi==2020.12.5
     # via
     #   elasticsearch
     #   requests
+    #   trafilatura
 chardet==4.0.0
-    # via requests
+    # via
+    #   htmldate
+    #   readability-lxml
+    #   requests
+    #   trafilatura
 click==7.1.2
     # via
     #   nltk
     #   sacremoses
     #   typer
+courlan==0.4.0
+    # via trafilatura
+cssselect==1.1.0
+    # via readability-lxml
 cymem==2.0.5
     # via
     #   preshed
     #   spacy
     #   thinc
+dateparser==1.0.0
+    # via htmldate
 deprecated==1.2.12
     # via atlassian-python-api
 elasticsearch==7.13.0
@@ -50,15 +62,18 @@ elasticsearch==7.13.0
 feedparser==6.0.2
     # via
     #   app-store-reviews-reader
+    #   gnews
     #   reddit-rss-reader
 filelock==3.0.12
     # via
     #   huggingface-hub
     #   tldextract
     #   transformers
+gnews==0.1.3
+    # via -r requirements.in
 google-api-core==1.28.0
     # via google-api-python-client
-google-api-python-client==2.5.0
+google-api-python-client==2.6.0
     # via -r requirements.in
 google-auth-httplib2==0.1.0
     # via google-api-python-client
@@ -67,12 +82,14 @@ google-auth==1.30.1
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
-google-play-scraper==0.2.1
+google-play-scraper==1.0.0
     # via -r requirements.in
 googleapis-common-protos==1.53.0
     # via google-api-core
 greenlet==1.1.0
     # via sqlalchemy
+htmldate==0.8.1
+    # via trafilatura
 httplib2==0.19.1
     # via
     #   google-api-python-client
@@ -83,12 +100,25 @@ idna==2.10
     # via
     #   requests
     #   tldextract
+importlib-metadata==4.3.0
+    # via
+    #   click
+    #   huggingface-hub
+    #   spacy
+    #   sqlalchemy
+    #   transformers
 jinja2==3.0.1
     # via spacy
 joblib==1.0.1
+    # via sacremoses
+justext==2.2.0
+    # via trafilatura
+lxml==4.6.3
     # via
-    #   nltk
-    #   sacremoses
+    #   htmldate
+    #   justext
+    #   readability-lxml
+    #   trafilatura
 markupsafe==2.0.1
     # via jinja2
 mmh3==3.0.0
@@ -157,12 +187,15 @@ pyparsing==2.4.7
 python-dateutil==2.8.1
     # via
     #   -r requirements.in
+    #   dateparser
+    #   htmldate
     #   pandas
     #   searchtweets-v2
     #   zenpy
 pytz==2021.1
     # via
     #   -r requirements.in
+    #   dateparser
     #   google-api-core
     #   pandas
     #   zenpy
@@ -170,11 +203,14 @@ pyyaml==5.4.1
     # via
     #   presidio-analyzer
     #   searchtweets-v2
+readability-lxml==0.8.1
+    # via trafilatura
 reddit-rss-reader==1.3.2
     # via -r requirements.in
 regex==2020.11.13
     # via
-    #   nltk
+    #   dateparser
+    #   htmldate
     #   presidio-analyzer
     #   sacremoses
     #   transformers
@@ -239,6 +275,8 @@ srsly==2.4.1
     #   thinc
 thinc==8.0.3
     # via spacy
+tld==0.12.5
+    # via courlan
 tldextract==3.1.0
     # via presidio-analyzer
 tokenizers==0.10.3
@@ -252,6 +290,8 @@ tqdm==4.61.0
     #   sacremoses
     #   spacy
     #   transformers
+trafilatura==0.8.2
+    # via -r requirements.in
 transformers==4.6.1
     # via -r requirements.in
 tweet-preprocessor==0.6.0
@@ -261,15 +301,25 @@ typer==0.3.2
     #   pathy
     #   spacy
 typing-extensions==3.10.0.0
-    # via torch
+    # via
+    #   catalogue
+    #   importlib-metadata
+    #   spacy
+    #   thinc
+    #   torch
+tzlocal==2.1
+    # via dateparser
 update-checker==0.18.0
     # via praw
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.26.4
+urllib3==1.26.5
     # via
+    #   courlan
     #   elasticsearch
+    #   htmldate
     #   requests
+    #   trafilatura
 vadersentiment==3.3.2
     # via -r requirements.in
 wasabi==0.8.2
