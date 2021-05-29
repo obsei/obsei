@@ -67,7 +67,7 @@ class AppStoreScrapperSource(BaseSource):
                 source_responses.append(
                     AnalyzerRequest(
                         processed_text=f"{review.title}. {review.content}",
-                        meta=review.__dict__,
+                        meta=vars(review) if hasattr(review, "__dict__") else review,
                         source_name=self.NAME,
                     )
                 )

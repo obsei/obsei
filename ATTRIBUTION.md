@@ -5,7 +5,6 @@ This could not have been possible without following open source software -
 - [tweet-preprocessor](https://github.com/s/preprocessor): For tweets preprocessing and cleaning
 - [atlassian-python-api](https://github.com/atlassian-api/atlassian-python-api): To interact with Jira
 - [elasticsearch](https://github.com/elastic/elasticsearch-py): To interact with Elasticsearch
-- [hydra](https://github.com/facebookresearch/hydra.git): To elegantly configuring Obsei
 - [apscheduler](https://github.com/agronholm/apscheduler): To schedule task to execute desired workflow
 - [pydantic](https://github.com/samuelcolvin/pydantic): For data validation
 - [sqlalchemy](https://github.com/sqlalchemy/sqlalchemy): As SQL toolkit to access DB storage
@@ -17,3 +16,5 @@ This could not have been possible without following open source software -
 - [slack-sdk](https://github.com/slackapi/python-slack-sdk): For slack integration
 - [zenpy](https://github.com/facetoe/zenpy): For Zendesk integration
 - [presidio-anonymizer](https://github.com/microsoft/presidio): Personal information anonymizer
+- [gnews](https://github.com/ranahaani/GNews): For Google News integration
+- [trafilatura](https://github.com/adbar/trafilatura): For crawling news article

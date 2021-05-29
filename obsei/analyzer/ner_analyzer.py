@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class NERAnalyzer(BaseAnalyzer):
     _pipeline: Pipeline = PrivateAttr()
+    _max_length: int = PrivateAttr()
     TYPE: str = "NER"
     model_name_or_path: str
     tokenizer_name: Optional[str] = None
@@ -44,6 +45,11 @@ class NERAnalyzer(BaseAnalyzer):
             grouped_entities=self.grouped_entities,
             device=self._device_id,
         )
+
+        if hasattr(self._pipeline.model.config, 'max_position_embeddings'):
+            self._max_length = self._pipeline.model.config.max_position_embeddings
+        else:
+            self._max_length = 510
 
     def _classify_text_from_model(self, text: str) -> Dict[str, float]:
         return self._pipeline(text)

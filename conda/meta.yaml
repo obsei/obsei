@@ -73,7 +73,7 @@ about:
     {{ data[ 'description' ] }}
 
 
-    In order to use PIIAnalyzer, PlayStoreScrapperSource, TwitterSource and ZendeskSink
+    In order to use PIIAnalyzer, PlayStoreScrapperSource, TwitterSource, GoogleNewsSource and ZendeskSink
     You need to install following packages via pip -
 
 
@@ -83,6 +83,8 @@ about:
         pip install searchtweets-v2
         pip install google-play-scraper
         pip install tweet-preprocessor
+        pip install gnews
+        pip install trafilatura
 
     Visit {{ data[ 'url' ] }} for feedback
   dev_url: "{{ data[ 'url' ] }}"

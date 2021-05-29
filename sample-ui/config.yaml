@@ -93,7 +93,31 @@ source:
         username: ''
         password: ''
       lookup_period: "1h"
-
+  Google News:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/googlenews.png"
+    _help_:
+      - '`fetch_article` use crawler to fetch full article'
+    source:
+      _target_: obsei.source.google_news_source.GoogleNewsSource
+    config:
+      _target_: obsei.source.google_news_source.GoogleNewsConfig
+      query: "bitcoin"
+      max_results: 3
+      lookup_period: "1d"
+      fetch_article: true
+  Website Crawler:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/webcrawler.png"
+    _help_:
+      - '`package name` can be found at the end of the url of app in play store.'
+      - ''
+      - 'For example - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en&gl=US'
+      - '`com.google.android.gm` is the `package name` for xcode and `us` is `country`.'
+    source:
+      _target_: obsei.source.website_crawler_source.TrafilaturaCrawlerSource
+    config:
+      _target_: obsei.source.website_crawler_source.TrafilaturaCrawlerConfig
+      urls:
+        - 'https://lalitpagaria.github.io/obsei/'
 sink:
   Jira:
     _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/jira.png"
