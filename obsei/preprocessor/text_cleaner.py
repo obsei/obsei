@@ -14,22 +14,22 @@ from pydantic import PrivateAttr
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.preprocessor.base_text_cleaner import (
-    BaseTextCleaner,
-    BaseTextCleanerConfig,
+    BaseTextPreprocessor,
+    BaseTextProcessorConfig,
 )
 
 logger = logging.getLogger(__name__)
-nltk.download("punkt")
+try:
+    nltk.data.find("tokenizers/punkt")
+except LookupError:
+    nltk.download("punkt")
 
 
-class TextCleaner(BaseTextCleaner):
+class TextCleaner(BaseTextPreprocessor):
     text_cleaning_functions: List = []
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self.stop_words: List = data.get(
-            "stop_words", stopwords.words(data.get("language", "english"))
-        )
         self.stemmer = data.get("stemmer", PorterStemmer())
         self.domain_keywords = data.get("domain_keywords", [])
         TextCleaner.text_cleaning_functions = [
@@ -63,7 +63,6 @@ class TextCleaner(BaseTextCleaner):
                 "name": "remove_date_time",
                 "is_enabled": True,
             },
-            {"function": self.remove_links, "name": "remove_links", "is_enabled": True},
             {
                 "function": self.replace_domain_keywords,
                 "name": "replace_domain_keywords",
@@ -78,8 +77,12 @@ class TextCleaner(BaseTextCleaner):
         ]
 
     def clean_input(
-        self, input_list: List[AnalyzerRequest], config: BaseTextCleanerConfig, **kwargs
+        self,
+        input_list: List[AnalyzerRequest],
+        config: BaseTextProcessorConfig,
+        **kwargs
     ) -> List[AnalyzerRequest]:
+        self.stop_words: List = stopwords.words(config.language)
         text_cleaning_functions_config: List[Dict] = (
             config.text_cleaning_functions or TextCleaner.text_cleaning_functions
         )
@@ -175,3 +178,11 @@ class TextCleaner(BaseTextCleaner):
                 text = text.replace(source_keyword, target_keyword)
         tokens: List[str] = text.split()
         return tokens
+
+
+if __name__ == "__main__":
+    request = AnalyzerRequest(
+        processed_text="Peter drinks likely likes to tea at 16:45 #datascience @shahrukh "
+    )
+    conf = BaseTextProcessorConfig()
+    print(TextCleaner().clean_input(config=conf, input_list=[request]))

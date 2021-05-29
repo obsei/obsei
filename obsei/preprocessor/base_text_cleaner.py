@@ -7,15 +7,16 @@ from pydantic import BaseModel, PrivateAttr
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 
 
-class BaseTextCleanerConfig(BaseModel):
+class BaseTextProcessorConfig(BaseModel):
     TYPE: str = "Base"
     text_cleaning_functions: Optional[List[Dict]]
+    language: Optional[str] = "english"
 
     class Config:
         arbitrary_types_allowed = True
 
 
-class BaseTextCleaner(BaseModel):
+class BaseTextPreprocessor(BaseModel):
     TYPE: str = "Base"
     stop_words: Optional[List[str]] = []
     domain_keywords: Optional[List[Dict]] = []
@@ -26,7 +27,10 @@ class BaseTextCleaner(BaseModel):
 
     @abstractmethod
     def clean_input(
-        self, input_list: List[AnalyzerRequest], config: BaseTextCleanerConfig, **kwargs
+        self,
+        input_list: List[AnalyzerRequest],
+        config: BaseTextProcessorConfig,
+        **kwargs
     ) -> List[AnalyzerRequest]:
         pass
 
