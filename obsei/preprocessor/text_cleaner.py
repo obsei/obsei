@@ -178,11 +178,3 @@ class TextCleaner(BaseTextPreprocessor):
                 text = text.replace(source_keyword, target_keyword)
         tokens: List[str] = text.split()
         return tokens
-
-
-if __name__ == "__main__":
-    request = AnalyzerRequest(
-        processed_text="Peter drinks likely likes to tea at 16:45 #datascience @shahrukh "
-    )
-    conf = BaseTextProcessorConfig()
-    print(TextCleaner().clean_input(config=conf, input_list=[request]))
