@@ -37,6 +37,9 @@
     <a href="https://www.youtube.com/channel/UCqdvgro1BzU13tkAfX3jCJA">
         <img alt="YouTube Channel Subscribers" src="https://img.shields.io/youtube/channel/subscribers/UCqdvgro1BzU13tkAfX3jCJA?style=social">
     </a>
+    <a href="https://join.slack.com/t/obsei-community/signup">
+        Join Slack
+    </a>
 
 </p>
 
