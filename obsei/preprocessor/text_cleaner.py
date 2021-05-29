@@ -175,11 +175,3 @@ class TextCleaner(BaseTextCleaner):
                 text = text.replace(source_keyword, target_keyword)
         tokens: List[str] = text.split()
         return tokens
-
-
-if __name__ == "__main__":
-    request = AnalyzerRequest(
-        processed_text=" https://github.com/lalitpagaria/obsei/blob/master/obsei/analyzer/pii_analyzer.py#L83 Peter drinks likely likes to tea at 16:45 #datascience @shahrukh "
-    )
-    conf = BaseTextCleanerConfig()
-    print(TextCleaner().clean_input(config=conf, input_list=[request]))
