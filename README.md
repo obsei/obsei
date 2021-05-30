@@ -38,7 +38,7 @@
         <img alt="YouTube Channel Subscribers" src="https://img.shields.io/youtube/channel/subscribers/UCqdvgro1BzU13tkAfX3jCJA?style=social">
     </a>
     <a href="https://join.slack.com/t/obsei-community/shared_invite/zt-r0wnuz02-FAkAmhTAUoc6pD4SLB9Ikg">
-        <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/Slack_join.svg">
+        <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/Slack_join.svg" height="30">
     </a>
 
 </p>
@@ -529,7 +529,7 @@ analyzer = DummyAnalyzer()
 <details><summary><b>Step 5: Configure Sink/Informer</b></summary>
 
 <table ><tbody ><tr></tr><tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/slack.svg" width="20" height="20"><b>Slack</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/slack.svg" width="25" height="25"><b>Slack</b></summary><hr>
 
  ```python
 from obsei.sink.slack_sink import SlackSink, SlackSinkConfig
