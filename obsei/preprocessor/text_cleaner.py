@@ -32,65 +32,18 @@ class TextCleaner(BaseTextPreprocessor):
         super().__init__(**data)
         self.stemmer = data.get("stemmer", PorterStemmer())
         self.domain_keywords = data.get("domain_keywords", [])
-        TextCleaner.text_cleaning_functions = [
-            {
-                "function": self.to_lower_case,
-                "name": "to_lower_case",
-                "is_enabled": True,
-            },
-            {
-                "function": self.remove_white_space,
-                "name": "remove_white_space",
-                "is_enabled": True,
-            },
-            {
-                "function": self.remove_punctuation,
-                "name": "remove_punctuation",
-                "is_enabled": True,
-            },
-            {
-                "function": self.remove_special_characters,
-                "name": "remove_special_characters",
-                "is_enabled": True,
-            },
-            {
-                "function": self.decode_unicode,
-                "name": "decode_unicode",
-                "is_enabled": True,
-            },
-            {
-                "function": self.remove_date_time,
-                "name": "remove_date_time",
-                "is_enabled": True,
-            },
-            {
-                "function": self.replace_domain_keywords,
-                "name": "replace_domain_keywords",
-                "is_enabled": True,
-            },
-            {"function": self.stem_text, "name": "stem_text", "is_enabled": True},
-            {
-                "function": self.remove_stop_words,
-                "name": "remove_stop_words",
-                "is_enabled": True,
-            },
-        ]
 
     def clean_input(
         self,
         input_list: List[AnalyzerRequest],
         config: BaseTextProcessorConfig,
-        **kwargs
+        **kwargs,
     ) -> List[AnalyzerRequest]:
         self.stop_words: List = stopwords.words(config.language)
-        text_cleaning_functions_config: List[Dict] = (
-            config.text_cleaning_functions or TextCleaner.text_cleaning_functions
-        )
         for index, input in enumerate(input_list):
             tokens: List[str] = self.tokenize_text(input.processed_text)
-            for text_cleaning_function_config in text_cleaning_functions_config:
-                if text_cleaning_function_config["is_enabled"]:
-                    tokens = text_cleaning_function_config["function"](tokens)
+            for text_cleaning_function in config.text_cleaning_functions:
+                tokens = eval(f"self.{text_cleaning_function}({tokens})")
             input_list[index].processed_text = " ".join(tokens)
 
         return input_list
