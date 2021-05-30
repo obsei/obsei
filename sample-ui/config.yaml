@@ -163,7 +163,7 @@ sink:
         email: ''
         password: ''
   Slack:
-    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/slack.png"
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/slack.svg"
     _help_:
       - 'Provide slack bot/app `token`, for more detail refer -'
       - 'https://slack.com/intl/en-de/help/articles/215770388-Create-and-regenerate-API-tokens'
