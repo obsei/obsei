@@ -34,7 +34,7 @@ class TextCleaner(BaseTextPreprocessor):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-    def clean_input(
+    def preprocess_input(
         self,
         input_list: List[AnalyzerRequest],
         config: BaseTextProcessorConfig,

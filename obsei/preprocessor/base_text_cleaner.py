@@ -40,7 +40,7 @@ class BaseTextPreprocessor(BaseModel):
         super().__init__(**data)
 
     @abstractmethod
-    def clean_input(
+    def preprocess_input(
         self,
         input_list: List[AnalyzerRequest],
         config: BaseTextProcessorConfig,
