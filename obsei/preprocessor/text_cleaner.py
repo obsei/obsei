@@ -7,7 +7,6 @@ from dateutil.parser import parse
 
 import nltk
 from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 
 from pydantic import PrivateAttr
@@ -26,12 +25,14 @@ except LookupError:
 
 
 class TextCleaner(BaseTextPreprocessor):
+    """
+    Cleanses the Text sequences by removing stop words, dates, white spaces etc.
+    """
+
     text_cleaning_functions: List = []
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self.stemmer = data.get("stemmer", PorterStemmer())
-        self.domain_keywords = data.get("domain_keywords", [])
 
     def clean_input(
         self,
@@ -39,7 +40,21 @@ class TextCleaner(BaseTextPreprocessor):
         config: BaseTextProcessorConfig,
         **kwargs,
     ) -> List[AnalyzerRequest]:
-        self.stop_words: List = stopwords.words(config.language)
+        """
+        Executes the text preprocessing pipeline based on the config state
+
+        Args:
+            input_list (List[AnalyzerRequest]): List of text sequences and other inputs
+            config (BaseTextProcessorConfig): Configuration of text cleaning pipeline
+            which includes choice of stemmer, stop words etc.
+
+        Returns:
+            List[AnalyzerRequest]: Cleansed and Processed list of text sequences
+        """
+        self.stemmer = config.stemmer
+        self.domain_keywords = config.domain_keywords
+        self.stop_words: List = config.stop_words or stopwords.words(config.language)
+
         for index, input in enumerate(input_list):
             tokens: List[str] = self.tokenize_text(input.processed_text)
             for text_cleaning_function in config.text_cleaning_functions:
@@ -51,12 +66,24 @@ class TextCleaner(BaseTextPreprocessor):
     def tokenize_text(self, text: str) -> List[str]:
         """
         Transforms text string to words using NLTK's tokenizer
+
+        Args:
+            text (str): Text sequence
+
+        Returns:
+            List[str]: List of word tokens
         """
         return word_tokenize(text)
 
     def to_lower_case(self, tokens: List[str]) -> List[str]:
         """
         Transforms string tokens to lower case
+
+        Args:
+            tokens (List[str]): [description]
+
+        Returns:
+            List[str]: [description]
         """
         return [token.lower() for token in tokens]
 
@@ -93,6 +120,13 @@ class TextCleaner(BaseTextPreprocessor):
         Removes special characters by eliminating all characters from each token
         and only retains alphabetic, numeric or alphanumeric tokens by stripping
         special characters from them
+
+        Args:
+            tokens (List[str]): List of word tokens
+
+        Returns:
+            List[str]: List of word tokens with each token with speical characters
+            removed
         """
         return [
             re.sub("[^A-Za-z0-9]+", "", token)
@@ -103,6 +137,12 @@ class TextCleaner(BaseTextPreprocessor):
     def decode_unicode(self, tokens: List[str]) -> List[str]:
         """
         Converts unicodes to ASCII characters
+
+        Args:
+            tokens (List[str]): List of word tokens
+
+        Returns:
+            List[str]: List of word tokens with unicodes converted to ASCII
         """
         return [
             unicode_decode("NFKD", token).encode("ascii", "ignore").decode("utf-8")
@@ -112,6 +152,12 @@ class TextCleaner(BaseTextPreprocessor):
     def remove_date_time(self, tokens: List[str]) -> List[str]:
         """
         Removes date or time mentions from text
+
+        Args:
+            tokens (List[str]): List of word tokens
+
+        Returns:
+            List[str]: List of word tokens with dates/times removes
         """
         text: str = " ".join(tokens)
         return parse(text, fuzzy_with_tokens=True)[1][0].split()
@@ -119,6 +165,12 @@ class TextCleaner(BaseTextPreprocessor):
     def replace_domain_keywords(self, tokens: List[str]) -> List[str]:
         """
         Replaces domain specific keywords
+
+        Args:
+            tokens (List[str]): List of word tokens
+
+        Returns:
+            List[str]: List of word tokens substituted with mapped domain words
         """
         # don't do anything when no domain keywords specified
         if not len(self.domain_keywords):

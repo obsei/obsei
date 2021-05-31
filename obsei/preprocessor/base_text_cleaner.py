@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 from enum import Enum
 from pydantic import BaseModel, PrivateAttr
 
+from nltk.stem import PorterStemmer
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 
@@ -23,6 +24,9 @@ class BaseTextProcessorConfig(BaseModel):
     TYPE: str = "Base"
     text_cleaning_functions: Optional[List[CleaningFunctions]]
     language: Optional[str] = "english"
+    stop_words: Optional[List[str]] = []
+    domain_keywords: Optional[List[Dict]] = []
+    stemmer: Any = PorterStemmer()
 
     class Config:
         arbitrary_types_allowed = True
@@ -31,9 +35,6 @@ class BaseTextProcessorConfig(BaseModel):
 
 class BaseTextPreprocessor(BaseModel):
     TYPE: str = "Base"
-    stop_words: Optional[List[str]] = []
-    domain_keywords: Optional[List[Dict]] = []
-    stemmer: Any
 
     def __init__(self, **data: Any):
         super().__init__(**data)
