@@ -6,8 +6,6 @@ from obsei.analyzer.base_analyzer import AnalyzerRequest
 import nltk
 
 nltk.download("stopwords")
-decode_unicode: str = "decode_unicode"
-
 
 TEXT_WITH_WHITE_SPACES = """        If anyone is interested... these are our hosts. I can’t recommend them enough, Abc & Pbc.         """
 
