@@ -3,8 +3,6 @@ from typing import Any, Dict, List, Optional
 from enum import Enum
 from pydantic import BaseModel, PrivateAttr
 
-from nltk.stem import PorterStemmer
-
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 
 
@@ -23,10 +21,8 @@ class CleaningFunctions(str, Enum):
 class BaseTextProcessorConfig(BaseModel):
     TYPE: str = "Base"
     text_cleaning_functions: Optional[List[CleaningFunctions]]
-    language: Optional[str] = "english"
-    stop_words: Optional[List[str]] = []
     domain_keywords: Optional[List[Dict]] = []
-    stemmer: Any = PorterStemmer()
+    tokenizer_name: Optional[str] = "punkt"
 
     class Config:
         arbitrary_types_allowed = True

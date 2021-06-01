@@ -5,6 +5,7 @@ import re
 from unicodedata import normalize as unicode_decode
 from dateutil.parser import parse
 
+from nltk.stem import PorterStemmer
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -18,10 +19,6 @@ from obsei.preprocessor.base_text_cleaner import (
 )
 
 logger = logging.getLogger(__name__)
-try:
-    nltk.data.find("tokenizers/punkt")
-except LookupError:
-    nltk.download("punkt")
 
 
 class TextCleaner(BaseTextPreprocessor):
@@ -29,10 +26,15 @@ class TextCleaner(BaseTextPreprocessor):
     Cleanses the Text sequences by removing stop words, dates, white spaces etc.
     """
 
-    text_cleaning_functions: List = []
+    stemmer: Optional[Any] = PorterStemmer()
+    language: Optional[str] = "english"
+    tokenizer_name: Optional[str] = "punkt"
+    domain_keywords: Optional[List] = []
+    stop_words: Optional[List[str]]
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+        self.stop_words = stopwords.words(self.language)
 
     def preprocess_input(
         self,
@@ -51,9 +53,10 @@ class TextCleaner(BaseTextPreprocessor):
         Returns:
             List[AnalyzerRequest]: Cleansed and Processed list of text sequences
         """
-        self.stemmer = config.stemmer
-        self.domain_keywords = config.domain_keywords
-        self.stop_words: List = config.stop_words or stopwords.words(config.language)
+        try:
+            nltk.data.find(f"tokenizers/{self.tokenizer_name}")
+        except LookupError:
+            nltk.download(f"{self.tokenizer_name}")
 
         for index, input in enumerate(input_list):
             tokens: List[str] = self.tokenize_text(input.processed_text)
@@ -113,7 +116,8 @@ class TextCleaner(BaseTextPreprocessor):
         """
         Transforms string tokens to lower case
         """
-        return [token.strip() for token in tokens if len(token.strip())]
+        text: str = " ".join(tokens).strip()
+        return text.split()
 
     def remove_special_characters(self, tokens: List[str]) -> List[str]:
         """
@@ -160,7 +164,11 @@ class TextCleaner(BaseTextPreprocessor):
             List[str]: List of word tokens with dates/times removes
         """
         text: str = " ".join(tokens)
-        return parse(text, fuzzy_with_tokens=True)[1][0].split()
+        try:
+            tokens = parse(text, fuzzy_with_tokens=True)[1][0].split()
+        except:
+            pass
+        return tokens
 
     def replace_domain_keywords(self, tokens: List[str]) -> List[str]:
         """
@@ -177,9 +185,8 @@ class TextCleaner(BaseTextPreprocessor):
             return tokens
 
         text: str = " ".join(tokens)
-        for domain_keyword in self.domain_keywords:
-            source_keyword, target_keyword = domain_keyword
-            if source_keyword in text:
+        for source_keyword, target_keyword in self.domain_keywords:
+            if source_keyword in text or source_keyword.lower() in text:
                 text = text.replace(source_keyword, target_keyword)
         tokens: List[str] = text.split()
         return tokens

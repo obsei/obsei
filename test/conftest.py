@@ -9,6 +9,7 @@ from obsei.analyzer.pii_analyzer import (
 )
 from obsei.analyzer.sentiment_analyzer import VaderSentimentAnalyzer
 from obsei.analyzer.translation_analyzer import TranslationAnalyzer
+from obsei.preprocessor.text_cleaner import TextCleaner
 
 
 @pytest.fixture(scope="session")
@@ -43,4 +44,11 @@ def pii_analyzer():
             nlp_engine_name="spacy",
             models=[PresidioModelConfig(model_name="en_core_web_lg", lang_code="en")],
         )
+    )
+
+
+@pytest.fixture(scope="session")
+def text_cleaner():
+    return TextCleaner(
+        domain_keywords=[("ML", "machine learning"), ("DL", "deep learning")],
     )
