@@ -3,7 +3,9 @@ from obsei.preprocessor.base_text_cleaner import BaseTextProcessorConfig
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 
+import nltk
 
+nltk.download("stopwords")
 decode_unicode: str = "decode_unicode"
 
 
