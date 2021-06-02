@@ -140,3 +140,7 @@ cython_debug/
 /.idea/*
 *.db
 models*
+
+
+## OSX attributes
+.DS_Store
