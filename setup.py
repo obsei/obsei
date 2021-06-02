@@ -65,7 +65,7 @@ setup(
     install_requires=parsed_requirements,
     include_package_data=True,
     python_requires=">=3.7.0",
-    tests_require=["pytest"],
+    tests_require=["pytest", "black"],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
