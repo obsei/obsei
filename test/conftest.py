@@ -49,6 +49,4 @@ def pii_analyzer():
 
 @pytest.fixture(scope="session")
 def text_cleaner():
-    return TextCleaner(
-        domain_keywords=[("ML", "machine learning"), ("DL", "deep learning")],
-    )
+    return TextCleaner()
