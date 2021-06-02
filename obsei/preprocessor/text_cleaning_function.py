@@ -6,7 +6,7 @@ from typing import Any, List, Optional, Tuple
 from unicodedata import normalize
 
 import nltk
-from dateparser import parse
+from dateutil.parser import parse
 from nltk.corpus import stopwords
 from pydantic import BaseModel
 
