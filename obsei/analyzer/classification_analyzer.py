@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Tuple, Optional, Generator
 
 from pydantic import PrivateAttr
 from transformers import Pipeline, pipeline
@@ -64,7 +64,7 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         texts: List[str],
         batch_size: int,
         source_response_list: List[AnalyzerRequest],
-    ) -> Dict[str, float]:
+    ) -> Generator[Tuple[List[str], List[AnalyzerRequest]], None, None]:
         for index in range(0, len(texts), batch_size):
             yield (
                 texts[index : index + batch_size],
