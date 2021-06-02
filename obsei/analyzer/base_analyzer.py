@@ -30,6 +30,7 @@ class AnalyzerResponse(BaseModel):
 
 class BaseAnalyzerConfig(BaseModel):
     TYPE: str = "Base"
+    batch_size: int = 1
 
     class Config:
         arbitrary_types_allowed = True
