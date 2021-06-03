@@ -59,10 +59,12 @@ class TranslationAnalyzer(BaseAnalyzer):
         for batch_texts, batch_source_response in self._batchify(
             texts, analyzer_config.batch_size, source_response_list
         ):
+            batch_predictions = []
             if len(batch_texts) <= 1:
                 batch_predictions = [self._pipeline(batch_texts)]
 
-            batch_predictions = self._pipeline(batch_texts)
+            else:
+                batch_predictions = self._pipeline(batch_texts)
 
             for prediction, source_response in zip(
                 batch_predictions, batch_source_response
