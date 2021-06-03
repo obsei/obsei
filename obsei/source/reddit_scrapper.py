@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import mmh3
@@ -87,8 +87,10 @@ class RedditScrapperSource(BaseSource):
                 )
             )
 
-            if last_since_time is None or last_since_time < reddit.updated:
-                last_since_time = reddit.updated
+            comment_time = reddit.updated["at"].replace(tzinfo=timezone.utc)
+
+            if last_since_time is None or last_since_time < comment_time:
+                last_since_time = comment_time
             if last_index is None:
                 # Assuming list is sorted based on time
                 last_index = reddit.id

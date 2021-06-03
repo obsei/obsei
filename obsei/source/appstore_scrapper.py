@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from app_store.app_store_reviews_reader import AppStoreReviewsReader
@@ -72,10 +72,11 @@ class AppStoreScrapperSource(BaseSource):
                     )
                 )
 
-                if review.date < since_time:
+                review_time = review.date.replace(tzinfo=timezone.utc)
+                if review_time < since_time:
                     break
-                if last_since_time is None or last_since_time < review.date:
-                    last_since_time = review.date
+                if last_since_time is None or last_since_time < review_time:
+                    last_since_time = review_time
                 if last_index is None or last_index < review.id:
                     last_index = review.id
 
