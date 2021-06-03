@@ -141,6 +141,9 @@ cython_debug/
 *.db
 models*
 
-
-## OSX attributes
+# OSX custom attributes
 .DS_Store
+
+# VS code configuration
+.vscode/*
+

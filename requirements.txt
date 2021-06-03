@@ -41,6 +41,7 @@ chardet==4.0.0
     #   trafilatura
 click==7.1.2
     # via
+    #   nltk
     #   sacremoses
     #   typer
 courlan==0.4.0
@@ -127,6 +128,8 @@ murmurhash==1.0.5
     #   preshed
     #   spacy
     #   thinc
+nltk==3.6.2
+    # via -r requirements.in
 numpy==1.20.3
     # via
     #   blis
@@ -283,6 +286,7 @@ torch==1.8.1; sys_platform != '*win*'
 tqdm==4.61.0
     # via
     #   huggingface-hub
+    #   nltk
     #   sacremoses
     #   spacy
     #   transformers
@@ -328,10 +332,6 @@ wrapt==1.12.1
     # via deprecated
 zenpy==2.0.24
     # via -r requirements.in
-zipp==3.4.1
-    # via
-    #   catalogue
-    #   importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
