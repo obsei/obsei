@@ -52,9 +52,8 @@ class NERAnalyzer(BaseAnalyzer):
             self._max_length = 510
 
     def _classify_text_from_model(self, texts: List[str]) -> List[Dict[str, float]]:
-        if len(texts) <= 1:
-            return [self._pipeline(texts)]
-        return self._pipeline(texts)
+        prediction = self._pipeline(texts)
+        return prediction if isinstance(prediction, list) else [prediction]
 
     def _batchify(
         self,

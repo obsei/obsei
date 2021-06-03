@@ -45,19 +45,10 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         labels: List[str],
         multi_class_classification: bool = True,
     ) -> List[Dict[str, float]]:
-        if len(texts) <= 1:
-            return [
-                self._pipeline(
-                    texts,
-                    labels,
-                    multi_label=multi_class_classification,
-                )
-            ]
-        return self._pipeline(
-            texts,
-            labels,
-            multi_label=multi_class_classification,
+        prediction = self._pipeline(
+            texts, labels, multi_label=multi_class_classification
         )
+        return prediction if isinstance(prediction, list) else [prediction]
 
     def _batchify(
         self,
