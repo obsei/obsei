@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Tuple, Optional, Generator
 
 from pydantic import PrivateAttr
 from transformers import (
@@ -46,32 +46,55 @@ class NERAnalyzer(BaseAnalyzer):
             device=self._device_id,
         )
 
-        if hasattr(self._pipeline.model.config, 'max_position_embeddings'):
+        if hasattr(self._pipeline.model.config, "max_position_embeddings"):
             self._max_length = self._pipeline.model.config.max_position_embeddings
         else:
             self._max_length = 510
 
-    def _classify_text_from_model(self, text: str) -> Dict[str, float]:
-        return self._pipeline(text)
+    def _classify_text_from_model(self, texts: List[str]) -> List[Dict[str, float]]:
+        if len(texts) <= 1:
+            return [self._pipeline(texts)]
+        return self._pipeline(texts)
+
+    def _batchify(
+        self,
+        texts: List[str],
+        batch_size: int,
+        source_response_list: List[AnalyzerRequest],
+    ) -> Generator[Tuple[List[str], List[AnalyzerRequest]], None, None]:
+        for index in range(0, len(texts), batch_size):
+            yield (
+                texts[index : index + batch_size],
+                source_response_list[index : index + batch_size],
+            )
 
     def analyze_input(
         self,
         source_response_list: List[AnalyzerRequest],
-        analyzer_config: Optional[BaseAnalyzerConfig] = None,
+        analyzer_config: BaseAnalyzerConfig,
         **kwargs
     ) -> List[AnalyzerResponse]:
         analyzer_output: List[AnalyzerResponse] = []
+        texts = [
+            source_response.processed_text[: self._max_length]
+            if len(source_response.processed_text) > self._max_length
+            else source_response.processed_text
+            for source_response in source_response_list
+        ]
 
-        for source_response in source_response_list:
-            ner_list = self._classify_text_from_model(source_response.processed_text)
-
-            analyzer_output.append(
-                AnalyzerResponse(
-                    processed_text=source_response.processed_text,
-                    meta=source_response.meta,
-                    segmented_data={"data": ner_list},
-                    source_name=source_response.source_name,
+        for batch_texts, batch_source_response in self._batchify(
+            texts, analyzer_config.batch_size, source_response_list
+        ):
+            batch_ner_predictions = self._classify_text_from_model(batch_texts)
+            for ner_prediction, source_response in zip(
+                batch_ner_predictions, batch_source_response
+            ):
+                analyzer_output.append(
+                    AnalyzerResponse(
+                        processed_text=source_response.processed_text,
+                        meta=source_response.meta,
+                        segmented_data={"data": ner_prediction},
+                        source_name=source_response.source_name,
+                    )
                 )
-            )
-
         return analyzer_output
