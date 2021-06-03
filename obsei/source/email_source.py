@@ -3,7 +3,7 @@ import imaplib
 import logging
 from datetime import datetime
 from email.header import decode_header
-from mailbox import Message
+from email.message import Message
 from typing import Any, Dict, List, Optional
 
 import pytz
@@ -79,7 +79,11 @@ class EmailSource(BaseSource):
 
         # Get data from state
         id: str = kwargs.get("id", None)
-        state: Optional[Dict[str, Any]] = None if id is None or self.store is None else self.store.get_source_state(id)
+        state: Optional[Dict[str, Any]] = (
+            None
+            if id is None or self.store is None
+            else self.store.get_source_state(id)
+        )
         update_state: bool = True if id else False
         state = state or dict()
 
@@ -113,7 +117,7 @@ class EmailSource(BaseSource):
 
             state[mailbox] = mailbox_stat
 
-            num_of_emails = int(messages[0])
+            num_of_emails = int(str(messages[0]))
 
             # Read in reverse order means latest emails first
             # Most of code is borrowed from https://www.thepythoncode.com/article/reading-emails-in-python and
@@ -245,7 +249,7 @@ class EmailSource(BaseSource):
                         source_responses.append(
                             AnalyzerRequest(
                                 processed_text="\n".join(
-                                    [email_meta.get("subject"), email_content]
+                                    [email_meta.get("subject", ""), email_content]
                                 ),
                                 meta=email_meta,
                                 source_name=self.NAME,

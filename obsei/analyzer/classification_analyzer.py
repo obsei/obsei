@@ -99,13 +99,8 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
             for prediction, source_response in zip(
                 batch_predictions, batch_source_response
             ):
-                score_dict = {
-                    label: score
-                    for label, score in zip(prediction["labels"], prediction["scores"])
-                }
-
                 classification_map = dict(
-                    sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
+                    sorted(prediction.items(), key=lambda x: x[1], reverse=True)
                 )
                 analyzer_output.append(
                     AnalyzerResponse(

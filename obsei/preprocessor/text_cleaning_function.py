@@ -53,9 +53,9 @@ class RemoveStopWords(TextCleaningFunction):
 class RemovePunctuation(TextCleaningFunction):
     def execute(self, tokens: List[str], **kwargs) -> List[str]:
         return [
-            token.translate(token.maketrans("", "", string.punctuation)) # type: ignore
+            token.translate(token.maketrans("", "", string.punctuation))  # type: ignore
             for token in tokens
-            if len(token.translate(token.maketrans("", "", string.punctuation))) # type: ignore
+            if len(token.translate(token.maketrans("", "", string.punctuation)))  # type: ignore
         ]
 
 
@@ -109,7 +109,7 @@ class RemoveDateTime(TextCleaningFunction):
         text: str = " ".join(tokens)
         try:
             fuzzy_tokens: Tuple[str]
-            _, fuzzy_tokens = parse(text, fuzzy_with_tokens=True)
+            _, fuzzy_tokens = parse(text, fuzzy_with_tokens=True)  # type: ignore
             tokens = " ".join(fuzzy_tokens).split()
         except ValueError:
             logger.warning("Token contain invalid date time format")
