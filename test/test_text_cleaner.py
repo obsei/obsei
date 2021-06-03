@@ -72,7 +72,9 @@ def test_remove_date_time(text_cleaner):
         config=config, input_list=[request]
     )
     cleaner_response = cleaner_responses[0]
-    assert "Peter drinks likely likes to tea at every" == cleaner_response.processed_text
+    assert (
+        "Peter drinks likely likes to tea at every" == cleaner_response.processed_text
+    )
 
 
 def test_remove_stop_words(text_cleaner):

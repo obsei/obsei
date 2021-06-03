@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional
 from uuid import uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from obsei.analyzer.base_analyzer import BaseAnalyzerConfig
 from obsei.sink.base_sink import BaseSinkConfig
@@ -31,11 +31,7 @@ class WorkflowState(BaseModel):
 class Workflow(BaseModel):
     id: str = str(uuid4())
     config: WorkflowConfig
-    states: Optional[WorkflowState]
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        self.states = self.states or WorkflowState()
+    states: WorkflowState = Field(WorkflowState())
 
     class Config:
         arbitrary_types_allowed = True

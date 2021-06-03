@@ -50,11 +50,17 @@ class RedditScrapperSource(BaseSource):
 
         # Get data from state
         id: str = kwargs.get("id", None)
-        state: Dict[str, Any] = None if id is None else self.store.get_source_state(id)
+        state: Optional[Dict[str, Any]] = (
+            None
+            if id is None or self.store is None
+            else self.store.get_source_state(id)
+        )
         update_state: bool = True if id else False
         state = state or dict()
 
-        scrapper_stat: Dict[str, Any] = state.get(config.url_id, dict())
+        scrapper_stat: Dict[str, Any] = (
+            dict() if not config.url_id else state.get(config.url_id, dict())
+        )
         lookup_period: str = scrapper_stat.get("since_time", config.lookup_period)
         lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
         if len(lookup_period) <= 5:
@@ -66,7 +72,8 @@ class RedditScrapperSource(BaseSource):
 
         since_id: Optional[str] = scrapper_stat.get("since_id", None)
         last_index = since_id
-        state[config.url_id] = scrapper_stat
+        if config.url_id:
+            state[config.url_id] = scrapper_stat
 
         reddit_data: Optional[List[RedditContent]] = None
         try:
@@ -98,7 +105,7 @@ class RedditScrapperSource(BaseSource):
         scrapper_stat["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
         scrapper_stat["since_id"] = last_index
 
-        if update_state:
+        if update_state and self.store:
             self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses

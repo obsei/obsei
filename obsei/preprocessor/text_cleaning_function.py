@@ -45,15 +45,17 @@ class RemoveStopWords(TextCleaningFunction):
             self.stop_words = stopwords.words(self.language)
 
     def execute(self, tokens: List[str], **kwargs) -> List[str]:
+        if not self.stop_words:
+            return tokens
         return [token for token in tokens if token not in self.stop_words]
 
 
 class RemovePunctuation(TextCleaningFunction):
     def execute(self, tokens: List[str], **kwargs) -> List[str]:
         return [
-            token.translate(token.maketrans("", "", string.punctuation))
+            token.translate(token.maketrans("", "", string.punctuation))  # type: ignore
             for token in tokens
-            if len(token.translate(token.maketrans("", "", string.punctuation)))
+            if len(token.translate(token.maketrans("", "", string.punctuation)))  # type: ignore
         ]
 
 
@@ -106,7 +108,8 @@ class RemoveDateTime(TextCleaningFunction):
     def execute(self, tokens: List[str], **kwargs) -> List[str]:
         text: str = " ".join(tokens)
         try:
-            _, fuzzy_tokens = parse(text, fuzzy_with_tokens=True)
+            fuzzy_tokens: Tuple[str]
+            _, fuzzy_tokens = parse(text, fuzzy_with_tokens=True)  # type: ignore
             tokens = " ".join(fuzzy_tokens).split()
         except ValueError:
             logger.warning("Token contain invalid date time format")
@@ -126,5 +129,5 @@ class ReplaceDomainKeywords(TextCleaningFunction):
         for source_keyword, target_keyword in self.domain_keywords:
             if source_keyword in text or source_keyword.lower() in text:
                 text = text.replace(source_keyword, target_keyword)
-        tokens: List[str] = text.split()
+        tokens = text.split()
         return tokens

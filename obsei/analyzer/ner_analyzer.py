@@ -76,9 +76,12 @@ class NERAnalyzer(BaseAnalyzer):
     def analyze_input(
         self,
         source_response_list: List[AnalyzerRequest],
-        analyzer_config: BaseAnalyzerConfig,
+        analyzer_config: Optional[BaseAnalyzerConfig] = None,
         **kwargs
     ) -> List[AnalyzerResponse]:
+        if analyzer_config is None:
+            raise ValueError("analyzer_config can't be None")
+
         analyzer_output: List[AnalyzerResponse] = []
         texts = [
             source_response.processed_text[: self._max_length]

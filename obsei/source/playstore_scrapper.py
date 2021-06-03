@@ -38,7 +38,11 @@ class PlayStoreScrapperSource(BaseSource):
 
         # Get data from state
         id: str = kwargs.get("id", None)
-        state: Dict[str, Any] = None if id is None else self.store.get_source_state(id)
+        state: Optional[Dict[str, Any]] = (
+            None
+            if id is None or self.store is None
+            else self.store.get_source_state(id)
+        )
         update_state: bool = True if id else False
         state = state or dict()
 
@@ -100,7 +104,7 @@ class PlayStoreScrapperSource(BaseSource):
             )
             # country_stat["since_id"] = last_index
 
-        if update_state:
+        if update_state and self.store:
             self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses

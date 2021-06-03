@@ -3,7 +3,7 @@ import imaplib
 import logging
 from datetime import datetime
 from email.header import decode_header
-from mailbox import Message
+from email.message import Message
 from typing import Any, Dict, List, Optional
 
 import pytz
@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 class EmailCredInfo(BaseSettings):
-    username: Optional[SecretStr] = Field(None, env="email_username")
-    password: Optional[SecretStr] = Field(None, env="email_password")
+    username: SecretStr = Field(env="email_username")
+    password: SecretStr = Field(env="email_password")
 
 
 class EmailConfig(BaseSourceConfig):
@@ -39,15 +39,12 @@ class EmailConfig(BaseSourceConfig):
     imap_server: str
     imap_port: Optional[int] = None
     download_attachments: Optional[bool] = False
-    mailboxes: Optional[List[str]] = Field(["INBOX"])
-    cred_info: Optional[EmailCredInfo] = None
+    mailboxes: List[str] = Field(["INBOX"])
+    cred_info: EmailCredInfo = Field(EmailCredInfo())
     lookup_period: Optional[str] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-
-        if self.cred_info is None:
-            self.cred_info = EmailCredInfo()
 
         if self.imap_port:
             self._imap_client = imaplib.IMAP4_SSL(
@@ -82,7 +79,11 @@ class EmailSource(BaseSource):
 
         # Get data from state
         id: str = kwargs.get("id", None)
-        state: Dict[str, Any] = None if id is None else self.store.get_source_state(id)
+        state: Optional[Dict[str, Any]] = (
+            None
+            if id is None or self.store is None
+            else self.store.get_source_state(id)
+        )
         update_state: bool = True if id else False
         state = state or dict()
 
@@ -116,7 +117,7 @@ class EmailSource(BaseSource):
 
             state[mailbox] = mailbox_stat
 
-            num_of_emails = int(messages[0])
+            num_of_emails = int(str(messages[0]))
 
             # Read in reverse order means latest emails first
             # Most of code is borrowed from https://www.thepythoncode.com/article/reading-emails-in-python and
@@ -248,7 +249,7 @@ class EmailSource(BaseSource):
                         source_responses.append(
                             AnalyzerRequest(
                                 processed_text="\n".join(
-                                    [email_meta.get("subject"), email_content]
+                                    [email_meta.get("subject", ""), email_content]
                                 ),
                                 meta=email_meta,
                                 source_name=self.NAME,
@@ -263,7 +264,7 @@ class EmailSource(BaseSource):
             )
             mailbox_stat["since_comment_id"] = last_index
 
-        if update_state:
+        if update_state and self.store:
             self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses
@@ -278,5 +279,5 @@ class EmailSource(BaseSource):
         value, encoding = decode_header(header[key])[0]
         if isinstance(value, bytes):
             # if it's a bytes, decode to str
-            value = value.decode(encoding)
+            return "" if not encoding else value.decode(encoding)
         return value

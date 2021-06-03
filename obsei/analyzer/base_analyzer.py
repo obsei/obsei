@@ -56,7 +56,7 @@ class BaseAnalyzer(BaseModel):
     def analyze_input(
         self,
         source_response_list: List[AnalyzerRequest],
-        analyzer_config: BaseAnalyzerConfig,
+        analyzer_config: Optional[BaseAnalyzerConfig] = None,
         **kwargs
     ) -> List[AnalyzerResponse]:
         pass

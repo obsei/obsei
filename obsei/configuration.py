@@ -18,10 +18,8 @@ logger = logging.getLogger(__name__)
 
 class ObseiConfiguration(BaseSettings):
     configuration: Optional[Dict[str, Any]] = None
-    config_path: Optional[constr(min_length=1)] = Field(None, env="obsei_config_path")
-    config_filename: Optional[constr(min_length=1)] = Field(
-        None, env="obsei_config_filename"
-    )
+    config_path: Optional[str] = Field(None, env="obsei_config_path")
+    config_filename: Optional[str] = Field(None, env="obsei_config_filename")
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -36,6 +34,7 @@ class ObseiConfiguration(BaseSettings):
     def initialize_instance(self, key_name: str = None):
         if (
             key_name is None
+            or self.configuration is None
             or key_name not in self.configuration
             or not self.configuration[key_name]
         ):
@@ -78,4 +77,4 @@ class ObseiConfiguration(BaseSettings):
         return self.initialize_instance(key_name)
 
     def get_logging_config(self, key_name: str = "logging") -> Dict[str, Any]:
-        return self.configuration[key_name]
+        return dict() if not self.configuration else self.configuration[key_name]

@@ -2,18 +2,16 @@ import logging
 from logging import Logger
 from typing import Any, List, Optional
 
+from pydantic import Field
+
 from obsei.analyzer.base_analyzer import AnalyzerResponse
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 
 
 class LoggerSinkConfig(BaseSinkConfig):
     TYPE: str = "Logging"
-    logger: Optional[Logger] = None
-    level: Optional[int] = logging.INFO
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        self.logger = self.logger or logging.getLogger(__name__)
+    logger: Logger = Field(logging.getLogger(__name__))
+    level: int = Field(logging.INFO)
 
 
 class LoggerSink(BaseSink):

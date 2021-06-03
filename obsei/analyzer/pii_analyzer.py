@@ -71,13 +71,19 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
         if not self.engine_config:
             self.engine_config = PresidioEngineConfig()
 
+        if not self.engine_config.models or len(self.engine_config.models) == 0:
+            self.engine_config.models = [PresidioModelConfig()]
+
         # If spacy engine then load Spacy models and select languages
         languages = []
         for model_config in self.engine_config.models:
             languages.append(model_config.lang_code)
 
             # Check SpacyNlpEngine.engine_name
-            if self.engine_config.nlp_engine_name == "spacy":
+            if (
+                self.engine_config.nlp_engine_name == "spacy"
+                and model_config.model_name is not None
+            ):
                 try:
                     spacy_model = __import__(model_config.model_name)
                     spacy_model.load()
@@ -115,10 +121,13 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
     def analyze_input(
         self,
         source_response_list: List[AnalyzerRequest],
-        analyzer_config: PresidioPIIAnalyzerConfig,
+        analyzer_config: Optional[PresidioPIIAnalyzerConfig] = None,
         language: Optional[str] = "en",
         **kwargs,
     ) -> List[AnalyzerResponse]:
+        if analyzer_config is None:
+            raise ValueError("analyzer_config can't be None")
+
         analyzer_output: List[AnalyzerResponse] = []
 
         for source_response in source_response_list:

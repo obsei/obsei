@@ -185,11 +185,9 @@ class WorkflowStore(BaseStore):
         return workflow_states
 
     @staticmethod
-    def _convert_sql_row_to_workflow_data(row) -> Optional[Workflow]:
+    def _convert_sql_row_to_workflow_data(row) -> Workflow:
         from obsei.workflow.workflow import WorkflowConfig, Workflow
 
-        if row is None:
-            return None
         config_dict = json.loads(row.config)
         workflow = Workflow(
             id=row.id,

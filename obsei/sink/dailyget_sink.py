@@ -39,7 +39,7 @@ class PayloadConvertor(Convertor):
         text = ""
         tweet_id = None
         created_at_str = None
-        classification_list = []
+        classification_list: List[str] = []
 
         flat_dict = flatten_dict(analyzer_response.to_dict())
         for k, v in flat_dict.items():
@@ -66,7 +66,7 @@ class PayloadConvertor(Convertor):
                 .strftime("%Y-%m-%d %H:%M:%S")
             )
 
-        tweet_url = user_url + "/status/" + tweet_id
+        tweet_url = f"{user_url}/status/{tweet_id}"
         # Sentiment rules
         if negative > 8.0:
             sentiment = "Strong Negative"

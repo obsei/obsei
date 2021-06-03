@@ -20,7 +20,7 @@ class DummyAnalyzer(BaseAnalyzer):
     def analyze_input(
         self,
         source_response_list: List[AnalyzerRequest],
-        analyzer_config: DummyAnalyzerConfig,
+        analyzer_config: Optional[DummyAnalyzerConfig] = None,
         **kwargs
     ) -> List[AnalyzerResponse]:
         responses = []
@@ -30,7 +30,11 @@ class DummyAnalyzer(BaseAnalyzer):
                     processed_text=source_response.processed_text,
                     meta=source_response.meta,
                     source_name=source_response.source_name,
-                    segmented_data={"data": analyzer_config.dummy_data},
+                    segmented_data={
+                        "data": None
+                        if not analyzer_config
+                        else analyzer_config.dummy_data
+                    },
                 )
             )
 

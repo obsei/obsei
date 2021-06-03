@@ -13,7 +13,7 @@ class GoogleCredInfo(BaseSettings):
     # Currently only service_account_file type credential supported
     # Refer: https://developers.google.com/identity/protocols/oauth2/service-account
     service_cred_file: str = Field(None, env="google_service_cred_file")
-    developer_key: Optional[SecretStr] = Field(None, env="google_developer_key")
+    developer_key: SecretStr = Field(None, env="google_developer_key")
     scopes: List[str] = ["https://www.googleapis.com/auth/androidpublisher"]
 
 
@@ -25,15 +25,9 @@ class PlayStoreConfig(BaseSourceConfig):
     num_retries: int = 1
     with_quota_project_id: Optional[str] = None
     with_subject: Optional[str] = None
-    cred_info: Optional[GoogleCredInfo] = None
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        if self.cred_info is None:
-            self.cred_info = GoogleCredInfo()
+    cred_info: GoogleCredInfo = Field(GoogleCredInfo())
 
     def get_google_credentials(self) -> Credentials:
-        # service_account.Credentials.from_service_account_info()
         credentials = service_account.Credentials.from_service_account_file(
             filename=self.cred_info.service_cred_file, scopes=self.cred_info.scopes
         )
@@ -64,10 +58,12 @@ class PlayStoreSource(BaseSource):
 
             # Get data from state
             id: str = kwargs.get("id", None)
-            state: Dict[str, Any] = (
-                None if id is None else self.store.get_source_state(id)
+            state: Optional[Dict[str, Any]] = (
+                None
+                if id is None or self.store is None
+                else self.store.get_source_state(id)
             )
-            start_index: Optional[str] = (
+            start_index: Optional[int] = (
                 config.start_index or None
                 if state is None
                 else state.get("start_index", None)
@@ -110,7 +106,7 @@ class PlayStoreSource(BaseSource):
                 if pagination_token is None:
                     break
 
-        if update_state:
+        if update_state and self.store:
             state["start_index"] = review_id
             self.store.update_source_state(workflow_id=id, state=state)
 
