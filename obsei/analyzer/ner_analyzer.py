@@ -51,7 +51,9 @@ class NERAnalyzer(BaseAnalyzer):
         else:
             self._max_length = 510
 
-    def _classify_text_from_model(self, texts: List[str]) -> List[Dict[str, float]]:
+    def _classify_text_from_model(
+        self, texts: List[str]
+    ) -> List[List[Dict[str, float]]]:
         prediction = self._pipeline(texts)
         return (
             prediction
