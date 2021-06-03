@@ -44,7 +44,7 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         texts: List[str],
         labels: List[str],
         multi_class_classification: bool = True,
-    ) -> List[Dict[str, float]]:
+    ) -> List[Dict[str, Any]]:
         prediction = self._pipeline(
             texts, labels, multi_label=multi_class_classification
         )
@@ -99,8 +99,13 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
             for prediction, source_response in zip(
                 batch_predictions, batch_source_response
             ):
+                score_dict = {
+                    label: score
+                    for label, score in zip(prediction["labels"], prediction["scores"])
+                }
+
                 classification_map = dict(
-                    sorted(prediction.items(), key=lambda x: x[1], reverse=True)
+                    sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
                 )
                 analyzer_output.append(
                     AnalyzerResponse(
