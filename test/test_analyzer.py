@@ -58,7 +58,6 @@ def test_ner_analyzer(ner_analyzer):
         source_response_list=source_responses,
         analyzer_config=BaseAnalyzerConfig(batch_size=1),
     )
-
     assert len(analyzer_responses) == 1
 
     entities = analyzer_responses[0].segmented_data["data"]

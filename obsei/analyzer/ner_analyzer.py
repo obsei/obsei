@@ -53,7 +53,11 @@ class NERAnalyzer(BaseAnalyzer):
 
     def _classify_text_from_model(self, texts: List[str]) -> List[Dict[str, float]]:
         prediction = self._pipeline(texts)
-        return prediction if isinstance(prediction, list) else [prediction]
+        return (
+            prediction
+            if len(prediction) and isinstance(prediction[0], list)
+            else [prediction]
+        )
 
     def _batchify(
         self,
