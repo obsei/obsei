@@ -1,4 +1,4 @@
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.analyzer.base_analyzer import AnalyzerRequest, BaseAnalyzerConfig
 
 GOOD_TEXT = """मुझे सब चीजे बहुत अच्छी लगी ।"""
 
@@ -18,7 +18,8 @@ def test_translate_analyzer(translate_analyzer):
         AnalyzerRequest(processed_text=text, source_name="sample") for text in TEXTS
     ]
     analyzer_responses = translate_analyzer.analyze_input(
-        source_response_list=source_responses
+        source_response_list=source_responses,
+        analyzer_config=BaseAnalyzerConfig(batch_size=1),
     )
     assert len(analyzer_responses) == len(TEXTS)
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Tuple, Optional, Generator
 
 from pydantic import PrivateAttr
 from transformers import Pipeline, pipeline
@@ -34,25 +34,33 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
             device=self._device_id,
         )
 
-        if hasattr(self._pipeline.model.config, 'max_position_embeddings'):
+        if hasattr(self._pipeline.model.config, "max_position_embeddings"):
             self._max_length = self._pipeline.model.config.max_position_embeddings
         else:
             self._max_length = 510
 
     def _classify_text_from_model(
-        self, text: str, labels: List[str], multi_class_classification: bool = True
-    ) -> Dict[str, float]:
-        scores_data = self._pipeline(
-            text[: self._max_length] if len(text) > self._max_length else text,
-            labels,
-            multi_label=multi_class_classification,
+        self,
+        texts: List[str],
+        labels: List[str],
+        multi_class_classification: bool = True,
+    ) -> List[Dict[str, float]]:
+        prediction = self._pipeline(
+            texts, labels, multi_label=multi_class_classification
         )
+        return prediction if isinstance(prediction, list) else [prediction]
 
-        score_dict = {
-            label: score
-            for label, score in zip(scores_data["labels"], scores_data["scores"])
-        }
-        return dict(sorted(score_dict.items(), key=lambda x: x[1], reverse=True))
+    def _batchify(
+        self,
+        texts: List[str],
+        batch_size: int,
+        source_response_list: List[AnalyzerRequest],
+    ) -> Generator[Tuple[List[str], List[AnalyzerRequest]], None, None]:
+        for index in range(0, len(texts), batch_size):
+            yield (
+                texts[index : index + batch_size],
+                source_response_list[index : index + batch_size],
+            )
 
     def analyze_input(
         self,
@@ -63,6 +71,13 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
     ) -> List[AnalyzerResponse]:
         analyzer_output: List[AnalyzerResponse] = []
 
+        texts = [
+            source_response.processed_text[: self._max_length]
+            if len(source_response.processed_text) > self._max_length
+            else source_response.processed_text
+            for source_response in source_response_list
+        ]
+
         labels = analyzer_config.labels or []
         if add_positive_negative_labels:
             if "positive" not in labels:
@@ -70,20 +85,32 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
             if "negative" not in labels:
                 labels.append("negative")
 
-        for source_response in source_response_list:
-            classification_map = self._classify_text_from_model(
-                source_response.processed_text,
+        for batch_texts, batch_source_response in self._batchify(
+            texts, analyzer_config.batch_size, source_response_list
+        ):
+            batch_predictions = self._classify_text_from_model(
+                batch_texts,
                 labels,
                 analyzer_config.multi_class_classification,
             )
+            for prediction, source_response in zip(
+                batch_predictions, batch_source_response
+            ):
+                score_dict = {
+                    label: score
+                    for label, score in zip(prediction["labels"], prediction["scores"])
+                }
 
-            analyzer_output.append(
-                AnalyzerResponse(
-                    processed_text=source_response.processed_text,
-                    meta=source_response.meta,
-                    segmented_data=classification_map,
-                    source_name=source_response.source_name,
+                classification_map = dict(
+                    sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
                 )
-            )
+                analyzer_output.append(
+                    AnalyzerResponse(
+                        processed_text=source_response.processed_text,
+                        meta=source_response.meta,
+                        segmented_data=classification_map,
+                        source_name=source_response.source_name,
+                    )
+                )
 
         return analyzer_output

@@ -1,5 +1,5 @@
 from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.analyzer.base_analyzer import AnalyzerRequest, BaseAnalyzerConfig
 
 GOOD_TEXT = """If anyone is interested... these are our hosts. I can’t recommend them enough, Abc & Pbc.
 
@@ -55,9 +55,9 @@ def test_ner_analyzer(ner_analyzer):
         )
     ]
     analyzer_responses = ner_analyzer.analyze_input(
-        source_response_list=source_responses
+        source_response_list=source_responses,
+        analyzer_config=BaseAnalyzerConfig(batch_size=1),
     )
-
     assert len(analyzer_responses) == 1
 
     entities = analyzer_responses[0].segmented_data["data"]
