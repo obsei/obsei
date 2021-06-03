@@ -79,9 +79,15 @@ class ZendeskSinkConfig(BaseSinkConfig):
             domain=self.domain,
             subdomain=self.subdomain,
             email=self.cred_info.email,
-            password=None if not self.cred_info.password else self.cred_info.password.get_secret_value(),
-            oauth_token=None if not self.cred_info.oauth_token else self.cred_info.oauth_token.get_secret_value(),
-            token=None if not self.cred_info.token else self.cred_info.token.get_secret_value(),
+            password=None
+            if not self.cred_info.password
+            else self.cred_info.password.get_secret_value(),
+            oauth_token=None
+            if not self.cred_info.oauth_token
+            else self.cred_info.oauth_token.get_secret_value(),
+            token=None
+            if not self.cred_info.token
+            else self.cred_info.token.get_secret_value(),
         )
 
     def get_client(self) -> Zenpy:

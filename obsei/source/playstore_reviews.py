@@ -59,7 +59,9 @@ class PlayStoreSource(BaseSource):
             # Get data from state
             id: str = kwargs.get("id", None)
             state: Optional[Dict[str, Any]] = (
-                None if id is None or self.store is None else self.store.get_source_state(id)
+                None
+                if id is None or self.store is None
+                else self.store.get_source_state(id)
             )
             start_index: Optional[int] = (
                 config.start_index or None

@@ -49,7 +49,11 @@ class GoogleNewsSource(BaseSource):
 
         # Get data from state
         id: str = kwargs.get("id", None)
-        state: Optional[Dict[str, Any]] = None if id is None or self.store is None else self.store.get_source_state(id)
+        state: Optional[Dict[str, Any]] = (
+            None
+            if id is None or self.store is None
+            else self.store.get_source_state(id)
+        )
         update_state: bool = True if id else False
         state = state or dict()
         lookup_period: str = state.get("since_time", config.lookup_period)
@@ -85,12 +89,8 @@ class GoogleNewsSource(BaseSource):
 
             if published_date and since_time and published_date < since_time:
                 break
-            if (
-                last_since_time is None
-                or (
-                    published_date
-                    and last_since_time < published_date
-                )
+            if last_since_time is None or (
+                published_date and last_since_time < published_date
             ):
                 last_since_time = published_date
 

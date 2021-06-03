@@ -19,9 +19,7 @@ logger = logging.getLogger(__name__)
 class ObseiConfiguration(BaseSettings):
     configuration: Optional[Dict[str, Any]] = None
     config_path: Optional[str] = Field(None, env="obsei_config_path")
-    config_filename: Optional[str] = Field(
-        None, env="obsei_config_filename"
-    )
+    config_filename: Optional[str] = Field(None, env="obsei_config_filename")
 
     def __init__(self, **data: Any):
         super().__init__(**data)

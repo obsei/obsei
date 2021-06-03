@@ -30,7 +30,11 @@ class DummyAnalyzer(BaseAnalyzer):
                     processed_text=source_response.processed_text,
                     meta=source_response.meta,
                     source_name=source_response.source_name,
-                    segmented_data={"data": None if not analyzer_config else analyzer_config.dummy_data},
+                    segmented_data={
+                        "data": None
+                        if not analyzer_config
+                        else analyzer_config.dummy_data
+                    },
                 )
             )
 

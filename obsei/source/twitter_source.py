@@ -171,7 +171,11 @@ class TwitterSource(BaseSource):
 
         # Get data from state
         id: str = kwargs.get("id", None)
-        state: Optional[Dict[str, Any]] = None if id is None or self.store is None else self.store.get_source_state(id)
+        state: Optional[Dict[str, Any]] = (
+            None
+            if id is None or self.store is None
+            else self.store.get_source_state(id)
+        )
         since_id: Optional[int] = (
             config.since_id or None if state is None else state.get("since_id", None)
         )

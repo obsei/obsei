@@ -73,7 +73,11 @@ class RedditSource(BaseSource):
 
         # Get data from state
         id: str = kwargs.get("id", None)
-        state: Optional[Dict[str, Any]] = None if id is None or self.store is None else self.store.get_source_state(id)
+        state: Optional[Dict[str, Any]] = (
+            None
+            if id is None or self.store is None
+            else self.store.get_source_state(id)
+        )
         update_state: bool = True if id else False
         state = state or dict()
 

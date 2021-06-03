@@ -80,7 +80,10 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
             languages.append(model_config.lang_code)
 
             # Check SpacyNlpEngine.engine_name
-            if self.engine_config.nlp_engine_name == "spacy" and model_config.model_name is not None:
+            if (
+                self.engine_config.nlp_engine_name == "spacy"
+                and model_config.model_name is not None
+            ):
                 try:
                     spacy_model = __import__(model_config.model_name)
                     spacy_model.load()
