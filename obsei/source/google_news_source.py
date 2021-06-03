@@ -49,7 +49,7 @@ class GoogleNewsSource(BaseSource):
 
         # Get data from state
         id: str = kwargs.get("id", None)
-        state: Dict[str, Any] = None if id is None else self.store.get_source_state(id)
+        state: Optional[Dict[str, Any]] = None if id is None or self.store is None else self.store.get_source_state(id)
         update_state: bool = True if id else False
         state = state or dict()
         lookup_period: str = state.get("since_time", config.lookup_period)
@@ -86,13 +86,15 @@ class GoogleNewsSource(BaseSource):
             if published_date and since_time and published_date < since_time:
                 break
             if (
-                published_date
-                and last_since_time is None
-                or last_since_time < published_date
+                last_since_time is None
+                or (
+                    published_date
+                    and last_since_time < published_date
+                )
             ):
                 last_since_time = published_date
 
-        if update_state and last_since_time:
+        if update_state and last_since_time and self.store:
             state["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
             self.store.update_source_state(workflow_id=id, state=state)
 

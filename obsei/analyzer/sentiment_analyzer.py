@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any, List, Optional
 
 from pydantic import PrivateAttr
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -72,7 +72,7 @@ class TransformersSentimentAnalyzer(ZeroShotClassificationAnalyzer):
     def analyze_input(
         self,
         source_response_list: List[AnalyzerRequest],
-        analyzer_config: TransformersSentimentAnalyzerConfig,
+        analyzer_config: Optional[TransformersSentimentAnalyzerConfig] = None,
         **kwargs
     ) -> List[AnalyzerResponse]:
         return super().analyze_input(

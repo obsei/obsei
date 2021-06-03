@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional
 
+from pydantic import Field
 from pydantic.main import BaseModel
 
 from obsei.analyzer.base_analyzer import AnalyzerResponse
@@ -37,12 +38,8 @@ class BaseSinkConfig(BaseModel):
 
 
 class BaseSink(BaseModel):
-    convertor: Optional[Convertor] = None
+    convertor: Convertor = Field(Convertor())
     store: Optional[BaseStore] = None
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        self.convertor = self.convertor or Convertor()
 
     @abstractmethod
     def send_data(

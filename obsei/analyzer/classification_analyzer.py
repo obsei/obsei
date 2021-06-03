@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class ClassificationAnalyzerConfig(BaseAnalyzerConfig):
     TYPE: str = "Classification"
     labels: List[str]
-    multi_class_classification: Optional[bool] = True
+    multi_class_classification: bool = True
 
 
 class ZeroShotClassificationAnalyzer(BaseAnalyzer):
@@ -65,11 +65,14 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
     def analyze_input(
         self,
         source_response_list: List[AnalyzerRequest],
-        analyzer_config: ClassificationAnalyzerConfig,
-        add_positive_negative_labels: Optional[bool] = True,
+        analyzer_config: Optional[ClassificationAnalyzerConfig] = None,
         **kwargs
     ) -> List[AnalyzerResponse]:
+        if analyzer_config is None:
+            raise ValueError("analyzer_config can't be None")
+
         analyzer_output: List[AnalyzerResponse] = []
+        add_positive_negative_labels = kwargs.get("add_positive_negative_labels", True)
 
         texts = [
             source_response.processed_text[: self._max_length]

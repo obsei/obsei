@@ -1,3 +1,5 @@
+from pydantic import Field
+
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.preprocessor.base_preprocessor import (
     BaseTextPreprocessor,
@@ -34,13 +36,7 @@ class TextCleanerConfig(BaseTextProcessorConfig):
 
 
 class TextCleaner(BaseTextPreprocessor):
-    text_tokenizer: Optional[BaseTextTokenizer] = None
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-
-        if not self.text_tokenizer:
-            self.text_tokenizer = NLTKTextTokenizer()
+    text_tokenizer: BaseTextTokenizer = Field(NLTKTextTokenizer())
 
     def preprocess_input(
         self,
@@ -48,6 +44,8 @@ class TextCleaner(BaseTextPreprocessor):
         config: TextCleanerConfig,
         **kwargs,
     ) -> List[AnalyzerRequest]:
+        if config.cleaning_functions is None:
+            return input_list
         for input_data in input_list:
             tokens: List[str] = self.text_tokenizer.tokenize_text(
                 input_data.processed_text

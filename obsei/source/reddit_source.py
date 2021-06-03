@@ -36,7 +36,7 @@ class RedditConfig(BaseSourceConfig):
     post_ids: Optional[List[str]] = None
     lookup_period: Optional[str] = None
     include_post_meta: Optional[bool] = True
-    post_meta_field: Optional[str] = "post_meta"
+    post_meta_field: str = "post_meta"
     cred_info: Optional[RedditCredInfo] = None
 
     def __init__(self, **data: Any):
@@ -73,7 +73,7 @@ class RedditSource(BaseSource):
 
         # Get data from state
         id: str = kwargs.get("id", None)
-        state: Dict[str, Any] = None if id is None else self.store.get_source_state(id)
+        state: Optional[Dict[str, Any]] = None if id is None or self.store is None else self.store.get_source_state(id)
         update_state: bool = True if id else False
         state = state or dict()
 
@@ -140,7 +140,7 @@ class RedditSource(BaseSource):
             post_stat["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
             post_stat["since_comment_id"] = last_index
 
-        if update_state:
+        if update_state and self.store:
             self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses

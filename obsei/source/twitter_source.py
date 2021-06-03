@@ -133,18 +133,13 @@ class TwitterSourceConfig(BaseSourceConfig):
     operators: Optional[List[str]] = Field(DEFAULT_OPERATORS)
     since_id: Optional[int] = None
     until_id: Optional[int] = None
-    lookup_period: str = None
+    lookup_period: Optional[str] = None
     tweet_fields: Optional[List[str]] = Field(DEFAULT_TWEET_FIELDS)
     user_fields: Optional[List[str]] = Field(DEFAULT_USER_FIELDS)
     expansions: Optional[List[str]] = Field(DEFAULT_EXPANSIONS)
     place_fields: Optional[List[str]] = Field(DEFAULT_PLACE_FIELDS)
     max_tweets: Optional[int] = DEFAULT_MAX_TWEETS
-    credential: Optional[TwitterCredentials] = None
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        if self.credential is None:
-            self.credential = TwitterCredentials()
+    credential: TwitterCredentials = Field(TwitterCredentials())
 
 
 class TwitterSource(BaseSource):
@@ -176,7 +171,7 @@ class TwitterSource(BaseSource):
 
         # Get data from state
         id: str = kwargs.get("id", None)
-        state: Dict[str, Any] = None if id is None else self.store.get_source_state(id)
+        state: Optional[Dict[str, Any]] = None if id is None or self.store is None else self.store.get_source_state(id)
         since_id: Optional[int] = (
             config.since_id or None if state is None else state.get("since_id", None)
         )
@@ -287,7 +282,7 @@ class TwitterSource(BaseSource):
             until_id = min_tweet_id
             lookup_period = None
 
-        if update_state:
+        if update_state and self.store:
             state["since_id"] = max_tweet_id
             self.store.update_source_state(workflow_id=id, state=state)
 

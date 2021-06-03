@@ -67,24 +67,21 @@ class ZendeskSinkConfig(BaseSinkConfig):
     # {scheme}://{netloc}/endpoint
     domain: str = Field("zendesk.com")
     subdomain: Optional[str] = Field(None, env="zendesk_subdomain")
-    cred_info: Optional[ZendeskCredInfo] = None
+    cred_info: ZendeskCredInfo = Field(ZendeskCredInfo())
     summary_max_length: int = 50
     labels_count = 3  # Number of labels to fetch
-    base_payload: Dict[str, Any] = None
+    base_payload: Optional[Dict[str, Any]] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-
-        if self.cred_info is None:
-            self.cred_info = ZendeskCredInfo()
 
         self._client = Zenpy(
             domain=self.domain,
             subdomain=self.subdomain,
             email=self.cred_info.email,
-            password=self.cred_info.password.get_secret_value(),
-            oauth_token=self.cred_info.oauth_token.get_secret_value(),
-            token=self.cred_info.token.get_secret_value(),
+            password=None if not self.cred_info.password else self.cred_info.password.get_secret_value(),
+            oauth_token=None if not self.cred_info.oauth_token else self.cred_info.oauth_token.get_secret_value(),
+            token=None if not self.cred_info.token else self.cred_info.token.get_secret_value(),
         )
 
     def get_client(self) -> Zenpy:

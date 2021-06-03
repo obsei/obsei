@@ -44,6 +44,11 @@ class Processor(BaseModel):
             source_config = source_config or self.source_config
             analyzer_config = analyzer_config or self.analyzer_config
 
+        if source is None or source_config is None:
+            return
+        if sink is None or sink_config is None:
+            return
+
         source_response_list = source.lookup(config=source_config, id=id)
         for idx, source_response in enumerate(source_response_list):
             logger.info(f"source_response#'{idx}'='{source_response}'")

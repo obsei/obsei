@@ -26,7 +26,7 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
     timeout = 30
     custom_mapping: Optional[dict] = None
     refresh_type: str = "wait_for"
-    base_payload: Dict[str, Any] = None
+    base_payload: Optional[Dict[str, Any]] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)

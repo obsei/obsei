@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from urllib.request import Request, urlopen
 
 from obsei.misc.utils import obj_to_json
@@ -13,11 +13,11 @@ DEFAULT_HEADERS = {"Content-type": "application/json"}
 class HttpSinkConfig(BaseSinkConfig):
     TYPE: str = "Http"
     url: str
-    headers: Dict[str, Any] = None
-    base_payload: Dict[str, Any] = None
+    headers: Optional[Dict[str, Any]] = None
+    base_payload: Optional[Dict[str, Any]] = None
     # analyzer_output to payload mapping
-    payload_mapping: Dict[str, List[str]] = None
-    field_conversion: Dict[str, str] = None
+    payload_mapping: Optional[Dict[str, List[str]]] = None
+    field_conversion: Optional[Dict[str, str]] = None
 
 
 class HttpSink(BaseSink):
