@@ -118,7 +118,7 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
         # Initialize the anonymizer with logger
         self._anonymizer = AnonymizerEngine()
 
-    def analyze_input(
+    def analyze_input(  # type: ignore[override]
         self,
         source_response_list: List[AnalyzerRequest],
         analyzer_config: Optional[PresidioPIIAnalyzerConfig] = None,

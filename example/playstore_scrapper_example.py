@@ -15,9 +15,7 @@ from obsei.source.playstore_scrapper import (
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-source_config = PlayStoreScrapperConfig(
-    countries=["us"], package_name="com.apcoaconnect", max_count=3
-)
+source_config = PlayStoreScrapperConfig(countries=["us"], app_name="gmail", max_count=3)
 
 source = PlayStoreScrapperSource()
 

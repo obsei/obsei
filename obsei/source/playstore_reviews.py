@@ -44,7 +44,7 @@ class PlayStoreConfig(BaseSourceConfig):
 class PlayStoreSource(BaseSource):
     NAME: str = "PlayStore"
 
-    def lookup(self, config: PlayStoreConfig, **kwargs) -> List[AnalyzerRequest]:
+    def lookup(self, config: PlayStoreConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
         source_responses: List[AnalyzerRequest] = []
         # Refer https://github.com/googleapis/google-api-python-client/blob/master/docs/start.md
         with build(

@@ -70,7 +70,7 @@ class JiraSink(BaseSink):
     def __init__(self, convertor: Convertor = JiraPayloadConvertor(), **data: Any):
         super().__init__(convertor=convertor, **data)
 
-    def send_data(
+    def send_data(  # type: ignore[override]
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: JiraSinkConfig,

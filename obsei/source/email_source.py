@@ -74,7 +74,7 @@ class EmailSource(BaseSource):
         # clean text for creating a folder
         return "".join(c if c.isalnum() else "_" for c in text)
 
-    def lookup(self, config: EmailConfig, **kwargs) -> List[AnalyzerRequest]:
+    def lookup(self, config: EmailConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
         source_responses: List[AnalyzerRequest] = []
 
         # Get data from state

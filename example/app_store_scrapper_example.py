@@ -24,7 +24,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 since_time = datetime.utcnow().astimezone(pytz.utc) + timedelta(days=-5)
 source_config = AppStoreScrapperConfig(
     countries=["us", "de"],
-    app_id="497799835",
+    app_name="xcode",
     lookup_period=since_time.strftime(DATETIME_STRING_PATTERN),
 )
 

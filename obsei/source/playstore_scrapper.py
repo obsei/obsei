@@ -1,8 +1,10 @@
+import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from google_play_scraper import Sort, reviews
 
+from obsei.misc.web_search import perform_search
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.misc.utils import (
@@ -15,7 +17,8 @@ from obsei.misc.utils import (
 class PlayStoreScrapperConfig(BaseSourceConfig):
     TYPE: str = "PlayStoreScrapper"
     countries: List[str]
-    package_name: str
+    package_name: Optional[str] = None
+    app_name: Optional[str] = None
     language: Optional[str]
     filter_score_with: Optional[int] = None
     lookup_period: Optional[str] = None
@@ -24,14 +27,34 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
+        if not self.package_name:
+            self.package_name = self.search_package_name()
+
+        if not self.package_name:
+            raise ValueError("Valid `package_name` or `app_name` is mandatory")
+
         if self.language is None:
             self.language = "en"
+
+    def search_package_name(self, store: str = "app"):
+        base_request_url = f"https://play.google.com"
+        search_response = perform_search(
+            request_url=base_request_url, query=f"play store {self.app_name}"
+        )
+
+        pattern = r"play.google.com/store/apps/details.+?id=([0-9a-z.]+)"
+        match_object = re.search(pattern, search_response.text)
+        if match_object:
+            app_id = match_object.group(1)
+        else:
+            raise RuntimeError("Pattern matching is not found")
+        return app_id
 
 
 class PlayStoreScrapperSource(BaseSource):
     NAME: Optional[str] = "PlayStoreScrapper"
 
-    def lookup(
+    def lookup(  # type: ignore[override]
         self, config: PlayStoreScrapperConfig, **kwargs
     ) -> List[AnalyzerRequest]:
         source_responses: List[AnalyzerRequest] = []

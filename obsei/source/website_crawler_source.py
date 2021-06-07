@@ -86,7 +86,7 @@ class TrafilaturaCrawlerConfig(BaseCrawlerConfig):
 class TrafilaturaCrawlerSource(BaseSource):
     NAME: Optional[str] = "Crawler"
 
-    def lookup(
+    def lookup(  # type: ignore[override]
         self, config: TrafilaturaCrawlerConfig, **kwargs
     ) -> List[AnalyzerRequest]:
         source_responses: List[AnalyzerRequest] = []

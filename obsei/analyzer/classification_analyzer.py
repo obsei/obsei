@@ -62,7 +62,7 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
                 source_response_list[index : index + batch_size],
             )
 
-    def analyze_input(
+    def analyze_input(  # type: ignore[override]
         self,
         source_response_list: List[AnalyzerRequest],
         analyzer_config: Optional[ClassificationAnalyzerConfig] = None,

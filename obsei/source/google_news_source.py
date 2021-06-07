@@ -44,7 +44,7 @@ class GoogleNewsConfig(BaseSourceConfig):
 class GoogleNewsSource(BaseSource):
     NAME: Optional[str] = "GoogleNews"
 
-    def lookup(self, config: GoogleNewsConfig, **kwargs) -> List[AnalyzerRequest]:
+    def lookup(self, config: GoogleNewsConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
         source_responses: List[AnalyzerRequest] = []
 
         # Get data from state

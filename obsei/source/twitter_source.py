@@ -145,7 +145,7 @@ class TwitterSourceConfig(BaseSourceConfig):
 class TwitterSource(BaseSource):
     NAME: str = "Twitter"
 
-    def lookup(self, config: TwitterSourceConfig, **kwargs) -> List[AnalyzerRequest]:
+    def lookup(self, config: TwitterSourceConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
         if (
             not config.query
             and not config.keywords
