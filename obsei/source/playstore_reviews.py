@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional
 
-from google.auth.credentials import Credentials
-from google.oauth2 import service_account
+from google.auth.credentials import Credentials # type: ignore
+from google.oauth2 import service_account # type: ignore
 from googleapiclient.discovery import build
 from pydantic import BaseSettings, Field, SecretStr
 
