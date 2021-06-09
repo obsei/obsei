@@ -34,7 +34,7 @@ def get_dependency_links(filename):
         lines = file.read().splitlines()
 
     return [
-        line.strip().split("=")[1]
+        line.strip().split(" ")[1]
         for line in lines
         if line.strip().startswith("--find-links")
     ]

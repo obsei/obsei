@@ -20,7 +20,9 @@ jobs:
       - name: Test with mypy
         run: |
           pip install mypy
-          mypy obsei --ignore-missing-imports
+          # Refer http://mypy-lang.blogspot.com/2021/06/mypy-0900-released.html
+          pip install mypy types-requests types-python-dateutil types-PyYAML types-dateparser types-protobuf types-pytz
+          mypy obsei
 
   build:
     runs-on: ${{ matrix.os }}
