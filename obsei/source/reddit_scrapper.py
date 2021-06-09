@@ -45,7 +45,7 @@ class RedditScrapperConfig(BaseSourceConfig):
 class RedditScrapperSource(BaseSource):
     NAME: Optional[str] = "RedditScrapper"
 
-    def lookup(self, config: RedditScrapperConfig, **kwargs) -> List[AnalyzerRequest]:
+    def lookup(self, config: RedditScrapperConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
         source_responses: List[AnalyzerRequest] = []
 
         # Get data from state

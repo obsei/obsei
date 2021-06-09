@@ -1,9 +1,11 @@
+import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from app_store.app_store_reviews_reader import AppStoreReviewsReader
 from pydantic import PrivateAttr
 
+from obsei.misc.web_search import perform_search
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.analyzer.base_analyzer import AnalyzerRequest
 from obsei.misc.utils import (
@@ -17,11 +19,18 @@ class AppStoreScrapperConfig(BaseSourceConfig):
     _scrappers: List[AppStoreReviewsReader] = PrivateAttr()
     TYPE: str = "AppStoreScrapper"
     countries: List[str]
-    app_id: str
+    app_id: Optional[str] = None
+    app_name: Optional[str] = None
     lookup_period: Optional[str] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+
+        if not self.app_id:
+            self.app_id = self.search_id()
+
+        if not self.app_id:
+            raise ValueError("Valid `app_id` or `app_name` is mandatory")
 
         self._scrappers = []
         for country in self.countries:
@@ -32,11 +41,33 @@ class AppStoreScrapperConfig(BaseSourceConfig):
     def get_review_readers(self) -> List[AppStoreReviewsReader]:
         return self._scrappers
 
+    # Code is influenced from https://github.com/cowboy-bebug/app-store-scraper
+    def search_id(self, store: str = "app"):
+        if store == "app":
+            landing_url = "apps.apple.com"
+            request_host = "amp-api.apps.apple.com"
+        else:
+            landing_url = "podcasts.apple.com"
+            request_host = "amp-api.podcasts.apple.com"
+
+        base_request_url = f"https://{request_host}"
+        search_response = perform_search(
+            request_url=base_request_url, query=f"app store {self.app_name}"
+        )
+
+        pattern = fr"{landing_url}/[a-z]{{2}}/.+?/id([0-9]+)"
+        match_object = re.search(pattern, search_response.text)
+        if match_object:
+            app_id = match_object.group(1)
+        else:
+            raise RuntimeError("Pattern matching is not found")
+        return app_id
+
 
 class AppStoreScrapperSource(BaseSource):
     NAME: Optional[str] = "AppStoreScrapper"
 
-    def lookup(self, config: AppStoreScrapperConfig, **kwargs) -> List[AnalyzerRequest]:
+    def lookup(self, config: AppStoreScrapperConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
         source_responses: List[AnalyzerRequest] = []
 
         # Get data from state
@@ -57,6 +88,7 @@ class AppStoreScrapperSource(BaseSource):
                 since_time = convert_utc_time(lookup_period)
             else:
                 since_time = datetime.strptime(lookup_period, DATETIME_STRING_PATTERN)
+                since_time = since_time.replace(tzinfo=timezone.utc)
 
             last_since_time: datetime = since_time
 

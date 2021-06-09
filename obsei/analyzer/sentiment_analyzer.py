@@ -69,7 +69,7 @@ class TransformersSentimentAnalyzerConfig(ClassificationAnalyzerConfig):
 
 
 class TransformersSentimentAnalyzer(ZeroShotClassificationAnalyzer):
-    def analyze_input(
+    def analyze_input(  # type: ignore[override]
         self,
         source_response_list: List[AnalyzerRequest],
         analyzer_config: Optional[TransformersSentimentAnalyzerConfig] = None,

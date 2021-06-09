@@ -38,7 +38,7 @@ class TextCleanerConfig(BaseTextProcessorConfig):
 class TextCleaner(BaseTextPreprocessor):
     text_tokenizer: BaseTextTokenizer = Field(NLTKTextTokenizer())
 
-    def preprocess_input(
+    def preprocess_input(  # type: ignore[override]
         self,
         input_list: List[AnalyzerRequest],
         config: TextCleanerConfig,

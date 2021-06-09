@@ -2,32 +2,32 @@ source:
   Appstore Scrapper:
     _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/appstore.png"
     _help_:
-      - '`app id` and `countries` can be found at the end of the url of app in app store.'
+      - '`app name` and `countries` can be found at the end of the url of app in app store.'
       - ''
       - 'For example - https://apps.apple.com/us/app/xcode/id497799835'
-      - '`310633997` is the `app id` for xcode and `us` is `country`.'
+      - '`xcode` is the `app name` for xcode and `us` is `country`.'
     source:
       _target_: obsei.source.appstore_scrapper.AppStoreScrapperSource
     config:
       _target_: obsei.source.appstore_scrapper.AppStoreScrapperConfig
       countries:
         - "us"
-      app_id: "310633997"
+      app_name: "gmail"
       lookup_period: "1h"
   Playstore Scrapper:
     _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/playstore.png"
     _help_:
-      - '`package name` can be found at the end of the url of app in play store.'
+      - '`app name` can be found at the end of the url of app in play store.'
       - ''
       - 'For example - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en&gl=US'
-      - '`com.google.android.gm` is the `package name` for xcode and `us` is `country`.'
+      - '`com.google.android.gm` is the `package name` for gmail and `us` is `country`.'
     source:
       _target_: obsei.source.playstore_scrapper.PlayStoreScrapperSource
     config:
       _target_: obsei.source.playstore_scrapper.PlayStoreScrapperConfig
       countries:
         - "us"
-      package_name: "com.google.android.gm"
+      app_name: "gmail"
       max_count: 3
       lookup_period: "1h"
   Reddit Scrapper:

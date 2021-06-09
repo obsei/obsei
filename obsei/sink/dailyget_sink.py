@@ -108,7 +108,7 @@ class DailyGetSink(HttpSink):
     def __init__(self, convertor: Convertor = PayloadConvertor(), **data: Any):
         super().__init__(convertor=convertor, **data)
 
-    def send_data(
+    def send_data(  # type: ignore[override]
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: DailyGetSinkConfig,

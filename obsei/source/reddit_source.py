@@ -68,7 +68,7 @@ class RedditConfig(BaseSourceConfig):
 class RedditSource(BaseSource):
     NAME: str = "Reddit"
 
-    def lookup(self, config: RedditConfig, **kwargs) -> List[AnalyzerRequest]:
+    def lookup(self, config: RedditConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
         source_responses: List[AnalyzerRequest] = []
 
         # Get data from state

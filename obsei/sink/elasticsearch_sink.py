@@ -86,7 +86,7 @@ class ElasticSearchSink(BaseSink):
     def __init__(self, convertor: Convertor = Convertor(), **data: Any):
         super().__init__(convertor=convertor, **data)
 
-    def send_data(
+    def send_data(  # type: ignore[override]
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: ElasticSearchSinkConfig,

@@ -17,7 +17,7 @@ class DummyAnalyzerConfig(BaseAnalyzerConfig):
 
 
 class DummyAnalyzer(BaseAnalyzer):
-    def analyze_input(
+    def analyze_input(  # type: ignore[override]
         self,
         source_response_list: List[AnalyzerRequest],
         analyzer_config: Optional[DummyAnalyzerConfig] = None,

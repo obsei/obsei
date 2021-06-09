@@ -31,7 +31,7 @@ class SlackSink(BaseSink):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-    def send_data(
+    def send_data(  # type: ignore[override]
         self,
         analyzer_responses: List[AnalyzerResponse],
         config: SlackSinkConfig,
