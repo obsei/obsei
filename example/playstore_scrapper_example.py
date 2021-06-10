@@ -5,7 +5,7 @@ from obsei.analyzer.classification_analyzer import (
     ClassificationAnalyzerConfig,
     ZeroShotClassificationAnalyzer,
 )
-from obsei.misc.utils import obj_to_json
+
 from obsei.source.playstore_scrapper import (
     PlayStoreScrapperConfig,
     PlayStoreScrapperSource,

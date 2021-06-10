@@ -35,7 +35,8 @@ class WorkflowTable(ORMBase):
 class WorkflowStore(BaseStore):
     from obsei.workflow.workflow import Workflow, WorkflowState
 
-    def __init__(self, url: str = "sqlite:///obsei.db"):
+    def __init__(self, url: str = "sqlite:///obsei.db", **data: Any):
+        super().__init__(**data)
         engine = create_engine(url)
         ORMBase.metadata.create_all(engine)
         local_session = sessionmaker(bind=engine)

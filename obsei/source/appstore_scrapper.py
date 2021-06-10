@@ -26,8 +26,8 @@ class AppStoreScrapperConfig(BaseSourceConfig):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-        if not self.app_id:
-            self.app_id = self.search_id()
+        if not self.app_id and self.app_name:
+            self.app_id = AppStoreScrapperConfig.search_id(self.app_name)
 
         if not self.app_id:
             raise ValueError("Valid `app_id` or `app_name` is mandatory")
@@ -42,7 +42,8 @@ class AppStoreScrapperConfig(BaseSourceConfig):
         return self._scrappers
 
     # Code is influenced from https://github.com/cowboy-bebug/app-store-scraper
-    def search_id(self, store: str = "app"):
+    @classmethod
+    def search_id(cls, app_name: str, store: str = "app"):
         if store == "app":
             landing_url = "apps.apple.com"
             request_host = "amp-api.apps.apple.com"
@@ -52,7 +53,7 @@ class AppStoreScrapperConfig(BaseSourceConfig):
 
         base_request_url = f"https://{request_host}"
         search_response = perform_search(
-            request_url=base_request_url, query=f"app store {self.app_name}"
+            request_url=base_request_url, query=f"app store {app_name}"
         )
 
         pattern = fr"{landing_url}/[a-z]{{2}}/.+?/id([0-9]+)"
@@ -121,7 +122,7 @@ class AppStoreScrapperSource(BaseSource):
             )
             country_stat["since_id"] = last_index
 
-        if update_state and self.store:
+        if update_state and self.store is not None:
             self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses

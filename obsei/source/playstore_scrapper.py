@@ -27,8 +27,8 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-        if not self.package_name:
-            self.package_name = self.search_package_name()
+        if not self.package_name and self.app_name:
+            self.package_name = PlayStoreScrapperConfig.search_package_name(self.app_name)
 
         if not self.package_name:
             raise ValueError("Valid `package_name` or `app_name` is mandatory")
@@ -36,10 +36,11 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
         if self.language is None:
             self.language = "en"
 
-    def search_package_name(self, store: str = "app"):
+    @classmethod
+    def search_package_name(cls, app_name: str):
         base_request_url = f"https://play.google.com"
         search_response = perform_search(
-            request_url=base_request_url, query=f"play store {self.app_name}"
+            request_url=base_request_url, query=f"play store {app_name}"
         )
 
         pattern = r"play.google.com/store/apps/details.+?id=([0-9a-z.]+)"
@@ -127,7 +128,7 @@ class PlayStoreScrapperSource(BaseSource):
             )
             # country_stat["since_id"] = last_index
 
-        if update_state and self.store:
+        if update_state and self.store is not None:
             self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses
