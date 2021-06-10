@@ -59,7 +59,7 @@ class PandasSink(BaseSink):
                 response = converted_response
             responses.append(response)
 
-        if config.dataframe:
+        if config.dataframe is not None:
             config.dataframe = config.dataframe.append(responses)
 
         return config.dataframe
