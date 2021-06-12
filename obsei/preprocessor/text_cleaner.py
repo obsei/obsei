@@ -1,3 +1,5 @@
+import traceback
+
 from pydantic import Field
 
 from obsei.analyzer.base_analyzer import AnalyzerRequest
@@ -7,6 +9,8 @@ from obsei.preprocessor.base_preprocessor import (
 )
 from obsei.preprocessor.text_cleaning_function import *
 from obsei.preprocessor.text_tokenizer import BaseTextTokenizer, NLTKTextTokenizer
+
+logger = logging.getLogger(__name__)
 
 
 class TextCleanerConfig(BaseTextProcessorConfig):
@@ -51,7 +55,12 @@ class TextCleaner(BaseTextPreprocessor):
                 input_data.processed_text
             )
             for cleaning_function in config.cleaning_functions:
-                tokens = cleaning_function.execute(tokens)
+                try:
+                    tokens = cleaning_function.execute(tokens)
+                except Exception as ex:
+                    logger.warning(f"Received exception: {ex}")
+                    traceback.print_exc()
+
             input_data.processed_text = " ".join(tokens)
 
         return input_list
