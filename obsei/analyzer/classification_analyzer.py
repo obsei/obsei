@@ -5,11 +5,10 @@ from pydantic import PrivateAttr
 from transformers import Pipeline, pipeline
 
 from obsei.analyzer.base_analyzer import (
-    AnalyzerRequest,
-    AnalyzerResponse,
     BaseAnalyzer,
     BaseAnalyzerConfig,
 )
+from obsei.payload import TextPayload
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +53,8 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         self,
         texts: List[str],
         batch_size: int,
-        source_response_list: List[AnalyzerRequest],
-    ) -> Generator[Tuple[List[str], List[AnalyzerRequest]], None, None]:
+        source_response_list: List[TextPayload],
+    ) -> Generator[Tuple[List[str], List[TextPayload]], None, None]:
         for index in range(0, len(texts), batch_size):
             yield (
                 texts[index : index + batch_size],
@@ -64,14 +63,14 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
 
     def analyze_input(  # type: ignore[override]
         self,
-        source_response_list: List[AnalyzerRequest],
+        source_response_list: List[TextPayload],
         analyzer_config: Optional[ClassificationAnalyzerConfig] = None,
         **kwargs
-    ) -> List[AnalyzerResponse]:
+    ) -> List[TextPayload]:
         if analyzer_config is None:
             raise ValueError("analyzer_config can't be None")
 
-        analyzer_output: List[AnalyzerResponse] = []
+        analyzer_output: List[TextPayload] = []
         add_positive_negative_labels = kwargs.get("add_positive_negative_labels", True)
 
         texts = [
@@ -108,7 +107,7 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
                     sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
                 )
                 analyzer_output.append(
-                    AnalyzerResponse(
+                    TextPayload(
                         processed_text=source_response.processed_text,
                         meta=source_response.meta,
                         segmented_data=classification_map,

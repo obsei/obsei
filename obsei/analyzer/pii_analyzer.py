@@ -8,11 +8,10 @@ from presidio_anonymizer.entities.engine import OperatorConfig
 from pydantic import BaseModel, Field, PrivateAttr
 
 from obsei.analyzer.base_analyzer import (
-    AnalyzerRequest,
-    AnalyzerResponse,
     BaseAnalyzer,
     BaseAnalyzerConfig,
 )
+from obsei.payload import TextPayload
 
 logger = logging.getLogger(__name__)
 
@@ -120,15 +119,15 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
 
     def analyze_input(  # type: ignore[override]
         self,
-        source_response_list: List[AnalyzerRequest],
+        source_response_list: List[TextPayload],
         analyzer_config: Optional[PresidioPIIAnalyzerConfig] = None,
         language: Optional[str] = "en",
         **kwargs,
-    ) -> List[AnalyzerResponse]:
+    ) -> List[TextPayload]:
         if analyzer_config is None:
             raise ValueError("analyzer_config can't be None")
 
-        analyzer_output: List[AnalyzerResponse] = []
+        analyzer_output: List[TextPayload] = []
 
         for source_response in source_response_list:
             analyzer_result = self._analyzer.analyze(
@@ -160,7 +159,7 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
                 text = source_response.processed_text
 
             analyzer_output.append(
-                AnalyzerResponse(
+                TextPayload(
                     processed_text=text,
                     meta=source_response.meta,
                     segmented_data={

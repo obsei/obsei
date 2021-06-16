@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.analyzer.pii_analyzer import (
     PresidioEngineConfig,
     PresidioModelConfig,
@@ -25,7 +25,7 @@ analyzer = PresidioPIIAnalyzer(
 text_to_anonymize = "His name is Mr. Jones and his phone number is 212-555-5555"
 
 analyzer_results = analyzer.analyze_input(
-    source_response_list=[AnalyzerRequest(processed_text=text_to_anonymize)],
+    source_response_list=[TextPayload(processed_text=text_to_anonymize)],
     analyzer_config=analyzer_config,
 )
 

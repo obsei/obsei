@@ -1,11 +1,10 @@
 from typing import Any, List, Optional
 
 from obsei.analyzer.base_analyzer import (
-    AnalyzerRequest,
-    AnalyzerResponse,
     BaseAnalyzer,
     BaseAnalyzerConfig,
 )
+from obsei.payload import TextPayload
 
 
 class DummyAnalyzerConfig(BaseAnalyzerConfig):
@@ -19,14 +18,14 @@ class DummyAnalyzerConfig(BaseAnalyzerConfig):
 class DummyAnalyzer(BaseAnalyzer):
     def analyze_input(  # type: ignore[override]
         self,
-        source_response_list: List[AnalyzerRequest],
+        source_response_list: List[TextPayload],
         analyzer_config: Optional[DummyAnalyzerConfig] = None,
         **kwargs
-    ) -> List[AnalyzerResponse]:
+    ) -> List[TextPayload]:
         responses = []
         for source_response in source_response_list:
             responses.append(
-                AnalyzerResponse(
+                TextPayload(
                     processed_text=source_response.processed_text,
                     meta=source_response.meta,
                     source_name=source_response.source_name,

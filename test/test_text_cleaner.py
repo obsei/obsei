@@ -1,4 +1,4 @@
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.preprocessor.text_cleaner import TextCleanerConfig
 from obsei.preprocessor.text_cleaning_function import *
 
@@ -25,7 +25,7 @@ TEXT_WITH_UNICODE = """what is this \u0021 \u0021 \u0021"""
 
 
 def test_white_space_cleaner(text_cleaner):
-    request = AnalyzerRequest(processed_text=TEXT_WITH_WHITE_SPACES)
+    request = TextPayload(processed_text=TEXT_WITH_WHITE_SPACES)
 
     config = TextCleanerConfig(cleaning_functions=[RemoveWhiteSpaceAndEmptyToken()])
     cleaner_responses = text_cleaner.preprocess_input(
@@ -39,7 +39,7 @@ def test_white_space_cleaner(text_cleaner):
 
 
 def test_lower_case(text_cleaner):
-    request = AnalyzerRequest(processed_text=TEXT_WITH_UPPER_CASE)
+    request = TextPayload(processed_text=TEXT_WITH_UPPER_CASE)
 
     config = TextCleanerConfig(cleaning_functions=[ToLowerCase()])
     cleaner_responses = text_cleaner.preprocess_input(
@@ -51,7 +51,7 @@ def test_lower_case(text_cleaner):
 
 
 def test_remove_punctuation(text_cleaner):
-    request = AnalyzerRequest(processed_text=TEXT_WITH_PUNCTUATION)
+    request = TextPayload(processed_text=TEXT_WITH_PUNCTUATION)
 
     config = TextCleanerConfig(cleaning_functions=[RemovePunctuation()])
     cleaner_responses = text_cleaner.preprocess_input(
@@ -65,7 +65,7 @@ def test_remove_punctuation(text_cleaner):
 
 
 def test_remove_date_time(text_cleaner):
-    request = AnalyzerRequest(processed_text=TEXT_WITH_DATE_TIME)
+    request = TextPayload(processed_text=TEXT_WITH_DATE_TIME)
 
     config = TextCleanerConfig(cleaning_functions=[RemoveDateTime()])
     cleaner_responses = text_cleaner.preprocess_input(
@@ -78,7 +78,7 @@ def test_remove_date_time(text_cleaner):
 
 
 def test_remove_stop_words(text_cleaner):
-    request = AnalyzerRequest(processed_text=TEXT_WITH_STOP_WORDS)
+    request = TextPayload(processed_text=TEXT_WITH_STOP_WORDS)
 
     config = TextCleanerConfig(cleaning_functions=[RemoveStopWords(language="english")])
     cleaner_responses = text_cleaner.preprocess_input(
@@ -89,7 +89,7 @@ def test_remove_stop_words(text_cleaner):
 
 
 def test_remove_special_characters(text_cleaner):
-    request = AnalyzerRequest(processed_text=TEXT_WITH_SPECIAL_CHARACTERS)
+    request = TextPayload(processed_text=TEXT_WITH_SPECIAL_CHARACTERS)
 
     config = TextCleanerConfig(cleaning_functions=[RemoveSpecialChars()])
 
@@ -103,7 +103,7 @@ def test_remove_special_characters(text_cleaner):
 
 
 def test_replace_domain_keywords(text_cleaner):
-    request = AnalyzerRequest(processed_text=TEXT_WITH_DOMAIN_WORDS)
+    request = TextPayload(processed_text=TEXT_WITH_DOMAIN_WORDS)
 
     config = TextCleanerConfig(
         cleaning_functions=[
@@ -124,7 +124,7 @@ def test_replace_domain_keywords(text_cleaner):
 
 
 def test_decode_unicode(text_cleaner):
-    request = AnalyzerRequest(processed_text=TEXT_WITH_UNICODE)
+    request = TextPayload(processed_text=TEXT_WITH_UNICODE)
 
     config = TextCleanerConfig(cleaning_functions=[DecodeUnicode()])
 

@@ -508,7 +508,7 @@ analyzer = PresidioPIIAnalyzer(
 <tr>
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/dummy.png" width="20" height="20"><b>Dummy Analyzer</b></summary><hr>
 
-Dummy Analyzer, do nothing it simply used for transforming input (AnalyzerRequest) to output (AnalyzerResponse) also adding user supplied dummy data.
+Dummy Analyzer, do nothing it simply used for transforming input (TextPayload) to output (TextPayload) also adding user supplied dummy data.
  ```python
 from obsei.analyzer.dummy_analyzer import DummyAnalyzer, DummyAnalyzerConfig
 

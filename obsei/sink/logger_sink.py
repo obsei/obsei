@@ -4,7 +4,7 @@ from typing import Any, List, Optional
 
 from pydantic import Field
 
-from obsei.analyzer.base_analyzer import AnalyzerResponse
+from obsei.payload import TextPayload
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 
 
@@ -22,7 +22,7 @@ class LoggerSink(BaseSink):
 
     def send_data(  # type: ignore[override]
         self,
-        analyzer_responses: List[AnalyzerResponse],
+        analyzer_responses: List[TextPayload],
         config: LoggerSinkConfig,
         **kwargs,
     ):

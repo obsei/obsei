@@ -11,7 +11,7 @@ from pydantic.types import SecretStr
 from searchtweets import collect_results, gen_request_parameters
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 
 import preprocessor as cleaning_processor
 
@@ -145,7 +145,7 @@ class TwitterSourceConfig(BaseSourceConfig):
 class TwitterSource(BaseSource):
     NAME: str = "Twitter"
 
-    def lookup(self, config: TwitterSourceConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
+    def lookup(self, config: TwitterSourceConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
         if (
             not config.query
             and not config.keywords
@@ -205,7 +205,7 @@ class TwitterSource(BaseSource):
             operators=config.operators,
         )
 
-        source_responses: List[AnalyzerRequest] = []
+        source_responses: List[TextPayload] = []
         need_more_lookup = True
         while need_more_lookup:
             search_query = gen_request_parameters(
@@ -336,7 +336,7 @@ class TwitterSource(BaseSource):
         processed_text = TwitterSource.clean_tweet_text(tweet["text"])
 
         tweet["tweet_url"] = tweet_url
-        return AnalyzerRequest(
+        return TextPayload(
             processed_text=processed_text, meta=tweet, source_name=self.NAME
         )
 

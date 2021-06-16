@@ -7,7 +7,7 @@ from pydantic import PrivateAttr
 
 from obsei.misc.web_search import perform_search
 from obsei.source.base_source import BaseSource, BaseSourceConfig
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.misc.utils import (
     DATETIME_STRING_PATTERN,
     DEFAULT_LOOKUP_PERIOD,
@@ -69,8 +69,8 @@ class AppStoreScrapperConfig(BaseSourceConfig):
 class AppStoreScrapperSource(BaseSource):
     NAME: Optional[str] = "AppStoreScrapper"
 
-    def lookup(self, config: AppStoreScrapperConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
-        source_responses: List[AnalyzerRequest] = []
+    def lookup(self, config: AppStoreScrapperConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+        source_responses: List[TextPayload] = []
 
         # Get data from state
         id: str = kwargs.get("id", None)
@@ -105,7 +105,7 @@ class AppStoreScrapperSource(BaseSource):
 
             for review in reviews:
                 source_responses.append(
-                    AnalyzerRequest(
+                    TextPayload(
                         processed_text=f"{review.title}. {review.content}",
                         meta=vars(review) if hasattr(review, "__dict__") else review,
                         source_name=self.NAME,

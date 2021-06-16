@@ -1,4 +1,4 @@
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.analyzer.pii_analyzer import PresidioPIIAnalyzerConfig
 
 text_to_anonymize = "His name is Mr. Jones. His phone number is 212-555-5555 and email is jones@email.com"
@@ -12,7 +12,7 @@ def test_pii_analyzer_replace_original(pii_analyzer):
     )
 
     source_responses = [
-        AnalyzerRequest(processed_text=text, source_name="sample") for text in TEXTS
+        TextPayload(processed_text=text, source_name="sample") for text in TEXTS
     ]
     analyzer_responses = pii_analyzer.analyze_input(
         source_response_list=source_responses, analyzer_config=analyzer_config
@@ -42,7 +42,7 @@ def test_pii_analyzer_not_replace_original(pii_analyzer):
     )
 
     source_responses = [
-        AnalyzerRequest(processed_text=text, source_name="sample") for text in TEXTS
+        TextPayload(processed_text=text, source_name="sample") for text in TEXTS
     ]
     analyzer_responses = pii_analyzer.analyze_input(
         source_response_list=source_responses, analyzer_config=analyzer_config
@@ -69,7 +69,7 @@ def test_pii_analyzer_analyze_only(pii_analyzer):
     )
 
     source_responses = [
-        AnalyzerRequest(processed_text=text, source_name="sample") for text in TEXTS
+        TextPayload(processed_text=text, source_name="sample") for text in TEXTS
     ]
     analyzer_responses = pii_analyzer.analyze_input(
         source_response_list=source_responses, analyzer_config=analyzer_config

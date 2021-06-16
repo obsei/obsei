@@ -4,8 +4,7 @@ from urllib.request import Request, urlopen
 
 from obsei.misc.utils import obj_to_json
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from obsei.analyzer.base_analyzer import AnalyzerResponse
-
+from obsei.payload import TextPayload
 
 DEFAULT_HEADERS = {"Content-type": "application/json"}
 
@@ -26,7 +25,7 @@ class HttpSink(BaseSink):
 
     def send_data(  # type: ignore[override]
         self,
-        analyzer_responses: List[AnalyzerResponse],
+        analyzer_responses: List[TextPayload],
         config: HttpSinkConfig,
         **kwargs
     ):

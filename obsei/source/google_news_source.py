@@ -4,7 +4,7 @@ import dateparser
 from gnews import GNews
 from pydantic import PrivateAttr
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.misc.utils import DATETIME_STRING_PATTERN, convert_utc_time
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.source.website_crawler_source import (
@@ -44,8 +44,8 @@ class GoogleNewsConfig(BaseSourceConfig):
 class GoogleNewsSource(BaseSource):
     NAME: Optional[str] = "GoogleNews"
 
-    def lookup(self, config: GoogleNewsConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
-        source_responses: List[AnalyzerRequest] = []
+    def lookup(self, config: GoogleNewsConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+        source_responses: List[TextPayload] = []
 
         # Get data from state
         id: str = kwargs.get("id", None)
@@ -84,7 +84,7 @@ class GoogleNewsSource(BaseSource):
                 article_text = article["description"]
 
             source_responses.append(
-                AnalyzerRequest(
+                TextPayload(
                     processed_text=f"{article['title']}.\n\n {article_text}",
                     meta=vars(article) if hasattr(article, "__dict__") else article,
                     source_name=self.NAME,

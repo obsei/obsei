@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Any, List
 from pydantic import BaseModel
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 
 
 class BaseTextProcessorConfig(BaseModel):
@@ -18,10 +18,10 @@ class BaseTextPreprocessor(BaseModel):
     @abstractmethod
     def preprocess_input(
         self,
-        input_list: List[AnalyzerRequest],
+        input_list: List[TextPayload],
         config: BaseTextProcessorConfig,
         **kwargs
-    ) -> List[AnalyzerRequest]:
+    ) -> List[TextPayload]:
         pass
 
     class Config:

@@ -5,11 +5,10 @@ from pydantic import PrivateAttr
 from transformers import pipeline, Pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 
 from obsei.analyzer.base_analyzer import (
-    AnalyzerRequest,
-    AnalyzerResponse,
     BaseAnalyzer,
     BaseAnalyzerConfig,
 )
+from obsei.payload import TextPayload
 
 
 class TranslationAnalyzer(BaseAnalyzer):
@@ -34,8 +33,8 @@ class TranslationAnalyzer(BaseAnalyzer):
         self,
         texts: List[str],
         batch_size: int,
-        source_response_list: List[AnalyzerRequest],
-    ) -> Generator[Tuple[List[str], List[AnalyzerRequest]], None, None]:
+        source_response_list: List[TextPayload],
+    ) -> Generator[Tuple[List[str], List[TextPayload]], None, None]:
         for index in range(0, len(texts), batch_size):
             yield (
                 texts[index : index + batch_size],
@@ -44,10 +43,10 @@ class TranslationAnalyzer(BaseAnalyzer):
 
     def analyze_input(
         self,
-        source_response_list: List[AnalyzerRequest],
+        source_response_list: List[TextPayload],
         analyzer_config: Optional[BaseAnalyzerConfig] = None,
         **kwargs
-    ) -> List[AnalyzerResponse]:
+    ) -> List[TextPayload]:
         if analyzer_config is None:
             raise ValueError("analyzer_config can't be None")
         analyzer_output = []
@@ -68,7 +67,7 @@ class TranslationAnalyzer(BaseAnalyzer):
             ):
 
                 analyzer_output.append(
-                    AnalyzerResponse(
+                    TextPayload(
                         processed_text=source_response.processed_text,
                         meta=source_response.meta,
                         segmented_data={

@@ -9,7 +9,7 @@ from dateutil import parser
 
 from obsei.sink.base_sink import Convertor
 from obsei.sink.http_sink import HttpSink, HttpSinkConfig
-from obsei.analyzer.base_analyzer import AnalyzerResponse
+from obsei.payload import TextPayload
 from obsei.misc.utils import flatten_dict
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ IST_TZ = pytz.timezone("Asia/Kolkata")
 class PayloadConvertor(Convertor):
     def convert(
         self,
-        analyzer_response: AnalyzerResponse,
+        analyzer_response: TextPayload,
         base_payload: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Dict[str, Any]:
@@ -110,7 +110,7 @@ class DailyGetSink(HttpSink):
 
     def send_data(  # type: ignore[override]
         self,
-        analyzer_responses: List[AnalyzerResponse],
+        analyzer_responses: List[TextPayload],
         config: DailyGetSinkConfig,
         **kwargs,
     ):

@@ -5,7 +5,7 @@ from google.oauth2 import service_account # type: ignore
 from googleapiclient.discovery import build
 from pydantic import BaseSettings, Field, SecretStr
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 
 
@@ -44,8 +44,8 @@ class PlayStoreConfig(BaseSourceConfig):
 class PlayStoreSource(BaseSource):
     NAME: str = "PlayStore"
 
-    def lookup(self, config: PlayStoreConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
-        source_responses: List[AnalyzerRequest] = []
+    def lookup(self, config: PlayStoreConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+        source_responses: List[TextPayload] = []
         # Refer https://github.com/googleapis/google-api-python-client/blob/master/docs/start.md
         with build(
             serviceName="androidpublisher",
@@ -93,7 +93,7 @@ class PlayStoreSource(BaseSource):
                         # Currently only one user comment is supported
                         text = review["comments"][0]["userComment"]["text"]
                         source_responses.append(
-                            AnalyzerRequest(
+                            TextPayload(
                                 processed_text=text, meta=review, source_name=self.NAME
                             )
                         )

@@ -1,31 +1,11 @@
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, PrivateAttr
 
 from obsei.misc import gpu_util
+from obsei.payload import TextPayload
 from obsei.workflow.base_store import BaseStore
-
-
-class AnalyzerRequest(BaseModel):
-    processed_text: str
-    source_name: str = "Undefined"
-    meta: Optional[Dict[str, Any]] = None
-
-
-class AnalyzerResponse(BaseModel):
-    processed_text: str
-    segmented_data: Optional[Dict[str, Any]] = None
-    meta: Optional[Dict[str, Any]] = None
-    source_name: Optional[str] = None
-
-    def to_dict(self):
-        return {
-            "processed_text": self.processed_text,
-            "segmented_data": self.segmented_data,
-            "meta": self.meta,
-            "source_name": self.source_name,
-        }
 
 
 class BaseAnalyzerConfig(BaseModel):
@@ -55,10 +35,10 @@ class BaseAnalyzer(BaseModel):
     @abstractmethod
     def analyze_input(
         self,
-        source_response_list: List[AnalyzerRequest],
+        source_response_list: List[TextPayload],
         analyzer_config: Optional[BaseAnalyzerConfig] = None,
         **kwargs
-    ) -> List[AnalyzerResponse]:
+    ) -> List[TextPayload]:
         pass
 
     class Config:
