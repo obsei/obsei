@@ -6,7 +6,7 @@ from google_play_scraper import Sort, reviews
 
 from obsei.misc.web_search import perform_search
 from obsei.source.base_source import BaseSource, BaseSourceConfig
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.misc.utils import (
     DATETIME_STRING_PATTERN,
     DEFAULT_LOOKUP_PERIOD,
@@ -57,8 +57,8 @@ class PlayStoreScrapperSource(BaseSource):
 
     def lookup(  # type: ignore[override]
         self, config: PlayStoreScrapperConfig, **kwargs
-    ) -> List[AnalyzerRequest]:
-        source_responses: List[AnalyzerRequest] = []
+    ) -> List[TextPayload]:
+        source_responses: List[TextPayload] = []
 
         # Get data from state
         id: str = kwargs.get("id", None)
@@ -100,7 +100,7 @@ class PlayStoreScrapperSource(BaseSource):
 
                 for review in store_reviews:
                     source_responses.append(
-                        AnalyzerRequest(
+                        TextPayload(
                             processed_text=review["content"],
                             meta=review,
                             source_name=self.NAME,

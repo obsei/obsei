@@ -7,7 +7,7 @@ from elasticsearch.exceptions import RequestError
 from pydantic import Field, PrivateAttr, SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from obsei.analyzer.base_analyzer import AnalyzerResponse
+from obsei.payload import TextPayload
 
 
 class ElasticSearchSinkConfig(BaseSinkConfig):
@@ -88,7 +88,7 @@ class ElasticSearchSink(BaseSink):
 
     def send_data(  # type: ignore[override]
         self,
-        analyzer_responses: List[AnalyzerResponse],
+        analyzer_responses: List[TextPayload],
         config: ElasticSearchSinkConfig,
         **kwargs
     ):

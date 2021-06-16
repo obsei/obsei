@@ -2,7 +2,7 @@ import traceback
 
 from pydantic import Field
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.preprocessor.base_preprocessor import (
     BaseTextPreprocessor,
     BaseTextProcessorConfig,
@@ -44,10 +44,10 @@ class TextCleaner(BaseTextPreprocessor):
 
     def preprocess_input(  # type: ignore[override]
         self,
-        input_list: List[AnalyzerRequest],
+        input_list: List[TextPayload],
         config: TextCleanerConfig,
         **kwargs,
-    ) -> List[AnalyzerRequest]:
+    ) -> List[TextPayload]:
         if config.cleaning_functions is None:
             return input_list
         for input_data in input_list:

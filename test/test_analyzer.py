@@ -1,5 +1,6 @@
 from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig
-from obsei.analyzer.base_analyzer import AnalyzerRequest, BaseAnalyzerConfig
+from obsei.analyzer.base_analyzer import BaseAnalyzerConfig
+from obsei.payload import TextPayload
 
 GOOD_TEXT = """If anyone is interested... these are our hosts. I can’t recommend them enough, Abc & Pbc.
 
@@ -16,7 +17,7 @@ def test_zero_shot_analyzer(zero_shot_analyzer):
     labels = ["facility", "food", "comfortable", "positive", "negative"]
 
     source_responses = [
-        AnalyzerRequest(processed_text=text, source_name="sample") for text in TEXTS
+        TextPayload(processed_text=text, source_name="sample") for text in TEXTS
     ]
     analyzer_responses = zero_shot_analyzer.analyze_input(
         source_response_list=source_responses,
@@ -33,7 +34,7 @@ def test_zero_shot_analyzer(zero_shot_analyzer):
 
 def test_vader_analyzer(vader_analyzer):
     source_responses = [
-        AnalyzerRequest(processed_text=text, source_name="sample") for text in TEXTS
+        TextPayload(processed_text=text, source_name="sample") for text in TEXTS
     ]
     analyzer_responses = vader_analyzer.analyze_input(
         source_response_list=source_responses
@@ -49,7 +50,7 @@ def test_vader_analyzer(vader_analyzer):
 
 def test_ner_analyzer(ner_analyzer):
     source_responses = [
-        AnalyzerRequest(
+        TextPayload(
             processed_text="My name is Lalit and I live in Berlin, Germany.",
             source_name="sample",
         )

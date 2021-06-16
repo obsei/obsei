@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from praw import Reddit
 from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.misc.utils import (
     DATETIME_STRING_PATTERN,
     DEFAULT_LOOKUP_PERIOD,
@@ -68,8 +68,8 @@ class RedditConfig(BaseSourceConfig):
 class RedditSource(BaseSource):
     NAME: str = "Reddit"
 
-    def lookup(self, config: RedditConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
-        source_responses: List[AnalyzerRequest] = []
+    def lookup(self, config: RedditConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+        source_responses: List[TextPayload] = []
 
         # Get data from state
         id: str = kwargs.get("id", None)
@@ -136,7 +136,7 @@ class RedditSource(BaseSource):
                 text = "".join(text_from_html(comment_data["body_html"]))
 
                 source_responses.append(
-                    AnalyzerRequest(
+                    TextPayload(
                         processed_text=text, meta=comment_data, source_name=self.NAME
                     )
                 )

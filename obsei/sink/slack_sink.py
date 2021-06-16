@@ -6,7 +6,7 @@ from pydantic import Field, PrivateAttr, SecretStr
 from slack_sdk import WebClient
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig
-from obsei.analyzer.base_analyzer import AnalyzerResponse
+from obsei.payload import TextPayload
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class SlackSink(BaseSink):
 
     def send_data(  # type: ignore[override]
         self,
-        analyzer_responses: List[AnalyzerResponse],
+        analyzer_responses: List[TextPayload],
         config: SlackSinkConfig,
         **kwargs,
     ):

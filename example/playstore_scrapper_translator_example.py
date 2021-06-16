@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 import pytz
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.analyzer.classification_analyzer import (
     ClassificationAnalyzerConfig,
     ZeroShotClassificationAnalyzer,
@@ -41,14 +41,14 @@ def translate_text(text_list):
         model_name_or_path="Helsinki-NLP/opus-mt-hi-en", device="auto"
     )
     source_responses = [
-        AnalyzerRequest(processed_text=text.processed_text, source_name="sample")
+        TextPayload(processed_text=text.processed_text, source_name="sample")
         for text in text_list
     ]
     analyzer_responses = translate_analyzer.analyze_input(
         source_response_list=source_responses
     )
     return [
-        AnalyzerRequest(
+        TextPayload(
             processed_text=response.segmented_data["translated_text"],
             source_name="translator",
         )

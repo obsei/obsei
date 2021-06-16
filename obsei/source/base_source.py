@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic.main import BaseModel
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.workflow.base_store import BaseStore
 
 
@@ -18,7 +18,7 @@ class BaseSource(BaseModel):
     store: Optional[BaseStore] = None
 
     @abstractmethod
-    def lookup(self, config: BaseSourceConfig, **kwargs) -> List[AnalyzerRequest]:
+    def lookup(self, config: BaseSourceConfig, **kwargs) -> List[TextPayload]:
         pass
 
     class Config:

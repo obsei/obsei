@@ -6,7 +6,7 @@ from typing import List, Optional
 import mmh3
 from trafilatura import extract, feeds, fetch_url, sitemaps
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 
 logger = logging.getLogger(__name__)
@@ -88,8 +88,8 @@ class TrafilaturaCrawlerSource(BaseSource):
 
     def lookup(  # type: ignore[override]
         self, config: TrafilaturaCrawlerConfig, **kwargs
-    ) -> List[AnalyzerRequest]:
-        source_responses: List[AnalyzerRequest] = []
+    ) -> List[TextPayload]:
+        source_responses: List[TextPayload] = []
 
         final_urls = []
         if config.is_sitemap or config.is_feed:
@@ -107,7 +107,7 @@ class TrafilaturaCrawlerSource(BaseSource):
                 "" if "comments" not in extracted_data else extracted_data["comments"]
             )
             source_responses.append(
-                AnalyzerRequest(
+                TextPayload(
                     processed_text=f"{extracted_data['text']}. {comments}",
                     meta=extracted_data,
                     source_name=self.NAME,

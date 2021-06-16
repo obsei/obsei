@@ -7,7 +7,7 @@ from pydantic import PrivateAttr
 from reddit_rss_reader.reader import RedditContent, RedditRSSReader
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.misc.utils import (
     DATETIME_STRING_PATTERN,
     DEFAULT_LOOKUP_PERIOD,
@@ -45,8 +45,8 @@ class RedditScrapperConfig(BaseSourceConfig):
 class RedditScrapperSource(BaseSource):
     NAME: Optional[str] = "RedditScrapper"
 
-    def lookup(self, config: RedditScrapperConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
-        source_responses: List[AnalyzerRequest] = []
+    def lookup(self, config: RedditScrapperConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+        source_responses: List[TextPayload] = []
 
         # Get data from state
         id: str = kwargs.get("id", None)
@@ -87,7 +87,7 @@ class RedditScrapperSource(BaseSource):
 
         for reddit in reddit_data:
             source_responses.append(
-                AnalyzerRequest(
+                TextPayload(
                     processed_text=f"{reddit.title}. {reddit.extracted_text}",
                     meta=reddit.__dict__,
                     source_name=self.NAME,

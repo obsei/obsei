@@ -1,4 +1,5 @@
-from obsei.analyzer.base_analyzer import AnalyzerRequest, BaseAnalyzerConfig
+from obsei.analyzer.base_analyzer import BaseAnalyzerConfig
+from obsei.payload import TextPayload
 
 GOOD_TEXT = """मुझे सब चीजे बहुत अच्छी लगी ।"""
 
@@ -15,7 +16,7 @@ TEXTS = [GOOD_TEXT, BAD_TEXT, MIXED_TEXT, EMOTICONS_TEXT, HINGLISH_TEXT]
 
 def test_translate_analyzer(translate_analyzer):
     source_responses = [
-        AnalyzerRequest(processed_text=text, source_name="sample") for text in TEXTS
+        TextPayload(processed_text=text, source_name="sample") for text in TEXTS
     ]
     analyzer_responses = translate_analyzer.analyze_input(
         source_response_list=source_responses,

@@ -8,7 +8,7 @@ from zenpy import Zenpy
 from zenpy.lib.api_objects import Ticket
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from obsei.analyzer.base_analyzer import AnalyzerResponse
+from obsei.payload import TextPayload
 from obsei.misc.utils import obj_to_markdown
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class ZendeskPayloadConvertor(Convertor):
     def convert(
         self,
-        analyzer_response: AnalyzerResponse,
+        analyzer_response: TextPayload,
         base_payload: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> dict:
@@ -100,7 +100,7 @@ class ZendeskSink(BaseSink):
 
     def send_data(  # type: ignore[override]
         self,
-        analyzer_responses: List[AnalyzerResponse],
+        analyzer_responses: List[TextPayload],
         config: ZendeskSinkConfig,
         **kwargs,
     ):

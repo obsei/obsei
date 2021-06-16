@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 import pytz
 from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
 
-from obsei.analyzer.base_analyzer import AnalyzerRequest
+from obsei.payload import TextPayload
 from obsei.misc.utils import (
     DATETIME_STRING_PATTERN,
     DEFAULT_LOOKUP_PERIOD,
@@ -74,8 +74,8 @@ class EmailSource(BaseSource):
         # clean text for creating a folder
         return "".join(c if c.isalnum() else "_" for c in text)
 
-    def lookup(self, config: EmailConfig, **kwargs) -> List[AnalyzerRequest]:  # type: ignore[override]
-        source_responses: List[AnalyzerRequest] = []
+    def lookup(self, config: EmailConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+        source_responses: List[TextPayload] = []
 
         # Get data from state
         id: str = kwargs.get("id", None)
@@ -247,7 +247,7 @@ class EmailSource(BaseSource):
                             last_index = email_meta["message_id"]
 
                         source_responses.append(
-                            AnalyzerRequest(
+                            TextPayload(
                                 processed_text="\n".join(
                                     [email_meta.get("subject", ""), email_content]
                                 ),

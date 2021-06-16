@@ -5,11 +5,10 @@ from pydantic import PrivateAttr
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from obsei.analyzer.base_analyzer import (
-    AnalyzerRequest,
-    AnalyzerResponse,
     BaseAnalyzer,
     BaseAnalyzerConfig,
 )
+from obsei.payload import TextPayload
 from obsei.analyzer.classification_analyzer import (
     ClassificationAnalyzerConfig,
     ZeroShotClassificationAnalyzer,
@@ -32,11 +31,11 @@ class VaderSentimentAnalyzer(BaseAnalyzer):
 
     def analyze_input(
         self,
-        source_response_list: List[AnalyzerRequest],
+        source_response_list: List[TextPayload],
         analyzer_config: BaseAnalyzerConfig = None,
         **kwargs
-    ) -> List[AnalyzerResponse]:
-        analyzer_output: List[AnalyzerResponse] = []
+    ) -> List[TextPayload]:
+        analyzer_output: List[TextPayload] = []
 
         for source_response in source_response_list:
             classification_map = {}
@@ -51,7 +50,7 @@ class VaderSentimentAnalyzer(BaseAnalyzer):
                 classification_map["negative"] = 1.0 - classification_map["positive"]
 
             analyzer_output.append(
-                AnalyzerResponse(
+                TextPayload(
                     processed_text=source_response.processed_text,
                     meta=source_response.meta,
                     segmented_data=classification_map,
@@ -71,10 +70,10 @@ class TransformersSentimentAnalyzerConfig(ClassificationAnalyzerConfig):
 class TransformersSentimentAnalyzer(ZeroShotClassificationAnalyzer):
     def analyze_input(  # type: ignore[override]
         self,
-        source_response_list: List[AnalyzerRequest],
+        source_response_list: List[TextPayload],
         analyzer_config: Optional[TransformersSentimentAnalyzerConfig] = None,
         **kwargs
-    ) -> List[AnalyzerResponse]:
+    ) -> List[TextPayload]:
         return super().analyze_input(
             source_response_list=source_response_list,
             analyzer_config=analyzer_config,

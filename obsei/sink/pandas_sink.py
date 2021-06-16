@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional
 
 from pandas import DataFrame
 
-from obsei.analyzer.base_analyzer import AnalyzerResponse
+from obsei.payload import TextPayload
 from obsei.misc.utils import flatten_dict
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 
@@ -10,7 +10,7 @@ from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 class PandasConvertor(Convertor):
     def convert(
         self,
-        analyzer_response: AnalyzerResponse,
+        analyzer_response: TextPayload,
         base_payload: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Dict[str, Any]:
@@ -40,7 +40,7 @@ class PandasSink(BaseSink):
 
     def send_data(  # type: ignore[override]
         self,
-        analyzer_responses: List[AnalyzerResponse],
+        analyzer_responses: List[TextPayload],
         config: PandasSinkConfig,
         **kwargs,
     ):

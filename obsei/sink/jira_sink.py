@@ -6,7 +6,7 @@ from atlassian import Jira
 from pydantic import PrivateAttr, SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from obsei.analyzer.base_analyzer import AnalyzerResponse
+from obsei.payload import TextPayload
 from obsei.misc.utils import obj_to_markdown
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class JiraPayloadConvertor(Convertor):
     def convert(
         self,
-        analyzer_response: AnalyzerResponse,
+        analyzer_response: TextPayload,
         base_payload: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> dict:
@@ -72,7 +72,7 @@ class JiraSink(BaseSink):
 
     def send_data(  # type: ignore[override]
         self,
-        analyzer_responses: List[AnalyzerResponse],
+        analyzer_responses: List[TextPayload],
         config: JiraSinkConfig,
         **kwargs,
     ):

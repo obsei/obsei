@@ -4,14 +4,14 @@ from typing import Any, Dict, List, Optional
 from pydantic import Field
 from pydantic.main import BaseModel
 
-from obsei.analyzer.base_analyzer import AnalyzerResponse
+from obsei.payload import TextPayload
 from obsei.workflow.base_store import BaseStore
 
 
 class Convertor(BaseModel):
     def convert(
         self,
-        analyzer_response: AnalyzerResponse,
+        analyzer_response: TextPayload,
         base_payload: Optional[Dict[str, Any]] = None,
         **kwargs
     ) -> dict:
@@ -44,7 +44,7 @@ class BaseSink(BaseModel):
     @abstractmethod
     def send_data(
         self,
-        analyzer_responses: List[AnalyzerResponse],
+        analyzer_responses: List[TextPayload],
         config: BaseSinkConfig,
         **kwargs
     ):
