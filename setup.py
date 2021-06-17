@@ -1,4 +1,6 @@
+import os
 import pathlib
+import re
 from io import open
 from sys import platform
 
@@ -40,6 +42,19 @@ def get_dependency_links(filename):
     ]
 
 
+def version_from_file(*filepath):
+    infile = os.path.join(*filepath)
+    with open(infile) as fp:
+        version_match = re.search(
+            r"^__version__\s*=\s*['\"]([^'\"]*)['\"]", fp.read(), re.M
+        )
+        if version_match:
+            return version_match.group(1)
+        raise RuntimeError("Unable to find version string in {}.".format(infile))
+
+
+here = os.path.abspath(os.path.dirname(__file__))
+
 dependency_links = get_dependency_links("requirements.txt")
 parsed_requirements = parse_requirements("requirements.txt")
 
@@ -52,7 +67,7 @@ README = (HERE / "README.md").read_text(encoding="utf8")
 
 setup(
     name="obsei",
-    version="0.0.8",
+    version=version_from_file(here, "obsei", "_version.py"),
     author="Lalit Pagaria",
     author_email="pagaria.lalit@gmail.com",
     description="Obsei is an automation tool for text analysis need",
