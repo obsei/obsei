@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class FacebookCredentials(BaseSettings):
     app_id: Optional[SecretStr] = Field(None, env="facebook_app_id")
     app_secret: Optional[SecretStr] = Field(None, env="facebook_app_secret")
-    long_term_token: Optional[SecretStr] = Field(None, env="long_term_token")
+    long_term_token: Optional[SecretStr] = Field(None, env="facebook_long_term_token")
     api: Optional[Api] = None
 
     def __init__(self, **data: Any):

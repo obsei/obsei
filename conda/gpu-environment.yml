@@ -23,6 +23,7 @@ dependencies:
 - vadersentiment
 - transformers
 - pandas
+- python-facebook-api
 - pip
 - pip:
   - presidio-analyzer

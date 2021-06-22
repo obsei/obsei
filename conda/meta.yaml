@@ -35,6 +35,7 @@ requirements:
     - transformers
     - pandas
     - pip
+    - python-facebook-api
 
   run:
     - python
@@ -56,6 +57,7 @@ requirements:
     - vadersentiment
     - transformers
     - pandas
+    - python-facebook-api
 
 test:
   imports:
