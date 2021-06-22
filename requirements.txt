@@ -194,6 +194,7 @@ python-dateutil==2.8.1
     #   pandas
     #   searchtweets-v2
     #   zenpy
+python-facebook-api==0.9.2
 pytz==2021.1
     # via
     #   -r requirements.in
@@ -342,3 +343,8 @@ zipp==3.4.1
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
+
+pytest~=6.2.2
+obsei~=0.0.6
+torch~=1.8.1+rocm4.0.1
+setuptools~=44.0.0
