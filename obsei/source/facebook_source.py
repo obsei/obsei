@@ -39,50 +39,50 @@ class FacebookCredentials(BaseSettings):
 class FacebookSourceConfig(BaseSourceConfig):
     TYPE: str = "Facebook"
     credential: FacebookCredentials = Field(FacebookCredentials())
-    page_id: str = None
-    since_time: str = None,
-    until_time: str = None,
-    count: int = 10,
-    include_title_description: bool = False,
+    page_id: Optional[str] = None
+    since_time: Optional[str] = None
+    until_time: Optional[str] = None
+    count: int = 10
+    include_title_description: bool = False
     include_comments: bool = False
 
 
 class FacebookSource(BaseSource):
     NAME: str = "Facebook"
 
-    def lookup(self, config: FacebookSourceConfig, **kwargs) -> List[TextPayload]:
-        text_payloads: List[TextPayload] = []
+    def lookup(self, config: FacebookSourceConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+        source_responses: List[TextPayload] = []
 
         if config.page_id is None:
             raise ValueError("page_id is mandatory")
 
         api = config.credential.get_facebook_api()
         token_info = api.get_token_info()
-        log_object("Token: ", token_info)
+        self.log_object("Token: ", token_info)
 
         posts = api.get_page_posts(page_id=config.page_id, return_json=True, count=10,
                                    since_time=config.since_time, until_time=config.until_time)
-        log_object("Posts: ", str(posts))
+        self.log_object("Posts: ", str(posts))
 
         if config.include_comments:
             for post in posts:
                 comments = api.get_comments_by_object(object_id=post['id'], return_json=True, filter_type='stream')
-                log_object("Comments: ", str(comments))
-                payloads = [TextPayload(processed_text=comment['message'], meta=comment, source_name=self.NAME)
-                            for comment in comments[0]]
-                text_payloads.extend(payloads)
+                self.log_object("Comments: ", str(comments))
+                text_payloads = [TextPayload(processed_text=comment['message'], meta=comment, source_name=self.NAME)
+                                 for comment in comments[0]]
+                source_responses.extend(text_payloads)
 
         if config.include_title_description:
-            payloads = [TextPayload(
+            text_payloads = [TextPayload(
                 processed_text=f"{data['title']}. {data['description']}",
                 meta=data,
                 source_name=self.NAME,
             ) for post in posts for data in post['attachments']['data']]
 
-            text_payloads.extend(payloads)
+            source_responses.extend(text_payloads)
 
-        return text_payloads
+        return source_responses
 
-
-def log_object(message, result):
-    logger.debug(message + str(obj_to_json(result)))
+    @staticmethod
+    def log_object(message, result):
+        logger.debug(message + str(obj_to_json(result)))
