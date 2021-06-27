@@ -35,7 +35,9 @@ class NERAnalyzer(BaseAnalyzer):
                 self.tokenizer_name, use_fast=True
             )
         else:
-            tokenizer = None
+            tokenizer = tokenizer = AutoTokenizer.from_pretrained(
+                self.model_name_or_path, use_fast=True
+            )
 
         self._pipeline = pipeline(
             "ner",
@@ -78,8 +80,9 @@ class NERAnalyzer(BaseAnalyzer):
         analyzer_config: Optional[BaseAnalyzerConfig] = None,
         **kwargs
     ) -> List[TextPayload]:
-        if analyzer_config is None:
-            raise ValueError("analyzer_config can't be None")
+        # if analyzer_config is None:
+        #     raise ValueError("analyzer_config can't be None")
+        ner_batch_size = 1
 
         analyzer_output: List[TextPayload] = []
         texts = [
@@ -90,7 +93,7 @@ class NERAnalyzer(BaseAnalyzer):
         ]
 
         for batch_texts, batch_source_response in self._batchify(
-            texts, analyzer_config.batch_size, source_response_list
+            texts, ner_batch_size, source_response_list
         ):
             batch_ner_predictions = self._classify_text_from_model(batch_texts)
             for ner_prediction, source_response in zip(
