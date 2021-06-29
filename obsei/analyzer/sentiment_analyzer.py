@@ -33,7 +33,7 @@ class VaderSentimentAnalyzer(BaseAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: BaseAnalyzerConfig = None,
-        **kwargs
+        **kwargs,
     ) -> List[TextPayload]:
         analyzer_output: List[TextPayload] = []
 
@@ -72,11 +72,11 @@ class TransformersSentimentAnalyzer(ZeroShotClassificationAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[TransformersSentimentAnalyzerConfig] = None,
-        **kwargs
+        **kwargs,
     ) -> List[TextPayload]:
         return super().analyze_input(
             source_response_list=source_response_list,
             analyzer_config=analyzer_config,
             add_positive_negative_labels=True,
-            **kwargs
+            **kwargs,
         )

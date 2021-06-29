@@ -25,15 +25,15 @@ class NERAnalyzer(BaseAnalyzer):
     model_name_or_path: str
     tokenizer_name: Optional[str] = None
     grouped_entities: Optional[bool] = True
-    ner_config : BaseAnalyzerConfig = BaseAnalyzerConfig(batch_size=1)
 
     def __init__(self, **data: Any):
         super().__init__(**data)
 
         model = AutoModelForTokenClassification.from_pretrained(self.model_name_or_path)
-        tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_name if self.tokenizer_name else self.model_name_or_path
-                                                  , use_fast=True)
-
+        tokenizer = AutoTokenizer.from_pretrained(
+            self.tokenizer_name if self.tokenizer_name else self.model_name_or_path,
+            use_fast=True,
+        )
 
         self._pipeline = pipeline(
             "ner",
@@ -73,12 +73,8 @@ class NERAnalyzer(BaseAnalyzer):
     def analyze_input(
         self,
         source_response_list: List[TextPayload],
-        analyzer_config: Optional[BaseAnalyzerConfig] = None,
-        **kwargs
+        **kwargs,
     ) -> List[TextPayload]:
-        if analyzer_config is not None:
-            self.ner_config = analyzer_config
-
         analyzer_output: List[TextPayload] = []
         texts = [
             source_response.processed_text[: self._max_length]
@@ -88,7 +84,7 @@ class NERAnalyzer(BaseAnalyzer):
         ]
 
         for batch_texts, batch_source_response in self._batchify(
-            texts, self.ner_config.batch_size, source_response_list
+            texts, self.batch_size, source_response_list
         ):
             batch_ner_predictions = self._classify_text_from_model(batch_texts)
             for ner_prediction, source_response in zip(

@@ -45,7 +45,7 @@ class TranslationAnalyzer(BaseAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[BaseAnalyzerConfig] = None,
-        **kwargs
+        **kwargs,
     ) -> List[TextPayload]:
         if analyzer_config is None:
             raise ValueError("analyzer_config can't be None")

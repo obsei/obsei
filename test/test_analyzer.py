@@ -57,7 +57,6 @@ def test_ner_analyzer(ner_analyzer):
     ]
     analyzer_responses = ner_analyzer.analyze_input(
         source_response_list=source_responses,
-        analyzer_config=BaseAnalyzerConfig(batch_size=1),
     )
     assert len(analyzer_responses) == 1
 
