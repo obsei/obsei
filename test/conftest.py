@@ -34,7 +34,9 @@ def ner_analyzer():
 
 @pytest.fixture(scope="session")
 def translate_analyzer():
-    return TranslationAnalyzer(model_name_or_path="Helsinki-NLP/opus-mt-hi-en")
+    return TranslationAnalyzer(
+        model_name_or_path="Helsinki-NLP/opus-mt-hi-en", batch_size=1
+    )
 
 
 @pytest.fixture(scope="session")

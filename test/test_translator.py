@@ -20,7 +20,6 @@ def test_translate_analyzer(translate_analyzer):
     ]
     analyzer_responses = translate_analyzer.analyze_input(
         source_response_list=source_responses,
-        analyzer_config=BaseAnalyzerConfig(batch_size=1),
     )
     assert len(analyzer_responses) == len(TEXTS)
 

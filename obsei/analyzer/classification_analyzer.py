@@ -65,7 +65,7 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[ClassificationAnalyzerConfig] = None,
-        **kwargs
+        **kwargs,
     ) -> List[TextPayload]:
         if analyzer_config is None:
             raise ValueError("analyzer_config can't be None")
@@ -88,7 +88,7 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
                 labels.append("negative")
 
         for batch_texts, batch_source_response in self._batchify(
-            texts, analyzer_config.batch_size, source_response_list
+            texts, self.batch_size, source_response_list
         ):
             batch_predictions = self._classify_text_from_model(
                 batch_texts,
