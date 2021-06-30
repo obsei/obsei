@@ -47,8 +47,7 @@ class TranslationAnalyzer(BaseAnalyzer):
         analyzer_config: Optional[BaseAnalyzerConfig] = None,
         **kwargs,
     ) -> List[TextPayload]:
-        if analyzer_config is None:
-            raise ValueError("analyzer_config can't be None")
+
         analyzer_output = []
         texts = [
             source_response.processed_text[: self._max_length]
@@ -58,7 +57,7 @@ class TranslationAnalyzer(BaseAnalyzer):
         ]
 
         for batch_texts, batch_source_response in self._batchify(
-            texts, analyzer_config.batch_size, source_response_list
+            texts, self.batch_size, source_response_list
         ):
             batch_predictions = self._pipeline(batch_texts)
 

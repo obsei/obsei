@@ -51,7 +51,7 @@ def test_vader_analyzer(vader_analyzer):
 def test_ner_analyzer(ner_analyzer):
     source_responses = [
         TextPayload(
-            processed_text="My name is Lalit and I live in Berlin, Germany.",
+            processed_text="My name is Sam and I live in Berlin, Germany.",
             source_name="sample",
         )
     ]
@@ -63,7 +63,7 @@ def test_ner_analyzer(ner_analyzer):
     entities = analyzer_responses[0].segmented_data["data"]
     matched_count = 0
     for entity in entities:
-        if entity["word"] == "Lalit" and entity["entity_group"] == "PER":
+        if entity["word"] == "Sam" and entity["entity_group"] == "PER":
             matched_count = matched_count + 1
         elif entity["word"] == "Berlin" and entity["entity_group"] == "LOC":
             matched_count = matched_count + 1
