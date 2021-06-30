@@ -35,7 +35,6 @@ requirements:
     - transformers
     - pandas
     - pip
-    - python-facebook-api
 
   run:
     - python
@@ -57,7 +56,6 @@ requirements:
     - vadersentiment
     - transformers
     - pandas
-    - python-facebook-api
 
 test:
   imports:
@@ -74,8 +72,6 @@ about:
   description: >
     {{ data[ 'description' ] }}
 
-
-    In order to use PIIAnalyzer, PlayStoreScrapperSource, TwitterSource, GoogleNewsSource and ZendeskSink
     You need to install following packages via pip -
 
 
@@ -87,6 +83,7 @@ about:
         pip install tweet-preprocessor
         pip install gnews
         pip install trafilatura
+        pip install python-facebook-api
 
     Visit {{ data[ 'url' ] }} for feedback
   dev_url: "{{ data[ 'url' ] }}"

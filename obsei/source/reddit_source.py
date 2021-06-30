@@ -37,13 +37,10 @@ class RedditConfig(BaseSourceConfig):
     lookup_period: Optional[str] = None
     include_post_meta: Optional[bool] = True
     post_meta_field: str = "post_meta"
-    cred_info: Optional[RedditCredInfo] = None
+    cred_info: RedditCredInfo = Field(RedditCredInfo())
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-
-        if self.cred_info is None:
-            self.cred_info = RedditCredInfo()
 
         self._reddit_client = Reddit(
             client_id=self.cred_info.client_id.get_secret_value(),
@@ -144,7 +141,7 @@ class RedditSource(BaseSource):
             post_stat["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
             post_stat["since_comment_id"] = last_index
 
-        if update_state and self.store:
+        if update_state and self.store is not None:
             self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses

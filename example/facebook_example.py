@@ -6,7 +6,9 @@ from obsei.source.facebook_source import FacebookSource, FacebookSourceConfig
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-source_config = FacebookSourceConfig(page_id='110844591144719', include_comments=True, include_title_description=True)
+source_config = FacebookSourceConfig(
+    page_id="110844591144719"
+)
 source = FacebookSource()
 source_response_list = source.lookup(source_config)
 
