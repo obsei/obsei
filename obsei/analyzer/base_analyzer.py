@@ -10,7 +10,6 @@ from obsei.workflow.base_store import BaseStore
 
 class BaseAnalyzerConfig(BaseModel):
     TYPE: str = "Base"
-    batch_size: int = 64
 
     class Config:
         arbitrary_types_allowed = True
