@@ -46,9 +46,12 @@
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
  - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
 
-Current flow -
+![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei_flow.gif)
+
+<details><summary>Current flow</summary>
 
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png)
+</details>
 
 <details><summary>Future concept (Coming Soon! 🙂)</summary>
 
