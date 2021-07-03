@@ -59,6 +59,23 @@ source:
         _target_: obsei.source.twitter_source.TwitterCredentials
         consumer_key: ''
         consumer_secret: ''
+  Facebook:
+    _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/facebook.png"
+    _help_:
+      - '`page_id` is id of your facebook page'
+      - ''
+      - 'Need facebook app_id, app_secret and long_term_token. Get it from https://developers.facebook.com/apps/'
+    source:
+      _target_: obsei.source.facebook_source.FacebookSource
+    config:
+      _target_: obsei.source.facebook_source.FacebookSourceConfig
+      page_id: "110844591144719"
+      lookup_period: "1h"
+      cred_info:
+        _target_: obsei.source.facebook_source.FacebookCredentials
+        app_id: ''
+        app_secret: ''
+        long_term_token: ''
   Email:
     _icon_: "https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/gmail.png"
     _help_:
