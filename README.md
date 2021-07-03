@@ -1,14 +1,14 @@
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-flyer.png" />
+    <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/obsei-flyer.png" />
 </p>
 
 <p align="center">
-    <a href="https://github.com/lalitpagaria/obsei/actions">
-        <img alt="Test" src="https://github.com/lalitpagaria/obsei/workflows/CI/badge.svg?branch=master">
+    <a href="https://github.com/obsei/obsei/actions">
+        <img alt="Test" src="https://github.com/obsei/obsei/workflows/CI/badge.svg?branch=master">
     </a>
-    <a href="https://github.com/lalitpagaria/obsei/blob/master/LICENSE">
-        <img alt="License" src="https://img.shields.io/github/license/lalitpagaria/obsei?color=blue">
+    <a href="https://github.com/obsei/obsei/blob/master/LICENSE">
+        <img alt="License" src="https://img.shields.io/github/license/obsei/obsei?color=blue">
     </a>
     <a href="https://pypi.org/project/obsei">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
@@ -28,14 +28,14 @@
     <a href="https://pepy.tech/project/obsei">
         <img src="https://pepy.tech/badge/obsei/month" alt="Downloads" />
     </a>
-    <a href="https://github.com/lalitpagaria/obsei/commits/master">
-        <img alt="Last commit" src="https://img.shields.io/github/last-commit/lalitpagaria/obsei">
+    <a href="https://github.com/obsei/obsei/commits/master">
+        <img alt="Last commit" src="https://img.shields.io/github/last-commit/obsei/obsei">
     </a>
     <a href="https://www.youtube.com/channel/UCqdvgro1BzU13tkAfX3jCJA">
         <img alt="YouTube Channel Subscribers" src="https://img.shields.io/youtube/channel/subscribers/UCqdvgro1BzU13tkAfX3jCJA?style=social">
     </a>
     <a href="https://join.slack.com/t/obsei-community/shared_invite/zt-r0wnuz02-FAkAmhTAUoc6pD4SLB9Ikg">
-        <img src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/Slack_join.svg" height="30">
+        <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/Slack_join.svg" height="30">
     </a>
 
 </p>
@@ -46,16 +46,16 @@
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
  - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
 
-![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei_flow.gif)
+![](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei_flow.gif)
 
 <details><summary>Current flow</summary>
 
-![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png)
+![](https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-flow-diagram.png)
 </details>
 
 <details><summary>Future concept (Coming Soon! 🙂)</summary>
 
-![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
+![](https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-future-concept.png)
 </details>
 
 ## Use cases
@@ -69,11 +69,11 @@
 ## Demo
 We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
 
-![Screenshot](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-ui-demo.png)
+![Screenshot](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei-ui-demo.png)
 
 **Watch:** [Obsei UI Demo](https://www.youtube.com/watch?v=GTF-Hy96gvY)
 
-To test remotely, just open: [Obsei Demo Link](https://share.streamlit.io/lalitpagaria/obsei/sample-ui/ui.py)
+To test remotely, just open: [Obsei Demo Link](https://share.streamlit.io/obsei/obsei/sample-ui/ui.py)
 
 To test locally, just run
 ```
@@ -144,9 +144,9 @@ pip install python-facebook-api
 
 ## How to use
 
-To try in Colab Notebook click: [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lalitpagaria/obsei/blob/master/example/Obsei_playstore_classification_logger_example.ipynb)
+To try in Colab Notebook click: [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obsei/obsei/blob/master/example/Obsei_playstore_classification_logger_example.ipynb)
 
-To try in Binder click: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lalitpagaria/obsei/HEAD?filepath=example%2FObsei_playstore_classification_logger_example.ipynb)
+To try in Binder click: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=example%2FObsei_playstore_classification_logger_example.ipynb)
 
 Expend following steps and create your workflow -
 
@@ -171,7 +171,7 @@ pip install obsei
 ```
 Install from master branch (if you want to try the latest features):
 ```shell
-git clone https://github.com/lalitpagaria/obsei.git
+git clone https://github.com/obsei/obsei.git
 cd obsei
 pip install --editable .
 ```
@@ -182,13 +182,13 @@ conda install -c lalitpagaria obsei
 ```
 Install from master branch (if you want to try the latest features):
 ```shell
-git clone https://github.com/lalitpagaria/obsei.git
+git clone https://github.com/obsei/obsei.git
 cd obsei
 conda env create -f conda/environment.yml
 ```
 For GPU based local environment -
 ```shell
-git clone https://github.com/lalitpagaria/obsei.git
+git clone https://github.com/obsei/obsei.git
 cd obsei
 conda env create -f conda/gpu-environment.yml
 ```
@@ -197,7 +197,7 @@ conda env create -f conda/gpu-environment.yml
 <details><summary><b>Step 3: Configure Source/Observer</b></summary>
 
 <table ><tbody ><tr></tr><tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/twitter.png" width="20" height="20"><b>Twitter</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/twitter.png" width="20" height="20"><b>Twitter</b></summary><hr>
 
  ```python
 from obsei.source.twitter_source import TwitterCredentials, TwitterSource, TwitterSourceConfig
@@ -220,7 +220,7 @@ source = TwitterSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/facebook.png" width="20" height="20"><b>Facebook</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/facebook.png" width="20" height="20"><b>Facebook</b></summary><hr>
 
  ```python
 from obsei.source.facebook_source import FacebookCredentials, FacebookSource, FacebookSourceConfig
@@ -244,7 +244,7 @@ source = FacebookSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/gmail.png" width="20" height="20"><b>Email</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/gmail.png" width="20" height="20"><b>Email</b></summary><hr>
 
  ```python
 from obsei.source.email_source import EmailConfig, EmailCredInfo, EmailSource
@@ -273,7 +273,7 @@ source = EmailSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/appstore.png" width="20" height="20"><b>AppStore Reviews Scrapper</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/appstore.png" width="20" height="20"><b>AppStore Reviews Scrapper</b></summary><hr>
 
  ```python
 from obsei.source.appstore_scrapper import AppStoreScrapperConfig, AppStoreScrapperSource
@@ -297,7 +297,7 @@ source = AppStoreScrapperSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/playstore.png" width="20" height="20"><b>Play Store Reviews Scrapper</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/playstore.png" width="20" height="20"><b>Play Store Reviews Scrapper</b></summary><hr>
 
  ```python
 from obsei.source.playstore_scrapper import PlayStoreScrapperConfig, PlayStoreScrapperSource
@@ -320,7 +320,7 @@ source = PlayStoreScrapperSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/reddit.png" width="20" height="20"><b>Reddit</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/reddit.png" width="20" height="20"><b>Reddit</b></summary><hr>
 
  ```python
 from obsei.source.reddit_source import RedditConfig, RedditSource, RedditCredInfo
@@ -347,7 +347,7 @@ source = RedditSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/reddit.png" width="20" height="20"><b>Reddit Scrapper</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/reddit.png" width="20" height="20"><b>Reddit Scrapper</b></summary><hr>
 
 <i>Note: Reddit heavily rate limit scrappers, hence use it to fetch small data during long period</i>
 
@@ -369,7 +369,7 @@ source = RedditScrapperSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/googlenews.png" width="20" height="20"><b>Google News</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/googlenews.png" width="20" height="20"><b>Google News</b></summary><hr>
 
  ```python
 from obsei.source.google_news_source import GoogleNewsConfig, GoogleNewsSource
@@ -390,14 +390,14 @@ source = GoogleNewsSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/webcrawler.png" width="20" height="20"><b>Web Crawler</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/webcrawler.png" width="20" height="20"><b>Web Crawler</b></summary><hr>
 
  ```python
 from obsei.source.website_crawler_source import TrafilaturaCrawlerConfig, TrafilaturaCrawlerSource
 
 # initialize website crawler source config
 source_config = TrafilaturaCrawlerConfig(
-    urls=['https://lalitpagaria.github.io/obsei/']
+    urls=['https://obsei.github.io/obsei/']
 )
 
 # initialize website text retriever
@@ -424,7 +424,7 @@ List of possible values of <b>device</b> parameter (default value <i>auto</i>):
 </p>
 
 <table ><tbody ><tr></tr><tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/classification.png" width="20" height="20"><b>Text Classification</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/classification.png" width="20" height="20"><b>Text Classification</b></summary><hr>
 
 Text classification, classify text into user provided categories.
  ```python
@@ -447,7 +447,7 @@ text_analyzer = ZeroShotClassificationAnalyzer(
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/sentiment.png" width="20" height="20"><b>Sentiment Analyzer</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/sentiment.png" width="20" height="20"><b>Sentiment Analyzer</b></summary><hr>
 
 Sentiment Analyzer, detect the sentiment of the text. Text classification can also perform sentiment analysis but if you don't want to use heavy-duty NLP model then use less resource hungry dictionary based Vader Sentiment detector.
  ```python
@@ -463,7 +463,7 @@ text_analyzer = VaderSentimentAnalyzer()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/ner.png" width="20" height="20"><b>NER Analyzer</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/ner.png" width="20" height="20"><b>NER Analyzer</b></summary><hr>
 
 NER (Named-Entity Recognition) Analyzer, extract information and classify named entities mentioned in text into pre-defined categories such as person names, organizations, locations, medical codes, time expressions, quantities, monetary values, percentages, etc
  ```python
@@ -483,7 +483,7 @@ text_analyzer = NERAnalyzer(
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/translator.png" width="20" height="20"><b>Translator</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/translator.png" width="20" height="20"><b>Translator</b></summary><hr>
 
  ```python
 from obsei.analyzer.translation_analyzer import TranslationAnalyzer
@@ -502,7 +502,7 @@ analyzer = TranslationAnalyzer(
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/pii.png" width="20" height="20"><b>PII Anonymizer</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/pii.png" width="20" height="20"><b>PII Anonymizer</b></summary><hr>
 
  ```python
 from obsei.analyzer.pii_analyzer import PresidioEngineConfig, PresidioModelConfig, \ 
@@ -532,7 +532,7 @@ analyzer = PresidioPIIAnalyzer(
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/dummy.png" width="20" height="20"><b>Dummy Analyzer</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/dummy.png" width="20" height="20"><b>Dummy Analyzer</b></summary><hr>
 
 Dummy Analyzer, do nothing it simply used for transforming input (TextPayload) to output (TextPayload) also adding user supplied dummy data.
  ```python
@@ -555,7 +555,7 @@ analyzer = DummyAnalyzer()
 <details><summary><b>Step 5: Configure Sink/Informer</b></summary>
 
 <table ><tbody ><tr></tr><tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/slack.svg" width="25" height="25"><b>Slack</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/slack.svg" width="25" height="25"><b>Slack</b></summary><hr>
 
  ```python
 from obsei.sink.slack_sink import SlackSink, SlackSinkConfig
@@ -576,7 +576,7 @@ sink = SlackSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/zendesk.png" width="20" height="20"><b>Zendesk</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/zendesk.png" width="20" height="20"><b>Zendesk</b></summary><hr>
 
  ```python
 from obsei.sink.zendesk_sink import ZendeskSink, ZendeskSinkConfig, ZendeskCredInfo
@@ -607,7 +607,7 @@ sink = ZendeskSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/jira.png" width="20" height="20"><b>Jira</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/jira.png" width="20" height="20"><b>Jira</b></summary><hr>
 
  ```python
 from obsei.sink.jira_sink import JiraSink, JiraSinkConfig
@@ -636,7 +636,7 @@ sink = JiraSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/elastic.png" width="20" height="20"><b>ElasticSearch</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/elastic.png" width="20" height="20"><b>ElasticSearch</b></summary><hr>
 
  ```python
 from obsei.sink.elasticsearch_sink import ElasticSearchSink, ElasticSearchSinkConfig
@@ -661,7 +661,7 @@ sink = ElasticSearchSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/http_api.png" width="20" height="20"><b>Http</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/http_api.png" width="20" height="20"><b>Http</b></summary><hr>
 
  ```python
 from obsei.sink.http_sink import HttpSink, HttpSinkConfig
@@ -689,7 +689,7 @@ sink = HttpSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/pandas.svg" width="20" height="20"><b>Pandas DataFrame</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/pandas.svg" width="20" height="20"><b>Pandas DataFrame</b></summary><hr>
 
  ```python
 from pandas import DataFrame
@@ -707,7 +707,7 @@ sink = PandasSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/logger.png" width="20" height="20"><b>Logger</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/logger.png" width="20" height="20"><b>Logger</b></summary><hr>
 
 This is useful for testing and dry run checking of pipeline.
  ```python
@@ -786,28 +786,28 @@ python example.py
 </details>
 
 ## Upcoming Release
-Upcoming release plan and progress can be tracked at [link](https://github.com/lalitpagaria/obsei/projects) (Suggestions are welcome).
+Upcoming release plan and progress can be tracked at [link](https://github.com/obsei/obsei/projects) (Suggestions are welcome).
 
 ## Discussion Forum
-Discussion about *Obsei* can be done at [community forum](https://github.com/lalitpagaria/obsei/discussions)
+Discussion about *Obsei* can be done at [community forum](https://github.com/obsei/obsei/discussions)
 
 ## Contribution
 First off, thank you for even considering contributing to this package, every contribution big or small is greatly appreciated.
-Please refer our [Contribution Guideline](https://github.com/lalitpagaria/obsei/blob/master/CONTRIBUTING.md) and [Code of Conduct](https://github.com/lalitpagaria/obsei/blob/master/CODE_OF_CONDUCT.md).
+Please refer our [Contribution Guideline](https://github.com/obsei/obsei/blob/master/CONTRIBUTING.md) and [Code of Conduct](https://github.com/obsei/obsei/blob/master/CODE_OF_CONDUCT.md).
 
 ## Changelog
-Refer [releases](https://github.com/lalitpagaria/obsei/releases) and [projects](https://github.com/lalitpagaria/obsei/projects).
+Refer [releases](https://github.com/obsei/obsei/releases) and [projects](https://github.com/obsei/obsei/projects).
 
 ## Security Issue
 For any security issue please contact us via [email](mailto:obsei.tool@gmail.com)
 
 ## Stargazers over time
 
-[![Stargazers over time](https://starchart.cc/lalitpagaria/obsei.svg)](https://starchart.cc/lalitpagaria/obsei)
+[![Stargazers over time](https://starchart.cc/obsei/obsei.svg)](https://starchart.cc/obsei/obsei)
 
 ## Attribution
 
-This could not have been possible without these [open source software](https://github.com/lalitpagaria/obsei/blob/master/ATTRIBUTION.md).
+This could not have been possible without these [open source software](https://github.com/obsei/obsei/blob/master/ATTRIBUTION.md).
 
 ## Acknowledgement
 

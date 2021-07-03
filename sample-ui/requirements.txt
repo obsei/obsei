@@ -1,2 +1,2 @@
-git+git://github.com/lalitpagaria/obsei@master#egg=obsei
+git+git://github.com/obsei/obsei@master#egg=obsei
 streamlit

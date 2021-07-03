@@ -74,7 +74,7 @@ setup(
     long_description=README,
     long_description_content_type="text/markdown",
     license="Apache Version 2.0",
-    url="https://github.com/lalitpagaria/obsei",
+    url="https://github.com/obsei/obsei",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     dependency_links=dependency_links,
     install_requires=parsed_requirements,

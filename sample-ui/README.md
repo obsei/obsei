@@ -2,7 +2,7 @@
 
 This is a minimal UI that can spin up to test Obsei. It's based on streamlit and is very easy to extend for your purposes. 
 
-![Screenshot](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/obsei-ui-demo.png)
+![Screenshot](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei-ui-demo.png)
 
 ## Usage
 
