@@ -33,3 +33,4 @@ dependencies:
   - tweet-preprocessor
   - gnews
   - trafilatura
+  - python-facebook-api

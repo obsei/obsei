@@ -22,9 +22,6 @@
     <a href="https://anaconda.org/lalitpagaria/obsei">
         <img src="https://anaconda.org/lalitpagaria/obsei/badges/version.svg" alt="Conda" />
     </a>
-    <a href="https://anaconda.org/lalitpagaria/obsei">
-        <img src="https://anaconda.org/lalitpagaria/obsei/badges/downloads.svg" alt="Downloads" />
-    </a>
     <a href="https://pypi.org/project/obsei/">
         <img alt="Release" src="https://img.shields.io/pypi/v/obsei">
     </a>
@@ -53,9 +50,10 @@ Current flow -
 
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-flow-diagram.png)
 
-A future concept (Coming Soon! 🙂)
+<details><summary>Future concept (Coming Soon! 🙂)</summary>
 
 ![](https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/Obsei-future-concept.png)
+</details>
 
 ## Use cases
 *Obsei* use cases are following, but not limited to -
@@ -136,6 +134,7 @@ pip install google-play-scraper
 pip install tweet-preprocessor
 pip install gnews
 pip install trafilatura
+pip install python-facebook-api
 ```
 </details>
 
@@ -213,6 +212,30 @@ source_config = TwitterSourceConfig(
 
 # initialize tweets retriever
 source = TwitterSource()
+```
+</details>
+</td>
+</tr>
+<tr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/lalitpagaria/obsei/master/images/logos/facebook.png" width="20" height="20"><b>Facebook</b></summary><hr>
+
+ ```python
+from obsei.source.facebook_source import FacebookCredentials, FacebookSource, FacebookSourceConfig
+
+# initialize facebook source config
+source_config = FacebookSourceConfig(
+    page_id="110844591144719", # Facebook page id, for example this one for Obsei
+    lookup_period="1h", # Lookup period from current time, format: `<number><d|h|m>` (day|hour|minute)
+    cred_info=FacebookCredentials(
+        # Enter your facebook app_id, app_secret and long_term_token. Get it from https://developers.facebook.com/apps/
+        app_id="<facebook_app_id>",
+        app_secret="<facebook_app_secret>",
+        long_term_token="<facebook_long_term_token>",
+    )
+)
+
+# initialize facebook post comments retriever
+source = FacebookSource()
 ```
 </details>
 </td>
