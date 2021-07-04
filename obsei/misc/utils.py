@@ -1,4 +1,5 @@
 import json
+import dateparser
 from datetime import datetime, timezone
 from importlib import import_module
 from typing import Any, Dict, Optional
@@ -106,6 +107,7 @@ def convert_utc_time(datetime_str):
         - YYYY-mm-DD
         - YYYY-mm-DD HH:MM
         - YYYY-mm-DDTHH:MM
+        - 2m (set start_time to two months ago)
         - 3d (set start_time to three days ago)
         - 12h (set start_time to twelve hours ago)
         - 15m (set start_time to fifteen minutes ago)
@@ -130,6 +132,8 @@ def convert_utc_time(datetime_str):
                 _date = _date + relativedelta(hours=-num)
             elif "m" in datetime_str:
                 _date = _date + relativedelta(minutes=-num)
+            elif "M" in datetime_str:
+                _date = _date + relativedelta(months=-num)
         elif not {"-", ":"} & set(datetime_str):
             _date = datetime.strptime(datetime_str, "%Y%m%d%H%M")
         elif "T" in datetime_str:
@@ -141,6 +145,13 @@ def convert_utc_time(datetime_str):
         _date = datetime.strptime(datetime_str, "%Y-%m-%d")
 
     return _date.replace(tzinfo=timezone.utc)
+
+
+def convert_datetime_str_to_epoch(datetime_str):
+    if not datetime_str:
+        return None
+    parsed_datetime = dateparser.parse(datetime_str)
+    return parsed_datetime.timestamp()
 
 
 def tag_visible(element):

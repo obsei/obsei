@@ -7,7 +7,8 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 source_config = FacebookSourceConfig(
-    page_id="110844591144719"
+    page_id="110844591144719",
+    lookup_period="2M"
 )
 source = FacebookSource()
 source_response_list = source.lookup(source_config)
