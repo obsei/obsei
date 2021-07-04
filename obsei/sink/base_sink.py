@@ -43,10 +43,7 @@ class BaseSink(BaseModel):
 
     @abstractmethod
     def send_data(
-        self,
-        analyzer_responses: List[TextPayload],
-        config: BaseSinkConfig,
-        **kwargs
+        self, analyzer_responses: List[TextPayload], config: BaseSinkConfig, **kwargs
     ):
         pass
 

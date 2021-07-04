@@ -80,7 +80,7 @@ To test locally, just run
 docker run -d --name obesi-ui -p 8501:8501 lalitpagaria/obsei-ui-demo
 
 # You can find the UI at http://localhost:8501
-``` 
+```
 
 
 ## Documentation
@@ -280,8 +280,8 @@ from obsei.source.appstore_scrapper import AppStoreScrapperConfig, AppStoreScrap
 
 # initialize app store source config
 source_config = AppStoreScrapperConfig(
-    # Need two parameters app_id and country. 
-    # `app_id` can be found at the end of the url of app in app store. 
+    # Need two parameters app_id and country.
+    # `app_id` can be found at the end of the url of app in app store.
     # For example - https://apps.apple.com/us/app/xcode/id497799835
     # `310633997` is the app_id for xcode and `us` is country.
     countries=["us"],
@@ -304,8 +304,8 @@ from obsei.source.playstore_scrapper import PlayStoreScrapperConfig, PlayStoreSc
 
 # initialize play store source config
 source_config = PlayStoreScrapperConfig(
-    # Need two parameters package_name and country. 
-    # `package_name` can be found at the end of the url of app in play store. 
+    # Need two parameters package_name and country.
+    # `package_name` can be found at the end of the url of app in play store.
     # For example - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en&gl=US
     # `com.google.android.gm` is the package_name for xcode and `us` is country.
     countries=["us"],
@@ -505,7 +505,7 @@ analyzer = TranslationAnalyzer(
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/pii.png" width="20" height="20"><b>PII Anonymizer</b></summary><hr>
 
  ```python
-from obsei.analyzer.pii_analyzer import PresidioEngineConfig, PresidioModelConfig, \ 
+from obsei.analyzer.pii_analyzer import PresidioEngineConfig, PresidioModelConfig, \
     PresidioPIIAnalyzer, PresidioPIIAnalyzerConfig
 
 # initialize pii analyzer's config
@@ -520,7 +520,7 @@ analyzer_config = PresidioPIIAnalyzerConfig(
 analyzer = PresidioPIIAnalyzer(
     engine_config=PresidioEngineConfig(
         # spacy and stanza nlp engines are supported
-        # For more info refer 
+        # For more info refer
         # https://microsoft.github.io/presidio/analyzer/developing_recognizers/#utilize-spacy-or-stanza
         nlp_engine_name="spacy",
         # Update desired spacy model and language

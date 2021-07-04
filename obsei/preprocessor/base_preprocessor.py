@@ -17,10 +17,7 @@ class BaseTextPreprocessor(BaseModel):
 
     @abstractmethod
     def preprocess_input(
-        self,
-        input_list: List[TextPayload],
-        config: BaseTextProcessorConfig,
-        **kwargs
+        self, input_list: List[TextPayload], config: BaseTextProcessorConfig, **kwargs
     ) -> List[TextPayload]:
         pass
 
