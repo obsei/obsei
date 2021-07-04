@@ -235,7 +235,7 @@ class EmailSource(BaseSource):
                             email_meta[part_id_str]["email_body"] = email_body
                             email_content = email_content + "\n" + email_body
 
-                        if date_received < since_time:
+                        if date_received <= since_time:
                             need_more_lookup = False
                             break
                         if last_index and last_index == email_meta["message_id"]:
