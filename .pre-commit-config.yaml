@@ -1,0 +1,14 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: check-yaml
+        exclude: ^(conda/meta.yaml)
+      - id: trailing-whitespace
+      - id: requirements-txt-fixer
+      - id: end-of-file-fixer
+
+  - repo: https://github.com/psf/black
+    rev: 21.6b0
+    hooks:
+      - id: black
