@@ -74,17 +74,18 @@ We have a minimal [streamlit](https://streamlit.io/) based UI that you can use t
 **Watch:** [Obsei UI Demo](https://www.youtube.com/watch?v=GTF-Hy96gvY)
 
 To test remotely, just open: [Obsei Demo Link](https://share.streamlit.io/obsei/obsei/sample-ui/ui.py)
+(**Note**: Due to rate limit sometime Streamlit demo might not work, hence please use docker image locally.)
 
 To test locally, just run
 ```
-docker run -d --name obesi-ui -p 8501:8501 lalitpagaria/obsei-ui-demo
+docker run -d --name obesi-ui -p 8501:8501 obsei/obsei-ui-demo
 
 # You can find the UI at http://localhost:8501
 ``` 
 
 
 ## Documentation
-For detailed installation instructions, usages and example refer [documentation](https://lalitpagaria.github.io/obsei/).
+For detailed installation instructions, usages and example refer [documentation](https://obsei.github.io/obsei/).
 
 ## Support and Release Matrix
 
