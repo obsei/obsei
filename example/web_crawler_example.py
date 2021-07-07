@@ -11,7 +11,7 @@ def print_list(response_list):
 
 
 # Single URL
-source_config = TrafilaturaCrawlerConfig(urls=["https://lalitpagaria.github.io/obsei/"])
+source_config = TrafilaturaCrawlerConfig(urls=["https://obsei.github.io/obsei/"])
 
 source = TrafilaturaCrawlerSource()
 

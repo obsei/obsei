@@ -87,7 +87,7 @@ about:
 
     Visit {{ data[ 'url' ] }} for feedback
   dev_url: "{{ data[ 'url' ] }}"
-  doc_url: lalitpagaria.github.io/obsei/
+  doc_url: obsei.github.io/obsei/
 
 extra:
   recipe-maintainers:
