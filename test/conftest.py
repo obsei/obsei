@@ -10,6 +10,7 @@ from obsei.analyzer.pii_analyzer import (
 from obsei.analyzer.sentiment_analyzer import VaderSentimentAnalyzer
 from obsei.analyzer.translation_analyzer import TranslationAnalyzer
 from obsei.preprocessor.text_cleaner import TextCleaner
+from obsei.preprocessor.text_splitter import TextSplitterConfig, TextSplitter
 
 
 @pytest.fixture(scope="session")
@@ -52,3 +53,8 @@ def pii_analyzer():
 @pytest.fixture(scope="session")
 def text_cleaner():
     return TextCleaner()
+
+
+@pytest.fixture(scope="session")
+def text_splitter():
+    return TextSplitter()
