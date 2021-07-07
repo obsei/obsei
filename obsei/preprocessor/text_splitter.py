@@ -28,7 +28,7 @@ class TextSplitter(BaseTextPreprocessor):
         document_id = 0
         for input_data in input_list:
             if config.generate_document_id:
-                document_id = uuid.uuid4().hex
+                document_id = uuid.uuid4().int
             start_idx = 0
             split_id = 0
             document_length = len(input_data.processed_text)
