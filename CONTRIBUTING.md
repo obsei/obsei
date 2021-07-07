@@ -12,6 +12,7 @@ Below are some sections detailing the guidelines we'd like you to follow to make
 - [Code Style and Formatting](#code)
 
 ## 📜 <a name="coc"></a> Code of Conduct
+
 The [Code of Conduct](https://github.com/obsei/obsei/blob/master/CODE_OF_CONDUCT.md) applies within all community spaces.
 If you are not familiar with our Code of Conduct policy, take a minute to read the policy before starting with your first contribution.
 
@@ -38,7 +39,7 @@ To avoid unnecessary work on either side, please stick to the following process:
 
 See [below](#submit) for some guidelines.
 
-##  ✉️  <a name="submit"></a> Submission Guidelines
+## ✉️ <a name="submit"></a> Submission Guidelines
 
 ### Submitting an Issue
 
@@ -76,8 +77,9 @@ Before you submit your pull request consider the following guidelines:
   We recommend using a [global](#global-gitignore) gitignore for this.
 - Before you commit please run the test suite and make sure all tests are passing.
 - Format your code appropriately:
-  * This package uses [black](https://black.readthedocs.io/en/stable/) as its formatter.
-    In order to format your code with black run ```black . ``` from the root of the package.
+  - This package uses [black](https://black.readthedocs.io/en/stable/) as its formatter.
+    In order to format your code with black run `black . ` from the root of the package.
+- Run `pre-commit run --all-files` if you're adding new hooks to pre-commit config file. By default, pre-commit will run on modified files when commiting changes.
 - Commit your changes using a descriptive commit message.
 - In GitHub, send a pull request to `obsei:master`.
 - If we suggest changes then:
@@ -86,12 +88,11 @@ Before you submit your pull request consider the following guidelines:
 
 That's it! Thank you for your contribution!
 
-
 ## ✅ <a name="rules"></a> Coding Rules
 
 We generally follow the [Google Python style guide](http://google.github.io/styleguide/pyguide.html).
 
-----
+---
 
-*This guide was inspired by the [transformers-interpret](https://github.com/cdpierse/transformers-interpret/blob/master/CONTRIBUTING.md)
-and [Haystack](https://github.com/deepset-ai/haystack/blob/master/CONTRIBUTING.md)*
+_This guide was inspired by the [transformers-interpret](https://github.com/cdpierse/transformers-interpret/blob/master/CONTRIBUTING.md)
+and [Haystack](https://github.com/deepset-ai/haystack/blob/master/CONTRIBUTING.md)_
