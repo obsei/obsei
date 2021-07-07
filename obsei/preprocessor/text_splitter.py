@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 class TextSplitterConfig(BaseTextProcessorConfig):
     max_split_length: int = 512
     split_stride: Optional[int] = 0  # overlap length
+    generate_document_id: Optional[bool] = True
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -25,7 +26,10 @@ class TextSplitter(BaseTextPreprocessor):
         self, input_list: List[TextPayload], config: TextSplitterConfig, **kwargs
     ) -> List[TextPayload]:
         splits = []
+        document_id = 0
         for input_data in input_list:
+            if config.generate_document_id:
+                document_id += 1
             start_idx = 0
             split_id = 0
             document_length = len(input_data.processed_text)
@@ -42,7 +46,9 @@ class TextSplitter(BaseTextPreprocessor):
                     min(start_idx + config.max_split_length, document_length),
                 )
                 phrase = input_data.processed_text[start_idx:end_idx]
-                splits.append(self._build_payload(phrase, start_idx, split_id))
+                splits.append(
+                    self._build_payload(phrase, start_idx, split_id, document_id)
+                )
                 start_idx = end_idx + 1
                 split_id += 1
 
@@ -58,7 +64,7 @@ class TextSplitter(BaseTextPreprocessor):
             idx -= 1
         return idx
 
-    def _build_payload(self, phrase, start_idx, split_id):
+    def _build_payload(self, phrase, start_idx, split_id, document_id=0):
         text_payload = TextPayload(processed_text=phrase)
         text_payload.segmented_data = phrase
         text_payload.meta = {
@@ -67,4 +73,6 @@ class TextSplitter(BaseTextPreprocessor):
             "text_length": len(phrase),
             "start_index": start_idx,
         }
+        if document_id:
+            text_payload.meta["document_id"] = document_id
         return text_payload
