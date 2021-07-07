@@ -101,7 +101,7 @@ class AppStoreScrapperSource(BaseSource):
             reviews = scrapper.fetch_reviews(after=since_time, since_id=since_id)
             reviews = reviews or []
             if config.max_count is not None and config.max_count < len(reviews):
-                reviews = reviews[:config.max_count]
+                reviews = reviews[: config.max_count]
 
             for review in reviews:
                 source_responses.append(

@@ -2,7 +2,7 @@ from obsei.payload import TextPayload
 from obsei.preprocessor.text_cleaner import TextCleanerConfig
 from obsei.preprocessor.text_cleaning_function import *
 
-TEXT_WITH_WHITE_SPACES = """        If anyone is interested... these are our hosts. I can’t recommend them enough, 
+TEXT_WITH_WHITE_SPACES = """        If anyone is interested... these are our hosts. I can’t recommend them enough,
 Abc & Pbc.         """
 
 TEXT_WITH_PUNCTUATION = """I had the worst experience ever with XYZ in \"Egypt\". Bad Cars, asking to pay in cash,"""

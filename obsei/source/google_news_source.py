@@ -77,7 +77,7 @@ class GoogleNewsSource(BaseSource):
                     article_text = extracted_data["text"]
                     del extracted_data["text"]
                 else:
-                    article_text = ''
+                    article_text = ""
 
                 article["extracted_data"] = extracted_data
             else:

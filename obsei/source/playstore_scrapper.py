@@ -28,7 +28,9 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
         super().__init__(**data)
 
         if not self.package_name and self.app_name:
-            self.package_name = PlayStoreScrapperConfig.search_package_name(self.app_name)
+            self.package_name = PlayStoreScrapperConfig.search_package_name(
+                self.app_name
+            )
 
         if not self.package_name:
             raise ValueError("Valid `package_name` or `app_name` is mandatory")

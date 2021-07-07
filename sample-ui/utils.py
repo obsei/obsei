@@ -34,7 +34,7 @@ def download_button(
     button_uuid = str(uuid.uuid4()).replace("-", "")
     button_id = re.sub("\d+", "", button_uuid)
 
-    custom_css = f""" 
+    custom_css = f"""
         <style>
             #{button_id} {{
                 display: inline-flex;
@@ -50,7 +50,7 @@ def download_button(
                 border-style: solid;
                 border-color: rgb(230, 234, 241);
                 border-image: initial;
-            }} 
+            }}
             #{button_id}:hover {{
                 border-color: rgb(246, 51, 102);
                 color: rgb(246, 51, 102);

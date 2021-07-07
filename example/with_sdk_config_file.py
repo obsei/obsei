@@ -18,6 +18,8 @@ daily_get_sink_config = obsei_configuration.initialize_instance("daily_get_sink"
 text_analyzer = obsei_configuration.initialize_instance("analyzer")
 analyzer_config = obsei_configuration.initialize_instance("analyzer_config")
 # docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" elasticsearch:7.9.2
-elasticsearch_sink_config = obsei_configuration.initialize_instance("elasticsearch_sink")
+elasticsearch_sink_config = obsei_configuration.initialize_instance(
+    "elasticsearch_sink"
+)
 # Start jira server locally `atlas-run-standalone --product jira`
 jira_sink_config = obsei_configuration.initialize_instance("jira_sink")
