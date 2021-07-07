@@ -18,5 +18,5 @@ streamlit run ui.py
 Just run
 ```
 docker run -d --name obesi-ui -p 8501:8501 obsei/obsei-ui-demo
-``` 
+```
 You can find the UI at `http://localhost:8501`
