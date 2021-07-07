@@ -1,7 +1,6 @@
-import traceback
 import logging
-from pydantic import Field
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional
+import uuid
 
 from obsei.payload import TextPayload
 from obsei.preprocessor.base_preprocessor import (
@@ -29,7 +28,7 @@ class TextSplitter(BaseTextPreprocessor):
         document_id = 0
         for input_data in input_list:
             if config.generate_document_id:
-                document_id += 1
+                document_id = uuid.uuid4().hex
             start_idx = 0
             split_id = 0
             document_length = len(input_data.processed_text)
@@ -71,8 +70,8 @@ class TextSplitter(BaseTextPreprocessor):
             "text": phrase,
             "paragraph_id": split_id,
             "text_length": len(phrase),
-            "start_index": start_idx,
+            "start_index": start_idx,  # start position of split in document
+            "document_id": document_id,
         }
-        if document_id:
-            text_payload.meta["document_id"] = document_id
+
         return text_payload
