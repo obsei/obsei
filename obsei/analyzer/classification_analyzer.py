@@ -9,6 +9,7 @@ from obsei.analyzer.base_analyzer import (
     BaseAnalyzerConfig,
 )
 from obsei.payload import TextPayload
+from obsei.preprocessor.text_splitter import TextSplitter, TextSplitterConfig
 
 logger = logging.getLogger(__name__)
 
@@ -72,14 +73,12 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
 
         analyzer_output: List[TextPayload] = []
         add_positive_negative_labels = kwargs.get("add_positive_negative_labels", True)
-
+        source_response_list = TextSplitter().preprocess_input(
+            source_response_list, config=TextSplitterConfig(max_split_length=512)
+        )
         texts = [
-            source_response.processed_text[: self._max_length]
-            if len(source_response.processed_text) > self._max_length
-            else source_response.processed_text
-            for source_response in source_response_list
+            source_response.processed_text for source_response in source_response_list
         ]
-
         labels = analyzer_config.labels or []
         if add_positive_negative_labels:
             if "positive" not in labels:

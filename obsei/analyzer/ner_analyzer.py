@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, List, Tuple, Optional, Generator
-
+from obsei.preprocessor.text_splitter import TextSplitter, TextSplitterConfig
 from pydantic import PrivateAttr
 from transformers import (
     AutoModelForTokenClassification,
@@ -79,11 +79,11 @@ class TransformersNERAnalyzer(BaseAnalyzer):
         **kwargs,
     ) -> List[TextPayload]:
         analyzer_output: List[TextPayload] = []
+        source_response_list = TextSplitter().preprocess_input(
+            source_response_list, config=TextSplitterConfig(max_split_length=512)
+        )
         texts = [
-            source_response.processed_text[: self._max_length]
-            if len(source_response.processed_text) > self._max_length
-            else source_response.processed_text
-            for source_response in source_response_list
+            source_response.processed_text for source_response in source_response_list
         ]
 
         for batch_texts, batch_source_response in self._batchify(
