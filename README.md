@@ -60,11 +60,22 @@
 
 ## Use cases
 *Obsei* use cases are following, but not limited to -
+- Social listening
+- Alerting/Notification when user complaints on social media
 - Automatic customer issue creation based on sentiment analysis (reduction of MTTD)
 - Proper tagging of ticket based for example login issue, signup issue, delivery issue etc (reduction of MTTR)
 - Checking effectiveness of social media marketing campaign
 - Extraction of deeper insight from feedbacks on various platforms
 - Research purpose
+- Many more based on creativity 💡
+
+## Tutorials
+
+| Sr. No. | Workflow | Colab | Binder |
+|---------|----------|-------|--------|
+| 1 | PlayStore Reviews → Classification → Logger | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/01_PlayStore_Classification_Logger.ipynb) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F01_PlayStore_Classification_Logger.ipynb) |
+| 2 | PlayStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/02_PlayStore_PreProc_Classification_Pandas.ipynb) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F02_PlayStore_PreProc_Classification_Pandas.ipynb) |
+| 3 | AppStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/03_AppStore_PreProc_Classification_Pandas.ipynb) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F03_AppStore_PreProc_Classification_Pandas.ipynb) |
 
 ## Demo
 We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
@@ -144,10 +155,6 @@ pip install python-facebook-api
 
 
 ## How to use
-
-To try in Colab Notebook click: [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obsei/obsei/blob/master/example/Obsei_playstore_classification_logger_example.ipynb)
-
-To try in Binder click: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=example%2FObsei_playstore_classification_logger_example.ipynb)
 
 Expend following steps and create your workflow -
 
@@ -785,6 +792,12 @@ Copy code snippets from <b>Step 3</b> to <b>Step 6</b> into python file for exam
 python example.py
 ```
 </details>
+
+## Articles
+
+| Sr. No. | Title | Author |
+|---------|----------|-------|
+| 1 | [LinkedIn App - User Feedback Analysis](https://medium.com/mlearning-ai/linkedin-app-user-feedback-analysis-9c9f98464daa) | [Himanshu Sharma](http://www.linkedin.com/in/himanshusharmads) | 
 
 ## Upcoming Release
 Upcoming release plan and progress can be tracked at [link](https://github.com/obsei/obsei/projects) (Suggestions are welcome).
