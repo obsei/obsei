@@ -82,7 +82,10 @@
 </thead>
 <tbody>
 <tr>
-<td>1</td>
+<td rowspan="2">1</td>
+<td colspan="3">Observe app reviews from Google play store, Analyze them via performing text classification and then Inform them on console via logger</td>
+</tr>
+<tr>
 <td>PlayStore Reviews → Classification → Logger</td>
 <td>
     <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/01_PlayStore_Classification_Logger.ipynb">
@@ -96,7 +99,10 @@
 </td>
 </tr>
 <tr>
-<td>2</td>
+<td rowspan="2">2</td>
+<td colspan="3">Observe app reviews from Google play store, PreProcess text via various text cleaning function, Analyze them via performing text classification, Inform them to Pandas DataFrame and store resultant CSV to Google Drive</td>
+</tr>
+<tr>
 <td>PlayStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive</td>
 <td>
     <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/02_PlayStore_PreProc_Classification_Pandas.ipynb">
@@ -110,7 +116,10 @@
 </td>
 </tr>
 <tr>
-<td>3</td>
+<td rowspan="2">3</td>
+<td colspan="3">Observe app reviews from Apple app store, PreProcess text via various text cleaning function, Analyze them via performing text classification, Inform them to Pandas DataFrame and store resultant CSV to Google Drive</td>
+</tr>
+<tr>
 <td>AppStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive</td>
 <td>
     <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/03_AppStore_PreProc_Classification_Pandas.ipynb">
