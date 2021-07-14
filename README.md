@@ -866,6 +866,15 @@ python example.py
 <tr>
 <td>1</td>
 <td>
+    <a href="https://reenabapna.medium.com/ai-based-comparative-customer-feedback-analysis-using-deep-learning-models-def0dc77aaee">AI based Comparative Customer Feedback Analysis Using Obsei</a>
+</td>
+<td>
+    <a href="linkedin.com/in/reena-bapna-66a8691a">Reena Bapna</a>
+</td>
+</tr>
+<tr>
+<td>2</td>
+<td>
     <a href="https://medium.com/mlearning-ai/linkedin-app-user-feedback-analysis-9c9f98464daa">LinkedIn App - User Feedback Analysis</a>
 </td>
 <td>
