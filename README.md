@@ -71,11 +71,61 @@
 
 ## Tutorials
 
-| Sr. No. | Workflow | Colab | Binder |
-|---------|----------|-------|--------|
-| 1 | PlayStore Reviews → Classification → Logger | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/01_PlayStore_Classification_Logger.ipynb) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F01_PlayStore_Classification_Logger.ipynb) |
-| 2 | PlayStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/02_PlayStore_PreProc_Classification_Pandas.ipynb) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F02_PlayStore_PreProc_Classification_Pandas.ipynb) |
-| 3 | AppStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/03_AppStore_PreProc_Classification_Pandas.ipynb) | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F03_AppStore_PreProc_Classification_Pandas.ipynb) |
+<table>
+<thead>
+<tr class="header">
+<th>Sr. No.</th>
+<th>Workflow</th>
+<th>Colab</th>
+<th>Binder</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>PlayStore Reviews → Classification → Logger</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/01_PlayStore_Classification_Logger.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F01_PlayStore_Classification_Logger.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+<tr>
+<td>2</td>
+<td>PlayStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/02_PlayStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F02_PlayStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+<tr>
+<td>3</td>
+<td>AppStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/03_AppStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F03_AppStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+</tbody>
+</table>
+
 
 ## Demo
 We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
@@ -795,9 +845,26 @@ python example.py
 
 ## Articles
 
-| Sr. No. | Title | Author |
-|---------|----------|-------|
-| 1 | [LinkedIn App - User Feedback Analysis](https://medium.com/mlearning-ai/linkedin-app-user-feedback-analysis-9c9f98464daa) | [Himanshu Sharma](http://www.linkedin.com/in/himanshusharmads) | 
+<table>
+<thead>
+<tr class="header">
+<th>Sr. No.</th>
+<th>Title</th>
+<th>Author</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>
+    <a href="https://medium.com/mlearning-ai/linkedin-app-user-feedback-analysis-9c9f98464daa">LinkedIn App - User Feedback Analysis</a>
+</td>
+<td>
+    <a href="http://www.linkedin.com/in/himanshusharmads">Himanshu Sharma</a>
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Upcoming Release
 Upcoming release plan and progress can be tracked at [link](https://github.com/obsei/obsei/projects) (Suggestions are welcome).
