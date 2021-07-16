@@ -17,7 +17,7 @@ class InterfaceAggregator(BasePostprocessor):
     def postprocess_input(
         self, input_list: List[TextPayload], config: InterfaceAggregatorConfig, **kwargs
     ) -> List[TextPayload]:
-        prev_document_id = -1
+        prev_document_id: int = -1
         document = []
         aggregated_payloads = []
         for output in input_list:
@@ -40,14 +40,16 @@ class InterfaceAggregator(BasePostprocessor):
             for doc in aggregated_payloads
         ]
 
-    def _process_scores(self, stratergy, documents):
-        if stratergy == "most_common":
+    def _process_scores(
+        self, strategy: str, documents: List[TextPayload]
+    ) -> TextPayload:
+        if strategy == "most_common":
             return self._most_common(documents)
-        if stratergy == "weighted_average":
+        if strategy == "weighted_average":
             return self._weighted_average(documents)
-        return None
+        return TextPayload(processed_text="")
 
-    def _most_common(self, documents):
+    def _most_common(self, documents: List[TextPayload]) -> TextPayload:
         labels = []
         doc_text = []
         doc_id = documents[0].meta["document_id"]
@@ -70,9 +72,9 @@ class InterfaceAggregator(BasePostprocessor):
             source_name=source_name,
         )
 
-    def _weighted_average(self, documents):
+    def _weighted_average(self, documents: List[TextPayload]) -> TextPayload:
         if len(documents) == 0:
-            return None
+            return TextPayload(processed_text="")
         doc_id = documents[0].meta["document_id"]
         document_length = documents[0].meta["document_length"]
         source_name = documents[0].source_name
