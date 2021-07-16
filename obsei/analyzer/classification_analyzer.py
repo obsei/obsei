@@ -10,6 +10,10 @@ from obsei.analyzer.base_analyzer import (
 )
 from obsei.payload import TextPayload
 from obsei.preprocessor.text_splitter import TextSplitter, TextSplitterConfig
+from obsei.postprocessor.interface_aggregator import (
+    InterfaceAggregator,
+    InterfaceAggregatorConfig,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +22,7 @@ class ClassificationAnalyzerConfig(BaseAnalyzerConfig):
     TYPE: str = "Classification"
     labels: List[str]
     multi_class_classification: bool = True
+    max_length_truncation: bool = True
 
 
 class ZeroShotClassificationAnalyzer(BaseAnalyzer):
@@ -73,11 +78,18 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
 
         analyzer_output: List[TextPayload] = []
         add_positive_negative_labels = kwargs.get("add_positive_negative_labels", True)
-        source_response_list = TextSplitter().preprocess_input(
-            source_response_list, config=TextSplitterConfig(max_split_length=512)
-        )
+
+        if not analyzer_config.max_length_truncation:
+            source_response_list = TextSplitter().preprocess_input(
+                source_response_list,
+                config=TextSplitterConfig(max_split_length=self._max_length),
+            )
+
         texts = [
-            source_response.processed_text for source_response in source_response_list
+            source_response.processed_text[: self._max_length]
+            if len(source_response.processed_text) > self._max_length
+            else source_response.processed_text
+            for source_response in source_response_list
         ]
         labels = analyzer_config.labels or []
         if add_positive_negative_labels:
@@ -113,5 +125,11 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
                         source_name=source_response.source_name,
                     )
                 )
+
+        if not analyzer_config.max_length_truncation:
+            analyzer_output = InterfaceAggregator().postprocess_input(
+                input_list=analyzer_output,
+                config=InterfaceAggregatorConfig(aggregation_method=""),
+            )
 
         return analyzer_output
