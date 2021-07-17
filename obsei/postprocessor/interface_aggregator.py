@@ -22,15 +22,15 @@ class InterfaceAggregator(BasePostprocessor):
         aggregated_payloads = []
         for output in input_list:
             if prev_document_id == -1:
-                prev_document_id = output.meta["document_id"]
+                prev_document_id = int(output.meta["document_id"])
                 document.append(output)
 
-            elif prev_document_id == output.meta["document_id"]:
+            elif prev_document_id == int(output.meta["document_id"]):
                 document.append(output)
             else:
                 aggregated_payloads.append(document)
                 document = [output]
-                prev_document_id = output.meta["document_id"]
+                prev_document_id = int(output.meta["document_id"])
 
         if document and not aggregated_payloads:
             aggregated_payloads.append(document)
@@ -52,7 +52,7 @@ class InterfaceAggregator(BasePostprocessor):
     def _most_common(self, documents: List[TextPayload]) -> TextPayload:
         labels = []
         doc_text = []
-        doc_id = documents[0].meta["document_id"]
+        doc_id = int(documents[0].meta["document_id"])
         source_name = documents[0].source_name
 
         for doc in documents:
