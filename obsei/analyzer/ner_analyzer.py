@@ -8,7 +8,8 @@ from transformers import (
     Pipeline,
     pipeline,
 )
-
+import spacy
+from spacy.lang import en
 from obsei.analyzer.base_analyzer import (
     BaseAnalyzer,
     BaseAnalyzerConfig,
@@ -18,7 +19,7 @@ from obsei.payload import TextPayload
 logger = logging.getLogger(__name__)
 
 
-class NERAnalyzer(BaseAnalyzer):
+class TransformersNERAnalyzer(BaseAnalyzer):
     _pipeline: Pipeline = PrivateAttr()
     _max_length: int = PrivateAttr()
     TYPE: str = "NER"
@@ -99,4 +100,52 @@ class NERAnalyzer(BaseAnalyzer):
                         source_name=source_response.source_name,
                     )
                 )
+        return analyzer_output
+
+
+class SpacyNERAnalyzer(BaseAnalyzer):
+    _nlp: en.English = PrivateAttr()
+    _max_length: int = PrivateAttr()
+    TYPE: str = "NER"
+    model_name_or_path: str
+    tokenizer_name: Optional[str] = None
+    grouped_entities: Optional[bool] = True
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self._nlp = spacy.load(
+            self.model_name_or_path,
+            disable=["tagger", "parser", "attribute_ruler", "lemmatizer"],
+        )
+
+    def analyze_input(
+        self,
+        source_response_list: List[TextPayload],
+        analyzer_config: Optional[BaseAnalyzerConfig] = None,
+        **kwargs,
+    ) -> List[TextPayload]:
+        analyzer_output: List[TextPayload] = []
+        texts = [
+            source_response.processed_text for source_response in source_response_list
+        ]
+
+        for doc, source_response in zip(self._nlp.pipe(texts), source_response_list):
+            ner_prediction = [
+                {
+                    "entity_group": ent.label_,
+                    "word": ent.text,
+                    "start": ent.start_char,
+                    "end": ent.end_char,
+                }
+                for ent in doc.ents
+            ]
+            analyzer_output.append(
+                TextPayload(
+                    processed_text=source_response.processed_text,
+                    meta=source_response.meta,
+                    segmented_data={"data": ner_prediction},
+                    source_name=source_response.source_name,
+                )
+            )
+
         return analyzer_output
