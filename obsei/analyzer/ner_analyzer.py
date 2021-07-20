@@ -164,4 +164,3 @@ class SpacyNERAnalyzer(BaseAnalyzer):
                 )
 
         return analyzer_output
-cd tres
