@@ -9,7 +9,8 @@ from transformers import (
     pipeline,
 )
 import spacy
-from spacy.lang import en
+from spacy.language import Language
+from spacy.tokens.doc import Doc
 from obsei.analyzer.base_analyzer import (
     BaseAnalyzer,
     BaseAnalyzerConfig,
@@ -104,8 +105,7 @@ class TransformersNERAnalyzer(BaseAnalyzer):
 
 
 class SpacyNERAnalyzer(BaseAnalyzer):
-    _nlp: en.English = PrivateAttr()
-    _max_length: int = PrivateAttr()
+    _nlp: Language = PrivateAttr()
     TYPE: str = "NER"
     model_name_or_path: str
     tokenizer_name: Optional[str] = None
@@ -118,6 +118,18 @@ class SpacyNERAnalyzer(BaseAnalyzer):
             disable=["tagger", "parser", "attribute_ruler", "lemmatizer"],
         )
 
+    def _batchify(
+        self,
+        texts: List[str],
+        batch_size: int,
+        source_response_list: List[TextPayload],
+    ) -> Generator[Tuple[List[Doc], List[TextPayload]], None, None]:
+        for index in range(0, len(texts), batch_size):
+            yield (
+                self._nlp.pipe(texts[index : index + batch_size]),
+                source_response_list[index : index + batch_size],
+            )
+
     def analyze_input(
         self,
         source_response_list: List[TextPayload],
@@ -129,23 +141,27 @@ class SpacyNERAnalyzer(BaseAnalyzer):
             source_response.processed_text for source_response in source_response_list
         ]
 
-        for doc, source_response in zip(self._nlp.pipe(texts), source_response_list):
-            ner_prediction = [
-                {
-                    "entity_group": ent.label_,
-                    "word": ent.text,
-                    "start": ent.start_char,
-                    "end": ent.end_char,
-                }
-                for ent in doc.ents
-            ]
-            analyzer_output.append(
-                TextPayload(
-                    processed_text=source_response.processed_text,
-                    meta=source_response.meta,
-                    segmented_data={"data": ner_prediction},
-                    source_name=source_response.source_name,
+        for batch_docs, batch_source_response in self._batchify(
+            texts, self.batch_size, source_response_list
+        ):
+            for doc, source_response in zip(batch_docs, batch_source_response):
+                ner_prediction = [
+                    {
+                        "entity_group": ent.label_,
+                        "word": ent.text,
+                        "start": ent.start_char,
+                        "end": ent.end_char,
+                    }
+                    for ent in doc.ents
+                ]
+                analyzer_output.append(
+                    TextPayload(
+                        processed_text=source_response.processed_text,
+                        meta=source_response.meta,
+                        segmented_data={"data": ner_prediction},
+                        source_name=source_response.source_name,
+                    )
                 )
-            )
 
         return analyzer_output
+cd tres
