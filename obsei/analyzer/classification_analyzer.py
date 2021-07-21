@@ -10,9 +10,9 @@ from obsei.analyzer.base_analyzer import (
 )
 from obsei.payload import TextPayload
 from obsei.preprocessor.text_splitter import TextSplitter, TextSplitterConfig
-from obsei.postprocessor.interface_aggregator import (
-    InterfaceAggregator,
-    InterfaceAggregatorConfig,
+from obsei.postprocessor.inference_aggregator import (
+    InferenceAggregatorConfig,
+    InferenceAggregator,
 )
 
 logger = logging.getLogger(__name__)
@@ -127,9 +127,9 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
                 )
 
         if not analyzer_config.max_length_truncation:
-            analyzer_output = InterfaceAggregator().postprocess_input(
+            analyzer_output = InferenceAggregator().postprocess_input(
                 input_list=analyzer_output,
-                config=InterfaceAggregatorConfig(aggregation_method=""),
+                config=InferenceAggregatorConfig(aggregation_method=""),
             )
 
         return analyzer_output

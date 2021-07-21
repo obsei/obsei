@@ -31,6 +31,7 @@ class TextSplitter(BaseTextPreprocessor):
                 document_id = uuid.uuid4().int
             start_idx = 0
             split_id = 0
+            document_splits = []
             document_length = len(input_data.processed_text)
             while start_idx < document_length:
                 if config.split_stride and start_idx:
@@ -45,13 +46,16 @@ class TextSplitter(BaseTextPreprocessor):
                     min(start_idx + config.max_split_length, document_length),
                 )
                 phrase = input_data.processed_text[start_idx:end_idx]
-                splits.append(
-                    self._build_payload(
-                        phrase, start_idx, split_id, document_id, document_length
-                    )
+                document_splits.append(
+                    (phrase, start_idx, split_id, document_id, document_length)
                 )
                 start_idx = end_idx + 1
                 split_id += 1
+
+            total_splits = len(document_splits)
+            splits.extend(
+                [self._build_payload(total_splits, *s) for s in document_splits]
+            )
 
         return splits
 
@@ -66,17 +70,24 @@ class TextSplitter(BaseTextPreprocessor):
         return idx
 
     def _build_payload(
-        self, phrase, start_idx, split_id, document_id=0, document_length=0
+        self,
+        total_splits,
+        phrase,
+        start_idx,
+        split_id,
+        document_id=0,
+        document_length=0,
     ):
         text_payload = TextPayload(processed_text=phrase)
         text_payload.segmented_data = phrase
         text_payload.meta = {
             "text": phrase,
-            "paragraph_id": split_id,
+            "chunk_id": split_id,
             "text_length": len(phrase),
             "start_index": start_idx,  # start position of split in document
             "document_id": document_id,
             "document_length": document_length,
+            "total_splits": total_splits,
         }
 
         return text_payload

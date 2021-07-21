@@ -3,42 +3,46 @@ from obsei.postprocessor.base_postprocessor import (
     BasePostprocessor,
     TextPayload,
 )
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
 
-class InterfaceAggregatorConfig(BasePostprocessorConfig):
-    aggregation_method = "most_common"
-
-    def __init__(self, **data):
-        super().__init__(**data)
+class InferenceAggregatorConfig(BasePostprocessorConfig):
+    aggregation_method: Optional[str] = "most_common"
 
 
-class InterfaceAggregator(BasePostprocessor):
+class InferenceAggregator(BasePostprocessor):
     def postprocess_input(
-        self, input_list: List[TextPayload], config: InterfaceAggregatorConfig, **kwargs
+        self, input_list: List[TextPayload], config: InferenceAggregatorConfig, **kwargs
     ) -> List[TextPayload]:
-        prev_document_id: int = -1
-        document = []
-        aggregated_payloads = []
-        for output in input_list:
-            if prev_document_id == -1:
-                prev_document_id = int(output.meta["document_id"])
-                document.append(output)
 
-            elif prev_document_id == int(output.meta["document_id"]):
-                document.append(output)
-            else:
-                aggregated_payloads.append(document)
-                document = [output]
-                prev_document_id = int(output.meta["document_id"])
-
-        if document and not aggregated_payloads:
-            aggregated_payloads.append(document)
+        aggregated_payloads = self._payload_aggregator(input_list, key="document_id")
 
         return [
             self._process_scores(config.aggregation_method, doc)
-            for doc in aggregated_payloads
+            for key, doc in aggregated_payloads.items()
         ]
+
+    def _payload_aggregator(
+        self, input_list: List[TextPayload], key: str = "document_id"
+    ) -> Dict[str, List[TextPayload]]:
+        prev_document_id: int = -1
+        document = []
+        aggregated_payloads = {}
+        for output in input_list:
+            if prev_document_id == -1:
+                prev_document_id = output.meta[key]
+                document.append(output)
+
+            elif prev_document_id == output.meta[key]:
+                document.append(output)
+            else:
+                aggregated_payloads[str(prev_document_id)] = document
+                document = [output]
+                prev_document_id = int(output.meta[key])
+        if document:
+            aggregated_payloads[str(prev_document_id)] = document
+
+        return aggregated_payloads
 
     def _process_scores(
         self, strategy: str, documents: List[TextPayload]
