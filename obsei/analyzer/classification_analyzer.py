@@ -129,7 +129,7 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         if not analyzer_config.max_length_truncation:
             analyzer_output = InferenceAggregator().postprocess_input(
                 input_list=analyzer_output,
-                config=InferenceAggregatorConfig(aggregation_method=""),
+                config=InferenceAggregatorConfig(aggregation_method="most_common"),
             )
 
         return analyzer_output
