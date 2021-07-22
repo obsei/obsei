@@ -1,7 +1,7 @@
 import pytest
 
 from obsei.analyzer.classification_analyzer import ZeroShotClassificationAnalyzer
-from obsei.analyzer.ner_analyzer import NERAnalyzer
+from obsei.analyzer.ner_analyzer import TransformersNERAnalyzer, SpacyNERAnalyzer
 from obsei.analyzer.pii_analyzer import (
     PresidioEngineConfig,
     PresidioModelConfig,
@@ -26,10 +26,17 @@ def vader_analyzer():
 
 
 @pytest.fixture(scope="session")
-def ner_analyzer():
-    return NERAnalyzer(
+def trf_ner_analyzer():
+    return TransformersNERAnalyzer(
         model_name_or_path="dbmdz/bert-large-cased-finetuned-conll03-english",
         tokenizer_name="bert-base-cased",
+    )
+
+
+@pytest.fixture(scope="session")
+def spacy_ner_analyzer():
+    return SpacyNERAnalyzer(
+        model_name_or_path="en_core_web_sm",
     )
 
 
