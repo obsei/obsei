@@ -78,16 +78,16 @@ class TextSplitter(BaseTextPreprocessor):
         document_id=0,
         document_length=0,
     ):
-        text_payload = TextPayload(processed_text=phrase)
-        text_payload.segmented_data = phrase
-        text_payload.meta = {
-            "text": phrase,
-            "chunk_id": split_id,
-            "text_length": len(phrase),
-            "start_index": start_idx,  # start position of split in document
-            "document_id": document_id,
-            "document_length": document_length,
-            "total_splits": total_splits,
-        }
-
-        return text_payload
+        return TextPayload(
+            processed_text=phrase,
+            segmented_data={"phrase": phrase},
+            meta={
+                "text": phrase,
+                "chunk_id": split_id,
+                "text_length": len(phrase),
+                "start_index": start_idx,  # start position of split in document
+                "document_id": document_id,
+                "document_length": document_length,
+                "total_splits": total_splits,
+            },
+        )
