@@ -73,7 +73,7 @@ class GoogleNewsSource(BaseSource):
             if config.fetch_article and config.crawler_config:
                 extracted_data = config.crawler_config.extract_url(url=article["url"])
 
-                if "text" in extracted_data and extracted_data["text"] is not None:
+                if extracted_data is not None and extracted_data.get("text", None) is not None:
                     article_text = extracted_data["text"]
                     del extracted_data["text"]
                 else:
