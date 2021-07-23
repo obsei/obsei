@@ -4,8 +4,8 @@ from pydantic import BaseModel
 
 
 class BasePayload(BaseModel):
-    segmented_data: Optional[Dict[str, Any]] = None
-    meta: Optional[Dict[str, Any]] = None
+    segmented_data: Dict[str, Any] = None
+    meta: Dict[str, Any] = None
     source_name: Optional[str] = "Undefined"
 
     class Config:
