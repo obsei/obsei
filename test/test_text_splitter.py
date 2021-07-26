@@ -1,6 +1,6 @@
 import pytest
 
-from obsei.preprocessor.text_splitter import TextSplitterConfig, TextSplitter
+from obsei.preprocessor.text_splitter import TextSplitterConfig
 from obsei.payload import TextPayload
 
 DOCUMENT_1 = """I love playing console games."""

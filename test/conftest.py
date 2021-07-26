@@ -10,7 +10,7 @@ from obsei.analyzer.pii_analyzer import (
 from obsei.analyzer.sentiment_analyzer import VaderSentimentAnalyzer
 from obsei.analyzer.translation_analyzer import TranslationAnalyzer
 from obsei.preprocessor.text_cleaner import TextCleaner
-from obsei.preprocessor.text_splitter import TextSplitterConfig, TextSplitter
+from obsei.preprocessor.text_splitter import TextSplitter
 
 
 @pytest.fixture(scope="session")

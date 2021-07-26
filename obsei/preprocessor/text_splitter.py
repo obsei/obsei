@@ -31,7 +31,7 @@ class TextSplitterConfig(BaseTextProcessorConfig):
 
 
 class TextSplitter(BaseTextPreprocessor):
-    def preprocess_input(
+    def preprocess_input(  # type: ignore[override]
         self, input_list: List[TextPayload], config: TextSplitterConfig, **kwargs
     ) -> List[TextPayload]:
         text_splits: List[TextPayload] = []

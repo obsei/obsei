@@ -13,7 +13,7 @@ class InferenceAggregatorConfig(BasePostprocessorConfig):
 
 
 class InferenceAggregator(BasePostprocessor):
-    def postprocess_input(
+    def postprocess_input(  # type: ignore[override]
         self, input_list: List[TextPayload], config: InferenceAggregatorConfig, **kwargs
     ) -> List[TextPayload]:
 

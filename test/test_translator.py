@@ -1,4 +1,3 @@
-from obsei.analyzer.base_analyzer import BaseAnalyzerConfig
 from obsei.payload import TextPayload
 
 GOOD_TEXT = """मुझे सब चीजे बहुत अच्छी लगी ।"""
