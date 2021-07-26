@@ -114,7 +114,7 @@ def test_spacy_ner_analyzer(spacy_ner_analyzer):
     )
     assert len(analyzer_responses) == 1
 
-    entities = analyzer_responses[0].segmented_data["data"]
+    entities = analyzer_responses[0].segmented_data["ner_data"]
     matched_count = 0
     for entity in entities:
         if entity["word"] == "Sam" and entity["entity_group"] == "PERSON":

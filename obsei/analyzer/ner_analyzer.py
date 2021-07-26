@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Generator, List, Optional, Tuple
 from pydantic import PrivateAttr
 from transformers import (
     AutoModelForTokenClassification,
@@ -98,6 +98,7 @@ class SpacyNERAnalyzer(BaseAnalyzer):
     model_name_or_path: str
     tokenizer_name: Optional[str] = None
     grouped_entities: Optional[bool] = True
+    n_process: int = 1
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -106,7 +107,7 @@ class SpacyNERAnalyzer(BaseAnalyzer):
             disable=["tagger", "parser", "attribute_ruler", "lemmatizer"],
         )
 
-    def _batchify(
+    def _spacy_pipe_batchify(
         self,
         texts: List[str],
         batch_size: int,
@@ -114,8 +115,12 @@ class SpacyNERAnalyzer(BaseAnalyzer):
     ) -> Generator[Tuple[List[Doc], List[TextPayload]], None, None]:
         for index in range(0, len(texts), batch_size):
             yield (
-                self._nlp.pipe(texts[index : index + batch_size]),
-                source_response_list[index : index + batch_size],
+                self._nlp.pipe(
+                    texts=texts[index: index + batch_size],
+                    batch_size=batch_size,
+                    n_process=self.n_process,
+                ),
+                source_response_list[index: index + batch_size],
             )
 
     def analyze_input(
@@ -129,7 +134,7 @@ class SpacyNERAnalyzer(BaseAnalyzer):
             source_response.processed_text for source_response in source_response_list
         ]
 
-        for batch_docs, batch_source_response in self._batchify(
+        for batch_docs, batch_source_response in self._spacy_pipe_batchify(
             texts, self.batch_size, source_response_list
         ):
             for doc, source_response in zip(batch_docs, batch_source_response):
@@ -142,11 +147,17 @@ class SpacyNERAnalyzer(BaseAnalyzer):
                     }
                     for ent in doc.ents
                 ]
+                segmented_data = {"ner_data": ner_prediction}
+                if source_response.segmented_data:
+                    segmented_data = {
+                        **segmented_data,
+                        **source_response.segmented_data,
+                    }
                 analyzer_output.append(
                     TextPayload(
                         processed_text=source_response.processed_text,
                         meta=source_response.meta,
-                        segmented_data={"data": ner_prediction},
+                        segmented_data=segmented_data,
                         source_name=source_response.source_name,
                     )
                 )
