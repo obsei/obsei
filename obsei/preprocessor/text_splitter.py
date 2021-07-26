@@ -27,7 +27,7 @@ class TextSplitterPayload(BaseModel):
 class TextSplitterConfig(BaseTextProcessorConfig):
     max_split_length: int = 512
     split_stride: int = 0  # overlap length
-    document_id_key: Optional[str]  # Document id in meta
+    document_id_key: Optional[str]  # document_id in meta
 
 
 class TextSplitter(BaseTextPreprocessor):
