@@ -1,6 +1,5 @@
 import logging
-from typing import Any, Dict, List, Tuple, Optional, Generator
-
+from typing import Any, Dict, Generator, List, Optional, Tuple
 from pydantic import PrivateAttr
 from transformers import (
     AutoModelForTokenClassification,
@@ -14,6 +13,7 @@ from spacy.tokens.doc import Doc
 from obsei.analyzer.base_analyzer import (
     BaseAnalyzer,
     BaseAnalyzerConfig,
+    MAX_LENGTH,
 )
 from obsei.payload import TextPayload
 
@@ -48,29 +48,15 @@ class TransformersNERAnalyzer(BaseAnalyzer):
         if hasattr(self._pipeline.model.config, "max_position_embeddings"):
             self._max_length = self._pipeline.model.config.max_position_embeddings
         else:
-            self._max_length = 510
+            self._max_length = MAX_LENGTH
 
-    def _classify_text_from_model(
-        self, texts: List[str]
-    ) -> List[List[Dict[str, float]]]:
+    def _prediction_from_model(self, texts: List[str]) -> List[List[Dict[str, float]]]:
         prediction = self._pipeline(texts)
         return (
             prediction
             if len(prediction) and isinstance(prediction[0], list)
             else [prediction]
         )
-
-    def _batchify(
-        self,
-        texts: List[str],
-        batch_size: int,
-        source_response_list: List[TextPayload],
-    ) -> Generator[Tuple[List[str], List[TextPayload]], None, None]:
-        for index in range(0, len(texts), batch_size):
-            yield (
-                texts[index : index + batch_size],
-                source_response_list[index : index + batch_size],
-            )
 
     def analyze_input(
         self,
@@ -79,25 +65,27 @@ class TransformersNERAnalyzer(BaseAnalyzer):
         **kwargs,
     ) -> List[TextPayload]:
         analyzer_output: List[TextPayload] = []
-        texts = [
-            source_response.processed_text[: self._max_length]
-            if len(source_response.processed_text) > self._max_length
-            else source_response.processed_text
-            for source_response in source_response_list
-        ]
 
-        for batch_texts, batch_source_response in self._batchify(
-            texts, self.batch_size, source_response_list
-        ):
-            batch_ner_predictions = self._classify_text_from_model(batch_texts)
-            for ner_prediction, source_response in zip(
-                batch_ner_predictions, batch_source_response
-            ):
+        for batch_responses in self.batchify(source_response_list, self.batch_size):
+            texts = [
+                source_response.processed_text[: self._max_length]
+                for source_response in batch_responses
+            ]
+            batch_predictions = self._prediction_from_model(texts)
+
+            for prediction, source_response in zip(batch_predictions, batch_responses):
+                segmented_data = {"ner_data": prediction}
+                if source_response.segmented_data:
+                    segmented_data = {
+                        **segmented_data,
+                        **source_response.segmented_data,
+                    }
+
                 analyzer_output.append(
                     TextPayload(
                         processed_text=source_response.processed_text,
                         meta=source_response.meta,
-                        segmented_data={"data": ner_prediction},
+                        segmented_data=segmented_data,
                         source_name=source_response.source_name,
                     )
                 )
@@ -110,6 +98,7 @@ class SpacyNERAnalyzer(BaseAnalyzer):
     model_name_or_path: str
     tokenizer_name: Optional[str] = None
     grouped_entities: Optional[bool] = True
+    n_process: int = 1
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -118,7 +107,7 @@ class SpacyNERAnalyzer(BaseAnalyzer):
             disable=["tagger", "parser", "attribute_ruler", "lemmatizer"],
         )
 
-    def _batchify(
+    def _spacy_pipe_batchify(
         self,
         texts: List[str],
         batch_size: int,
@@ -126,8 +115,12 @@ class SpacyNERAnalyzer(BaseAnalyzer):
     ) -> Generator[Tuple[List[Doc], List[TextPayload]], None, None]:
         for index in range(0, len(texts), batch_size):
             yield (
-                self._nlp.pipe(texts[index : index + batch_size]),
-                source_response_list[index : index + batch_size],
+                self._nlp.pipe(
+                    texts=texts[index: index + batch_size],
+                    batch_size=batch_size,
+                    n_process=self.n_process,
+                ),
+                source_response_list[index: index + batch_size],
             )
 
     def analyze_input(
@@ -141,7 +134,7 @@ class SpacyNERAnalyzer(BaseAnalyzer):
             source_response.processed_text for source_response in source_response_list
         ]
 
-        for batch_docs, batch_source_response in self._batchify(
+        for batch_docs, batch_source_response in self._spacy_pipe_batchify(
             texts, self.batch_size, source_response_list
         ):
             for doc, source_response in zip(batch_docs, batch_source_response):
@@ -154,11 +147,17 @@ class SpacyNERAnalyzer(BaseAnalyzer):
                     }
                     for ent in doc.ents
                 ]
+                segmented_data = {"ner_data": ner_prediction}
+                if source_response.segmented_data:
+                    segmented_data = {
+                        **segmented_data,
+                        **source_response.segmented_data,
+                    }
                 analyzer_output.append(
                     TextPayload(
                         processed_text=source_response.processed_text,
                         meta=source_response.meta,
-                        segmented_data={"data": ner_prediction},
+                        segmented_data=segmented_data,
                         source_name=source_response.source_name,
                     )
                 )

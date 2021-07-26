@@ -129,40 +129,41 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
 
         analyzer_output: List[TextPayload] = []
 
-        for source_response in source_response_list:
-            analyzer_result = self._analyzer.analyze(
-                text=source_response.processed_text,
-                entities=analyzer_config.entities,
-                return_decision_process=analyzer_config.return_decision_process,
-                language=language,
-            )
-
-            anonymized_result = None
-            if not analyzer_config.analyze_only:
-                anonymizers_config = (
-                    analyzer_config.anonymizers_config or self.anonymizers_config
+        for batch_responses in self.batchify(source_response_list, self.batch_size):
+            for source_response in batch_responses:
+                analyzer_result = self._analyzer.analyze(
+                    text=source_response.processed_text,
+                    entities=analyzer_config.entities,
+                    return_decision_process=analyzer_config.return_decision_process,
+                    language=language,
                 )
 
-                if (
-                    source_response.processed_text is not None
-                    and len(source_response.processed_text) > 0
-                ):
-                    anonymized_result = self._anonymizer.anonymize(
-                        text=source_response.processed_text,
-                        operators=anonymizers_config,
-                        analyzer_results=analyzer_result,
+                anonymized_result = None
+                if not analyzer_config.analyze_only:
+                    anonymizers_config = (
+                        analyzer_config.anonymizers_config or self.anonymizers_config
                     )
 
-            if analyzer_config.replace_original_text and anonymized_result is not None:
-                text = anonymized_result.text
-            else:
-                text = source_response.processed_text
+                    if (
+                        source_response.processed_text is not None
+                        and len(source_response.processed_text) > 0
+                    ):
+                        anonymized_result = self._anonymizer.anonymize(
+                            text=source_response.processed_text,
+                            operators=anonymizers_config,
+                            analyzer_results=analyzer_result,
+                        )
 
-            analyzer_output.append(
-                TextPayload(
-                    processed_text=text,
-                    meta=source_response.meta,
-                    segmented_data={
+                if (
+                    analyzer_config.replace_original_text
+                    and anonymized_result is not None
+                ):
+                    text = anonymized_result.text
+                else:
+                    text = source_response.processed_text
+
+                segmented_data = {
+                    "pii_data": {
                         "analyzer_result": [vars(result) for result in analyzer_result],
                         "anonymized_result": None
                         if not anonymized_result
@@ -170,9 +171,21 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
                         "anonymized_text": None
                         if not anonymized_result
                         else anonymized_result.text,
-                    },
-                    source_name=source_response.source_name,
+                    }
+                }
+                if source_response.segmented_data:
+                    segmented_data = {
+                        **segmented_data,
+                        **source_response.segmented_data,
+                    }
+
+                analyzer_output.append(
+                    TextPayload(
+                        processed_text=text,
+                        meta=source_response.meta,
+                        segmented_data=segmented_data,
+                        source_name=source_response.source_name,
+                    )
                 )
-            )
 
         return analyzer_output

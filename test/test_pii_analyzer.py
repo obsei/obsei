@@ -22,18 +22,19 @@ def test_pii_analyzer_replace_original(pii_analyzer):
     for text, analyzer_response in zip(TEXTS, analyzer_responses):
 
         assert analyzer_response.segmented_data is not None
-        assert analyzer_response.segmented_data["analyzer_result"] is not None
-        assert analyzer_response.segmented_data["anonymized_result"] is not None
-        assert analyzer_response.segmented_data["anonymized_text"] is not None
+        assert analyzer_response.segmented_data["pii_data"] is not None
+        assert analyzer_response.segmented_data["pii_data"]["analyzer_result"] is not None
+        assert analyzer_response.segmented_data["pii_data"]["anonymized_result"] is not None
+        assert analyzer_response.segmented_data["pii_data"]["anonymized_text"] is not None
 
         for pii_info in PII_LIST:
-            assert pii_info not in analyzer_response.segmented_data["anonymized_text"]
+            assert pii_info not in analyzer_response.segmented_data["pii_data"]["anonymized_text"]
 
         assert (
-            analyzer_response.segmented_data["anonymized_text"]
+            analyzer_response.segmented_data["pii_data"]["anonymized_text"]
             == analyzer_response.processed_text
         )
-        assert analyzer_response.segmented_data["anonymized_text"] != text
+        assert analyzer_response.segmented_data["pii_data"]["anonymized_text"] != text
 
 
 def test_pii_analyzer_not_replace_original(pii_analyzer):
@@ -52,15 +53,16 @@ def test_pii_analyzer_not_replace_original(pii_analyzer):
     for text, analyzer_response in zip(TEXTS, analyzer_responses):
 
         assert analyzer_response.segmented_data is not None
-        assert analyzer_response.segmented_data["analyzer_result"] is not None
-        assert analyzer_response.segmented_data["anonymized_result"] is not None
-        assert analyzer_response.segmented_data["anonymized_text"] is not None
+        assert analyzer_response.segmented_data["pii_data"] is not None
+        assert analyzer_response.segmented_data["pii_data"]["analyzer_result"] is not None
+        assert analyzer_response.segmented_data["pii_data"]["anonymized_result"] is not None
+        assert analyzer_response.segmented_data["pii_data"]["anonymized_text"] is not None
 
         for pii_info in PII_LIST:
-            assert pii_info not in analyzer_response.segmented_data["anonymized_text"]
+            assert pii_info not in analyzer_response.segmented_data["pii_data"]["anonymized_text"]
 
         assert analyzer_response.processed_text == text
-        assert analyzer_response.segmented_data["anonymized_text"] != text
+        assert analyzer_response.segmented_data["pii_data"]["anonymized_text"] != text
 
 
 def test_pii_analyzer_analyze_only(pii_analyzer):
@@ -79,7 +81,8 @@ def test_pii_analyzer_analyze_only(pii_analyzer):
     for text, analyzer_response in zip(TEXTS, analyzer_responses):
 
         assert analyzer_response.segmented_data is not None
-        assert analyzer_response.segmented_data["analyzer_result"] is not None
-        assert analyzer_response.segmented_data["anonymized_result"] is None
+        assert analyzer_response.segmented_data["pii_data"] is not None
+        assert analyzer_response.segmented_data["pii_data"]["analyzer_result"] is not None
+        assert analyzer_response.segmented_data["pii_data"]["anonymized_result"] is None
 
         assert text == analyzer_response.processed_text

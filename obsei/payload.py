@@ -1,11 +1,11 @@
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class BasePayload(BaseModel):
-    segmented_data: Optional[Dict[str, Any]] = None
-    meta: Optional[Dict[str, Any]] = None
+    segmented_data: Dict[str, Any] = Field({})
+    meta: Dict[str, Any] = Field({})
     source_name: Optional[str] = "Undefined"
 
     class Config:
@@ -22,6 +22,12 @@ class TextPayload(BasePayload):
             "meta": self.meta,
             "source_name": self.source_name,
         }
+
+    def is_contains_classification_payload(self) -> bool:
+        if self.segmented_data:
+            if "classifier_data" in self.segmented_data:
+                return True
+        return False
 
     class Config:
         arbitrary_types_allowed = True

@@ -1,4 +1,3 @@
-from obsei.analyzer.base_analyzer import BaseAnalyzerConfig
 from obsei.payload import TextPayload
 
 GOOD_TEXT = """मुझे सब चीजे बहुत अच्छी लगी ।"""
@@ -25,4 +24,6 @@ def test_translate_analyzer(translate_analyzer):
 
     for text, analyzer_response in zip(TEXTS, analyzer_responses):
         assert analyzer_response.segmented_data is not None
-        assert text != analyzer_response.segmented_data["translated_text"]
+        assert analyzer_response.segmented_data["translation_data"] is not None
+        assert text == analyzer_response.segmented_data["translation_data"]["original_text"]
+        assert text != analyzer_response.processed_text
