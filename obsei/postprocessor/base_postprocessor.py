@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import List
 from obsei.payload import TextPayload
 from pydantic import BaseModel
 from abc import abstractmethod

@@ -37,26 +37,38 @@ class VaderSentimentAnalyzer(BaseAnalyzer):
     ) -> List[TextPayload]:
         analyzer_output: List[TextPayload] = []
 
-        for source_response in source_response_list:
-            classification_map = {}
-            sentiment_value = self._get_sentiment_score_from_vader(
-                source_response.processed_text
-            )
-            if sentiment_value < 0.0:
-                classification_map["negative"] = -sentiment_value
-                classification_map["positive"] = 1.0 - classification_map["negative"]
-            else:
-                classification_map["positive"] = sentiment_value
-                classification_map["negative"] = 1.0 - classification_map["positive"]
-
-            analyzer_output.append(
-                TextPayload(
-                    processed_text=source_response.processed_text,
-                    meta=source_response.meta,
-                    segmented_data=classification_map,
-                    source_name=source_response.source_name,
+        for batch_responses in self.batchify(source_response_list, self.batch_size):
+            for source_response in batch_responses:
+                classification_map = {}
+                sentiment_value = self._get_sentiment_score_from_vader(
+                    source_response.processed_text
                 )
-            )
+                if sentiment_value < 0.0:
+                    classification_map["negative"] = -sentiment_value
+                    classification_map["positive"] = (
+                        1.0 - classification_map["negative"]
+                    )
+                else:
+                    classification_map["positive"] = sentiment_value
+                    classification_map["negative"] = (
+                        1.0 - classification_map["positive"]
+                    )
+
+                segmented_data = {"classifier_data": classification_map}
+                if source_response.segmented_data:
+                    segmented_data = {
+                        **segmented_data,
+                        **source_response.segmented_data,
+                    }
+
+                analyzer_output.append(
+                    TextPayload(
+                        processed_text=source_response.processed_text,
+                        meta=source_response.meta,
+                        segmented_data=segmented_data,
+                        source_name=source_response.source_name,
+                    )
+                )
 
         return analyzer_output
 

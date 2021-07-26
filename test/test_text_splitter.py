@@ -1,3 +1,5 @@
+import pytest
+
 from obsei.preprocessor.text_splitter import TextSplitterConfig, TextSplitter
 from obsei.payload import TextPayload
 
@@ -6,43 +8,22 @@ DOCUMENT_2 = """Beyoncé Giselle Knowles-Carter (/biːˈjɒnseɪ/ bee-YON-say; b
 DOC1_VAL = [29]
 DOC2_VAL1 = [503, 512, 504, 384]
 DOC2_VAL2 = [503, 512, 507, 505, 394]
+MAX_SPLIT_LENGTH = 512
+SPLIT_STRIDE = 128
 
 
-def test_no_stride_splits(text_splitter):
-    doc1_splits = text_splitter.preprocess_input(
-        input_list=[TextPayload(processed_text=DOCUMENT_1)],
-        config=TextSplitterConfig(max_split_length=512),
+@pytest.mark.parametrize(
+    "doc, expected_lengths, stride",
+    [(DOCUMENT_1, DOC1_VAL, 0), (DOCUMENT_1, DOC1_VAL, 128), (DOCUMENT_2, DOC2_VAL1, 0), (DOCUMENT_2, DOC2_VAL2, 128)]
+)
+def test_splits(doc, expected_lengths, stride, text_splitter):
+    doc_splits = text_splitter.preprocess_input(
+        input_list=[TextPayload(processed_text=doc)],
+        config=TextSplitterConfig(max_split_length=MAX_SPLIT_LENGTH, split_stride=stride),
     )
 
-    doc2_splits = text_splitter.preprocess_input(
-        input_list=[TextPayload(processed_text=DOCUMENT_2)],
-        config=TextSplitterConfig(max_split_length=512),
-    )
-
-    assert len(DOC1_VAL) == len(doc1_splits)
-    for i, j in zip(doc1_splits, DOC1_VAL):
-        assert int(i.meta["text_length"]) == j
-
-    assert len(DOC2_VAL1) == len(doc2_splits)
-    for i, j in zip(doc2_splits, DOC2_VAL1):
-        assert int(i.meta["text_length"]) == j
-
-
-def test_stride_splits(text_splitter):
-    doc1_splits = text_splitter.preprocess_input(
-        input_list=[TextPayload(processed_text=DOCUMENT_1)],
-        config=TextSplitterConfig(max_split_length=512, split_stride=128),
-    )
-
-    doc2_splits = text_splitter.preprocess_input(
-        input_list=[TextPayload(processed_text=DOCUMENT_2)],
-        config=TextSplitterConfig(max_split_length=512, split_stride=128),
-    )
-
-    assert len(DOC1_VAL) == len(doc1_splits)
-    for i, j in zip(doc1_splits, DOC1_VAL):
-        assert int(i.meta["text_length"]) == j
-
-    assert len(DOC2_VAL2) == len(doc2_splits)
-    for i, j in zip(doc2_splits, DOC2_VAL2):
-        assert int(i.meta["text_length"]) == j
+    assert len(expected_lengths) == len(doc_splits)
+    for text_payload, expected_length in zip(doc_splits, expected_lengths):
+        assert "splitter" in text_payload.meta
+        splitter_payload = text_payload.meta["splitter"]
+        assert splitter_payload.chunk_length == expected_length

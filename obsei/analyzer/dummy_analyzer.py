@@ -24,16 +24,22 @@ class DummyAnalyzer(BaseAnalyzer):
     ) -> List[TextPayload]:
         responses = []
         for source_response in source_response_list:
+
+            segmented_data = {
+                "dummy_data": None
+                if not analyzer_config
+                else analyzer_config.dummy_data
+            }
+
+            if source_response.segmented_data:
+                segmented_data = {**segmented_data, **source_response.segmented_data}
+
             responses.append(
                 TextPayload(
                     processed_text=source_response.processed_text,
                     meta=source_response.meta,
                     source_name=source_response.source_name,
-                    segmented_data={
-                        "data": None
-                        if not analyzer_config
-                        else analyzer_config.dummy_data
-                    },
+                    segmented_data=segmented_data,
                 )
             )
 

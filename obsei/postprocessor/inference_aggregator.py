@@ -1,13 +1,15 @@
+from typing import List, Optional, Dict
 from obsei.postprocessor.base_postprocessor import (
     BasePostprocessorConfig,
     BasePostprocessor,
     TextPayload,
 )
-from typing import Any, List, Optional, Dict
+from obsei.postprocessor.inference_aggregator_function import BaseInferenceAggregateFunction
+from obsei.preprocessor.text_splitter import TextSplitterPayload
 
 
 class InferenceAggregatorConfig(BasePostprocessorConfig):
-    aggregation_method: Optional[str] = "most_common"
+    aggregate_function: BaseInferenceAggregateFunction
 
 
 class InferenceAggregator(BasePostprocessor):
@@ -15,92 +17,38 @@ class InferenceAggregator(BasePostprocessor):
         self, input_list: List[TextPayload], config: InferenceAggregatorConfig, **kwargs
     ) -> List[TextPayload]:
 
-        aggregated_payloads = self._payload_aggregator(input_list, key="document_id")
+        aggregated_payloads = self.segregate_payload(input_list)
+        postproces_output: List[TextPayload] = []
+        for key, payload_list in aggregated_payloads.items():
+            postproces_output.extend(
+                config.aggregate_function.execute(payload_list)
+            )
 
-        return [
-            self._process_scores(config.aggregation_method, doc)
-            for key, doc in aggregated_payloads.items()
-        ]
+        return postproces_output
 
-    def _payload_aggregator(
-        self, input_list: List[TextPayload], key: str = "document_id"
+    @staticmethod
+    def segregate_payload(
+        input_list: List[TextPayload],
     ) -> Dict[str, List[TextPayload]]:
-        prev_document_id: int = -1
-        document = []
-        aggregated_payloads = {}
-        for output in input_list:
-            if prev_document_id == -1:
-                prev_document_id = output.meta[key]
-                document.append(output)
+        segregated_payload: Dict[str, List[TextPayload]] = {}
 
-            elif prev_document_id == output.meta[key]:
-                document.append(output)
-            else:
-                aggregated_payloads[str(prev_document_id)] = document
-                document = [output]
-                prev_document_id = int(output.meta[key])
-        if document:
-            aggregated_payloads[str(prev_document_id)] = document
+        # segregate payload
+        for idx, payload in enumerate(input_list):
+            splitter_data: Optional[TextSplitterPayload] = (
+                payload.meta.get("splitter", None) if payload.meta else None
+            )
+            doc_id = splitter_data.document_id if splitter_data else str(idx)
+            if doc_id not in segregated_payload:
+                segregated_payload[doc_id] = []
+            segregated_payload[doc_id].append(payload)
 
-        return aggregated_payloads
+        # sort based on chunk id
+        for doc_id, payloads in segregated_payload.items():
+            if (
+                len(payloads) > 0
+                and payloads[0].meta
+                and payloads[0].meta.get("splitter", None)
+            ):
+                payloads.sort(key=lambda x: x.meta["splitter"].chunk_id)
 
-    def _process_scores(
-        self, strategy: str, documents: List[TextPayload]
-    ) -> TextPayload:
-        if strategy == "most_common":
-            return self._most_common(documents)
-        if strategy == "weighted_average":
-            return self._weighted_average(documents)
-        return TextPayload(processed_text="")
-
-    def _most_common(self, documents: List[TextPayload]) -> TextPayload:
-        labels = []
-        doc_text = []
-        doc_id = int(documents[0].meta["document_id"])
-        source_name = documents[0].source_name
-
-        for doc in documents:
-            doc_text.append(doc.processed_text)
-            scores = doc.segmented_data
-            scores = {
-                key: value
-                for key, value in scores.items()
-                if key not in ["positive", "negative"]
-            }
-            max_key = max(scores, key=scores.get)
-            labels.append(max_key)
-        label = max(labels, key=labels.count)
-        return TextPayload(
-            processed_text=" ".join(doc_text),
-            meta={"document_id": doc_id, "label": label},
-            source_name=source_name,
-        )
-
-    def _weighted_average(self, documents: List[TextPayload]) -> TextPayload:
-        if len(documents) == 0:
-            return TextPayload(processed_text="")
-        doc_id = documents[0].meta["document_id"]
-        document_length = documents[0].meta["document_length"]
-        source_name = documents[0].source_name
-        scores = {key: 0 for key in documents[0].segmented_data.keys()}
-        doc_text = []
-        for doc in documents:
-
-            doc_text.append(doc.processed_text)
-            for key in scores.keys():
-                scores[key] += (
-                    doc.meta["text_length"] / document_length
-                ) * doc.segmented_data[key]
-
-        scores = {
-            key: value
-            for key, value in scores.items()
-            if key not in ["positive", "negative"]
-        }
-        max_key = max(scores, key=scores.get)
-        return TextPayload(
-            processed_text=" ".join(doc_text),
-            meta={"label": max_key, "document_id": doc_id},
-            segmented_data=scores,
-            source_name=source_name,
-        )
+        return segregated_payload
