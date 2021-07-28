@@ -10,6 +10,7 @@ Below are some sections detailing the guidelines we'd like you to follow to make
 - [Issues, Bugs, and Feature Requests](#issue)
 - [Submission Guidelines](#submit)
 - [Code Style and Formatting](#code)
+- [Contributor License Agreement](#cla)
 
 ## 📜 <a name="coc"></a> Code of Conduct
 
@@ -92,7 +93,11 @@ That's it! Thank you for your contribution!
 
 We generally follow the [Google Python style guide](http://google.github.io/styleguide/pyguide.html).
 
+## 📝 <a name="cla"></a> Contributor License Agreement
+
+That we do not have any potential problems later it is sadly necessary to sign a [Contributor License Agreement](CONTRIBUTOR_LICENSE_AGREEMENT.md). That can be done literally with the push of a button.
+
 ---
 
-_This guide was inspired by the [transformers-interpret](https://github.com/cdpierse/transformers-interpret/blob/master/CONTRIBUTING.md)
-and [Haystack](https://github.com/deepset-ai/haystack/blob/master/CONTRIBUTING.md)_
+_This guide was inspired by the [transformers-interpret](https://github.com/cdpierse/transformers-interpret/blob/master/CONTRIBUTING.md), 
+[Haystack](https://github.com/deepset-ai/haystack/blob/master/CONTRIBUTING.md) and [n8n](https://github.com/n8n-io/n8n/blob/master/CONTRIBUTOR_LICENSE_AGREEMENT.md)_
