@@ -137,7 +137,7 @@
 <td colspan="3">Observe news article from Google news, PreProcess text via various text cleaning function, Analyze them via performing text classification while splitting text in small chunks and later computing final inference using given formula</td>
 </tr>
 <tr>
-<td>Google News → PreProcessing → Classification</td>
+<td>Google News → Text Cleaner → Text Splitter → Classification → Inference Aggregator</td>
 <td>
     <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/04_GoogleNews_Cleaner_Splitter_Classification_Aggregator.ipynb">
         <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
