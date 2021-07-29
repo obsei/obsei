@@ -900,6 +900,11 @@ python example.py
 </tbody>
 </table>
 
+## Tips
+### Handle large text classification
+
+![](https://raw.githubusercontent.com/obsei/obsei-resources/master/gifs/Long_Text_Classification.gif)
+
 ## Upcoming Release
 Upcoming release plan and progress can be tracked at [link](https://github.com/obsei/obsei/projects) (Suggestions are welcome).
 
