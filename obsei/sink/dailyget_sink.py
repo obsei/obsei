@@ -108,10 +108,10 @@ class PayloadConvertor(Convertor):
                 "userProfile": user_url,
                 "sentiment": sentiment,
                 "predictedCategories": ",".join(classification_list),
-                "metadata": str(json.dumps(analyzer_response.segmented_data)),
+                "metadata": str(json.dumps(analyzer_response.segmented_data, ensure_ascii=False)),
                 "originatedAt": created_at_str,
             }
-            request_payload["messageDetail"] = str(json.dumps(message))
+            request_payload["messageDetail"] = str(json.dumps(message, ensure_ascii=False))
 
         return request_payload
 
