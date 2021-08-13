@@ -33,7 +33,7 @@ for idx, source_response in enumerate(source_response_list):
 analyzer_response_list = text_analyzer.analyze_input(
     source_response_list=source_response_list,
     analyzer_config=ClassificationAnalyzerConfig(
-        labels=["no parking", "registration issue", "app issue", "payment issue"],
+        labels=["interface", "slow", "battery"],
     ),
 )
 for idx, an_response in enumerate(analyzer_response_list):

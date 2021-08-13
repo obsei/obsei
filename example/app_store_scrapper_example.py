@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import pytz
 
-from obsei.analyzer.classification_analyzer import ZeroShotClassificationAnalyzer
+from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig, ZeroShotClassificationAnalyzer
 from obsei.misc.utils import DATETIME_STRING_PATTERN
 from obsei.source.appstore_scrapper import (
     AppStoreScrapperConfig,
@@ -34,7 +34,7 @@ for idx, source_response in enumerate(source_response_list):
 analyzer_response_list = text_analyzer.analyze_input(
     source_response_list=source_response_list,
     analyzer_config=ClassificationAnalyzerConfig(
-        labels=["no parking", "registration issue", "app issue", "payment issue"],
+        labels=["interface", "slow", "battery"],
     ),
 )
 for idx, an_response in enumerate(analyzer_response_list):
