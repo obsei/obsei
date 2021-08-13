@@ -19,7 +19,7 @@ from obsei.misc.utils import (
 class PlayStoreScrapperConfig(BaseSourceConfig):
     TYPE: str = "PlayStoreScrapper"
     app_url: Optional[str] = None
-    countries: Optional[List[str]] = Field(["us"])
+    countries: [List[str]] = Field(["us"])
     package_name: Optional[str] = None
     app_name: Optional[str] = None
     language: Optional[str] = None
