@@ -1,8 +1,10 @@
 import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from urllib import parse
 
 from google_play_scraper import Sort, reviews
+from pydantic import Field
 
 from obsei.misc.web_search import perform_search
 from obsei.source.base_source import BaseSource, BaseSourceConfig
@@ -16,10 +18,11 @@ from obsei.misc.utils import (
 
 class PlayStoreScrapperConfig(BaseSourceConfig):
     TYPE: str = "PlayStoreScrapper"
-    countries: List[str]
+    app_url: Optional[str] = None
+    countries: Optional[List[str]] = Field(["us"])
     package_name: Optional[str] = None
     app_name: Optional[str] = None
-    language: Optional[str]
+    language: Optional[str] = None
     filter_score_with: Optional[int] = None
     lookup_period: Optional[str] = None
     max_count: Optional[int] = 200
@@ -27,16 +30,27 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-        if not self.package_name and self.app_name:
-            self.package_name = PlayStoreScrapperConfig.search_package_name(
-                self.app_name
-            )
-
-        if not self.package_name:
-            raise ValueError("Valid `package_name` or `app_name` is mandatory")
+        if self.app_url is not None:
+            parsed_url = parse.urlparse(self.app_url)
+            query_dict = parse.parse_qs(parsed_url.query)
+            self.countries = query_dict.get('gl', self.countries)
+            languages = query_dict.get('hl', None)
+            if languages is not None:
+                self.language = languages[0]
+            package_ids = query_dict.get('id', None)
+            if package_ids is not None:
+                self.package_name = package_ids[0]
+        else:
+            if not self.package_name and self.app_name:
+                self.package_name = PlayStoreScrapperConfig.search_package_name(
+                    self.app_name
+                )
 
         if self.language is None:
             self.language = "en"
+
+        if not self.package_name:
+            raise ValueError("Valid `package_name`, `app_name` or `app_url` is mandatory")
 
     @classmethod
     def search_package_name(cls, app_name: str):

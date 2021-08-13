@@ -1,9 +1,10 @@
 import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from urllib import parse
 
 from app_store.app_store_reviews_reader import AppStoreReviewsReader
-from pydantic import PrivateAttr
+from pydantic import Field, PrivateAttr
 
 from obsei.misc.web_search import perform_search
 from obsei.source.base_source import BaseSource, BaseSourceConfig
@@ -18,7 +19,8 @@ from obsei.misc.utils import (
 class AppStoreScrapperConfig(BaseSourceConfig):
     _scrappers: List[AppStoreReviewsReader] = PrivateAttr()
     TYPE: str = "AppStoreScrapper"
-    countries: List[str]
+    app_url: Optional[str] = None
+    countries: List[str] = Field(["us"])
     app_id: Optional[str] = None
     app_name: Optional[str] = None
     lookup_period: Optional[str] = None
@@ -27,11 +29,20 @@ class AppStoreScrapperConfig(BaseSourceConfig):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-        if not self.app_id and self.app_name:
-            self.app_id = AppStoreScrapperConfig.search_id(self.app_name)
+        if self.app_url is not None:
+            parsed_url = parse.urlparse(self.app_url)
+            url_paths = parsed_url.path.split("/")
+            if len(url_paths) == 5:
+                self.countries = [url_paths[1]]
+                self.app_name = url_paths[3]
+                app_ids = url_paths[4].split("id")
+                self.app_id = None if len(app_ids) != 2 else app_ids[1]
+        else:
+            if not self.app_id and self.app_name:
+                self.app_id = AppStoreScrapperConfig.search_id(self.app_name)
 
         if not self.app_id:
-            raise ValueError("Valid `app_id` or `app_name` is mandatory")
+            raise ValueError("Valid `package_name`, `app_name` or `app_url` is mandatory")
 
         self._scrappers = []
         for country in self.countries:

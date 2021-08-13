@@ -15,7 +15,10 @@ from obsei.source.playstore_scrapper import (
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-source_config = PlayStoreScrapperConfig(countries=["us"], app_name="gmail", max_count=3)
+source_config = PlayStoreScrapperConfig(
+    app_url='https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en_IN&gl=US',
+    max_count=3
+)
 
 source = PlayStoreScrapperSource()
 
