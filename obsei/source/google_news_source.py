@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+from urllib import parse
 
 import dateparser
 from gnews import GNews
@@ -61,7 +62,8 @@ class GoogleNewsSource(BaseSource):
         last_since_time = since_time
 
         google_news_client = config.get_client()
-        articles = google_news_client.get_news(config.query)
+        query = parse.quote(config.query, errors='ignore')
+        articles = google_news_client.get_news(query)
 
         for article in articles:
             published_date = (
@@ -98,7 +100,7 @@ class GoogleNewsSource(BaseSource):
             ):
                 last_since_time = published_date
 
-        if update_state and last_since_time and self.store:
+        if update_state and last_since_time and self.store is not None:
             state["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
             self.store.update_source_state(workflow_id=id, state=state)
 
