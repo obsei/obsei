@@ -93,4 +93,65 @@ def extract_topic_sizes(df):
     return {key:value for key, value in topic_sizes}
 
 
+def get_vec_lda(model, corpus, k):
+    """
+    Get the LDA vector representation (probabilistic topic assignments for all documents)
+    :return: vec_lda with dimension: (n_doc * n_topic)
+    """
+    n_doc = len(corpus)
+    vec_lda = np.zeros((n_doc, k))
+    for i in range(n_doc):
+        # get the distribution for the i-th document in corpus
+        for topic, prob in model.get_document_topics(corpus[i]):
+            vec_lda[i, topic] = prob
 
+    return vec_lda
+
+
+import keras
+from keras.layers import Input, Dense
+from keras.models import Model
+from sklearn.model_selection import train_test_split
+import warnings
+warnings.filterwarnings('ignore')
+
+
+class Autoencoder:
+    """
+    Autoencoder for learning latent space representation
+    architecture simplified for only one hidden layer
+    """
+
+    def __init__(self, latent_dim=32, activation='relu', epochs=200, batch_size=128):
+        self.latent_dim = latent_dim
+        self.activation = activation
+        self.epochs = epochs
+        self.batch_size = batch_size
+        self.autoencoder = None
+        self.encoder = None
+        self.decoder = None
+        self.his = None
+
+    def _compile(self, input_dim):
+        """
+        compile the computational graph
+        """
+        input_vec = Input(shape=(input_dim,))
+        encoded = Dense(self.latent_dim, activation=self.activation)(input_vec)
+        decoded = Dense(input_dim, activation=self.activation)(encoded)
+        self.autoencoder = Model(input_vec, decoded)
+        self.encoder = Model(input_vec, encoded)
+        encoded_input = Input(shape=(self.latent_dim,))
+        decoder_layer = self.autoencoder.layers[-1]
+        self.decoder = Model(encoded_input, self.autoencoder.layers[-1](encoded_input))
+        self.autoencoder.compile(optimizer='adam', loss=keras.losses.mean_squared_error)
+
+    def fit(self, X):
+        if not self.autoencoder:
+            self._compile(X.shape[1])
+        X_train, X_test = train_test_split(X)
+        self.his = self.autoencoder.fit(X_train, X_train,
+                                        epochs=self.epochs,
+                                        batch_size=self.batch_size,
+                                        shuffle=True,
+                                        validation_data=(X_test, X_test), verbose=0)

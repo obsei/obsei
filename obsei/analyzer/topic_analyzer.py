@@ -3,17 +3,22 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import Field, PrivateAttr
 from transformers import Pipeline, pipeline
-
+from gensim import corpora
+from gensim.models.ldamodel import LdaModel
 from obsei.analyzer.base_analyzer import (
     BaseAnalyzer,
     BaseAnalyzerConfig,
     MAX_LENGTH
 )
+import re
 from obsei.payload import TextPayload
 from obsei.postprocessor.inference_aggregator import InferenceAggregatorConfig
 from obsei.postprocessor.inference_aggregator_function import ClassificationAverageScore
-from obsei.analyzer.topic_analyzer_utils import get_topics_by_cluster, get_umap_embedings, cluster_embeddings
+from obsei.analyzer.topic_analyzer_utils import get_topics_by_cluster, get_umap_embedings, cluster_embeddings, get_vec_lda
 from sentence_transformers import SentenceTransformer
+from obsei.preprocessor.text_cleaner import TextCleanerConfig, TextCleaner
+from obsei.preprocessor.text_tokenizer import NLTKTextTokenizer
+from obsei.preprocessor.text_cleaning_function import RemovePunctuation, RemoveStopWords, RemoveWhiteSpaceAndEmptyToken, ToLowerCase, TokenStemming
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +46,8 @@ class TopicClassificationAnalyzer(BaseAnalyzer):
 
     def _get_topics(self, source_response_list, source_name):
         if self.method == "BERT":
-            docs = [
-                source_response.processed_text[: self._max_length]
-                for source_response in source_response_list
-            ]
-            return self._get_topic_bert(docs, source_name)
+
+            return self._get_topic_bert(source_response_list, source_name)
         if self.method == "LDA":
 
             return self._get_topic_lda(source_response_list)
@@ -54,7 +56,11 @@ class TopicClassificationAnalyzer(BaseAnalyzer):
 
         return None
 
-    def _get_topic_bert(self, docs, source_name,  umap_n_neighbors = 10, umap_n_components = 5, min_cluster_size = 10):
+    def _get_topic_bert(self, source_response_list, source_name,  umap_n_neighbors = 10, umap_n_components = 5, min_cluster_size = 10):
+        docs = [
+            source_response.processed_text[: self._max_length]
+            for source_response in source_response_list
+        ]
         embeddings = self._get_transformer_embeddings(docs)
         umap_embeddings = get_umap_embedings(embeddings = embeddings, n_neighbors= umap_n_neighbors, n_component= umap_n_components)
         clusters = cluster_embeddings(umap_embeddings, min_cluster_size = min_cluster_size)
@@ -76,8 +82,40 @@ class TopicClassificationAnalyzer(BaseAnalyzer):
         #     raise ValueError("analyzer_config can't be None")
         source_name = source_response_list[0].source_name
         analyzer_output = self._get_topics(source_response_list,source_name) # other params in config?
-        return  analyzer_output# maybe return list of text payload only , with processed text as the discoverd topic names,
-    # and meta contains all the texts / list of payloads contained in that Payload
+        return  analyzer_output
+
+    def _get_topic_lda(self, source_input_list, source_name):
+        token_lists =  self._prepare_tokens(source_input_list)
+        dictionary = corpora.Dictionary(token_lists)
+        corpus = [dictionary.doc2bow(text) for text in token_lists]
+        _, lda_model = self._get_lda_embeddings(dictionary,corpus )
+        topics = lda_model.show_topics()
+        topics_list = [ re.findall(r'"([^"]*)"', t[1]) for t in  topics]
+        analyzer_output = [TextPayload(
+            processed_text="_".join(t),
+            meta={"cluster_topics": t},
+            source_name=source_name
+        ) for t in topics_list]
+        return analyzer_output
+
+    def _get_lda_embeddings(self, dictionary ,corpus, num_topics= 10):
+        ldamodel = LdaModel(corpus, num_topics= num_topics , id2word=dictionary,
+                                                   passes=20)
+        embeddings = get_vec_lda(ldamodel, corpus, num_topics )
+        return embeddings, ldamodel
+
+    def _prepare_tokens(self, source_response_list):
+        tokenizer = NLTKTextTokenizer()
+        preprocess_config = TextCleanerConfig(cleaning_functions=[RemoveWhiteSpaceAndEmptyToken(),RemovePunctuation(),RemoveStopWords(),ToLowerCase()]) #Stemming
+        preprocessor = TextCleaner()
+        cleaner_responses = preprocessor.preprocess_input(
+            config=preprocess_config, input_list=source_response_list
+        )
+        tokenized_texts = [tokenizer.tokenize_text(t.processed_text) for t in cleaner_responses]
+        return tokenized_texts
+
+    def _get_topic_ldabert(self, source_list):
+        
 
 if __name__ == '__main__':
     from obsei.source.playstore_scrapper import PlayStoreScrapperConfig, PlayStoreScrapperSource
@@ -97,9 +135,10 @@ if __name__ == '__main__':
     source = PlayStoreScrapperSource()
     source_list = source.lookup(source_config)
     print("downld")
-    docs = [s.processed_text for s in source_list]
     topic_analyzer = TopicClassificationAnalyzer(model_name_or_path = "paraphrase-distilroberta-base-v2",method = "BERT")
-    clusters = topic_analyzer.analyze_input(source_list)
+    #clusters = topic_analyzer.analyze_input(source_list)
+    y = topic_analyzer._get_topic_lda(source_list, "pc")
+    z = topic_analyzer._get_topic_bert(source_list, "cc")
     x = 1
 
 
