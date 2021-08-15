@@ -1,10 +1,10 @@
+import logging
 import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from urllib import parse
 
 from app_store.app_store_reviews_reader import AppStoreReviewsReader
-from pydantic import Field, PrivateAttr
 
 from obsei.misc.web_search import perform_search
 from obsei.source.base_source import BaseSource, BaseSourceConfig
@@ -15,12 +15,13 @@ from obsei.misc.utils import (
     convert_utc_time,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class AppStoreScrapperConfig(BaseSourceConfig):
-    _scrappers: List[AppStoreReviewsReader] = PrivateAttr()
     TYPE: str = "AppStoreScrapper"
     app_url: Optional[str] = None
-    countries: List[str] = Field(["us"])
+    countries: Optional[List[str]] = None
     app_id: Optional[str] = None
     app_name: Optional[str] = None
     lookup_period: Optional[str] = None
@@ -30,13 +31,7 @@ class AppStoreScrapperConfig(BaseSourceConfig):
         super().__init__(**data)
 
         if self.app_url is not None:
-            parsed_url = parse.urlparse(self.app_url)
-            url_paths = parsed_url.path.split("/")
-            if len(url_paths) == 5:
-                self.countries = [url_paths[1]]
-                self.app_name = url_paths[3]
-                app_ids = url_paths[4].split("id")
-                self.app_id = None if len(app_ids) != 2 else app_ids[1]
+            self.app_id, self.countries, self.app_name = AppStoreScrapperConfig.parse_app_url(self.app_url)
         else:
             if not self.app_id and self.app_name:
                 self.app_id = AppStoreScrapperConfig.search_id(self.app_name)
@@ -44,14 +39,22 @@ class AppStoreScrapperConfig(BaseSourceConfig):
         if not self.app_id:
             raise ValueError("Valid `package_name`, `app_name` or `app_url` is mandatory")
 
-        self._scrappers = []
-        for country in self.countries:
-            self._scrappers.append(
-                AppStoreReviewsReader(country=country, app_id=self.app_id)
-            )
+        self.countries = self.countries or ["us"]
+        self.app_name = self.app_name or self.app_id
 
-    def get_review_readers(self) -> List[AppStoreReviewsReader]:
-        return self._scrappers
+    @classmethod
+    def parse_app_url(cls, app_url:str):
+        parsed_url = parse.urlparse(app_url)
+        url_paths = parsed_url.path.split("/")
+
+        countries = app_name = app_id = None
+        if len(url_paths) == 5:
+            countries = [url_paths[1]]
+            app_name = url_paths[3]
+            app_ids = url_paths[4].split("id")
+            app_id = None if len(app_ids) != 2 else app_ids[1]
+
+        return app_id, countries, app_name
 
     # Code is influenced from https://github.com/cowboy-bebug/app-store-scraper
     @classmethod
@@ -93,8 +96,12 @@ class AppStoreScrapperSource(BaseSource):
         update_state: bool = True if id else False
         state = state or dict()
 
-        for scrapper in config.get_review_readers():
-            country_stat: Dict[str, Any] = state.get(scrapper.country, dict())
+        if config.countries is None or len(config.countries) == 0:
+            logger.warning("`countries` in config should not be empty or None")
+            return source_responses
+
+        for country in config.countries:
+            country_stat: Dict[str, Any] = state.get(country, dict())
             lookup_period: str = country_stat.get("since_time", config.lookup_period)
             lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
             if len(lookup_period) <= 5:
@@ -107,8 +114,9 @@ class AppStoreScrapperSource(BaseSource):
 
             since_id: Optional[int] = country_stat.get("since_id", None)
             last_index = since_id
-            state[scrapper.country] = country_stat
+            state[country] = country_stat
 
+            scrapper = AppStoreReviewsReader(country=country, app_id=config.app_id)
             reviews = scrapper.fetch_reviews(after=since_time, since_id=since_id)
             reviews = reviews or []
             if config.max_count is not None and config.max_count < len(reviews):
