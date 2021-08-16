@@ -2,34 +2,27 @@ source:
   Appstore Scrapper:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/appstore.png"
     _help_:
-      - '`app name` and `countries` can be found at the end of the url of app in app store.'
-      - ''
-      - 'For example - https://apps.apple.com/us/app/xcode/id497799835'
-      - '`xcode` is the `app name` for xcode and `us` is `country`.'
+      - '`app_url` is application url on app store.
+      - For example for Xcode - https://apps.apple.com/us/app/xcode/id497799835'
     source:
       _target_: obsei.source.appstore_scrapper.AppStoreScrapperSource
     config:
       _target_: obsei.source.appstore_scrapper.AppStoreScrapperConfig
-      countries:
-        - "us"
-      app_name: "gmail"
+      app_url: "https://apps.apple.com/us/app/gmail-email-by-google/id422689480"
       lookup_period: "1h"
+      max_count: 5
   Playstore Scrapper:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/playstore.png"
     _help_:
-      - '`app name` can be found at the end of the url of app in play store.'
-      - ''
-      - 'For example - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en&gl=US'
-      - '`com.google.android.gm` is the `package name` for gmail and `us` is `country`.'
+      - '`app_url` is application url on play store.
+      - For example for Gmail - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en_IN&gl=US'
     source:
       _target_: obsei.source.playstore_scrapper.PlayStoreScrapperSource
     config:
       _target_: obsei.source.playstore_scrapper.PlayStoreScrapperConfig
-      countries:
-        - "us"
-      app_name: "gmail"
-      max_count: 3
+      app_url: "https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en_IN&gl=US"
       lookup_period: "1h"
+      max_count: 5
   Reddit Scrapper:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/reddit.png"
     _help_:
@@ -44,15 +37,14 @@ source:
   Twitter:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/twitter.png"
     _help_:
-      - '`Keywords` accept search string, @user or #hashtags'
+      - '`query` accept search string, @user or #hashtags also'
       - ''
       - 'Need twitter `consumer key` and `secret`, get it from https://developer.twitter.com/en/apply-for-access'
     source:
       _target_: obsei.source.twitter_source.TwitterSource
     config:
       _target_: obsei.source.twitter_source.TwitterSourceConfig
-      keywords:
-        - "@Twitter"
+      query: "@Twitter"
       lookup_period: "1h"
       max_tweets: 10
       credential:
@@ -280,9 +272,15 @@ analyzer:
         - ''
         - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
       analyzer:
-        _target_: obsei.analyzer.ner_analyzer.NERAnalyzer
+        _target_: obsei.analyzer.ner_analyzer.TransformersNERAnalyzer
         model_name_or_path: "elastic/distilbert-base-cased-finetuned-conll03-english"
         device: "auto"
+    Spacy:
+      _help_:
+        - 'For supported models refer https://spacy.io/models'
+      analyzer:
+        _target_: obsei.analyzer.ner_analyzer.SpacyNERAnalyzer
+        model_name_or_path: "en_core_web_sm"
   Translation:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/translator.png"
     Transformer:
