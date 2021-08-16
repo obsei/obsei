@@ -95,7 +95,7 @@ def render_config(config, component, help_str=None, parent_key=None):
 
     prefix = "" if parent_key is None else f"{parent_key}."
     if help_str is not None:
-        with component.beta_expander("Info", False):
+        with component.expander("Info", False):
             help_area = "\n".join(help_str)
             st.code(f"{help_area}")
     for k, v in config.items():
