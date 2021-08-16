@@ -143,11 +143,12 @@ import json
 
 from obsei.configuration import ObseiConfiguration
 
-# This is Obsei config
-configuration = {json.dumps(generate_config, indent=2, sort_keys=True)}
+# This is Obsei workflow path and filename
+config_path = "./"
+config_filename = "workflow.yml"
 
-# Better way to pass config via yaml file using `config_path` and `config_filename` parameters instead of `configuration`
-obsei_configuration = ObseiConfiguration(configuration=json.load(configuration))
+# Extract config via yaml file using `config_path` and `config_filename`
+obsei_configuration = ObseiConfiguration(config_path=config_path, config_filename=config_filename)
 
 # Initialize objects using configuration
 source_config = obsei_configuration.initialize_instance("source_config")
