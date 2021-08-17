@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, List
+from typing import Any, List, Optional
 
 from pydantic import Field, PrivateAttr, SecretStr
 from slack_sdk import WebClient
@@ -16,11 +16,16 @@ class SlackSinkConfig(BaseSinkConfig):
     _slack_client: WebClient = PrivateAttr()
     TYPE: str = "Slack"
 
-    slack_token: SecretStr = Field(None, env="SLACK_TOKEN")
-    channel_id: str
+    slack_token: Optional[SecretStr] = Field(None, env="SLACK_TOKEN")
+    channel_id: Optional[str] = Field(None, env="SLACK_CHANNEL_ID")
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+        if self.slack_token is None or self.channel_id:
+            raise AttributeError(
+                "Slack informer need slack_token and channel_id"
+            )
+
         self._slack_client = WebClient(token=self.slack_token.get_secret_value())
 
     def get_slack_client(self):
