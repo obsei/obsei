@@ -1,10 +1,10 @@
 from typing import List
 from obsei.payload import TextPayload
-from pydantic import BaseModel
+from pydantic import BaseModel, BaseSettings
 from abc import abstractmethod
 
 
-class BasePostprocessorConfig(BaseModel):
+class BasePostprocessorConfig(BaseSettings):
     TYPE: str = "Base"
 
     class Config:

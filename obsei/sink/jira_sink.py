@@ -44,8 +44,8 @@ class JiraSinkConfig(BaseSinkConfig):
     _jira_client: Jira = PrivateAttr()
     TYPE: str = "Jira"
     url: str
-    username: Optional[SecretStr] = Field(None, env="JIRA_USERNAME")
-    password: Optional[SecretStr] = Field(None, env="JIRA_PASSWORD")
+    username: Optional[SecretStr] = Field(None, env="jira_username")
+    password: Optional[SecretStr] = Field(None, env="jira_password")
     issue_type: Dict[str, str]
     project: Dict[str, str]
     update_history: bool = True

@@ -16,8 +16,8 @@ class SlackSinkConfig(BaseSinkConfig):
     _slack_client: WebClient = PrivateAttr()
     TYPE: str = "Slack"
 
-    slack_token: Optional[SecretStr] = Field(None, env="SLACK_TOKEN")
-    channel_id: Optional[str] = Field(None, env="SLACK_CHANNEL_ID")
+    slack_token: Optional[SecretStr] = Field(None, env="slack_token")
+    channel_id: Optional[str] = Field(None, env="slack_channel_id")
 
     def __init__(self, **data: Any):
         super().__init__(**data)
