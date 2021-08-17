@@ -21,7 +21,7 @@ class SlackSinkConfig(BaseSinkConfig):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        if self.slack_token is None or self.channel_id:
+        if self.slack_token is None or self.channel_id is None:
             raise AttributeError(
                 "Slack informer need slack_token and channel_id"
             )
