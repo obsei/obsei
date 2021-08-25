@@ -40,23 +40,38 @@
 
 </p>
 
+![](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei_flow.gif)
 
-**Obsei** is intended to be an automation tool for text analysis need. *Obsei* consist of -
+
+**Obsei** is an open-source low-code AI powered automation tool. *Obsei* consist of -
  - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews, News, Website etc and feed that information to,
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
  - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
 
-![](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei_flow.gif)
 
-<details><summary>Current flow</summary>
+<table style="text-align:center">
+<thead>
+<tr class="header">
+<th style="width:50%">Current Plan</th>
+<th style="width:50%">Future Plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img alt="Current Plan" src="https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-flow-diagram.png"></td>
+<td><img alt="Future Plan" src="https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-future-concept.png"></td>
+</tr>
+<tr>
+<td>Text oriented workflows</td>
+<td>Text, Image, Audio, and Video oriented workflows</td>
+</tr>
+</tbody>
+</table>
 
-![](https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-flow-diagram.png)
-</details>
+### Introductory demo video
 
-<details><summary>Future concept (Coming Soon! 🙂)</summary>
+[![Introductory and demo video](https://img.youtube.com/vi/bhAYLI9P9W0/2.jpg)](https://www.youtube.com/watch?v=bhAYLI9P9W0)
 
-![](https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-future-concept.png)
-</details>
 
 ## Use cases
 *Obsei* use cases are following, but not limited to -
@@ -157,7 +172,10 @@ We have a minimal [streamlit](https://streamlit.io/) based UI that you can use t
 
 ![Screenshot](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei-ui-demo.png)
 
-**Watch:** [Obsei UI Demo](https://www.youtube.com/watch?v=GTF-Hy96gvY)
+### Watch UI demo video
+
+[![Introductory and demo video](https://img.youtube.com/vi/GTF-Hy96gvY/2.jpg)](https://www.youtube.com/watch?v=GTF-Hy96gvY)
+
 
 To test remotely, just open: [Obsei Demo Link](https://share.streamlit.io/obsei/obsei/sample-ui/ui.py)
 (**Note**: Due to rate limit sometime Streamlit demo might not work, hence please use docker image locally.)
@@ -169,6 +187,7 @@ docker run -d --name obesi-ui -p 8501:8501 obsei/obsei-ui-demo
 # You can find the UI at http://localhost:8501
 ```
 
+**To run Obsei workflow easily using GitHub Actions (no signups and cloud hosting require), refer [repo](https://github.com/obsei/demo-workflow-action) for more information.**
 
 ## Documentation
 For detailed installation instructions, usages and example refer [documentation](https://obsei.github.io/obsei/).
