@@ -3,12 +3,13 @@
     <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/obsei-flyer.png" />
 </p>
 
+---
 <p align="center">
     <a href="https://github.com/obsei/obsei/actions">
         <img alt="Test" src="https://github.com/obsei/obsei/workflows/CI/badge.svg?branch=master">
     </a>
     <a href="https://github.com/obsei/obsei/blob/master/LICENSE">
-        <img alt="License" src="https://img.shields.io/github/license/obsei/obsei?color=blue">
+        <img alt="License" src="https://img.shields.io/pypi/l/obsei">
     </a>
     <a href="https://pypi.org/project/obsei">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
@@ -31,14 +32,21 @@
     <a href="https://github.com/obsei/obsei/commits/master">
         <img alt="Last commit" src="https://img.shields.io/github/last-commit/obsei/obsei">
     </a>
+    <a href="https://github.com/obsei/obsei">
+        <img alt="Github stars" src="https://img.shields.io/github/stars/obsei/obsei?style=social">
+    </a>
     <a href="https://www.youtube.com/channel/UCqdvgro1BzU13tkAfX3jCJA">
         <img alt="YouTube Channel Subscribers" src="https://img.shields.io/youtube/channel/subscribers/UCqdvgro1BzU13tkAfX3jCJA?style=social">
     </a>
     <a href="https://join.slack.com/t/obsei-community/shared_invite/zt-r0wnuz02-FAkAmhTAUoc6pD4SLB9Ikg">
         <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/Slack_join.svg" height="30">
     </a>
-
+    <a href="https://www.facebook.com/ai.obsei/">
+        <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/facebook.png" height="30">
+    </a>
 </p>
+
+---
 
 ![](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei_flow.gif)
 
@@ -72,7 +80,7 @@
 
 [![Introductory and demo video](https://img.youtube.com/vi/bhAYLI9P9W0/2.jpg)](https://www.youtube.com/watch?v=bhAYLI9P9W0)
 
-
+---
 ## Use cases
 *Obsei* use cases are following, but not limited to -
 - Social listening
@@ -83,7 +91,7 @@
 - Extraction of deeper insight from feedbacks on various platforms
 - Research purpose
 - Many more based on creativity 💡
-
+---
 ## Tutorials
 
 <table>
@@ -167,6 +175,7 @@
 </tbody>
 </table>
 
+---
 ## Demo
 We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
 
@@ -189,9 +198,11 @@ docker run -d --name obesi-ui -p 8501:8501 obsei/obsei-ui-demo
 
 **To run Obsei workflow easily using GitHub Actions (no signups and cloud hosting require), refer [repo](https://github.com/obsei/demo-workflow-action) for more information.**
 
+---
 ## Documentation
 For detailed installation instructions, usages and example refer [documentation](https://obsei.github.io/obsei/).
 
+---
 ## Support and Release Matrix
 
 <table>
@@ -247,7 +258,7 @@ pip install python-facebook-api
 ```
 </details>
 
-
+---
 ## How to use
 
 Expend following steps and create your workflow -
@@ -887,6 +898,7 @@ python example.py
 ```
 </details>
 
+---
 ## Articles
 
 <table>
@@ -919,36 +931,46 @@ python example.py
 </tbody>
 </table>
 
+---
 ## Tips
 ### Handle large text classification
 
 ![](https://raw.githubusercontent.com/obsei/obsei-resources/master/gifs/Long_Text_Classification.gif)
 
+---
 ## Upcoming Release
 Upcoming release plan and progress can be tracked at [link](https://github.com/obsei/obsei/projects) (Suggestions are welcome).
 
+---
 ## Discussion Forum
 Discussion about *Obsei* can be done at [community forum](https://github.com/obsei/obsei/discussions)
 
+---
 ## Contribution
 First off, thank you for even considering contributing to this package, every contribution big or small is greatly appreciated.
 Please refer our [Contribution Guideline](https://github.com/obsei/obsei/blob/master/CONTRIBUTING.md) and [Code of Conduct](https://github.com/obsei/obsei/blob/master/CODE_OF_CONDUCT.md).
 
+---
 ## Changelog
 Refer [releases](https://github.com/obsei/obsei/releases) and [projects](https://github.com/obsei/obsei/projects).
 
+---
 ## Security Issue
 For any security issue please contact us via [email](mailto:obsei.tool@gmail.com)
 
+---
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/obsei/obsei.svg)](https://starchart.cc/obsei/obsei)
 
+---
 ## Attribution
 
 This could not have been possible without these [open source software](https://github.com/obsei/obsei/blob/master/ATTRIBUTION.md).
 
+---
 ## Acknowledgement
 
 We would like to thank [DailyGet](https://dailyget.in/) for continuous support and encouragement.
 Please check [DailyGet](https://dailyget.in/) out. it is a platform which can easily be configured to solve any business process automation requirements.
+---
