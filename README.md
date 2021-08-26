@@ -66,8 +66,8 @@
 </thead>
 <tbody>
 <tr>
-<td><img alt="Current Plan" src="https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-flow-diagram.png"></td>
-<td><img alt="Future Plan" src="https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-future-concept.png"></td>
+<td><img alt="Current Plan" src="https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-flow-diagram.png" style="width:400"></td>
+<td><img alt="Future Plan" src="https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-future-concept.png" style="width:400"></td>
 </tr>
 <tr>
 <td>Text oriented workflows</td>
