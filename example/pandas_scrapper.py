@@ -4,16 +4,15 @@ from obsei.source.pandas_source import (
 )
 import logging
 import sys
+
 path = "glass1.csv"
 
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(stream=sys.stdout,level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 source_config = PandasSourceConfig(
-    target = path,
-    input_type = "csv",
-    columns = ["fe","type"]
+    target=path, input_type="csv", columns=["fe", "type"]
 )
 source = PandasSourceScrapper()
 source_response_list = source.lookup(source_config)
