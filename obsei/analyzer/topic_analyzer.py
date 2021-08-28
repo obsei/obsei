@@ -1,8 +1,8 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from pydantic import Field, PrivateAttr
-from transformers import Pipeline, pipeline
+from transformers import Pipeline
 from gensim import corpora
 from gensim.models.ldamodel import LdaModel
 from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig, MAX_LENGTH
@@ -26,7 +26,6 @@ from obsei.preprocessor.text_cleaning_function import (
     RemoveStopWords,
     RemoveWhiteSpaceAndEmptyToken,
     ToLowerCase,
-    TokenStemming,
 )
 import numpy as np
 
@@ -37,6 +36,7 @@ class TopicAnalyzerConfig(BaseAnalyzerConfig):
     TYPE: str = "TopicModelling"
     labels: List[str]
     multi_class_classification: bool = True
+    method: str = "lda"
     aggregator_config: InferenceAggregatorConfig = Field(
         InferenceAggregatorConfig(aggregate_function=ClassificationAverageScore())
     )
@@ -47,30 +47,31 @@ class TopicClassificationAnalyzer(BaseAnalyzer):
     _max_length: int = PrivateAttr()
     TYPE: str = "TopicModelling"
     model_name_or_path: str
-    method: str
+    methods: dict = {}
 
     def __init__(self, **data: Any):
         super().__init__(**data)
         self._max_length = MAX_LENGTH
+        self.methods = {
+            "BERT": self._get_topic_bert,
+            "LDA": self._get_topic_lda,
+            "LDA_BERT": self._get_topic_ldabert,
+        }
 
-    def _get_topics(
-        self, source_response_list: List[TextPayload], source_name: str
+    def analyze_input(
+        self,
+        source_response_list: List[TextPayload],
+        analyzer_config: Optional[TopicAnalyzerConfig] = None,
+        **kwargs,
     ) -> List[TextPayload]:
-        if self.method == "BERT":
-
-            return self._get_topic_bert(source_response_list, source_name)
-        if self.method == "LDA":
-
-            return self._get_topic_lda(source_response_list)
-        elif self.method == "LDA_BERT":
-            return self._get_topic_ldabert(source_response_list)
-        # return LDA by default
-        return self._get_topic_lda(source_response_list)
+        if analyzer_config is None:
+            raise ValueError("analyzer_config can't be None")
+        analyzer_output = self.methods[analyzer_config.method](source_response_list)
+        return analyzer_output
 
     def _get_topic_bert(
         self,
         source_response_list: List[TextPayload],
-        source_name: str,
         umap_n_neighbors: int = 10,
         umap_n_components: int = 5,
         min_cluster_size: int = 10,
@@ -88,7 +89,7 @@ class TopicClassificationAnalyzer(BaseAnalyzer):
         clusters = cluster_embeddings(
             umap_embeddings, min_cluster_size=min_cluster_size
         )
-        topics_per_cluster = get_topics_by_cluster(docs, clusters, source_name)
+        topics_per_cluster = get_topics_by_cluster(docs, clusters, source_response_list)
         return topics_per_cluster
 
     def _get_transformer_embeddings(self, docs: List[str]) -> List[Tensor]:
@@ -96,21 +97,7 @@ class TopicClassificationAnalyzer(BaseAnalyzer):
         embeddings = model.encode(docs, show_progress_bar=True)
         return embeddings
 
-    def analyze_input(
-        self,
-        source_response_list: List[TextPayload],
-        analyzer_config: Optional[BaseAnalyzerConfig] = None,
-        **kwargs,
-    ) -> List[TextPayload]:
-        # if analyzer_config is None:
-        #     raise ValueError("analyzer_config can't be None")
-        source_name = source_response_list[0].source_name
-        analyzer_output = self._get_topics(
-            source_response_list, source_name
-        )  # other params in config?
-        return analyzer_output
-
-    def _get_topic_lda(self, source_input_list: List[TextPayload], source_name: str):
+    def _get_topic_lda(self, source_input_list: List[TextPayload]):
         _, lda_model = self._get_lda_embeddings(source_input_list)
         topics = lda_model.show_topics()
         topics_list = [re.findall(r'"([^"]*)"', t[1]) for t in topics]
@@ -118,7 +105,6 @@ class TopicClassificationAnalyzer(BaseAnalyzer):
             TextPayload(
                 processed_text="_".join(t),
                 meta={"cluster_topics": t},
-                source_name=source_name,
             )
             for t in topics_list
         ]
@@ -158,7 +144,6 @@ class TopicClassificationAnalyzer(BaseAnalyzer):
     def _get_topic_ldabert(
         self,
         source_input_list: List[TextPayload],
-        source_name: str,
         umap_n_neighbors: int = 10,
         umap_n_components: int = 5,
         min_cluster_size: int = 10,
@@ -182,42 +167,5 @@ class TopicClassificationAnalyzer(BaseAnalyzer):
         clusters = cluster_embeddings(
             umap_embeddings, min_cluster_size=min_cluster_size
         )
-        topics_per_cluster = get_topics_by_cluster(docs, clusters, source_name)
+        topics_per_cluster = get_topics_by_cluster(docs, clusters, source_input_list)
         return topics_per_cluster
-
-
-if __name__ == "__main__":
-    from obsei.source.playstore_scrapper import (
-        PlayStoreScrapperConfig,
-        PlayStoreScrapperSource,
-    )
-
-    # initialize play store source config
-    source_config = PlayStoreScrapperConfig(
-        # Need two parameters package_name and country.
-        # `package_name` can be found at the end of the url of app in play store.
-        # For example - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en&gl=US
-        # `com.google.android.gm` is the package_name for xcode and `us` is country.
-        countries=["in"],
-        package_name="com.application.zomato",
-        lookup_period="1h",
-        max_count=2000,  # Lookup period from current time, format: `<number><d|h|m>` (day|hour|minute)
-    )
-
-    # initialize play store reviews retriever
-    source = PlayStoreScrapperSource()
-    source_list = source.lookup(source_config)
-    print("downld")
-    topic_analyzer = TopicClassificationAnalyzer(
-        model_name_or_path="paraphrase-TinyBERT-L6-v2 ", method="BERT"
-    )
-    # clusters = topic_analyzer.analyze_input(source_list)
-    x = topic_analyzer._get_topic_ldabert(source_list, "ae")
-    y = topic_analyzer._get_topic_lda(source_list, "pc")
-    z = topic_analyzer._get_topic_bert(source_list, "cc")
-
-    top_ldabert = [t.processed_text for t in x]
-    top_bert = [t.processed_text for t in z]
-    top_lda = [t.processed_text for t in y]
-
-    a = 1

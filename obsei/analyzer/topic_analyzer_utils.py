@@ -1,7 +1,6 @@
-import logging
-from abc import abstractmethod
+import torch
+from gensim.models.ldamodel import LdaModel
 from typing import Any, Dict, List, Tuple
-from symspellpy import SymSpell, Verbosity
 from obsei.payload import TextPayload
 
 import umap.umap_ as umap
@@ -10,14 +9,24 @@ from sklearn.feature_extraction.text import CountVectorizer
 import pandas as pd
 import hdbscan
 
+import keras
+from keras.layers import Input, Dense
+from keras.models import Model
+from sklearn.model_selection import train_test_split
+import warnings
 
-def get_umap_embedings(embeddings, n_neighbors, n_component):
+warnings.filterwarnings("ignore")
+
+
+def get_umap_embedings(
+    embeddings: List[torch.Tensor], n_neighbors: int, n_component: int
+) -> np.ndarray:
     return umap.UMAP(
         n_neighbors=n_neighbors, n_components=n_component, metric="cosine"
     ).fit_transform(embeddings)
 
 
-def cluster_embeddings(embeddings, min_cluster_size):
+def cluster_embeddings(embeddings: np.ndarray, min_cluster_size: int) -> object:
     return hdbscan.HDBSCAN(
         min_cluster_size=min_cluster_size,
         metric="euclidean",
@@ -26,9 +35,12 @@ def cluster_embeddings(embeddings, min_cluster_size):
 
 
 def get_topics_by_cluster(
-    docs: List[str], cluster, source_name: str
+    docs: List[str], cluster, source_input_list
 ) -> List[TextPayload]:
     docs_df = pd.DataFrame(docs, columns=["text"])
+    docs_df["source_name"] = [
+        source_input.source_name for source_input in source_input_list
+    ]
     docs_df["topic"] = cluster.labels_
     docs_df["doc_id"] = range(len(docs_df))
     docs_per_topic = docs_df.groupby(["topic"], as_index=False)
@@ -59,15 +71,18 @@ def get_topics_by_cluster(
             },
             segmented_data={
                 "cluster_texts": [
-                    TextPayload(processed_text=t, meta={"cluster_id": name})
-                    for t in group["text"]
+                    TextPayload(
+                        processed_text=t["text"],
+                        meta={"cluster_id": name},
+                        source_name=t["source_name"],
+                    )
+                    for j, t in group.iterrows()
                 ]
             },
-            source_name=source_name,
         )
         top_n_words_list.append(payload)
 
-    return top_n_words_list  # return a list of textpayloads?
+    return top_n_words_list
 
 
 def c_tf_idf(documents, m, ngram_range=(1, 1)):
@@ -84,7 +99,9 @@ def c_tf_idf(documents, m, ngram_range=(1, 1)):
     return tf_idf, count
 
 
-def extract_top_n_words_per_topic(tf_idf, count, docs_per_topic, n=20):
+def extract_top_n_words_per_topic(
+    tf_idf: np.ndarray, count: int, docs_per_topic: pd.DataFrame, n: int = 20
+) -> Dict:
     words = count.get_feature_names()
     labels = list(docs_per_topic.topic)
     tf_idf_transposed = tf_idf.T
@@ -107,7 +124,7 @@ def extract_topic_sizes(df):
     return {key: value for key, value in topic_sizes}
 
 
-def get_vec_lda(model, corpus, k):
+def get_vec_lda(model: LdaModel, corpus: List, k: int):
     """
     Get the LDA vector representation (probabilistic topic assignments for all documents)
     :return: vec_lda with dimension: (n_doc * n_topic)
@@ -120,15 +137,6 @@ def get_vec_lda(model, corpus, k):
             vec_lda[i, topic] = prob
 
     return vec_lda
-
-
-import keras
-from keras.layers import Input, Dense
-from keras.models import Model
-from sklearn.model_selection import train_test_split
-import warnings
-
-warnings.filterwarnings("ignore")
 
 
 class Autoencoder:
