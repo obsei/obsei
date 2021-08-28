@@ -36,7 +36,6 @@ class TopicAnalyzerConfig(BaseAnalyzerConfig):
     TYPE: str = "TopicModelling"
     labels: List[str]
     multi_class_classification: bool = True
-    method: str = "lda"
     aggregator_config: InferenceAggregatorConfig = Field(
         InferenceAggregatorConfig(aggregate_function=ClassificationAverageScore())
     )
@@ -66,7 +65,11 @@ class TopicClassificationAnalyzer(BaseAnalyzer):
     ) -> List[TextPayload]:
         if analyzer_config is None:
             raise ValueError("analyzer_config can't be None")
-        analyzer_output = self.methods[analyzer_config.method](source_response_list)
+        analyzer_output = []
+        for label in analyzer_config.labels:
+            if label not in self.methods.keys():
+                label = "LDA"
+            analyzer_output.append(self.methods[label](source_response_list))
         return analyzer_output
 
     def _get_topic_bert(

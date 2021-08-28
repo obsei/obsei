@@ -100,7 +100,7 @@ def c_tf_idf(documents, m, ngram_range=(1, 1)):
 
 
 def extract_top_n_words_per_topic(
-    tf_idf: np.ndarray, count: int, docs_per_topic: pd.DataFrame, n: int = 20
+    tf_idf: np.ndarray, count: CountVectorizer, docs_per_topic: pd.DataFrame, n: int = 20
 ) -> Dict:
     words = count.get_feature_names()
     labels = list(docs_per_topic.topic)
