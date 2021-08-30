@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 sample_dict = {
-    'name': ["aparna", "pankaj", "sudhir", "Geeku"],
-    'degree': ["MBA", "BCA", "M.Tech", "MBA"],
-    'score': [90, 40, 80, 98]
+    "name": ["aparna", "pankaj", "sudhir", "Geeku"],
+    "degree": ["MBA", "BCA", "M.Tech", "MBA"],
+    "score": [90, 40, 80, 98],
 }
 
 source_config = PandasSourceConfig(
