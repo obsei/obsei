@@ -25,7 +25,7 @@ class GooglePlaceConfig(BaseSourceConfig):
     max_results: int = 1000
     num_retries: int = 1
     place_id: Optional[str] = None
-    api_key: str = None
+    api_key: Optional[str] = None
     language: Optional[str] = "en"
     _gmaps_client: googlemaps.Client = PrivateAttr()
 
