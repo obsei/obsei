@@ -1,6 +1,8 @@
+import logging
 import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from urllib import parse
 
 from google_play_scraper import Sort, reviews
 
@@ -13,13 +15,16 @@ from obsei.misc.utils import (
     convert_utc_time,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class PlayStoreScrapperConfig(BaseSourceConfig):
     TYPE: str = "PlayStoreScrapper"
-    countries: List[str]
+    app_url: Optional[str] = None
+    countries: Optional[List[str]] = None
     package_name: Optional[str] = None
     app_name: Optional[str] = None
-    language: Optional[str]
+    language: Optional[str] = None
     filter_score_with: Optional[int] = None
     lookup_period: Optional[str] = None
     max_count: Optional[int] = 200
@@ -27,14 +32,39 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-        if not self.package_name and self.app_name:
-            self.package_name = PlayStoreScrapperConfig.search_package_name(self.app_name)
+        if self.app_url is not None:
+            self.package_name, self.countries, self.language = PlayStoreScrapperConfig.parse_app_url(self.app_url)
+        else:
+            if not self.package_name and self.app_name:
+                self.package_name = PlayStoreScrapperConfig.search_package_name(
+                    self.app_name
+                )
 
         if not self.package_name:
-            raise ValueError("Valid `package_name` or `app_name` is mandatory")
+            raise ValueError("Valid `package_name`, `app_name` or `app_url` is mandatory")
 
-        if self.language is None:
-            self.language = "en"
+        self.language = self.language or "en"
+        self.countries = self.countries or ["us"]
+        self.app_name = self.app_name or self.package_name
+
+    @classmethod
+    def parse_app_url(cls, app_url: str):
+
+        parsed_url = parse.urlparse(app_url)
+        query_dict = parse.parse_qs(parsed_url.query)
+        countries = query_dict.get('gl', None)
+
+        language = None
+        languages = query_dict.get('hl', None)
+        if languages is not None:
+            language = languages[0]
+
+        package_name = None
+        package_ids = query_dict.get('id', None)
+        if package_ids is not None:
+            package_name = package_ids[0]
+
+        return package_name, countries, language
 
     @classmethod
     def search_package_name(cls, app_name: str):
@@ -69,6 +99,10 @@ class PlayStoreScrapperSource(BaseSource):
         )
         update_state: bool = True if id else False
         state = state or dict()
+
+        if config.countries is None or len(config.countries) == 0:
+            logger.warning("`countries` in config should not be empty or None")
+            return source_responses
 
         for country in config.countries:
             country_stat: Dict[str, Any] = state.get(country, dict())

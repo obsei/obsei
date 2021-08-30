@@ -24,10 +24,7 @@ class HttpSink(BaseSink):
         super().__init__(convertor=convertor, **data)
 
     def send_data(  # type: ignore[override]
-        self,
-        analyzer_responses: List[TextPayload],
-        config: HttpSinkConfig,
-        **kwargs
+        self, analyzer_responses: List[TextPayload], config: HttpSinkConfig, **kwargs
     ):
 
         headers = config.headers or DEFAULT_HEADERS

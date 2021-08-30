@@ -1,14 +1,17 @@
 import logging
-from typing import Any, Dict, List, Tuple, Optional, Generator
+from typing import Any, Dict, List, Optional
 
-from pydantic import PrivateAttr
+from pydantic import Field, PrivateAttr
 from transformers import Pipeline, pipeline
 
 from obsei.analyzer.base_analyzer import (
     BaseAnalyzer,
     BaseAnalyzerConfig,
+    MAX_LENGTH,
 )
 from obsei.payload import TextPayload
+from obsei.postprocessor.inference_aggregator import InferenceAggregatorConfig
+from obsei.postprocessor.inference_aggregator_function import ClassificationAverageScore
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +20,11 @@ class ClassificationAnalyzerConfig(BaseAnalyzerConfig):
     TYPE: str = "Classification"
     labels: List[str]
     multi_class_classification: bool = True
+    aggregator_config: InferenceAggregatorConfig = Field(
+        InferenceAggregatorConfig(
+            aggregate_function=ClassificationAverageScore()
+        )
+    )
 
 
 class ZeroShotClassificationAnalyzer(BaseAnalyzer):
@@ -36,9 +44,9 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         if hasattr(self._pipeline.model.config, "max_position_embeddings"):
             self._max_length = self._pipeline.model.config.max_position_embeddings
         else:
-            self._max_length = 510
+            self._max_length = MAX_LENGTH
 
-    def _classify_text_from_model(
+    def _prediction_from_model(
         self,
         texts: List[str],
         labels: List[str],
@@ -48,18 +56,6 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
             texts, labels, multi_label=multi_class_classification
         )
         return prediction if isinstance(prediction, list) else [prediction]
-
-    def _batchify(
-        self,
-        texts: List[str],
-        batch_size: int,
-        source_response_list: List[TextPayload],
-    ) -> Generator[Tuple[List[str], List[TextPayload]], None, None]:
-        for index in range(0, len(texts), batch_size):
-            yield (
-                texts[index : index + batch_size],
-                source_response_list[index : index + batch_size],
-            )
 
     def analyze_input(  # type: ignore[override]
         self,
@@ -71,48 +67,64 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
             raise ValueError("analyzer_config can't be None")
 
         analyzer_output: List[TextPayload] = []
-        add_positive_negative_labels = kwargs.get("add_positive_negative_labels", True)
-
-        texts = [
-            source_response.processed_text[: self._max_length]
-            if len(source_response.processed_text) > self._max_length
-            else source_response.processed_text
-            for source_response in source_response_list
-        ]
 
         labels = analyzer_config.labels or []
+        add_positive_negative_labels = kwargs.get("add_positive_negative_labels", True)
         if add_positive_negative_labels:
             if "positive" not in labels:
                 labels.append("positive")
             if "negative" not in labels:
                 labels.append("negative")
 
-        for batch_texts, batch_source_response in self._batchify(
-            texts, self.batch_size, source_response_list
-        ):
-            batch_predictions = self._classify_text_from_model(
-                batch_texts,
+        if analyzer_config.use_splitter_and_aggregator and analyzer_config.splitter_config:
+            source_response_list = self.splitter.preprocess_input(
+                source_response_list,
+                config=analyzer_config.splitter_config,
+            )
+
+        for batch_responses in self.batchify(source_response_list, self.batch_size):
+            texts = [
+                source_response.processed_text[: self._max_length]
+                for source_response in batch_responses
+            ]
+
+            batch_predictions = self._prediction_from_model(
+                texts,
                 labels,
                 analyzer_config.multi_class_classification,
             )
-            for prediction, source_response in zip(
-                batch_predictions, batch_source_response
-            ):
+
+            for prediction, source_response in zip(batch_predictions, batch_responses):
                 score_dict = {
                     label: score
                     for label, score in zip(prediction["labels"], prediction["scores"])
                 }
 
-                classification_map = dict(
-                    sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
-                )
+                segmented_data = {
+                    "classifier_data": dict(
+                        sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
+                    )
+                }
+
+                if source_response.segmented_data:
+                    segmented_data = {
+                        **segmented_data,
+                        **source_response.segmented_data,
+                    }
+
                 analyzer_output.append(
                     TextPayload(
                         processed_text=source_response.processed_text,
                         meta=source_response.meta,
-                        segmented_data=classification_map,
+                        segmented_data=segmented_data,
                         source_name=source_response.source_name,
                     )
                 )
+
+        if analyzer_config.use_splitter_and_aggregator and analyzer_config.aggregator_config:
+            analyzer_output = self.aggregator.postprocess_input(
+                input_list=analyzer_output,
+                config=analyzer_config.aggregator_config,
+            )
 
         return analyzer_output

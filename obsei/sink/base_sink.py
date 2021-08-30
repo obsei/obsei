@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional
 
-from pydantic import Field
+from pydantic import BaseSettings, Field
 from pydantic.main import BaseModel
 
 from obsei.payload import TextPayload
@@ -26,7 +26,7 @@ class Convertor(BaseModel):
         arbitrary_types_allowed = True
 
 
-class BaseSinkConfig(BaseModel):
+class BaseSinkConfig(BaseSettings):
     TYPE: str = "Base"
 
     @classmethod
@@ -43,10 +43,7 @@ class BaseSink(BaseModel):
 
     @abstractmethod
     def send_data(
-        self,
-        analyzer_responses: List[TextPayload],
-        config: BaseSinkConfig,
-        **kwargs
+        self, analyzer_responses: List[TextPayload], config: BaseSinkConfig, **kwargs
     ):
         pass
 

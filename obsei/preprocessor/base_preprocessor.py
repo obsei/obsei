@@ -1,11 +1,11 @@
 from abc import abstractmethod
 from typing import Any, List
-from pydantic import BaseModel
+from pydantic import BaseModel, BaseSettings
 
 from obsei.payload import TextPayload
 
 
-class BaseTextProcessorConfig(BaseModel):
+class BaseTextProcessorConfig(BaseSettings):
     TYPE: str = "Base"
 
     class Config:
@@ -17,10 +17,7 @@ class BaseTextPreprocessor(BaseModel):
 
     @abstractmethod
     def preprocess_input(
-        self,
-        input_list: List[TextPayload],
-        config: BaseTextProcessorConfig,
-        **kwargs
+        self, input_list: List[TextPayload], config: BaseTextProcessorConfig, **kwargs
     ) -> List[TextPayload]:
         pass
 

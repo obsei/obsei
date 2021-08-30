@@ -3,12 +3,13 @@
     <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/obsei-flyer.png" />
 </p>
 
+---
 <p align="center">
     <a href="https://github.com/obsei/obsei/actions">
         <img alt="Test" src="https://github.com/obsei/obsei/workflows/CI/badge.svg?branch=master">
     </a>
     <a href="https://github.com/obsei/obsei/blob/master/LICENSE">
-        <img alt="License" src="https://img.shields.io/github/license/obsei/obsei?color=blue">
+        <img alt="License" src="https://img.shields.io/pypi/l/obsei">
     </a>
     <a href="https://pypi.org/project/obsei">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
@@ -31,61 +32,177 @@
     <a href="https://github.com/obsei/obsei/commits/master">
         <img alt="Last commit" src="https://img.shields.io/github/last-commit/obsei/obsei">
     </a>
+    <a href="https://github.com/obsei/obsei">
+        <img alt="Github stars" src="https://img.shields.io/github/stars/obsei/obsei?style=social">
+    </a>
     <a href="https://www.youtube.com/channel/UCqdvgro1BzU13tkAfX3jCJA">
         <img alt="YouTube Channel Subscribers" src="https://img.shields.io/youtube/channel/subscribers/UCqdvgro1BzU13tkAfX3jCJA?style=social">
     </a>
     <a href="https://join.slack.com/t/obsei-community/shared_invite/zt-r0wnuz02-FAkAmhTAUoc6pD4SLB9Ikg">
         <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/Slack_join.svg" height="30">
     </a>
-
+    <a href="https://www.facebook.com/ai.obsei/">
+        <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/facebook.png" height="30">
+    </a>
 </p>
 
+---
 
-**Obsei** is intended to be an automation tool for text analysis need. *Obsei* consist of -
+![](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei_flow.gif)
+
+
+**Obsei** is an open-source low-code AI powered automation tool. *Obsei* consist of -
  - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews, News, Website etc and feed that information to,
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
  - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
 
-![](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei_flow.gif)
 
-<details><summary>Current flow</summary>
+<table style="text-align:center">
+<thead>
+<tr class="header">
+<th style="width:50%">Current Plan</th>
+<th style="width:50%">Future Plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img alt="Current Plan" src="https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-flow-diagram.png" style="width:400"></td>
+<td><img alt="Future Plan" src="https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-future-concept.png" style="width:400"></td>
+</tr>
+<tr>
+<td>Text oriented workflows</td>
+<td>Text, Image, Audio, and Video oriented workflows</td>
+</tr>
+</tbody>
+</table>
 
-![](https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-flow-diagram.png)
-</details>
+### Introductory demo video
 
-<details><summary>Future concept (Coming Soon! 🙂)</summary>
+[![Introductory and demo video](https://img.youtube.com/vi/bhAYLI9P9W0/2.jpg)](https://www.youtube.com/watch?v=bhAYLI9P9W0)
 
-![](https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-future-concept.png)
-</details>
-
+---
 ## Use cases
 *Obsei* use cases are following, but not limited to -
+- Social listening
+- Alerting/Notification when user complaints on social media
 - Automatic customer issue creation based on sentiment analysis (reduction of MTTD)
 - Proper tagging of ticket based for example login issue, signup issue, delivery issue etc (reduction of MTTR)
 - Checking effectiveness of social media marketing campaign
 - Extraction of deeper insight from feedbacks on various platforms
 - Research purpose
+- Many more based on creativity 💡
+---
+## Tutorials
 
+<table>
+<thead>
+<tr class="header">
+<th>Sr. No.</th>
+<th>Workflow</th>
+<th>Colab</th>
+<th>Binder</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td rowspan="2">1</td>
+<td colspan="3">Observe app reviews from Google play store, Analyze them via performing text classification and then Inform them on console via logger</td>
+</tr>
+<tr>
+<td>PlayStore Reviews → Classification → Logger</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/01_PlayStore_Classification_Logger.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F01_PlayStore_Classification_Logger.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+<tr>
+<td rowspan="2">2</td>
+<td colspan="3">Observe app reviews from Google play store, PreProcess text via various text cleaning function, Analyze them via performing text classification, Inform them to Pandas DataFrame and store resultant CSV to Google Drive</td>
+</tr>
+<tr>
+<td>PlayStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/02_PlayStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F02_PlayStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+<tr>
+<td rowspan="2">3</td>
+<td colspan="3">Observe app reviews from Apple app store, PreProcess text via various text cleaning function, Analyze them via performing text classification, Inform them to Pandas DataFrame and store resultant CSV to Google Drive</td>
+</tr>
+<tr>
+<td>AppStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/03_AppStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F03_AppStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+<tr>
+<td rowspan="2">4</td>
+<td colspan="3">Observe news article from Google news, PreProcess text via various text cleaning function, Analyze them via performing text classification while splitting text in small chunks and later computing final inference using given formula</td>
+</tr>
+<tr>
+<td>Google News → Text Cleaner → Text Splitter → Classification → Inference Aggregator</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/04_GoogleNews_Cleaner_Splitter_Classification_Aggregator.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F04_GoogleNews_Cleaner_Splitter_Classification_Aggregator.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+</tbody>
+</table>
+
+---
 ## Demo
 We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
 
 ![Screenshot](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei-ui-demo.png)
 
-**Watch:** [Obsei UI Demo](https://www.youtube.com/watch?v=GTF-Hy96gvY)
+### Watch UI demo video
+
+[![Introductory and demo video](https://img.youtube.com/vi/GTF-Hy96gvY/2.jpg)](https://www.youtube.com/watch?v=GTF-Hy96gvY)
+
 
 To test remotely, just open: [Obsei Demo Link](https://share.streamlit.io/obsei/obsei/sample-ui/ui.py)
+(**Note**: Due to rate limit sometime Streamlit demo might not work, hence please use docker image locally.)
 
 To test locally, just run
 ```
-docker run -d --name obesi-ui -p 8501:8501 lalitpagaria/obsei-ui-demo
+docker run -d --name obesi-ui -p 8501:8501 obsei/obsei-ui-demo
 
 # You can find the UI at http://localhost:8501
-``` 
+```
 
+**To run Obsei workflow easily using GitHub Actions (no signups and cloud hosting require), refer [repo](https://github.com/obsei/demo-workflow-action) for more information.**
 
+---
 ## Documentation
-For detailed installation instructions, usages and example refer [documentation](https://lalitpagaria.github.io/obsei/).
+For detailed installation instructions, usages and example refer [documentation](https://obsei.github.io/obsei/).
 
+---
 ## Support and Release Matrix
 
 <table>
@@ -141,12 +258,8 @@ pip install python-facebook-api
 ```
 </details>
 
-
+---
 ## How to use
-
-To try in Colab Notebook click: [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/obsei/obsei/blob/master/example/Obsei_playstore_classification_logger_example.ipynb)
-
-To try in Binder click: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=example%2FObsei_playstore_classification_logger_example.ipynb)
 
 Expend following steps and create your workflow -
 
@@ -280,8 +393,8 @@ from obsei.source.appstore_scrapper import AppStoreScrapperConfig, AppStoreScrap
 
 # initialize app store source config
 source_config = AppStoreScrapperConfig(
-    # Need two parameters app_id and country. 
-    # `app_id` can be found at the end of the url of app in app store. 
+    # Need two parameters app_id and country.
+    # `app_id` can be found at the end of the url of app in app store.
     # For example - https://apps.apple.com/us/app/xcode/id497799835
     # `310633997` is the app_id for xcode and `us` is country.
     countries=["us"],
@@ -304,8 +417,8 @@ from obsei.source.playstore_scrapper import PlayStoreScrapperConfig, PlayStoreSc
 
 # initialize play store source config
 source_config = PlayStoreScrapperConfig(
-    # Need two parameters package_name and country. 
-    # `package_name` can be found at the end of the url of app in play store. 
+    # Need two parameters package_name and country.
+    # `package_name` can be found at the end of the url of app in play store.
     # For example - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en&gl=US
     # `com.google.android.gm` is the package_name for xcode and `us` is country.
     countries=["us"],
@@ -505,7 +618,7 @@ analyzer = TranslationAnalyzer(
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/pii.png" width="20" height="20"><b>PII Anonymizer</b></summary><hr>
 
  ```python
-from obsei.analyzer.pii_analyzer import PresidioEngineConfig, PresidioModelConfig, \ 
+from obsei.analyzer.pii_analyzer import PresidioEngineConfig, PresidioModelConfig, \
     PresidioPIIAnalyzer, PresidioPIIAnalyzerConfig
 
 # initialize pii analyzer's config
@@ -520,7 +633,7 @@ analyzer_config = PresidioPIIAnalyzerConfig(
 analyzer = PresidioPIIAnalyzer(
     engine_config=PresidioEngineConfig(
         # spacy and stanza nlp engines are supported
-        # For more info refer 
+        # For more info refer
         # https://microsoft.github.io/presidio/analyzer/developing_recognizers/#utilize-spacy-or-stanza
         nlp_engine_name="spacy",
         # Update desired spacy model and language
@@ -785,31 +898,80 @@ python example.py
 ```
 </details>
 
+---
+## Articles
+
+<table>
+<thead>
+<tr class="header">
+<th>Sr. No.</th>
+<th>Title</th>
+<th>Author</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>
+    <a href="https://reenabapna.medium.com/ai-based-comparative-customer-feedback-analysis-using-deep-learning-models-def0dc77aaee">AI based Comparative Customer Feedback Analysis Using Obsei</a>
+</td>
+<td>
+    <a href="linkedin.com/in/reena-bapna-66a8691a">Reena Bapna</a>
+</td>
+</tr>
+<tr>
+<td>2</td>
+<td>
+    <a href="https://medium.com/mlearning-ai/linkedin-app-user-feedback-analysis-9c9f98464daa">LinkedIn App - User Feedback Analysis</a>
+</td>
+<td>
+    <a href="http://www.linkedin.com/in/himanshusharmads">Himanshu Sharma</a>
+</td>
+</tr>
+</tbody>
+</table>
+
+---
+## Tips
+### Handle large text classification
+
+![](https://raw.githubusercontent.com/obsei/obsei-resources/master/gifs/Long_Text_Classification.gif)
+
+---
 ## Upcoming Release
 Upcoming release plan and progress can be tracked at [link](https://github.com/obsei/obsei/projects) (Suggestions are welcome).
 
+---
 ## Discussion Forum
 Discussion about *Obsei* can be done at [community forum](https://github.com/obsei/obsei/discussions)
 
+---
 ## Contribution
 First off, thank you for even considering contributing to this package, every contribution big or small is greatly appreciated.
 Please refer our [Contribution Guideline](https://github.com/obsei/obsei/blob/master/CONTRIBUTING.md) and [Code of Conduct](https://github.com/obsei/obsei/blob/master/CODE_OF_CONDUCT.md).
 
+---
 ## Changelog
 Refer [releases](https://github.com/obsei/obsei/releases) and [projects](https://github.com/obsei/obsei/projects).
 
+---
 ## Security Issue
 For any security issue please contact us via [email](mailto:obsei.tool@gmail.com)
 
+---
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/obsei/obsei.svg)](https://starchart.cc/obsei/obsei)
 
+---
 ## Attribution
 
 This could not have been possible without these [open source software](https://github.com/obsei/obsei/blob/master/ATTRIBUTION.md).
 
+---
 ## Acknowledgement
 
 We would like to thank [DailyGet](https://dailyget.in/) for continuous support and encouragement.
 Please check [DailyGet](https://dailyget.in/) out. it is a platform which can easily be configured to solve any business process automation requirements.
+
+---

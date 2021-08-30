@@ -3,7 +3,7 @@ import textwrap
 from typing import Any, Dict, List, Optional
 
 from atlassian import Jira
-from pydantic import PrivateAttr, SecretStr
+from pydantic import Field, PrivateAttr, SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.payload import TextPayload
@@ -44,8 +44,8 @@ class JiraSinkConfig(BaseSinkConfig):
     _jira_client: Jira = PrivateAttr()
     TYPE: str = "Jira"
     url: str
-    username: SecretStr
-    password: SecretStr
+    username: Optional[SecretStr] = Field(None, env="jira_username")
+    password: Optional[SecretStr] = Field(None, env="jira_password")
     issue_type: Dict[str, str]
     project: Dict[str, str]
     update_history: bool = True
@@ -55,6 +55,11 @@ class JiraSinkConfig(BaseSinkConfig):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+        if self.username is None or self.password is None:
+            raise AttributeError(
+                "Jira informer need username and password"
+            )
+
         self._jira_client = Jira(
             url=self.url,
             username=self.username.get_secret_value(),

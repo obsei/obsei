@@ -34,7 +34,7 @@ def download_button(
     button_uuid = str(uuid.uuid4()).replace("-", "")
     button_id = re.sub("\d+", "", button_uuid)
 
-    custom_css = f""" 
+    custom_css = f"""
         <style>
             #{button_id} {{
                 display: inline-flex;
@@ -50,7 +50,7 @@ def download_button(
                 border-style: solid;
                 border-color: rgb(230, 234, 241);
                 border-image: initial;
-            }} 
+            }}
             #{button_id}:hover {{
                 border-color: rgb(246, 51, 102);
                 color: rgb(246, 51, 102);
@@ -95,7 +95,7 @@ def render_config(config, component, help_str=None, parent_key=None):
 
     prefix = "" if parent_key is None else f"{parent_key}."
     if help_str is not None:
-        with component.beta_expander("Info", False):
+        with component.expander("Info", False):
             help_area = "\n".join(help_str)
             st.code(f"{help_area}")
     for k, v in config.items():
@@ -143,11 +143,12 @@ import json
 
 from obsei.configuration import ObseiConfiguration
 
-# This is Obsei config
-configuration = {json.dumps(generate_config, indent=2, sort_keys=True)}
+# This is Obsei workflow path and filename
+config_path = "./"
+config_filename = "workflow.yml"
 
-# Better way to pass config via yaml file using `config_path` and `config_filename` parameters instead of `configuration`
-obsei_configuration = ObseiConfiguration(configuration=json.load(configuration))
+# Extract config via yaml file using `config_path` and `config_filename`
+obsei_configuration = ObseiConfiguration(config_path=config_path, config_filename=config_filename)
 
 # Initialize objects using configuration
 source_config = obsei_configuration.initialize_instance("source_config")

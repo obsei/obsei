@@ -1,5 +1,4 @@
-from typing import List, Any
-from typing import Any, Dict, List, Tuple, Optional, Generator
+from typing import Any, List, Optional
 
 from pydantic import PrivateAttr
 from transformers import pipeline, Pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
@@ -7,6 +6,7 @@ from transformers import pipeline, Pipeline, AutoTokenizer, AutoModelForSeq2SeqL
 from obsei.analyzer.base_analyzer import (
     BaseAnalyzer,
     BaseAnalyzerConfig,
+    MAX_LENGTH,
 )
 from obsei.payload import TextPayload
 
@@ -27,19 +27,7 @@ class TranslationAnalyzer(BaseAnalyzer):
         if hasattr(self._pipeline.model.config, "max_position_embeddings"):
             self._max_length = self._pipeline.model.config.max_position_embeddings
         else:
-            self._max_length = 510
-
-    def _batchify(
-        self,
-        texts: List[str],
-        batch_size: int,
-        source_response_list: List[TextPayload],
-    ) -> Generator[Tuple[List[str], List[TextPayload]], None, None]:
-        for index in range(0, len(texts), batch_size):
-            yield (
-                texts[index : index + batch_size],
-                source_response_list[index : index + batch_size],
-            )
+            self._max_length = MAX_LENGTH
 
     def analyze_input(
         self,
@@ -49,29 +37,32 @@ class TranslationAnalyzer(BaseAnalyzer):
     ) -> List[TextPayload]:
 
         analyzer_output = []
-        texts = [
-            source_response.processed_text[: self._max_length]
-            if len(source_response.processed_text) > self._max_length
-            else source_response.processed_text
-            for source_response in source_response_list
-        ]
 
-        for batch_texts, batch_source_response in self._batchify(
-            texts, self.batch_size, source_response_list
-        ):
-            batch_predictions = self._pipeline(batch_texts)
+        for batch_responses in self.batchify(source_response_list, self.batch_size):
+            texts = [
+                source_response.processed_text[: self._max_length]
+                for source_response in batch_responses
+            ]
 
-            for prediction, source_response in zip(
-                batch_predictions, batch_source_response
-            ):
+            batch_predictions = self._pipeline(texts)
+
+            for prediction, source_response in zip(batch_predictions, batch_responses):
+                segmented_data = {
+                    "translation_data": {
+                        "original_text": source_response.processed_text
+                    }
+                }
+                if source_response.segmented_data:
+                    segmented_data = {
+                        **segmented_data,
+                        **source_response.segmented_data,
+                    }
 
                 analyzer_output.append(
                     TextPayload(
-                        processed_text=source_response.processed_text,
+                        processed_text=prediction["translation_text"],
                         meta=source_response.meta,
-                        segmented_data={
-                            "translated_text": prediction["translation_text"]
-                        },
+                        segmented_data=segmented_data,
                         source_name=source_response.source_name,
                     )
                 )

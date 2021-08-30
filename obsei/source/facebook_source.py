@@ -1,13 +1,18 @@
 import logging
 from datetime import datetime
-from time import mktime
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseSettings, Field, PrivateAttr
 from pydantic.types import SecretStr
 from pyfacebook import Api
 
-from obsei.misc.utils import DATETIME_STRING_PATTERN, DEFAULT_LOOKUP_PERIOD, convert_utc_time, obj_to_json
+from obsei.misc.utils import (
+    DATETIME_STRING_PATTERN,
+    DEFAULT_LOOKUP_PERIOD,
+    convert_utc_time,
+    obj_to_json,
+    convert_datetime_str_to_epoch,
+)
 from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 
@@ -77,7 +82,8 @@ class FacebookSource(BaseSource):
             else:
                 since_time = datetime.strptime(lookup_period, DATETIME_STRING_PATTERN)
 
-            since_timestamp = int(mktime(since_time.timetuple()))
+            since_timestamp = int(since_time.timestamp())
+        self.log_object("Since: ", str(datetime.fromtimestamp(since_timestamp)))
         post_last_since_time = since_timestamp
 
         api = config.get_client()
@@ -87,18 +93,22 @@ class FacebookSource(BaseSource):
                 page_id=config.page_id,
                 count=config.max_post,
                 since_time=str(since_timestamp),
+                return_json=True,
             )
             self.log_object("Posts: ", str(posts))
             post_ids = []
             for post in posts:
-                post_update_time = int(post.updated_time)
+                post_update_time = convert_datetime_str_to_epoch(post["updated_time"])
                 if post_update_time < since_timestamp:
                     break
 
-                if post_last_since_time is None or post_last_since_time < post_update_time:
+                if (
+                    post_last_since_time is None
+                    or post_last_since_time < post_update_time
+                ):
                     post_last_since_time = post_update_time
 
-                post_ids.append(post.id)
+                post_ids.append(post["id"])
 
         for post_id in post_ids:
             # Collect post state
@@ -117,11 +127,16 @@ class FacebookSource(BaseSource):
             self.log_object("Comment Summary: ", str(comment_summary))
 
             for comment in comments:
-                comment_created_time = int(comment.created_time)
+                comment_created_time = convert_datetime_str_to_epoch(
+                    comment.created_time
+                )
                 if comment_created_time < comment_since_time:
                     break
 
-                if comment_last_since_time is None or comment_last_since_time < comment_created_time:
+                if (
+                    comment_last_since_time is None
+                    or comment_last_since_time < comment_created_time
+                ):
                     comment_last_since_time = comment_created_time
 
                 source_responses.append(

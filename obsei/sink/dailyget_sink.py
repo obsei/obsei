@@ -1,3 +1,4 @@
+import json
 import logging
 from copy import deepcopy
 from datetime import timezone
@@ -27,11 +28,13 @@ class PayloadConvertor(Convertor):
         **kwargs,
     ) -> Dict[str, Any]:
         request_payload = base_payload or {}
+        use_enquiry_api = kwargs.get("use_enquiry_api", False)
 
         if analyzer_response.source_name != "Twitter":
             return {**request_payload, **analyzer_response.to_dict()}
 
         source_information = kwargs["source_information"]
+        partner_id = kwargs["partner_id"]
 
         user_url = ""
         positive = 0.0
@@ -58,9 +61,10 @@ class PayloadConvertor(Convertor):
             elif "segmented_data" in k and len(classification_list) < 2:
                 classification_list.append(k.rsplit("_", 1)[1])
 
+        created_at_str_parsed: Optional[str] = None
         if created_at_str:
             created_at = parser.isoparse(created_at_str)
-            created_at_str = (
+            created_at_str_parsed = (
                 created_at.replace(tzinfo=timezone.utc)
                 .astimezone(tz=IST_TZ)
                 .strftime("%Y-%m-%d %H:%M:%S")
@@ -79,20 +83,36 @@ class PayloadConvertor(Convertor):
         else:
             sentiment = "Neutral"
 
-        enquiry = {
-            "Source": source_information,
-            "FeedbackBy": user_url,
-            "Sentiment": sentiment,
-            "TweetUrl": tweet_url,
-            "FormattedText": text,
-            "PredictedCategories": ",".join(classification_list),
-        }
+        if use_enquiry_api:
+            enquiry = {
+                "Source": source_information,
+                "FeedbackBy": user_url,
+                "Sentiment": sentiment,
+                "TweetUrl": tweet_url,
+                "FormattedText": text,
+                "PredictedCategories": ",".join(classification_list),
+            }
 
-        if created_at_str:
-            enquiry["ReportedAt"] = created_at_str
+            if created_at_str_parsed is not None:
+                enquiry["ReportedAt"] = created_at_str_parsed
 
-        kv_str_list = [k + ": " + str(v) for k, v in enquiry.items()]
-        request_payload["enquiryMessage"] = "\n".join(kv_str_list)
+            kv_str_list = [k + ": " + str(v) for k, v in enquiry.items()]
+            request_payload["enquiryMessage"] = "\n".join(kv_str_list)
+        else:
+            message = {
+                "message": text,
+                "partnerId": partner_id,
+                "query": source_information,
+                "source": analyzer_response.source_name,
+                "url": tweet_url,
+                "userProfile": user_url,
+                "sentiment": sentiment,
+                "predictedCategories": ",".join(classification_list),
+                "metadata": str(json.dumps(analyzer_response.segmented_data, ensure_ascii=False)),
+                "originatedAt": created_at_str,
+            }
+            request_payload["messageDetail"] = str(json.dumps(message, ensure_ascii=False))
+
         return request_payload
 
 
@@ -101,6 +121,7 @@ class DailyGetSinkConfig(HttpSinkConfig):
     partner_id: str
     consumer_phone_number: str
     source_information: str
+    use_enquiry_api: bool = False
     headers: Dict[str, Any] = {"Content-type": "application/json"}
 
 
@@ -126,6 +147,8 @@ class DailyGetSink(HttpSink):
                     if config.base_payload is None
                     else deepcopy(config.base_payload),
                     source_information=config.source_information,
+                    use_enquiry_api=config.use_enquiry_api,
+                    partner_id=config.partner_id
                 )
             )
 

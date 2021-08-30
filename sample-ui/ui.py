@@ -24,9 +24,9 @@ Do not share and commit generated file as it may contains secure information.
     execute_col,
     download_python_col,
     download_yaml_col,
-) = st.beta_columns([2, 2, 1, 1, 1])
+) = st.columns([2, 2, 1, 1, 1])
 
-source_col, analyzer_col, sink_col = st.beta_columns([1, 1, 1])
+source_col, analyzer_col, sink_col = st.columns([1, 1, 1])
 
 source_list = [k for k in configuration["source"].keys()]
 selected_source = source_col.selectbox("Select Observer", source_list)
