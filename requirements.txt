@@ -84,6 +84,7 @@ google-auth==1.30.2
     #   google-auth-httplib2
 google-play-scraper==1.0.0
     # via -r requirements.in
+googlemaps==4.5.3
 googleapis-common-protos==1.53.0
     # via google-api-core
 greenlet==1.1.0
