@@ -1,6 +1,6 @@
 source:
   Appstore Scrapper:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/appstore.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/appstore.png"
     _help_:
       - '`app_url` is application url on app store.
       - For example for Xcode - https://apps.apple.com/us/app/xcode/id497799835'
@@ -12,7 +12,7 @@ source:
       lookup_period: "1h"
       max_count: 5
   Playstore Scrapper:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/playstore.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/playstore.png"
     _help_:
       - '`app_url` is application url on play store.
       - For example for Gmail - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en_IN&gl=US'
@@ -24,7 +24,7 @@ source:
       lookup_period: "1h"
       max_count: 5
   Reddit Scrapper:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/reddit.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
     _help_:
       - 'Reddit subreddit, search etc rss url. For proper url refer following link -'
       - 'https://www.reddit.com/r/pathogendavid/comments/tv8m9/pathogendavids_guide_to_rss_and_reddit/'
@@ -35,7 +35,7 @@ source:
       url: 'https://www.reddit.com/r/wallstreetbets/comments/.rss?sort=new'
       lookup_period: "1h"
   Twitter:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/twitter.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/twitter.png"
     _help_:
       - '`query` accept search string, @user or #hashtags also'
       - ''
@@ -52,7 +52,7 @@ source:
         consumer_key: ''
         consumer_secret: ''
   Facebook:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/facebook.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png"
     _help_:
       - '`page_id` is id of your facebook page'
       - ''
@@ -69,7 +69,7 @@ source:
         app_secret: ''
         long_term_token: ''
   Email:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/gmail.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/gmail.png"
     _help_:
       - 'List of IMAP servers for most commonly used email providers https://www.systoolsgroup.com/imap/'
       - ''
@@ -87,7 +87,7 @@ source:
         password: ''
       lookup_period: "1h"
   Reddit:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/reddit.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
     _help_:
       - 'Reddit account `username` and `password` require'
       - 'Enter list of `subreddits`'
@@ -103,7 +103,7 @@ source:
         password: ''
       lookup_period: "1h"
   Google News:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/googlenews.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/googlenews.png"
     _help_:
       - '`fetch_article` use crawler to fetch full article'
     source:
@@ -115,7 +115,7 @@ source:
       lookup_period: "1d"
       fetch_article: true
   Website Crawler:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/webcrawler.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/webcrawler.png"
     _help_:
       - '`package name` can be found at the end of the url of app in play store.'
       - ''
@@ -129,7 +129,7 @@ source:
         - 'https://obsei.github.io/obsei/'
 sink:
   Jira:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/jira.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/jira.png"
     _help_:
       - 'For testing purpose you can start jira server locally'
       - 'Refer https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-run-standalone/'
@@ -153,7 +153,7 @@ sink:
       project:
         key: ""
   Zendesk:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/zendesk.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/zendesk.png"
     _help_:
       - 'For custom domain refer http://docs.facetoe.com.au/zenpy.html#custom-domains'
       - 'Provide zendesk `domain`'
@@ -172,7 +172,7 @@ sink:
         email: ''
         password: ''
   Slack:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/slack.svg"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/slack.svg"
     _help_:
       - 'Provide slack bot/app `token`, for more detail refer -'
       - 'https://slack.com/intl/en-de/help/articles/215770388-Create-and-regenerate-API-tokens'
@@ -186,7 +186,7 @@ sink:
       slack_token: ''
       channel_id: ''
   Elastic:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/elastic.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/elastic.png"
     _help_:
       - 'For testing purpose you can start Elasticsearch server locally via docker'
       - '`docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" elasticsearch:7.9.2`'
@@ -200,7 +200,7 @@ sink:
       port: 9200
       index_name: "test"
   Http:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/http_api.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/http_api.png"
     _help_:
       - 'For testing purpose you can create mock http server via postman, refer -'
       - 'https://learning.postman.com/docs/designing-and-developing-your-api/mocking-data/setting-up-mock/'
@@ -214,7 +214,7 @@ sink:
       headers:
         Content-type: "application/json"
   Logger:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/logger.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/logger.png"
     _help_: null
     sink:
       _target_: obsei.sink.logger_sink.LoggerSink
@@ -223,7 +223,7 @@ sink:
 
 analyzer:
   Classification:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/classification.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/classification.png"
     Transformer:
       _help_:
         - 'For supported models refer https://huggingface.co/models?filter=zero-shot-classification'
@@ -243,7 +243,7 @@ analyzer:
         model_name_or_path: "typeform/mobilebert-uncased-mnli"
         device: "auto"
   Sentiment:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/sentiment.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/sentiment.png"
     Vader:
       _help_:
         - 'Vader is less resource hungry dictionary based Vader Sentiment detector'
@@ -265,7 +265,7 @@ analyzer:
         model_name_or_path: "typeform/mobilebert-uncased-mnli"
         device: "auto"
   Named Entity Recognition:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/ner.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/ner.png"
     Transformer:
       _help_:
         - 'For supported models refer https://huggingface.co/models?filter=token-classification'
@@ -282,7 +282,7 @@ analyzer:
         _target_: obsei.analyzer.ner_analyzer.SpacyNERAnalyzer
         model_name_or_path: "en_core_web_sm"
   Translation:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/translator.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/translator.png"
     Transformer:
       _help_:
         - 'For supported models refer https://huggingface.co/models?pipeline_tag=translation'
@@ -293,7 +293,7 @@ analyzer:
         model_name_or_path: "Helsinki-NLP/opus-mt-en-hi"
         device: "auto"
   PII Anonymizer:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/pii.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/pii.png"
     Presidio:
       _help_:
         - '`analyze_only` decide whether to return only pii analysis or anonymize text'
@@ -318,7 +318,7 @@ analyzer:
               model_name: "en_core_web_md"
               lang_code: "en"
   Dummy:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/dummy.png"
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/dummy.png"
     Dummy:
       _help_:
         - 'Dummy Analyzer, do nothing it simply used for transforming input to output'

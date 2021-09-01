@@ -1,4 +1,4 @@
-from pandas import DataFrame
+import pandas as pd
 
 from obsei.source.pandas_source import (
     PandasSourceConfig,
@@ -10,16 +10,15 @@ import sys
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-sample_dict = {
-    "name": ["aparna", "pankaj", "sudhir", "Geeku"],
-    "degree": ["MBA", "BCA", "M.Tech", "MBA"],
-    "score": [90, 40, 80, 98],
-}
+# Initialize your Pandas DataFrame from your sources like csv, excel, sql etc
+# In following example we are reading csv which have two columns title and text
+csv_file = "https://raw.githubusercontent.com/deepset-ai/haystack/master/tutorials/small_generator_dataset.csv"
+dataframe = pd.read_csv(csv_file)
 
 source_config = PandasSourceConfig(
-    dataframe=DataFrame(sample_dict),
-    include_columns=["score"],
-    text_columns=["name", "degree"],
+    dataframe=dataframe,
+    include_columns=["title"],
+    text_columns=["text"],
 )
 source = PandasSource()
 

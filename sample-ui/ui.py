@@ -2,7 +2,7 @@ from utils import *
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
 configuration = get_obsei_config(current_path, "config.yaml")
-logo_url = "https://raw.githubusercontent.com/obsei/obsei/master/images/logos/obsei_200x200.png"
+logo_url = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
 
 st.set_page_config(page_title="Obsei Demo", layout="wide", page_icon=logo_url)
 

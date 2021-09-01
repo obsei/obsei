@@ -1,8 +1,8 @@
 ## Demo UI
 
-This is a minimal UI that can spin up to test Obsei. It's based on streamlit and is very easy to extend for your purposes.
+This is a minimal UI that can spin up to test Obsei. It's based on streamlit and is very easy to extend for your own use.
 
-![Screenshot](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei-ui-demo.png)
+![Screenshot](https://raw.githubusercontent.com/obsei/obsei-resources/master/images/obsei-ui-demo.png)
 
 ## Usage
 

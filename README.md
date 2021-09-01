@@ -1,6 +1,6 @@
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/obsei-flyer.png" />
+    <img src="https://raw.githubusercontent.com/obsei/obsei-resources/master/images/obsei-flyer.png" />
 </p>
 
 ---
@@ -39,16 +39,16 @@
         <img alt="YouTube Channel Subscribers" src="https://img.shields.io/youtube/channel/subscribers/UCqdvgro1BzU13tkAfX3jCJA?style=social">
     </a>
     <a href="https://join.slack.com/t/obsei-community/shared_invite/zt-r0wnuz02-FAkAmhTAUoc6pD4SLB9Ikg">
-        <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/Slack_join.svg" height="30">
+        <img src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/Slack_join.svg" height="30">
     </a>
     <a href="https://www.facebook.com/ai.obsei/">
-        <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/facebook.png" height="30">
+        <img src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png" height="30">
     </a>
 </p>
 
 ---
 
-![](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei_flow.gif)
+![](https://raw.githubusercontent.com/obsei/obsei-resources/master/gifs/obsei_flow.gif)
 
 
 **Obsei** is an open-source low-code AI powered automation tool. *Obsei* consist of -
@@ -60,14 +60,14 @@
 <table style="text-align:center">
 <thead>
 <tr class="header">
-<th style="width:50%">Current Plan</th>
-<th style="width:50%">Future Plan</th>
+<th style="width:45%">Current Plan</th>
+<th style="width:45%">Future Plan</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><img alt="Current Plan" src="https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-flow-diagram.png" style="width:400"></td>
-<td><img alt="Future Plan" src="https://raw.githubusercontent.com/obsei/obsei/master/images/Obsei-future-concept.png" style="width:400"></td>
+<td><img alt="Current Plan" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/images/Obsei-flow-diagram.png" style="width:400"></td>
+<td><img alt="Future Plan" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/images/Obsei-future-concept.png" style="width:400"></td>
 </tr>
 <tr>
 <td>Text oriented workflows</td>
@@ -179,7 +179,7 @@
 ## Demo
 We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
 
-![Screenshot](https://raw.githubusercontent.com/obsei/obsei/master/images/obsei-ui-demo.png)
+![Screenshot](https://raw.githubusercontent.com/obsei/obsei-resources/master/images/obsei-ui-demo.png)
 
 ### Watch UI demo video
 
@@ -310,7 +310,7 @@ conda env create -f conda/gpu-environment.yml
 <details><summary><b>Step 3: Configure Source/Observer</b></summary>
 
 <table ><tbody ><tr></tr><tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/twitter.png" width="20" height="20"><b>Twitter</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/twitter.png" width="20" height="20"><b>Twitter</b></summary><hr>
 
  ```python
 from obsei.source.twitter_source import TwitterCredentials, TwitterSource, TwitterSourceConfig
@@ -333,7 +333,7 @@ source = TwitterSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/facebook.png" width="20" height="20"><b>Facebook</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png" width="20" height="20"><b>Facebook</b></summary><hr>
 
  ```python
 from obsei.source.facebook_source import FacebookCredentials, FacebookSource, FacebookSourceConfig
@@ -357,7 +357,7 @@ source = FacebookSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/gmail.png" width="20" height="20"><b>Email</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/gmail.png" width="20" height="20"><b>Email</b></summary><hr>
 
  ```python
 from obsei.source.email_source import EmailConfig, EmailCredInfo, EmailSource
@@ -386,7 +386,7 @@ source = EmailSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/appstore.png" width="20" height="20"><b>AppStore Reviews Scrapper</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/appstore.png" width="20" height="20"><b>AppStore Reviews Scrapper</b></summary><hr>
 
  ```python
 from obsei.source.appstore_scrapper import AppStoreScrapperConfig, AppStoreScrapperSource
@@ -410,7 +410,7 @@ source = AppStoreScrapperSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/playstore.png" width="20" height="20"><b>Play Store Reviews Scrapper</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/playstore.png" width="20" height="20"><b>Play Store Reviews Scrapper</b></summary><hr>
 
  ```python
 from obsei.source.playstore_scrapper import PlayStoreScrapperConfig, PlayStoreScrapperSource
@@ -433,7 +433,7 @@ source = PlayStoreScrapperSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/reddit.png" width="20" height="20"><b>Reddit</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png" width="20" height="20"><b>Reddit</b></summary><hr>
 
  ```python
 from obsei.source.reddit_source import RedditConfig, RedditSource, RedditCredInfo
@@ -460,7 +460,7 @@ source = RedditSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/reddit.png" width="20" height="20"><b>Reddit Scrapper</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png" width="20" height="20"><b>Reddit Scrapper</b></summary><hr>
 
 <i>Note: Reddit heavily rate limit scrappers, hence use it to fetch small data during long period</i>
 
@@ -482,7 +482,7 @@ source = RedditScrapperSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/googlenews.png" width="20" height="20"><b>Google News</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/googlenews.png" width="20" height="20"><b>Google News</b></summary><hr>
 
  ```python
 from obsei.source.google_news_source import GoogleNewsConfig, GoogleNewsSource
@@ -503,7 +503,7 @@ source = GoogleNewsSource()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/webcrawler.png" width="20" height="20"><b>Web Crawler</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/webcrawler.png" width="20" height="20"><b>Web Crawler</b></summary><hr>
 
  ```python
 from obsei.source.website_crawler_source import TrafilaturaCrawlerConfig, TrafilaturaCrawlerSource
@@ -515,6 +515,31 @@ source_config = TrafilaturaCrawlerConfig(
 
 # initialize website text retriever
 source = TrafilaturaCrawlerSource()
+```
+</details>
+</td>
+</tr>
+<tr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/pandas.svg" width="20" height="20"><b>Pandas DataFrame</b></summary><hr>
+
+ ```python
+import pandas as pd
+from obsei.source.pandas_source import PandasSource, PandasSourceConfig
+
+# Initialize your Pandas DataFrame from your sources like csv, excel, sql etc
+# In following example we are reading csv which have two columns title and text
+csv_file = "https://raw.githubusercontent.com/deepset-ai/haystack/master/tutorials/small_generator_dataset.csv"
+dataframe = pd.read_csv(csv_file)
+
+# initialize pandas sink config
+sink_config = PandasSourceConfig(
+    dataframe=dataframe,
+    include_columns=["score"],
+    text_columns=["name", "degree"],
+)
+
+# initialize pandas sink
+sink = PandasSource()
 ```
 </details>
 </td>
@@ -537,7 +562,7 @@ List of possible values of <b>device</b> parameter (default value <i>auto</i>):
 </p>
 
 <table ><tbody ><tr></tr><tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/classification.png" width="20" height="20"><b>Text Classification</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/classification.png" width="20" height="20"><b>Text Classification</b></summary><hr>
 
 Text classification, classify text into user provided categories.
  ```python
@@ -560,7 +585,7 @@ text_analyzer = ZeroShotClassificationAnalyzer(
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/sentiment.png" width="20" height="20"><b>Sentiment Analyzer</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/sentiment.png" width="20" height="20"><b>Sentiment Analyzer</b></summary><hr>
 
 Sentiment Analyzer, detect the sentiment of the text. Text classification can also perform sentiment analysis but if you don't want to use heavy-duty NLP model then use less resource hungry dictionary based Vader Sentiment detector.
  ```python
@@ -576,7 +601,7 @@ text_analyzer = VaderSentimentAnalyzer()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/ner.png" width="20" height="20"><b>NER Analyzer</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/ner.png" width="20" height="20"><b>NER Analyzer</b></summary><hr>
 
 NER (Named-Entity Recognition) Analyzer, extract information and classify named entities mentioned in text into pre-defined categories such as person names, organizations, locations, medical codes, time expressions, quantities, monetary values, percentages, etc
  ```python
@@ -596,7 +621,7 @@ text_analyzer = NERAnalyzer(
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/translator.png" width="20" height="20"><b>Translator</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/translator.png" width="20" height="20"><b>Translator</b></summary><hr>
 
  ```python
 from obsei.analyzer.translation_analyzer import TranslationAnalyzer
@@ -615,7 +640,7 @@ analyzer = TranslationAnalyzer(
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/pii.png" width="20" height="20"><b>PII Anonymizer</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/pii.png" width="20" height="20"><b>PII Anonymizer</b></summary><hr>
 
  ```python
 from obsei.analyzer.pii_analyzer import PresidioEngineConfig, PresidioModelConfig, \
@@ -645,7 +670,7 @@ analyzer = PresidioPIIAnalyzer(
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/dummy.png" width="20" height="20"><b>Dummy Analyzer</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/dummy.png" width="20" height="20"><b>Dummy Analyzer</b></summary><hr>
 
 Dummy Analyzer, do nothing it simply used for transforming input (TextPayload) to output (TextPayload) also adding user supplied dummy data.
  ```python
@@ -668,7 +693,7 @@ analyzer = DummyAnalyzer()
 <details><summary><b>Step 5: Configure Sink/Informer</b></summary>
 
 <table ><tbody ><tr></tr><tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/slack.svg" width="25" height="25"><b>Slack</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/slack.svg" width="25" height="25"><b>Slack</b></summary><hr>
 
  ```python
 from obsei.sink.slack_sink import SlackSink, SlackSinkConfig
@@ -689,7 +714,7 @@ sink = SlackSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/zendesk.png" width="20" height="20"><b>Zendesk</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/zendesk.png" width="20" height="20"><b>Zendesk</b></summary><hr>
 
  ```python
 from obsei.sink.zendesk_sink import ZendeskSink, ZendeskSinkConfig, ZendeskCredInfo
@@ -720,7 +745,7 @@ sink = ZendeskSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/jira.png" width="20" height="20"><b>Jira</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/jira.png" width="20" height="20"><b>Jira</b></summary><hr>
 
  ```python
 from obsei.sink.jira_sink import JiraSink, JiraSinkConfig
@@ -749,7 +774,7 @@ sink = JiraSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/elastic.png" width="20" height="20"><b>ElasticSearch</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/elastic.png" width="20" height="20"><b>ElasticSearch</b></summary><hr>
 
  ```python
 from obsei.sink.elasticsearch_sink import ElasticSearchSink, ElasticSearchSinkConfig
@@ -774,7 +799,7 @@ sink = ElasticSearchSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/http_api.png" width="20" height="20"><b>Http</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/http_api.png" width="20" height="20"><b>Http</b></summary><hr>
 
  ```python
 from obsei.sink.http_sink import HttpSink, HttpSinkConfig
@@ -802,7 +827,7 @@ sink = HttpSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/pandas.svg" width="20" height="20"><b>Pandas DataFrame</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/pandas.svg" width="20" height="20"><b>Pandas DataFrame</b></summary><hr>
 
  ```python
 from pandas import DataFrame
@@ -820,7 +845,7 @@ sink = PandasSink()
 </td>
 </tr>
 <tr>
-<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/logger.png" width="20" height="20"><b>Logger</b></summary><hr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/logger.png" width="20" height="20"><b>Logger</b></summary><hr>
 
 This is useful for testing and dry run checking of pipeline.
  ```python
