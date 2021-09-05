@@ -2,3 +2,5 @@ theme: jekyll-theme-primer
 markdown: CommonMarkGhPages
 title: "Obsei: An open-source low-code AI powered automation tool"
 description: "Obsei is an open-source low-code AI powered automation tool"
+
+google_analytics: G-0E2FTKBK4T
