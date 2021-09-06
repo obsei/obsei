@@ -1,4 +1,5 @@
 import logging
+import os
 import textwrap
 from typing import Any, Dict, List, Optional
 
@@ -44,8 +45,8 @@ class JiraSinkConfig(BaseSinkConfig):
     _jira_client: Jira = PrivateAttr()
     TYPE: str = "Jira"
     url: str
-    username: Optional[SecretStr] = Field(None, env="jira_username")
-    password: Optional[SecretStr] = Field(None, env="jira_password")
+    username: Optional[SecretStr] = Field(os.environ.get("jira_username", None))
+    password: Optional[SecretStr] = Field(os.environ.get("jira_password", None))
     issue_type: Dict[str, str]
     project: Dict[str, str]
     update_history: bool = True

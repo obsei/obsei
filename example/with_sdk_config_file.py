@@ -8,7 +8,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 obsei_configuration = ObseiConfiguration(
     config_path="../example",
-    config_filename="sdk.yaml",
+#    config_filename="sdk.yaml",
 )
 
 play_store_source_config = obsei_configuration.initialize_instance("play_store_source")

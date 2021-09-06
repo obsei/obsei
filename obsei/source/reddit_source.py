@@ -1,8 +1,9 @@
+import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from praw import Reddit
-from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
+from pydantic import BaseModel, Field, PrivateAttr, SecretStr
 
 from obsei.payload import TextPayload
 from obsei.misc.utils import (
@@ -14,17 +15,17 @@ from obsei.misc.utils import (
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 
 
-class RedditCredInfo(BaseSettings):
+class RedditCredInfo(BaseModel):
     # Create credential at https://www.reddit.com/prefs/apps
     # Also refer https://praw.readthedocs.io/en/latest/getting_started/authentication.html
     # Currently Password Flow, Read Only Mode and Saved Refresh Token Mode are supported
-    client_id: SecretStr = Field(None, env="reddit_client_id")
-    client_secret: SecretStr = Field(None, env="reddit_client_secret")
+    client_id: SecretStr = Field(os.environ.get("reddit_client_id", None))
+    client_secret: SecretStr = Field(os.environ.get("reddit_client_secret", None))
     user_agent: str = "Test User Agent"
     redirect_uri: Optional[str] = None
-    refresh_token: Optional[SecretStr] = Field(None, env="reddit_refresh_token")
-    username: Optional[str] = Field(None, env="reddit_username")
-    password: Optional[SecretStr] = Field(None, env="reddit_password")
+    refresh_token: Optional[SecretStr] = Field(os.environ.get("reddit_refresh_token", None))
+    username: Optional[str] = Field(os.environ.get("reddit_username", None))
+    password: Optional[SecretStr] = Field(os.environ.get("reddit_password", None))
     read_only: bool = True
 
 
