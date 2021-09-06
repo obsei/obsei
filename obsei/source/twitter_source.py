@@ -97,9 +97,15 @@ class TwitterSourceConfig(BaseSourceConfig):
     place_fields: Optional[List[str]] = Field(DEFAULT_PLACE_FIELDS)
     max_tweets: Optional[int] = DEFAULT_MAX_TWEETS
     cred_info: TwitterCredentials = Field(TwitterCredentials())
+    credential: Optional[TwitterCredentials] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+
+        if self.credential is not None:
+            logger.warning("`credential` is deprecated; use `cred_info`")
+            self.cred_info = self.credential
+
         if self.cred_info.bearer_token is None:
             if self.cred_info.consumer_key is None and self.cred_info.consumer_secret is None:
                 raise AttributeError(
