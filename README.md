@@ -319,7 +319,7 @@ from obsei.source.twitter_source import TwitterCredentials, TwitterSource, Twitt
 source_config = TwitterSourceConfig(
     keywords=["issue"], # Keywords, @user or #hashtags
     lookup_period="1h", # Lookup period from current time, format: `<number><d|h|m>` (day|hour|minute)
-    credential=TwitterCredentials(
+    cred_info=TwitterCredentials(
         # Enter your twitter consumer key and secret. Get it from https://developer.twitter.com/en/apply-for-access
         consumer_key="<twitter_consumer_key>",
         consumer_secret="<twitter_consumer_secret>"

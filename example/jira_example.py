@@ -36,7 +36,7 @@ source_config = TwitterSourceConfig(
     expansions=["author_id"],
     place_fields=None,
     max_tweets=10,
-    credential=TwitterCredentials(
+    cred_info=TwitterCredentials(
         consumer_key=SecretStr(os.environ["twitter_consumer_key"]),
         consumer_secret=SecretStr(os.environ["twitter_consumer_secret"]),
     ),

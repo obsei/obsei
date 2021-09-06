@@ -47,7 +47,7 @@ source:
       query: "@Twitter"
       lookup_period: "1h"
       max_tweets: 10
-      credential:
+      cred_info:
         _target_: obsei.source.twitter_source.TwitterCredentials
         consumer_key: ''
         consumer_secret: ''

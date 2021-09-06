@@ -94,7 +94,7 @@ class RedditScrapperSource(BaseSource):
                 )
             )
 
-            comment_time = reddit.updated["at"].replace(tzinfo=timezone.utc)
+            comment_time = reddit.updated.replace(tzinfo=timezone.utc)
 
             if last_since_time is None or last_since_time < comment_time:
                 last_since_time = comment_time
@@ -105,7 +105,7 @@ class RedditScrapperSource(BaseSource):
         scrapper_stat["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
         scrapper_stat["since_id"] = last_index
 
-        if update_state and self.store:
+        if update_state and self.store is not None:
             self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses
