@@ -265,7 +265,7 @@ class EmailSource(BaseSource):
             )
             mailbox_stat["since_comment_id"] = last_index
 
-        if update_state and self.store:
+        if update_state and self.store is not None:
             self.store.update_source_state(workflow_id=id, state=state)
 
         return source_responses

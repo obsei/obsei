@@ -107,7 +107,7 @@ class PlayStoreSource(BaseSource):
                 if pagination_token is None:
                     break
 
-        if update_state and self.store:
+        if update_state and self.store is not None:
             state["start_index"] = review_id
             self.store.update_source_state(workflow_id=id, state=state)
 

@@ -80,50 +80,6 @@ class TwitterCredentials(BaseModel):
     )
     extra_headers_dict: Optional[Dict[str, Any]] = None
 
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        if self.bearer_token is None:
-            if self.consumer_key is None and self.consumer_secret is None:
-                raise AttributeError(
-                    "consumer_key and consumer_secret required to generate bearer_token via Twitter"
-                )
-
-            self.bearer_token = SecretStr(self.generate_bearer_token())
-
-    def get_twitter_credentials(self):
-        if self.bearer_token is None:
-            self.bearer_token = self.generate_bearer_token()
-
-        return {
-            "bearer_token": self.bearer_token.get_secret_value(),
-            "endpoint": self.endpoint,
-            "extra_headers_dict": self.extra_headers_dict,
-        }
-
-    # Copied from Twitter searchtweets-v2 lib
-    def generate_bearer_token(self):
-        """
-        Return the bearer token for a given pair of consumer key and secret values.
-        """
-        data = [("grant_type", "client_credentials")]
-        resp = requests.post(
-            TWITTER_OAUTH_ENDPOINT,
-            data=data,
-            auth=(
-                self.consumer_key.get_secret_value(),
-                self.consumer_secret.get_secret_value(),
-            ),
-        )
-        logger.warning("Grabbing bearer token from OAUTH")
-        if resp.status_code >= 400:
-            logger.error(resp.text)
-            resp.raise_for_status()
-
-        return resp.json()["access_token"]
-
-    class Config:
-        arbitrary_types_allowed = True
-
 
 class TwitterSourceConfig(BaseSourceConfig):
     TYPE: str = "Twitter"
@@ -140,7 +96,48 @@ class TwitterSourceConfig(BaseSourceConfig):
     expansions: Optional[List[str]] = Field(DEFAULT_EXPANSIONS)
     place_fields: Optional[List[str]] = Field(DEFAULT_PLACE_FIELDS)
     max_tweets: Optional[int] = DEFAULT_MAX_TWEETS
-    credential: TwitterCredentials = Field(TwitterCredentials())
+    cred_info: TwitterCredentials = Field(TwitterCredentials())
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        if self.cred_info.bearer_token is None:
+            if self.cred_info.consumer_key is None and self.cred_info.consumer_secret is None:
+                raise AttributeError(
+                    "consumer_key and consumer_secret required to generate bearer_token via Twitter"
+                )
+
+            self.cred_info.bearer_token = SecretStr(self.generate_bearer_token())
+
+    def get_twitter_credentials(self):
+        if self.cred_info.bearer_token is None:
+            self.cred_info.bearer_token = self.generate_bearer_token()
+
+        return {
+            "bearer_token": self.cred_info.bearer_token.get_secret_value(),
+            "endpoint": self.cred_info.endpoint,
+            "extra_headers_dict": self.cred_info.extra_headers_dict,
+        }
+
+    # Copied from Twitter searchtweets-v2 lib
+    def generate_bearer_token(self):
+        """
+        Return the bearer token for a given pair of consumer key and secret values.
+        """
+        data = [("grant_type", "client_credentials")]
+        resp = requests.post(
+            TWITTER_OAUTH_ENDPOINT,
+            data=data,
+            auth=(
+                self.cred_info.consumer_key.get_secret_value(),
+                self.cred_info.consumer_secret.get_secret_value(),
+            ),
+        )
+        logger.warning("Grabbing bearer token from OAUTH")
+        if resp.status_code >= 400:
+            logger.error(resp.text)
+            resp.raise_for_status()
+
+        return resp.json()["access_token"]
 
 
 class TwitterSource(BaseSource):
@@ -225,7 +222,7 @@ class TwitterSource(BaseSource):
             tweets_output = collect_results(
                 query=search_query,
                 max_tweets=config.max_tweets,
-                result_stream_args=config.credential.get_twitter_credentials(),
+                result_stream_args=config.get_twitter_credentials(),
             )
 
             if not tweets_output:
@@ -287,7 +284,7 @@ class TwitterSource(BaseSource):
             until_id = min_tweet_id
             lookup_period = None
 
-        if update_state and self.store:
+        if update_state and self.store is not None:
             state["since_id"] = max_tweet_id
             self.store.update_source_state(workflow_id=id, state=state)
 
