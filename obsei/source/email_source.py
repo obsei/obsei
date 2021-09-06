@@ -1,13 +1,14 @@
 import email
 import imaplib
 import logging
+import os
 from datetime import datetime
 from email.header import decode_header
 from email.message import Message
 from typing import Any, Dict, List, Optional
 
 import pytz
-from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
+from pydantic import BaseModel, Field, PrivateAttr, SecretStr
 
 from obsei.payload import TextPayload
 from obsei.misc.utils import (
@@ -21,9 +22,9 @@ from obsei.source.base_source import BaseSource, BaseSourceConfig
 logger = logging.getLogger(__name__)
 
 
-class EmailCredInfo(BaseSettings):
-    username: SecretStr = Field(env="email_username")
-    password: SecretStr = Field(env="email_password")
+class EmailCredInfo(BaseModel):
+    username: SecretStr = Field(os.environ.get("email_username", None))
+    password: SecretStr = Field(os.environ.get("email_password", None))
 
 
 class EmailConfig(BaseSourceConfig):

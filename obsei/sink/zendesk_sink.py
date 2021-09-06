@@ -1,9 +1,10 @@
 import logging
+import os
 import textwrap
 from copy import deepcopy
 from typing import Any, Dict, List, Mapping, Optional
 
-from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
+from pydantic import BaseModel, Field, PrivateAttr, SecretStr
 from zenpy import Zenpy
 from zenpy.lib.api_objects import Ticket
 
@@ -48,11 +49,11 @@ class ZendeskPayloadConvertor(Convertor):
         return payload
 
 
-class ZendeskCredInfo(BaseSettings):
-    email: Optional[str] = Field(None, env="zendesk_email")
-    password: Optional[SecretStr] = Field(None, env="zendesk_password")
-    oauth_token: Optional[SecretStr] = Field(None, env="zendesk_oauth_token")
-    token: Optional[SecretStr] = Field(None, env="zendesk_token")
+class ZendeskCredInfo(BaseModel):
+    email: Optional[str] = Field(os.environ.get("zendesk_email", None))
+    password: Optional[SecretStr] = Field(os.environ.get("zendesk_password", None))
+    oauth_token: Optional[SecretStr] = Field(os.environ.get("zendesk_oauth_token", None))
+    token: Optional[SecretStr] = Field(os.environ.get("zendesk_token", None))
 
 
 class ZendeskSinkConfig(BaseSinkConfig):
@@ -66,7 +67,7 @@ class ZendeskSinkConfig(BaseSinkConfig):
     # when set it will force request on:
     # {scheme}://{netloc}/endpoint
     domain: str = Field("zendesk.com")
-    subdomain: Optional[str] = Field(None, env="zendesk_subdomain")
+    subdomain: Optional[str] = Field(os.environ.get("zendesk_subdomain", None))
     cred_info: ZendeskCredInfo = Field(ZendeskCredInfo())
     summary_max_length: int = 50
     labels_count = 3  # Number of labels to fetch

@@ -1,8 +1,9 @@
 import logging
+import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseSettings, Field, PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr
 from pydantic.types import SecretStr
 from pyfacebook import Api
 
@@ -19,10 +20,10 @@ from obsei.source.base_source import BaseSource, BaseSourceConfig
 logger = logging.getLogger(__name__)
 
 
-class FacebookCredentials(BaseSettings):
-    app_id: SecretStr = Field(None, env="facebook_app_id")
-    app_secret: SecretStr = Field(None, env="facebook_app_secret")
-    long_term_token: SecretStr = Field(None, env="facebook_long_term_token")
+class FacebookCredentials(BaseModel):
+    app_id: SecretStr = Field(os.environ.get("facebook_app_id", None))
+    app_secret: SecretStr = Field(os.environ.get("facebook_app_secret", None))
+    long_term_token: SecretStr = Field(os.environ.get("facebook_long_term_token", None))
 
     def __init__(self, **data: Any):
         super().__init__(**data)

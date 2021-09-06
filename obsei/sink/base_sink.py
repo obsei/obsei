@@ -1,8 +1,7 @@
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseSettings, Field
-from pydantic.main import BaseModel
+from pydantic import Field, BaseModel
 
 from obsei.payload import TextPayload
 from obsei.workflow.base_store import BaseStore
@@ -26,7 +25,7 @@ class Convertor(BaseModel):
         arbitrary_types_allowed = True
 
 
-class BaseSinkConfig(BaseSettings):
+class BaseSinkConfig(BaseModel):
     TYPE: str = "Base"
 
     @classmethod

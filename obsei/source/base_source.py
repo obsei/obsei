@@ -1,14 +1,13 @@
 from abc import abstractmethod
 from typing import List, Optional
 
-from pydantic import BaseSettings
-from pydantic.main import BaseModel
+from pydantic import BaseModel
 
 from obsei.payload import TextPayload
 from obsei.workflow.base_store import BaseStore
 
 
-class BaseSourceConfig(BaseSettings):
+class BaseSourceConfig(BaseModel):
     TYPE: str = "Base"
 
     class Config:
