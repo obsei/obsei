@@ -3,7 +3,10 @@ import pytest
 from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig
 from obsei.payload import TextPayload
 from obsei.postprocessor.inference_aggregator import InferenceAggregatorConfig
-from obsei.postprocessor.inference_aggregator_function import ClassificationAverageScore, ClassificationMaxCategories
+from obsei.postprocessor.inference_aggregator_function import (
+    ClassificationAverageScore,
+    ClassificationMaxCategories,
+)
 from obsei.preprocessor.text_splitter import TextSplitterConfig
 
 GOOD_TEXT = """If anyone is interested... these are our hosts. I can’t recommend them enough, Abc & Pbc.
@@ -15,6 +18,12 @@ BAD_TEXT = """I had the worst experience ever with XYZ in Egypt. Bad Cars, askin
 MIXED_TEXT = """I am mixed"""
 
 TEXTS = [GOOD_TEXT, BAD_TEXT, MIXED_TEXT]
+
+BUY_INTENT = """I am interested in this style of PGN-ES-D-6150 /Direct drive energy saving servo motor price and in doing business with you. Could you please send me the quotation"""
+
+SELL_INTENT = """Black full body massage chair for sale."""
+
+BUY_SELL_TEXTS = [BUY_INTENT, SELL_INTENT]
 
 
 def test_zero_shot_analyzer(zero_shot_analyzer):
@@ -36,10 +45,32 @@ def test_zero_shot_analyzer(zero_shot_analyzer):
         assert "negative" in analyzer_response.segmented_data["classifier_data"]
 
 
+def test_text_classification_analyzer(text_classification_analyzer):
+    labels = []
+
+    source_responses = [
+        TextPayload(processed_text=text, source_name="sample")
+        for text in BUY_SELL_TEXTS
+    ]
+    analyzer_responses = text_classification_analyzer.analyze_input(
+        source_response_list=source_responses,
+        analyzer_config=ClassificationAnalyzerConfig(labels=labels),
+    )
+
+    assert len(analyzer_responses) == len(BUY_SELL_TEXTS)
+
+    for analyzer_response in analyzer_responses:
+        assert ("LABEL_1" in analyzer_response.segmented_data["classifier_data"]) or (
+            "LABEL_0" in analyzer_response.segmented_data["classifier_data"]
+        )
+
+
 @pytest.mark.parametrize(
     "aggregate_function", [ClassificationAverageScore(), ClassificationMaxCategories()]
 )
-def test_classification_analyzer_with_splitter_aggregator(aggregate_function, zero_shot_analyzer):
+def test_classification_analyzer_with_splitter_aggregator(
+    aggregate_function, zero_shot_analyzer
+):
     labels = ["facility", "food", "comfortable", "positive", "negative"]
 
     source_responses = [
@@ -51,7 +82,9 @@ def test_classification_analyzer_with_splitter_aggregator(aggregate_function, ze
             labels=labels,
             use_splitter_and_aggregator=True,
             splitter_config=TextSplitterConfig(max_split_length=50),
-            aggregator_config=InferenceAggregatorConfig(aggregate_function=aggregate_function)
+            aggregator_config=InferenceAggregatorConfig(
+                aggregate_function=aggregate_function
+            ),
         ),
     )
 

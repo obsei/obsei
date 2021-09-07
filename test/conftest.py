@@ -1,6 +1,9 @@
 import pytest
 
-from obsei.analyzer.classification_analyzer import ZeroShotClassificationAnalyzer
+from obsei.analyzer.classification_analyzer import (
+    ZeroShotClassificationAnalyzer,
+    TextClassificationAnalyzer,
+)
 from obsei.analyzer.ner_analyzer import TransformersNERAnalyzer, SpacyNERAnalyzer
 from obsei.analyzer.pii_analyzer import (
     PresidioEngineConfig,
@@ -17,6 +20,13 @@ from obsei.preprocessor.text_splitter import TextSplitter
 def zero_shot_analyzer():
     return ZeroShotClassificationAnalyzer(
         model_name_or_path="typeform/mobilebert-uncased-mnli",
+    )
+
+
+@pytest.fixture(scope="session")
+def text_classification_analyzer():
+    return TextClassificationAnalyzer(
+        model_name_or_path="obsei-ai/sell-buy-intent-classifier-bert-mini",
     )
 
 
