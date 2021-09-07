@@ -168,14 +168,6 @@ class TextClassificationAnalyzer(BaseAnalyzer):
 
         analyzer_output: List[TextPayload] = []
 
-        labels = analyzer_config.labels or []
-        add_positive_negative_labels = kwargs.get("add_positive_negative_labels", True)
-        if add_positive_negative_labels:
-            if "positive" not in labels:
-                labels.append("positive")
-            if "negative" not in labels:
-                labels.append("negative")
-
         if (
             analyzer_config.use_splitter_and_aggregator
             and analyzer_config.splitter_config
@@ -195,7 +187,6 @@ class TextClassificationAnalyzer(BaseAnalyzer):
 
             for prediction, source_response in zip(batch_predictions, batch_responses):
                 score_dict = {prediction["label"]: prediction["score"]}
-                print(score_dict)
 
                 segmented_data = {
                     "classifier_data": dict(
