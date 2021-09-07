@@ -45,24 +45,29 @@ def test_zero_shot_analyzer(zero_shot_analyzer):
         assert "negative" in analyzer_response.segmented_data["classifier_data"]
 
 
-def test_text_classification_analyzer(text_classification_analyzer):
-    labels = []
-
+@pytest.mark.parametrize(
+    "label_map, expected", [
+        (None, ["LABEL_1", "LABEL_0"]),
+        ({"LABEL_1": "Buy", "LABEL_0": "Sell"}, ["Buy", "Sell"])
+    ]
+)
+def test_text_classification_analyzer(text_classification_analyzer, label_map, expected):
     source_responses = [
         TextPayload(processed_text=text, source_name="sample")
         for text in BUY_SELL_TEXTS
     ]
     analyzer_responses = text_classification_analyzer.analyze_input(
         source_response_list=source_responses,
-        analyzer_config=ClassificationAnalyzerConfig(labels=labels),
+        analyzer_config=ClassificationAnalyzerConfig(
+            label_map=label_map,
+        ),
     )
 
     assert len(analyzer_responses) == len(BUY_SELL_TEXTS)
 
     for analyzer_response in analyzer_responses:
-        assert ("LABEL_1" in analyzer_response.segmented_data["classifier_data"]) or (
-            "LABEL_0" in analyzer_response.segmented_data["classifier_data"]
-        )
+        assert analyzer_response.segmented_data["classifier_data"] is not None
+        assert analyzer_response.segmented_data["classifier_data"].keys() <= set(expected)
 
 
 @pytest.mark.parametrize(
