@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from pydantic import Field
+from pydantic import Field, PrivateAttr
 from transformers import Pipeline, pipeline
 
 from obsei.analyzer.base_analyzer import (
@@ -37,29 +37,29 @@ class ClassificationAnalyzerConfig(BaseAnalyzerConfig):
 class TextClassificationAnalyzer(BaseAnalyzer):
     TYPE: str = "Classification"
     pipeline_name: str = "text-classification"
-    pipeline: Optional[Pipeline] = None
-    max_length: Optional[int] = None
+    _pipeline: Pipeline = PrivateAttr()
+    _max_length: int = PrivateAttr()
     model_name_or_path: str
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self.pipeline = pipeline(
+        self._pipeline = pipeline(
             self.pipeline_name,
             model=self.model_name_or_path,
             device=self._device_id,
         )
 
-        if hasattr(self.pipeline.model.config, "max_position_embeddings"):
-            self.max_length = self.pipeline.model.config.max_position_embeddings
+        if hasattr(self._pipeline.model.config, "max_position_embeddings"):
+            self._max_length = self._pipeline.model.config.max_position_embeddings
         else:
-            self.max_length = MAX_LENGTH
+            self._max_length = MAX_LENGTH
 
     def prediction_from_model(
         self,
         texts: List[str],
         analyzer_config: Optional[ClassificationAnalyzerConfig] = None,
     ) -> List[Dict[str, Any]]:
-        prediction = self.pipeline(texts)
+        prediction = self._pipeline(texts)
         predictions = prediction if isinstance(prediction, list) else [prediction]
         label_map = analyzer_config.label_map if analyzer_config is not None else {}
         label_map = label_map or {}
@@ -89,7 +89,7 @@ class TextClassificationAnalyzer(BaseAnalyzer):
 
         for batch_responses in self.batchify(source_response_list, self.batch_size):
             texts = [
-                source_response.processed_text[: self.max_length]
+                source_response.processed_text[: self._max_length]
                 for source_response in batch_responses
             ]
 
@@ -149,7 +149,7 @@ class ZeroShotClassificationAnalyzer(TextClassificationAnalyzer):
         if len(labels) == 0:
             raise ValueError("`labels` can't be empty or `add_positive_negative_labels` should be False")
 
-        prediction = self.pipeline(
+        prediction = self._pipeline(
             texts, labels, multi_label=analyzer_config.multi_class_classification
         )
         predictions = prediction if isinstance(prediction, list) else [prediction]
