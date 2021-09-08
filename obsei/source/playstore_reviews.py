@@ -32,7 +32,13 @@ class PlayStoreConfig(BaseSourceConfig):
 
         self.cred_info = self.cred_info or GoogleCredInfo()
 
+        if self.cred_info.service_cred_file is None or self.cred_info.developer_key is None:
+            raise ValueError("`service_cred_file` and `developer_key` can't be empty")
+
     def get_google_credentials(self) -> Credentials:
+        if self.cred_info.service_cred_file is None or self.cred_info.developer_key is None:
+            raise ValueError("`service_cred_file` and `developer_key` can't be empty")
+
         credentials = service_account.Credentials.from_service_account_file(
             filename=self.cred_info.service_cred_file, scopes=self.cred_info.scopes
         )
