@@ -18,25 +18,33 @@ logger = logging.getLogger(__name__)
 
 class ClassificationAnalyzerConfig(BaseAnalyzerConfig):
     TYPE: str = "Classification"
-    labels: List[str]
+    labels: Optional[List[str]] = None
+    label_map: Optional[Dict[str, str]] = None
     multi_class_classification: bool = True
+    add_positive_negative_labels: bool = True
     aggregator_config: InferenceAggregatorConfig = Field(
-        InferenceAggregatorConfig(
-            aggregate_function=ClassificationAverageScore()
-        )
+        InferenceAggregatorConfig(aggregate_function=ClassificationAverageScore())
     )
 
+    def __init__(self, **data: Any):
+        super().__init__(**data)
 
-class ZeroShotClassificationAnalyzer(BaseAnalyzer):
+        if self.labels is None:
+            self.multi_class_classification = False
+            self.add_positive_negative_labels = False
+
+
+class TextClassificationAnalyzer(BaseAnalyzer):
+    TYPE: str = "Classification"
+    pipeline_name: str = "text-classification"
     _pipeline: Pipeline = PrivateAttr()
     _max_length: int = PrivateAttr()
-    TYPE: str = "Classification"
     model_name_or_path: str
 
     def __init__(self, **data: Any):
         super().__init__(**data)
         self._pipeline = pipeline(
-            "zero-shot-classification",
+            self.pipeline_name,
             model=self.model_name_or_path,
             device=self._device_id,
         )
@@ -46,16 +54,20 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         else:
             self._max_length = MAX_LENGTH
 
-    def _prediction_from_model(
+    def prediction_from_model(
         self,
         texts: List[str],
-        labels: List[str],
-        multi_class_classification: bool = True,
+        analyzer_config: Optional[ClassificationAnalyzerConfig] = None,
     ) -> List[Dict[str, Any]]:
-        prediction = self._pipeline(
-            texts, labels, multi_label=multi_class_classification
-        )
-        return prediction if isinstance(prediction, list) else [prediction]
+        prediction = self._pipeline(texts)
+        predictions = prediction if isinstance(prediction, list) else [prediction]
+        label_map = analyzer_config.label_map if analyzer_config is not None else {}
+        label_map = label_map or {}
+        return [
+            {
+                label_map.get(prediction["label"], prediction["label"]): prediction["score"]
+            } for prediction in predictions
+        ]
 
     def analyze_input(  # type: ignore[override]
         self,
@@ -63,20 +75,13 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
         analyzer_config: Optional[ClassificationAnalyzerConfig] = None,
         **kwargs,
     ) -> List[TextPayload]:
-        if analyzer_config is None:
-            raise ValueError("analyzer_config can't be None")
-
         analyzer_output: List[TextPayload] = []
 
-        labels = analyzer_config.labels or []
-        add_positive_negative_labels = kwargs.get("add_positive_negative_labels", True)
-        if add_positive_negative_labels:
-            if "positive" not in labels:
-                labels.append("positive")
-            if "negative" not in labels:
-                labels.append("negative")
-
-        if analyzer_config.use_splitter_and_aggregator and analyzer_config.splitter_config:
+        if (
+            analyzer_config is not None
+            and analyzer_config.use_splitter_and_aggregator
+            and analyzer_config.splitter_config
+        ):
             source_response_list = self.splitter.preprocess_input(
                 source_response_list,
                 config=analyzer_config.splitter_config,
@@ -88,22 +93,11 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
                 for source_response in batch_responses
             ]
 
-            batch_predictions = self._prediction_from_model(
-                texts,
-                labels,
-                analyzer_config.multi_class_classification,
-            )
+            batch_predictions = self.prediction_from_model(texts=texts, analyzer_config=analyzer_config)
 
-            for prediction, source_response in zip(batch_predictions, batch_responses):
-                score_dict = {
-                    label: score
-                    for label, score in zip(prediction["labels"], prediction["scores"])
-                }
-
+            for score_dict, source_response in zip(batch_predictions, batch_responses):
                 segmented_data = {
-                    "classifier_data": dict(
-                        sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
-                    )
+                    "classifier_data": score_dict
                 }
 
                 if source_response.segmented_data:
@@ -121,10 +115,58 @@ class ZeroShotClassificationAnalyzer(BaseAnalyzer):
                     )
                 )
 
-        if analyzer_config.use_splitter_and_aggregator and analyzer_config.aggregator_config:
+        if (
+            analyzer_config is not None
+            and analyzer_config.use_splitter_and_aggregator
+            and analyzer_config.aggregator_config
+        ):
             analyzer_output = self.aggregator.postprocess_input(
                 input_list=analyzer_output,
                 config=analyzer_config.aggregator_config,
             )
 
         return analyzer_output
+
+
+class ZeroShotClassificationAnalyzer(TextClassificationAnalyzer):
+    pipeline_name: str = "zero-shot-classification"
+
+    def prediction_from_model(
+        self,
+        texts: List[str],
+        analyzer_config: Optional[ClassificationAnalyzerConfig] = None,
+    ) -> List[Dict[str, Any]]:
+        if analyzer_config is None:
+            raise ValueError("analyzer_config can't be None")
+
+        labels = analyzer_config.labels or []
+        if analyzer_config.add_positive_negative_labels:
+            if "positive" not in labels:
+                labels.append("positive")
+            if "negative" not in labels:
+                labels.append("negative")
+
+        if len(labels) == 0:
+            raise ValueError("`labels` can't be empty or `add_positive_negative_labels` should be False")
+
+        prediction = self._pipeline(
+            texts, labels, multi_label=analyzer_config.multi_class_classification
+        )
+        predictions = prediction if isinstance(prediction, list) else [prediction]
+
+        return [dict(zip(prediction["labels"], prediction["scores"])) for prediction in predictions]
+
+    def analyze_input(  # type: ignore[override]
+        self,
+        source_response_list: List[TextPayload],
+        analyzer_config: Optional[ClassificationAnalyzerConfig] = None,
+        **kwargs,
+    ) -> List[TextPayload]:
+        if analyzer_config is None:
+            raise ValueError("analyzer_config can't be None")
+
+        return super().analyze_input(
+            source_response_list=source_response_list,
+            analyzer_config=analyzer_config,
+            **kwargs
+        )
