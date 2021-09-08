@@ -1,4 +1,3 @@
-import os
 from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
@@ -18,8 +17,8 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
     host: str
     port: int
     index_name: str = "es_index"
-    username: SecretStr = Field(os.environ.get("elasticsearch_username", SecretStr("")))
-    password: SecretStr = Field(os.environ.get("elasticsearch_password", SecretStr("")))
+    username: SecretStr = Field(SecretStr(""), env="elasticsearch_username")
+    password: SecretStr = Field(SecretStr(""), env="elasticsearch_password")
     scheme: str = "http"
     ca_certs: bool = False
     verify_certs: bool = True

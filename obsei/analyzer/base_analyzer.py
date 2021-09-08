@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Any, Generator, List, Optional
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseSettings, Field, PrivateAttr
 
 from obsei.misc import gpu_util
 from obsei.payload import TextPayload
@@ -17,7 +17,7 @@ DEFAULT_BATCH_SIZE_GPU: int = 64
 DEFAULT_BATCH_SIZE_CPU: int = 4
 
 
-class BaseAnalyzerConfig(BaseModel):
+class BaseAnalyzerConfig(BaseSettings):
     TYPE: str = "Base"
     use_splitter_and_aggregator: Optional[bool] = False
     splitter_config: Optional[TextSplitterConfig]
@@ -34,7 +34,7 @@ class BaseAnalyzerConfig(BaseModel):
         arbitrary_types_allowed = True
 
 
-class BaseAnalyzer(BaseModel):
+class BaseAnalyzer(BaseSettings):
     _device_id: int = PrivateAttr()
     TYPE: str = "Base"
     store: Optional[BaseStore] = None

@@ -50,6 +50,12 @@
 
 ![](https://raw.githubusercontent.com/obsei/obsei-resources/master/gifs/obsei_flow.gif)
 
+---
+<span style="color:red">
+<b>Note</b>: We are working towards release 0.1.0 and making jump from 0.0.9. This release will have many breaking changes related to naming convention. We will make sure to update docker image and colab tutorials.
+</span>
+
+---
 
 **Obsei** is an open-source low-code AI powered automation tool. *Obsei* consist of -
  - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews, News, Website etc and feed that information to,
@@ -60,7 +66,7 @@
 <table style="text-align:center">
 <thead>
 <tr class="header">
-<th style="width:45%">Current Plan</th>
+<th style="width:45%">Current State</th>
 <th style="width:45%">Future Plan</th>
 </tr>
 </thead>

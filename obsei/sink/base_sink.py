@@ -1,13 +1,13 @@
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional
 
-from pydantic import Field, BaseModel
+from pydantic import Field, BaseSettings
 
 from obsei.payload import TextPayload
 from obsei.workflow.base_store import BaseStore
 
 
-class Convertor(BaseModel):
+class Convertor(BaseSettings):
     def convert(
         self,
         analyzer_response: TextPayload,
@@ -25,7 +25,7 @@ class Convertor(BaseModel):
         arbitrary_types_allowed = True
 
 
-class BaseSinkConfig(BaseModel):
+class BaseSinkConfig(BaseSettings):
     TYPE: str = "Base"
 
     @classmethod
@@ -36,7 +36,7 @@ class BaseSinkConfig(BaseModel):
         arbitrary_types_allowed = True
 
 
-class BaseSink(BaseModel):
+class BaseSink(BaseSettings):
     convertor: Convertor = Field(Convertor())
     store: Optional[BaseStore] = None
 

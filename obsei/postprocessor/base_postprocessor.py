@@ -1,17 +1,17 @@
 from typing import List
 from obsei.payload import TextPayload
-from pydantic import BaseModel
+from pydantic import BaseSettings
 from abc import abstractmethod
 
 
-class BasePostprocessorConfig(BaseModel):
+class BasePostprocessorConfig(BaseSettings):
     TYPE: str = "Base"
 
     class Config:
         multi_label = True
 
 
-class BasePostprocessor(BaseModel):
+class BasePostprocessor(BaseSettings):
     TYPE: str = "Base"
 
     @abstractmethod

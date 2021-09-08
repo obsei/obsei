@@ -1,20 +1,19 @@
-import os
 from typing import Any, Dict, List, Optional
 
 from google.auth.credentials import Credentials  # type: ignore
 from google.oauth2 import service_account  # type: ignore
 from googleapiclient.discovery import build
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseSettings, Field, SecretStr
 
 from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 
 
-class GoogleCredInfo(BaseModel):
+class GoogleCredInfo(BaseSettings):
     # Currently only service_account_file type credential supported
     # Refer: https://developers.google.com/identity/protocols/oauth2/service-account
-    service_cred_file: str = Field(os.environ.get("google_service_cred_file", None))
-    developer_key: SecretStr = Field(os.environ.get("google_developer_key", None))
+    service_cred_file: Optional[str] = Field(None, env="google_service_cred_file")
+    developer_key: Optional[SecretStr] = Field(None, env="google_developer_key")
     scopes: List[str] = ["https://www.googleapis.com/auth/androidpublisher"]
 
 
@@ -26,7 +25,12 @@ class PlayStoreConfig(BaseSourceConfig):
     num_retries: int = 1
     with_quota_project_id: Optional[str] = None
     with_subject: Optional[str] = None
-    cred_info: GoogleCredInfo = Field(GoogleCredInfo())
+    cred_info: Optional[GoogleCredInfo] = Field(None)
+
+    def __init__(self, **values: Any):
+        super().__init__(**values)
+
+        self.cred_info = self.cred_info or GoogleCredInfo()
 
     def get_google_credentials(self) -> Credentials:
         credentials = service_account.Credentials.from_service_account_file(

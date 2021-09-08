@@ -1,20 +1,20 @@
 from abc import abstractmethod
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseSettings
 
 from obsei.payload import TextPayload
 from obsei.workflow.base_store import BaseStore
 
 
-class BaseSourceConfig(BaseModel):
+class BaseSourceConfig(BaseSettings):
     TYPE: str = "Base"
 
     class Config:
         arbitrary_types_allowed = True
 
 
-class BaseSource(BaseModel):
+class BaseSource(BaseSettings):
     store: Optional[BaseStore] = None
 
     @abstractmethod
