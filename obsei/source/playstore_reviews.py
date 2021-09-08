@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 from google.auth.credentials import Credentials  # type: ignore
 from google.oauth2 import service_account  # type: ignore
 from googleapiclient.discovery import build
-from pydantic import BaseSettings, Field, SecretStr
+from pydantic import BaseSettings, Field, SecretStr, PrivateAttr
 
 from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSource, BaseSourceConfig
@@ -18,6 +18,7 @@ class GoogleCredInfo(BaseSettings):
 
 
 class PlayStoreConfig(BaseSourceConfig):
+    _credentials: Credentials = PrivateAttr()
     TYPE: str = "PlayStore"
     package_name: str
     start_index: Optional[int] = None
@@ -35,22 +36,23 @@ class PlayStoreConfig(BaseSourceConfig):
         if self.cred_info.service_cred_file is None or self.cred_info.developer_key is None:
             raise ValueError("`service_cred_file` and `developer_key` can't be empty")
 
-    def get_google_credentials(self) -> Credentials:
-        if self.cred_info.service_cred_file is None or self.cred_info.developer_key is None:
-            raise ValueError("`service_cred_file` and `developer_key` can't be empty")
-
-        credentials = service_account.Credentials.from_service_account_file(
+        self._credentials = service_account.Credentials.from_service_account_file(
             filename=self.cred_info.service_cred_file, scopes=self.cred_info.scopes
         )
 
         if self.with_quota_project_id is not None:
-            credentials = credentials.with_quota_project(self.with_quota_project_id)
+            self._credentials = self._credentials.with_quota_project(self.with_quota_project_id)
 
         if self.with_subject is not None:
-            credentials = credentials.with_subject(self.with_subject)
+            self._credentials = self._credentials.with_subject(self.with_subject)
 
-        return credentials
+    def get_google_credentials(self) -> Credentials:
+        return self._credentials
 
+    def get_developer_key(self) -> str:
+        if self.cred_info is None or self.cred_info.developer_key is None:
+            raise ValueError("`developer_key` can't be empty")
+        return self.cred_info.developer_key.get_secret_value()
 
 class PlayStoreSource(BaseSource):
     NAME: str = "PlayStore"
@@ -62,7 +64,7 @@ class PlayStoreSource(BaseSource):
             serviceName="androidpublisher",
             version="v3",
             credentials=config.get_google_credentials(),
-            developerKey=config.cred_info.developer_key.get_secret_value(),
+            developerKey=config.get_developer_key(),
         ) as service:
             reviews = service.reviews()
             pagination_token: Optional[str] = None
