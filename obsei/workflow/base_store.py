@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseSettings
 
 
-class BaseStore(BaseModel):
+class BaseStore(BaseSettings):
     @abstractmethod
     def get_source_state(self, id: str) -> Optional[Dict[str, Any]]:
         pass

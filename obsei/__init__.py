@@ -1,4 +1,5 @@
 import logging
+
 from obsei._version import __version__
 
 logging.basicConfig(

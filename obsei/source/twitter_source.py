@@ -1,5 +1,4 @@
 import logging
-import os
 from datetime import datetime
 
 import pytz
@@ -7,7 +6,7 @@ import requests
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseSettings, Field
 from pydantic.types import SecretStr
 from searchtweets import collect_results, gen_request_parameters
 
@@ -71,10 +70,10 @@ DEFAULT_USER_FIELDS = [
 DEFAULT_OPERATORS = ["-is:reply", "-is:retweet"]
 
 
-class TwitterCredentials(BaseModel):
-    bearer_token: Optional[SecretStr] = Field(os.environ.get("twitter_bearer_token", None))
-    consumer_key: Optional[SecretStr] = Field(os.environ.get("twitter_consumer_key", None))
-    consumer_secret: Optional[SecretStr] = Field(os.environ.get("twitter_consumer_secret", None))
+class TwitterCredentials(BaseSettings):
+    bearer_token: Optional[SecretStr] = Field(None, env="twitter_bearer_token")
+    consumer_key: Optional[SecretStr] = Field(None, env="twitter_consumer_key")
+    consumer_secret: Optional[SecretStr] = Field(None, env="twitter_consumer_secret")
     endpoint: str = Field(
         "https://api.twitter.com/2/tweets/search/recent", env="twitter_endpoint"
     )
@@ -96,11 +95,13 @@ class TwitterSourceConfig(BaseSourceConfig):
     expansions: Optional[List[str]] = Field(DEFAULT_EXPANSIONS)
     place_fields: Optional[List[str]] = Field(DEFAULT_PLACE_FIELDS)
     max_tweets: Optional[int] = DEFAULT_MAX_TWEETS
-    cred_info: TwitterCredentials = Field(TwitterCredentials())
+    cred_info: TwitterCredentials = Field(None)
     credential: Optional[TwitterCredentials] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+
+        self.cred_info = self.cred_info or TwitterCredentials()
 
         if self.credential is not None:
             logger.warning("`credential` is deprecated; use `cred_info`")

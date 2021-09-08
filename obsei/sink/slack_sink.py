@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 from typing import Any, List, Optional
 
 from pydantic import Field, PrivateAttr, SecretStr
@@ -17,8 +16,8 @@ class SlackSinkConfig(BaseSinkConfig):
     _slack_client: WebClient = PrivateAttr()
     TYPE: str = "Slack"
 
-    slack_token: Optional[SecretStr] = Field(os.environ.get("slack_token", None))
-    channel_id: Optional[str] = Field(os.environ.get("slack_channel_id", None))
+    slack_token: Optional[SecretStr] = Field(None, env="slack_token")
+    channel_id: Optional[str] = Field(None, env="slack_channel_id")
 
     def __init__(self, **data: Any):
         super().__init__(**data)

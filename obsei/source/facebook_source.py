@@ -1,9 +1,8 @@
 import logging
-import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseSettings, Field, PrivateAttr
 from pydantic.types import SecretStr
 from pyfacebook import Api
 
@@ -20,22 +19,10 @@ from obsei.source.base_source import BaseSource, BaseSourceConfig
 logger = logging.getLogger(__name__)
 
 
-class FacebookCredentials(BaseModel):
-    app_id: SecretStr = Field(os.environ.get("facebook_app_id", None))
-    app_secret: SecretStr = Field(os.environ.get("facebook_app_secret", None))
-    long_term_token: SecretStr = Field(os.environ.get("facebook_long_term_token", None))
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        if (
-            self.app_id is None
-            or self.app_secret is None
-            or self.long_term_token is None
-        ):
-            raise AttributeError("app and token required to connect to Facebook")
-
-    class Config:
-        arbitrary_types_allowed = True
+class FacebookCredentials(BaseSettings):
+    app_id: Optional[SecretStr] = Field(None, env="facebook_app_id")
+    app_secret: Optional[SecretStr] = Field(None, env="facebook_app_secret")
+    long_term_token: Optional[SecretStr] = Field(None, env="facebook_long_term_token")
 
 
 class FacebookSourceConfig(BaseSourceConfig):
@@ -45,10 +32,19 @@ class FacebookSourceConfig(BaseSourceConfig):
     post_ids: Optional[List[str]] = None
     lookup_period: Optional[str] = None
     max_post: Optional[int] = 50
-    cred_info: FacebookCredentials = Field(FacebookCredentials())
+    cred_info: Optional[FacebookCredentials] = Field(None)
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+
+        self.cred_info = self.cred_info or FacebookCredentials()
+
+        if (
+            self.cred_info.app_id is None
+            or self.cred_info.app_secret is None
+            or self.cred_info.long_term_token is None
+        ):
+            raise AttributeError("`app_id`, `app_secret` and `long_term_token` required to connect to Facebook")
 
         self._api_client = Api(
             app_id=self.cred_info.app_id.get_secret_value(),

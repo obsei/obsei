@@ -1,18 +1,18 @@
 from abc import abstractmethod
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseSettings
 
 from obsei.payload import TextPayload
 
 
-class BaseTextProcessorConfig(BaseModel):
+class BaseTextProcessorConfig(BaseSettings):
     TYPE: str = "Base"
 
     class Config:
         arbitrary_types_allowed = True
 
 
-class BaseTextPreprocessor(BaseModel):
+class BaseTextPreprocessor(BaseSettings):
     TYPE: str = "Base"
 
     @abstractmethod

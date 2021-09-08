@@ -1,5 +1,4 @@
 import logging
-import os
 import textwrap
 from copy import deepcopy
 from typing import Any, Dict, List, Mapping, Optional
@@ -50,10 +49,10 @@ class ZendeskPayloadConvertor(Convertor):
 
 
 class ZendeskCredInfo(BaseModel):
-    email: Optional[str] = Field(os.environ.get("zendesk_email", None))
-    password: Optional[SecretStr] = Field(os.environ.get("zendesk_password", None))
-    oauth_token: Optional[SecretStr] = Field(os.environ.get("zendesk_oauth_token", None))
-    token: Optional[SecretStr] = Field(os.environ.get("zendesk_token", None))
+    email: Optional[str] = Field(None, env="zendesk_email")
+    password: Optional[SecretStr] = Field(None, env="zendesk_password")
+    oauth_token: Optional[SecretStr] = Field(None, env="zendesk_oauth_token")
+    token: Optional[SecretStr] = Field(None, env="zendesk_token")
 
 
 class ZendeskSinkConfig(BaseSinkConfig):
@@ -67,14 +66,16 @@ class ZendeskSinkConfig(BaseSinkConfig):
     # when set it will force request on:
     # {scheme}://{netloc}/endpoint
     domain: str = Field("zendesk.com")
-    subdomain: Optional[str] = Field(os.environ.get("zendesk_subdomain", None))
-    cred_info: ZendeskCredInfo = Field(ZendeskCredInfo())
+    subdomain: Optional[str] = Field(None, env="zendesk_subdomain")
+    cred_info: Optional[ZendeskCredInfo] = Field(None)
     summary_max_length: int = 50
     labels_count = 3  # Number of labels to fetch
     base_payload: Optional[Dict[str, Any]] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+
+        self.cred_info = self.cred_info or ZendeskCredInfo()
 
         self._client = Zenpy(
             domain=self.domain,
