@@ -30,3 +30,7 @@ trafilatura<0.9.0
 python-facebook-api
 htmldate<0.9.0   # To handle regex conflict
 keras
+gensim
+umap
+sentence_transformers
+scikit-learn
