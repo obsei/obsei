@@ -31,6 +31,7 @@ python-facebook-api
 htmldate<0.9.0   # To handle regex conflict
 keras
 gensim
-umap
+umap-learn
 sentence_transformers
 scikit-learn
+hdbscan
