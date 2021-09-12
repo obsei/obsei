@@ -1,6 +1,9 @@
 import torch
 from gensim.models.ldamodel import LdaModel
-from typing import Any, Dict, List, Tuple
+from typing import Dict, List
+
+from keras.losses import mean_squared_error
+
 from obsei.payload import TextPayload
 
 import umap.umap_ as umap
@@ -9,7 +12,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 import pandas as pd
 import hdbscan
 
-import keras
 from keras.layers import Input, Dense
 from keras.models import Model
 from sklearn.model_selection import train_test_split
@@ -165,9 +167,8 @@ class Autoencoder:
         self.autoencoder = Model(input_vec, decoded)
         self.encoder = Model(input_vec, encoded)
         encoded_input = Input(shape=(self.latent_dim,))
-        decoder_layer = self.autoencoder.layers[-1]
         self.decoder = Model(encoded_input, self.autoencoder.layers[-1](encoded_input))
-        self.autoencoder.compile(optimizer="adam", loss=keras.losses.mean_squared_error)
+        self.autoencoder.compile(optimizer="adam", loss=mean_squared_error)
 
     def fit(self, X):
         if not self.autoencoder:

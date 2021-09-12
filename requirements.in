@@ -35,3 +35,4 @@ umap-learn
 sentence_transformers
 scikit-learn
 hdbscan
+tensorflow
