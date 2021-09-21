@@ -8,7 +8,6 @@ This could not have been possible without following open source software -
 - [apscheduler](https://github.com/agronholm/apscheduler): To schedule task to execute desired workflow
 - [pydantic](https://github.com/samuelcolvin/pydantic): For data validation
 - [sqlalchemy](https://github.com/sqlalchemy/sqlalchemy): As SQL toolkit to access DB storage
-- [fastapi](https://fastapi.tiangolo.com/) & [gunicorn](https://gunicorn.org/): For HTTP server and API interface
 - [google-play-scraper](https://github.com/JoMingyu/google-play-scraper): To fetch the Google Play Store review without authentication
 - [praw](https://github.com/praw-dev/praw): For Reddit client
 - [reddit-rss-reader](https://github.com/lalitpagaria/reddit-rss-reader): For Reddit scrapping
@@ -18,3 +17,5 @@ This could not have been possible without following open source software -
 - [presidio-anonymizer](https://github.com/microsoft/presidio): Personal information anonymizer
 - [gnews](https://github.com/ranahaani/GNews): For Google News integration
 - [trafilatura](https://github.com/adbar/trafilatura): For crawling news article
+- [google-maps-scraper](https://github.com/outscraper/google-maps-scraper-pyhton): To scrap Google Maps reviews via [OutScrapper API](https://app.outscraper.com/api-docs)
+- [python-facebook-api](https://github.com/sns-sdks/python-facebook): For facebook integration

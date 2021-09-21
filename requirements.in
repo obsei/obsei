@@ -16,7 +16,7 @@ google-play-scraper
 app-store-reviews-reader
 reddit-rss-reader
 praw
-mmh3
+
 beautifulsoup4
 slack-sdk
 zenpy
@@ -26,5 +26,7 @@ presidio-anonymizer
 pandas
 nltk
 gnews
-trafilatura
+trafilatura<0.9.0
 python-facebook-api
+google-services-api
+htmldate<0.9.0   # To handle regex conflict

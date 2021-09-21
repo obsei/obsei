@@ -62,25 +62,18 @@
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
  - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
 
+![](https://raw.githubusercontent.com/obsei/obsei-resources/master/images/Obsei_diagram.png)
 
-<table style="text-align:center">
-<thead>
-<tr class="header">
-<th style="width:45%">Current State</th>
-<th style="width:45%">Future Plan</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><img alt="Current Plan" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/images/Obsei-flow-diagram.png" style="width:400"></td>
-<td><img alt="Future Plan" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/images/Obsei-future-concept.png" style="width:400"></td>
-</tr>
-<tr>
-<td>Text oriented workflows</td>
-<td>Text, Image, Audio, and Video oriented workflows</td>
-</tr>
-</tbody>
-</table>
+<details><summary>Future thoughts -</summary>
+
+- Text, Image, Audio, Documents and Video oriented workflows
+- Collect data from every possible private and public channels
+- Add each possible to AI piece which can automate manual cognitive workflows
+
+
+![](https://raw.githubusercontent.com/obsei/obsei-resources/master/images/Obsei-future-concept.png)
+</details>
+
 
 ### Introductory demo video
 
@@ -387,6 +380,29 @@ source_config = EmailConfig(
 
 # initialize email retriever
 source = EmailSource()
+```
+</details>
+</td>
+</tr>
+<tr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/google_maps.png" width="20" height="20"><b>Google Maps Reviews Scrapper</b></summary><hr>
+
+ ```python
+from obsei.source import OSGoogleMapsReviewsSource, OSGoogleMapsReviewsConfig
+
+# initialize Outscrapper Maps review source config
+source_config = OSGoogleMapsReviewsConfig(
+    # Collect API key from https://outscraper.com/
+    api_key="<Enter Your API Key>",
+    # Enter Google Maps link or place id
+    # For example below is for the "Taj Mahal"
+    queries=["https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"],
+    number_of_reviews=10,
+)
+
+
+# initialize Outscrapper Maps review retriever
+source = OSGoogleMapsReviewsSource()
 ```
 </details>
 </td>
