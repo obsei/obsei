@@ -27,7 +27,7 @@ source:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/google_maps.png"
     _help_:
       - 'Collect `api_key` from https://outscraper.com/'
-      -
+      - ''
       - 'For `queries` enter google maps urls or place ids, for example'
       - "https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"
     source:
