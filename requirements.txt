@@ -133,6 +133,8 @@ marshmallow==3.13.0
     #   marshmallow-enum
 marshmallow-enum==1.5.1
     # via dataclasses-json
+mmh3==3.0.0
+    # via -r requirements.in
 murmurhash==1.0.5
     # via
     #   preshed
