@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseSettings, Field, PrivateAttr
 from pydantic.types import SecretStr
-from pyfacebook import Api
+from pyfacebook import FacebookApi
 
 from obsei.misc.utils import (
     DATETIME_STRING_PATTERN,
@@ -26,7 +26,7 @@ class FacebookCredentials(BaseSettings):
 
 
 class FacebookSourceConfig(BaseSourceConfig):
-    _api_client: Api = PrivateAttr()
+    _api_client: FacebookApi = PrivateAttr()
     TYPE: str = "Facebook"
     page_id: str
     post_ids: Optional[List[str]] = None
@@ -46,13 +46,13 @@ class FacebookSourceConfig(BaseSourceConfig):
         ):
             raise AttributeError("`app_id`, `app_secret` and `long_term_token` required to connect to Facebook")
 
-        self._api_client = Api(
+        self._api_client = FacebookApi(
             app_id=self.cred_info.app_id.get_secret_value(),
             app_secret=self.cred_info.app_secret.get_secret_value(),
             long_term_token=self.cred_info.long_term_token.get_secret_value(),
         )
 
-    def get_client(self) -> Api:
+    def get_client(self) -> FacebookApi:
         return self._api_client
 
 
@@ -63,13 +63,13 @@ class FacebookSource(BaseSource):
         source_responses: List[TextPayload] = []
 
         # Get data from state
-        id: str = kwargs.get("id", None)
+        identifier: str = kwargs.get("id", None)
         state: Optional[Dict[str, Any]] = (
             None
-            if id is None or self.store is None
-            else self.store.get_source_state(id)
+            if identifier is None or self.store is None
+            else self.store.get_source_state(identifier)
         )
-        update_state: bool = True if id else False
+        update_state: bool = True if identifier else False
         state = state or dict()
         since_timestamp: Optional[int] = state.get("since_timestamp", None)
         if since_timestamp is None:
@@ -86,7 +86,7 @@ class FacebookSource(BaseSource):
         api = config.get_client()
         post_ids = config.post_ids
         if not post_ids:
-            posts = api.get_page_posts(
+            posts = api.page.get_posts(
                 page_id=config.page_id,
                 count=config.max_post,
                 since_time=str(since_timestamp),
@@ -115,7 +115,7 @@ class FacebookSource(BaseSource):
             comment_since_time = state.get("since_timestamp", since_timestamp)
             comment_last_since_time = comment_since_time
 
-            comments, comment_summary = api.get_comments_by_object(
+            comments, comment_summary = api.page.get_comments(
                 object_id=post_id,
                 filter_type="stream",
                 order_type="reverse_chronological",
@@ -163,7 +163,7 @@ class FacebookSource(BaseSource):
         #     source_responses.extend(text_payloads)
 
         if update_state and self.store is not None:
-            self.store.update_source_state(workflow_id=id, state=state)
+            self.store.update_source_state(workflow_id=identifier, state=state)
 
         return source_responses
 
