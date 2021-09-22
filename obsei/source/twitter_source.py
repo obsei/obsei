@@ -175,11 +175,11 @@ class TwitterSource(BaseSource):
         )
 
         # Get data from state
-        id: str = kwargs.get("id", None)
+        identifier: str = kwargs.get("id", None)
         state: Optional[Dict[str, Any]] = (
             None
-            if id is None or self.store is None
-            else self.store.get_source_state(id)
+            if identifier is None or self.store is None
+            else self.store.get_source_state(identifier)
         )
         since_id: Optional[int] = (
             config.since_id or None if state is None else state.get("since_id", None)
@@ -187,7 +187,7 @@ class TwitterSource(BaseSource):
         until_id: Optional[int] = (
             config.until_id or None if state is None else state.get("until_id", None)
         )
-        update_state: bool = True if id else False
+        update_state: bool = True if identifier else False
         state = state or dict()
         max_tweet_id = since_id
         min_tweet_id = until_id
@@ -214,6 +214,7 @@ class TwitterSource(BaseSource):
         need_more_lookup = True
         while need_more_lookup:
             search_query = gen_request_parameters(
+                granularity=None,
                 query=query,
                 results_per_call=config.max_tweets,
                 place_fields=place_fields,
@@ -293,7 +294,7 @@ class TwitterSource(BaseSource):
 
         if update_state and self.store is not None:
             state["since_id"] = max_tweet_id
-            self.store.update_source_state(workflow_id=id, state=state)
+            self.store.update_source_state(workflow_id=identifier, state=state)
 
         return source_responses
 

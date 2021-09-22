@@ -17,5 +17,4 @@ This could not have been possible without following open source software -
 - [presidio-anonymizer](https://github.com/microsoft/presidio): Personal information anonymizer
 - [gnews](https://github.com/ranahaani/GNews): For Google News integration
 - [trafilatura](https://github.com/adbar/trafilatura): For crawling news article
-- [google-maps-scraper](https://github.com/outscraper/google-maps-scraper-pyhton): To scrap Google Maps reviews via [OutScrapper API](https://app.outscraper.com/api-docs)
 - [python-facebook-api](https://github.com/sns-sdks/python-facebook): For facebook integration

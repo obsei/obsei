@@ -1,17 +1,20 @@
+import logging
 from datetime import datetime
 from typing import Optional, List, Any, Dict
 
-from outscraper import ApiClient
-from pydantic import SecretStr, Field, PrivateAttr
+import requests
+from pydantic import SecretStr, Field
 
 from obsei.misc.utils import convert_utc_time, DATETIME_STRING_PATTERN
 from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSourceConfig, BaseSource
 
+logger = logging.getLogger(__name__)
+OUTSCRAPPER_API_URL = 'https://api.app.outscraper.com'
+
 
 class OSGoogleMapsReviewsConfig(BaseSourceConfig):
     NAME: str = "Maps Reviews Scrapper"
-    _client: ApiClient = PrivateAttr()
     queries: List[str]
     sort: str = "newest"
     ignore_empty_reviews: bool = True
@@ -26,6 +29,7 @@ class OSGoogleMapsReviewsConfig(BaseSourceConfig):
     # It has to be constructed in the next sequence: "@" + "latitude" + "," + "longitude" + "," + "zoom"
     # (e.g. "@41.3954381,2.1628662,15.1z").
     central_coordinates: Optional[str] = None
+    # Get API key from https://outscraper.com/
     api_key: Optional[SecretStr] = Field(None, env="outscrapper_api_key")
 
     def __init__(self, **values: Any):
@@ -33,9 +37,6 @@ class OSGoogleMapsReviewsConfig(BaseSourceConfig):
 
         if self.api_key is None:
             raise ValueError("OutScrapper API key require to fetch reviews data")
-
-    def get_client(self) -> ApiClient:
-        return self._client
 
 
 class OSGoogleMapsReviewsSource(BaseSource):
@@ -69,18 +70,27 @@ class OSGoogleMapsReviewsSource(BaseSource):
 
         last_reviews_since_time = since_timestamp
 
-        queries_data = config.get_client().google_maps_reviews(
-            query=config.queries,
-            reviewsLimit=config.number_of_reviews,
-            limit=config.number_of_places_per_query,
-            sort=config.sort,
-            ignore_empty=config.ignore_empty_reviews,
-            coordinates=config.central_coordinates,
-            language=config.language,
-            region=config.country,
-            start=since_timestamp,
-            cutoff=config.until_timestamp,
-        )
+        response = requests.get(f'{OUTSCRAPPER_API_URL}/maps/reviews-v2', params={
+            'query': config.queries,
+            'reviewsLimit': config.number_of_reviews,
+            'limit': config.number_of_places_per_query,
+            'sort': config.sort,
+            'start': since_timestamp,
+            'cutoff': config.until_timestamp,
+            'ignoreEmpty': config.ignore_empty_reviews,
+            'coordinates': config.central_coordinates,
+            'language': config.language,
+            'region': config.country,
+            'async': False,
+        }, headers={
+            'X-API-KEY': config.api_key.get_secret_value(),
+        })
+
+        queries_data = []
+        if response.status_code == 200:
+            queries_data = response.json().get('data', [])
+        else:
+            logger.warning(f"API call failed with error: {response.json()}")
 
         for query_data in queries_data:
             reviews = [] if "reviews_data" not in query_data else query_data.pop("reviews_data")

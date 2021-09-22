@@ -91,8 +91,6 @@ google-auth-httplib2==0.1.0
     # via google-api-python-client
 google-play-scraper==1.0.2
     # via -r requirements.in
-google-services-api==1.0.0
-    # via -r requirements.in
 googleapis-common-protos==1.53.0
     # via google-api-core
 greenlet==1.1.1
@@ -238,7 +236,6 @@ requests==2.26.0
     #   app-store-reviews-reader
     #   atlassian-python-api
     #   google-api-core
-    #   google-services-api
     #   huggingface-hub
     #   prawcore
     #   python-facebook-api
