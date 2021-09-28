@@ -70,7 +70,7 @@ class OSGoogleMapsReviewsSource(BaseSource):
 
         last_reviews_since_time = since_timestamp
 
-        response = requests.get(f'{OUTSCRAPPER_API_URL}/maps/reviews-v2', params={
+        params: Dict[str, Any] = {
             'query': config.queries,
             'reviewsLimit': config.number_of_reviews,
             'limit': config.number_of_places_per_query,
@@ -82,8 +82,10 @@ class OSGoogleMapsReviewsSource(BaseSource):
             'language': config.language,
             'region': config.country,
             'async': False,
-        }, headers={
-            'X-API-KEY': config.api_key.get_secret_value(),
+        }
+
+        response = requests.get(f'{OUTSCRAPPER_API_URL}/maps/reviews-v2', params=params, headers={
+            'X-API-KEY': "" if config.api_key is None else config.api_key.get_secret_value(),
         })
 
         queries_data = []
