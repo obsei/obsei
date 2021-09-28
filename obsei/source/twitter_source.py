@@ -123,6 +123,7 @@ class TwitterSourceConfig(BaseSourceConfig):
             "bearer_token": self.cred_info.bearer_token.get_secret_value(),
             "endpoint": self.cred_info.endpoint,
             "extra_headers_dict": self.cred_info.extra_headers_dict,
+            "output_format": "m",
         }
 
     # Copied from Twitter searchtweets-v2 lib
@@ -235,7 +236,6 @@ class TwitterSource(BaseSource):
 
             if not tweets_output:
                 logger.info("No Tweets found")
-                need_more_lookup = False
                 break
 
             tweets = []
@@ -257,6 +257,10 @@ class TwitterSource(BaseSource):
 
             # TODO use it later
             logger.info(f"Twitter API meta_info='{meta_info}'")
+
+            if len(tweets):
+                logger.error("Something is broken in tweet search API call, this not supposed to happen")
+                break
 
             for tweet in tweets:
                 if "author_id" in tweet and tweet["author_id"] in user_map:

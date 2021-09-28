@@ -321,7 +321,8 @@ source_config = TwitterSourceConfig(
     cred_info=TwitterCredentials(
         # Enter your twitter consumer key and secret. Get it from https://developer.twitter.com/en/apply-for-access
         consumer_key="<twitter_consumer_key>",
-        consumer_secret="<twitter_consumer_secret>"
+        consumer_secret="<twitter_consumer_secret>",
+        bearer_token='<ENTER BEARER TOKEN>',
     )
 )
 
