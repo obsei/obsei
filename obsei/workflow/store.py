@@ -3,6 +3,7 @@ import logging
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
+from pydantic import PrivateAttr
 from sqlalchemy import Column, DateTime, String, create_engine, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -34,16 +35,17 @@ class WorkflowTable(ORMBase):
 
 class WorkflowStore(BaseStore):
     from obsei.workflow.workflow import Workflow, WorkflowState
+    _session: sessionmaker = PrivateAttr()
 
     def __init__(self, url: str = "sqlite:///obsei.db", **data: Any):
         super().__init__(**data)
         engine = create_engine(url)
         ORMBase.metadata.create_all(engine)
         local_session = sessionmaker(bind=engine)
-        self.session = local_session()
+        self._session = local_session()
 
-    def get(self, id: str) -> Optional[Workflow]:
-        row = self.session.query(WorkflowTable).filter_by(id=id).all()
+    def get(self, identifier: str) -> Optional[Workflow]:
+        row = self._session.query(WorkflowTable).filter_by(id=identifier).all()
         return (
             None
             if row is None or len(row) == 0
@@ -51,17 +53,17 @@ class WorkflowStore(BaseStore):
         )
 
     def get_all(self) -> List[Workflow]:
-        rows = self.session.query(WorkflowTable).all()
+        rows = self._session.query(WorkflowTable).all()
         return [self._convert_sql_row_to_workflow_data(row) for row in rows]
 
-    def get_workflow_state(self, id: str) -> Optional[WorkflowState]:
+    def get_workflow_state(self, identifier: str) -> Optional[WorkflowState]:
         row = (
-            self.session.query(
+            self._session.query(
                 WorkflowTable.source_state,
                 WorkflowTable.analyzer_state,
                 WorkflowTable.sink_state,
             )
-            .filter(id=id)
+            .filter(id=identifier)
             .all()
         )
 
@@ -71,26 +73,26 @@ class WorkflowStore(BaseStore):
             else self._convert_sql_row_to_workflow_state(row[0])
         )
 
-    def get_source_state(self, id: str) -> Optional[Dict[str, Any]]:
+    def get_source_state(self, identifier: str) -> Optional[Dict[str, Any]]:
         row = (
-            self.session.query(WorkflowTable.source_state)
-            .filter(WorkflowTable.id == id)
+            self._session.query(WorkflowTable.source_state)
+            .filter(WorkflowTable.id == identifier)
             .all()
         )
         return None if row[0].source_state is None else json.loads(row[0].source_state)
 
-    def get_sink_state(self, id: str) -> Optional[Dict[str, Any]]:
-        row = self.session.query(WorkflowTable.sink_state).filter(id=id).all()
+    def get_sink_state(self, identifier: str) -> Optional[Dict[str, Any]]:
+        row = self._session.query(WorkflowTable.sink_state).filter(id=identifier).all()
         return None if row[0].sink_state is None else json.loads(row[0].sink_state)
 
-    def get_analyzer_state(self, id: str) -> Optional[Dict[str, Any]]:
-        row = self.session.query(WorkflowTable.analyzer_state).filter(id=id).all()
+    def get_analyzer_state(self, identifier: str) -> Optional[Dict[str, Any]]:
+        row = self._session.query(WorkflowTable.analyzer_state).filter(id=identifier).all()
         return (
             None if row[0].analyzer_state is None else json.loads(row[0].analyzer_state)
         )
 
     def add_workflow(self, workflow: Workflow):
-        self.session.add(
+        self._session.add(
             WorkflowTable(
                 id=workflow.id,
                 config=obj_to_json(workflow.config),
@@ -102,7 +104,7 @@ class WorkflowStore(BaseStore):
         self._commit_transaction()
 
     def update_workflow(self, workflow: Workflow):
-        self.session.query(WorkflowTable).filter_by(id=workflow.id).update(
+        self._session.query(WorkflowTable).filter_by(id=workflow.id).update(
             {
                 WorkflowTable.config: obj_to_json(workflow.config),
                 WorkflowTable.source_state: obj_to_json(workflow.states.source_state),
@@ -116,7 +118,7 @@ class WorkflowStore(BaseStore):
         self._commit_transaction()
 
     def update_workflow_state(self, workflow_id: str, workflow_state: WorkflowState):
-        self.session.query(WorkflowTable).filter_by(id=workflow_id).update(
+        self._session.query(WorkflowTable).filter_by(id=workflow_id).update(
             {
                 WorkflowTable.source_state: obj_to_json(workflow_state.source_state),
                 WorkflowTable.sink_state: obj_to_json(workflow_state.sink_state),
@@ -129,35 +131,35 @@ class WorkflowStore(BaseStore):
         self._commit_transaction()
 
     def update_source_state(self, workflow_id: str, state: Dict[str, Any]):
-        self.session.query(WorkflowTable).filter_by(id=workflow_id).update(
+        self._session.query(WorkflowTable).filter_by(id=workflow_id).update(
             {WorkflowTable.source_state: obj_to_json(state)}, synchronize_session=False
         )
         self._commit_transaction()
 
     def update_sink_state(self, workflow_id: str, state: Dict[str, Any]):
-        self.session.query(WorkflowTable).filter_by(id=workflow_id).update(
+        self._session.query(WorkflowTable).filter_by(id=workflow_id).update(
             {WorkflowTable.sink_state: obj_to_json(state)}, synchronize_session=False
         )
         self._commit_transaction()
 
     def update_analyzer_state(self, workflow_id: str, state: Dict[str, Any]):
-        self.session.query(WorkflowTable).filter_by(id=workflow_id).update(
+        self._session.query(WorkflowTable).filter_by(id=workflow_id).update(
             {WorkflowTable.analyzer_state: obj_to_json(state)},
             synchronize_session=False,
         )
         self._commit_transaction()
 
     def delete_workflow(self, id: str):
-        self.session.query(WorkflowTable).filter_by(id=id).delete()
+        self._session.query(WorkflowTable).filter_by(id=id).delete()
         self._commit_transaction()
 
     def _commit_transaction(self):
         try:
-            self.session.commit()
+            self._session.commit()
         except Exception as ex:
             logger.error(f"Transaction rollback: {ex.__cause__}")
             # Rollback is important here otherwise self.session will be in inconsistent state and next call will fail
-            self.session.rollback()
+            self._session.rollback()
             raise ex
 
     @staticmethod

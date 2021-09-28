@@ -2,6 +2,7 @@ import json
 import logging
 from typing import Any, List, Optional
 
+from jinja2 import Template
 from pydantic import Field, PrivateAttr, SecretStr
 from slack_sdk import WebClient
 
@@ -18,6 +19,7 @@ class SlackSinkConfig(BaseSinkConfig):
 
     slack_token: Optional[SecretStr] = Field(None, env="slack_token")
     channel_id: Optional[str] = Field(None, env="slack_channel_id")
+    jinja_template: Optional[str] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -48,10 +50,16 @@ class SlackSink(BaseSink):
             payloads.append(self.convertor.convert(analyzer_response=analyzer_response))
 
         for payload in payloads:
+            if config.jinja_template is not None:
+                template = Template(config.jinja_template)
+                message = template.render(payload=payload)
+            else:
+                message = f'Message: `{str(payload["processed_text"])}` '
+                f'```{json.dumps(payload["segmented_data"], indent=2, ensure_ascii=False)}```'
+
             response = config.get_slack_client().chat_postMessage(
                 channel=config.channel_id,
-                text=f'Message: `{str(payload["processed_text"])}` '
-                f'```{json.dumps(payload["segmented_data"], indent=2, ensure_ascii=False)}```',
+                text=message,
             )
             logger.info(f"response='{response}'")
             responses.append(response)
