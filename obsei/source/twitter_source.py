@@ -237,8 +237,8 @@ class TwitterSource(BaseSource):
             result_stream_args=config.get_twitter_credentials(),
         )
 
-        tweets = []
-        users = []
+        tweets: List[Dict[str, Any]] = []
+        users: List[Dict[str, Any]] = []
         meta_info: Dict[str, Any] = {}
 
         if not tweets_output and len(tweets_output) == 0:
