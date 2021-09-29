@@ -79,3 +79,21 @@ analyzer:
   device: "auto"
   initialize_model: true
   analyzer_config: ${analyzer_config}
+
+slack_sink:
+  _target_: obsei.sink.SlackSink
+
+slack_sink_config:
+  _target_: obsei.sink.SlackSinkConfig
+  slack_token: 'Enter token'
+  channel_id: 'slack channel id'
+  jinja_template: |
+    ```
+           {%- for key, value in payload.items() recursive%}
+               {%- if value is mapping -%}
+      {{loop(value.items())}}
+               {%- else %}
+      {{key}}: {{value}}
+               {%- endif %}
+           {%- endfor%}
+    ```
