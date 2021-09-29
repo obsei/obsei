@@ -36,6 +36,7 @@ DEFAULT_TWEET_FIELDS = [
     "referenced_tweets",
     "source",
     "text",
+    "withheld",
 ]
 DEFAULT_EXPANSIONS = [
     "author_id",
@@ -94,7 +95,7 @@ class TwitterSourceConfig(BaseSourceConfig):
     user_fields: Optional[List[str]] = Field(DEFAULT_USER_FIELDS)
     expansions: Optional[List[str]] = Field(DEFAULT_EXPANSIONS)
     place_fields: Optional[List[str]] = Field(DEFAULT_PLACE_FIELDS)
-    max_tweets: Optional[int] = DEFAULT_MAX_TWEETS
+    max_tweets: int = DEFAULT_MAX_TWEETS
     cred_info: TwitterCredentials = Field(None)
     credential: Optional[TwitterCredentials] = None
 
@@ -115,6 +116,10 @@ class TwitterSourceConfig(BaseSourceConfig):
 
             self.cred_info.bearer_token = SecretStr(self.generate_bearer_token())
 
+        if self.max_tweets > 100:
+            logger.warning("Twitter API support max 100 tweets per call, hence resetting `max_tweets` to 100")
+            self.max_tweets = 100
+
     def get_twitter_credentials(self):
         if self.cred_info.bearer_token is None:
             self.cred_info.bearer_token = self.generate_bearer_token()
@@ -123,7 +128,6 @@ class TwitterSourceConfig(BaseSourceConfig):
             "bearer_token": self.cred_info.bearer_token.get_secret_value(),
             "endpoint": self.cred_info.endpoint,
             "extra_headers_dict": self.cred_info.extra_headers_dict,
-            "output_format": "m",
         }
 
     # Copied from Twitter searchtweets-v2 lib
@@ -212,89 +216,64 @@ class TwitterSource(BaseSource):
         )
 
         source_responses: List[TextPayload] = []
-        need_more_lookup = True
-        while need_more_lookup:
-            search_query = gen_request_parameters(
-                granularity=None,
-                query=query,
-                results_per_call=config.max_tweets,
-                place_fields=place_fields,
-                expansions=expansions,
-                user_fields=user_fields,
-                tweet_fields=tweet_fields,
-                since_id=since_id,
-                until_id=until_id,
-                start_time=lookup_period,
-            )
-            logger.info(search_query)
 
-            tweets_output = collect_results(
-                query=search_query,
-                max_tweets=config.max_tweets,
-                result_stream_args=config.get_twitter_credentials(),
-            )
+        search_query = gen_request_parameters(
+            granularity=None,
+            query=query,
+            results_per_call=config.max_tweets,
+            place_fields=place_fields,
+            expansions=expansions,
+            user_fields=user_fields,
+            tweet_fields=tweet_fields,
+            since_id=since_id,
+            until_id=until_id,
+            start_time=lookup_period,
+        )
+        logger.info(search_query)
 
-            if not tweets_output:
-                logger.info("No Tweets found")
-                break
+        tweets_output = collect_results(
+            query=search_query,
+            max_tweets=config.max_tweets,
+            result_stream_args=config.get_twitter_credentials(),
+        )
 
-            tweets = []
-            users = []
-            meta_info = None
-            for raw_output in tweets_output:
-                if "text" in raw_output:
-                    tweets.append(raw_output)
-                elif "users" in raw_output:
-                    users = raw_output["users"]
-                elif "meta" in raw_output:
-                    meta_info = raw_output["meta"]
+        tweets = []
+        users = []
+        meta_info: Dict[str, Any] = {}
 
-            # Extract user info and create user map
-            user_map: Dict[str, Dict[str, Any]] = {}
-            if len(users) > 0 and "id" in users[0]:
-                for user in users:
-                    user_map[user["id"]] = user
+        if not tweets_output and len(tweets_output) == 0:
+            logger.info("No Tweets found")
+        else:
+            tweets = tweets_output[0]["data"] if "data" in tweets_output[0] else tweets
+            if "includes" in tweets_output[0] and "users" in tweets_output[0]["includes"]:
+                users = tweets_output[0]["includes"]["users"]
+            meta_info = tweets_output[0]["meta"] if "meta" in tweets_output[0] else meta_info
 
-            # TODO use it later
-            logger.info(f"Twitter API meta_info='{meta_info}'")
+        # Extract user info and create user map
+        user_map: Dict[str, Dict[str, Any]] = {}
+        if len(users) > 0 and "id" in users[0]:
+            for user in users:
+                if "username" in user:
+                    user["user_url"] = f'https://twitter.com/{user["username"]}'
+                user_map[user["id"]] = user
 
-            if len(tweets):
-                logger.error("Something is broken in tweet search API call, this not supposed to happen")
-                break
+        logger.info(f"Twitter API meta_info='{meta_info}'")
 
-            for tweet in tweets:
-                if "author_id" in tweet and tweet["author_id"] in user_map:
-                    tweet["author_info"] = user_map.get(tweet["author_id"])
+        for tweet in tweets:
+            if "author_id" in tweet and tweet["author_id"] in user_map:
+                tweet["author_info"] = user_map.get(tweet["author_id"])
 
-                source_responses.append(self._get_source_output(tweet))
+            source_responses.append(self._get_source_output(tweet))
 
-                # Get latest tweet id
-                current_tweet_id = int(tweet["id"])
-
-                logger.info(
-                    f'{tweet["created_at"]}:{current_tweet_id}:{since_id}:{until_id}'
+            if start_time:
+                created_date = datetime.strptime(
+                    tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
                 )
+                if start_time > created_date:
+                    break
 
-                if start_time:
-                    created_date = datetime.strptime(
-                        tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
-                    )
-                    if start_time > created_date:
-                        need_more_lookup = False
-                        break
-
-                if max_tweet_id is None:
-                    max_tweet_id = current_tweet_id
-                if min_tweet_id is None:
-                    min_tweet_id = current_tweet_id
-                if max_tweet_id < current_tweet_id:
-                    max_tweet_id = current_tweet_id
-                if min_tweet_id > current_tweet_id:
-                    min_tweet_id = current_tweet_id
-
-            logger.info(f"{max_tweet_id}:{min_tweet_id}")
-            until_id = min_tweet_id
-            lookup_period = None
+        max_tweet_id = meta_info["newest_id"] if "newest_id" in meta_info else max_tweet_id
+        # min_tweet_id = meta_info["oldest_id"] if "oldest_id" in meta_info else min_tweet_id
 
         if update_state and self.store is not None:
             state["since_id"] = max_tweet_id
@@ -342,10 +321,8 @@ class TwitterSource(BaseSource):
         return or_query_str + and_query_str
 
     def _get_source_output(self, tweet: Dict[str, Any]):
-        tweet_url = TwitterSource.get_tweet_url(tweet["text"])
         processed_text = TwitterSource.clean_tweet_text(tweet["text"])
-
-        tweet["tweet_url"] = tweet_url
+        tweet["tweet_url"] = f'https://twitter.com/twitter/statuses/{tweet["id"]}'
         return TextPayload(
             processed_text=processed_text, meta=tweet, source_name=self.NAME
         )
@@ -353,18 +330,3 @@ class TwitterSource(BaseSource):
     @staticmethod
     def clean_tweet_text(tweet_text: str):
         return cleaning_processor.clean(tweet_text)
-
-    @staticmethod
-    def get_tweet_url(tweet_text: str):
-        parsed_tweet = cleaning_processor.parse(tweet_text)
-        tweet_url = None
-        if not parsed_tweet.urls:
-            return tweet_url
-
-        last_index = len(tweet_text)
-        for url_info in parsed_tweet.urls:
-            if url_info.end_index == last_index:
-                tweet_url = url_info.match
-                break
-
-        return tweet_url
