@@ -228,6 +228,7 @@ class TwitterSource(BaseSource):
             since_id=since_id,
             until_id=until_id,
             start_time=lookup_period,
+            stringify=False,
         )
         logger.info(search_query)
 
