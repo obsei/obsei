@@ -154,7 +154,7 @@ class ZeroShotClassificationAnalyzer(TextClassificationAnalyzer):
         )
         predictions = prediction if isinstance(prediction, list) else [prediction]
 
-        return [dict(zip(prediction["labels"], prediction["scores"])) for prediction in predictions]
+        return [dict(zip(prediction[0]["labels"], prediction[0]["scores"])) for prediction in predictions]
 
     def analyze_input(  # type: ignore[override]
         self,
