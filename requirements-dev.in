@@ -1,5 +1,4 @@
 # Dev dependencies
--c requirements.txt
 pre-commit
 black
 mypy

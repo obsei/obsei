@@ -137,8 +137,8 @@ class ReplaceDomainKeywords(TextCleaningFunction):
 
 
 class RegExSubstitute(TextCleaningFunction):
-    pattern: str = None
-    substitute: str = None
+    pattern: Optional[str] = None
+    substitute: Optional[str] = None
 
     def execute(self, tokens: List[str], **kwargs) -> List[str]:
         if not self.pattern or not self.substitute:
