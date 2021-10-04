@@ -308,7 +308,7 @@ tqdm==4.62.3
     #   transformers
 trafilatura==0.8.2
     # via -r requirements.in
-transformers==4.11.2
+transformers==4.10.2
     # via -r requirements.in
 tweet-preprocessor==0.6.0
     # via -r requirements.in

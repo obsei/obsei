@@ -44,7 +44,7 @@ def test_imports():
     from obsei.preprocessor import BaseTextTokenizer, NLTKTextTokenizer
     from obsei.preprocessor import TextCleaningFunction, ToLowerCase, RemoveStopWords, \
         RemovePunctuation, TokenStemming, RemoveSpecialChars, RemoveWhiteSpaceAndEmptyToken, DecodeUnicode, \
-        RemoveDateTime, ReplaceDomainKeywords
+        RemoveDateTime, ReplaceDomainKeywords, RegExSubstitute, SpacyLemmatization
 
     from obsei.workflow.base_store import BaseStore
     from obsei.workflow.store import WorkflowStore, WorkflowTable

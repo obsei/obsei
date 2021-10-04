@@ -150,11 +150,11 @@ class ZeroShotClassificationAnalyzer(TextClassificationAnalyzer):
             raise ValueError("`labels` can't be empty or `add_positive_negative_labels` should be False")
 
         prediction = self._pipeline(
-            texts, labels, multi_label=analyzer_config.multi_class_classification
+            texts, candidate_labels=labels, multi_label=analyzer_config.multi_class_classification
         )
         predictions = prediction if isinstance(prediction, list) else [prediction]
 
-        return [dict(zip(prediction[0]["labels"], prediction[0]["scores"])) for prediction in predictions]
+        return [dict(zip(prediction["labels"], prediction["scores"])) for prediction in predictions]
 
     def analyze_input(  # type: ignore[override]
         self,
