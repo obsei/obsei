@@ -29,7 +29,7 @@ class TextSplitterConfig(BaseTextProcessorConfig):
     document_id_key: Optional[str]  # document_id in meta
     enable_sentence_split: bool = False
     honor_paragraph_boundary: bool = False
-    paragraph_marker: str = r'\n\n'
+    paragraph_marker: str = '\n\n'
     sentence_tokenizer: str = 'tokenizers/punkt/PY3/english.pickle'
 
     def __init__(self, **data: Any):
