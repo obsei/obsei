@@ -1,33 +1,4 @@
-# PyTorch
---find-links=https://download.pytorch.org/whl/torch_stable.html
-torch; sys_platform != '*win*'
-vaderSentiment
-transformers
-searchtweets-v2
-tweet-preprocessor
-pytz
-atlassian-python-api
-elasticsearch
-pydantic
-python-dateutil
-SQLAlchemy
-google-api-python-client
-google-play-scraper
-app-store-reviews-reader
-reddit-rss-reader
-praw
-mmh3
-beautifulsoup4
-slack-sdk
-zenpy
-sentencepiece
-presidio-analyzer
-presidio-anonymizer
-pandas
-nltk
-gnews
-trafilatura
-python-facebook-api
+# Dev dependencies
 pre-commit
 black
 mypy

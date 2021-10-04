@@ -71,14 +71,12 @@ analyzer_config:
     - "delay"
     - "tracking"
     - "no response"
-  use_sentiment_model: true
+  add_positive_negative_labels: false
 
 analyzer:
   _target_: obsei.analyzer.classification_analyzer.ZeroShotClassificationAnalyzer
-  model_name_or_path: "joeddav/bart-large-mnli-yahoo-answers"
+  model_name_or_path: "typeform/mobilebert-uncased-mnli"
   device: "auto"
-  initialize_model: true
-  analyzer_config: ${analyzer_config}
 
 slack_sink:
   _target_: obsei.sink.SlackSink

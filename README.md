@@ -14,9 +14,6 @@
     <a href="https://pypi.org/project/obsei">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
     </a>
-    <a href="https://github.com/psf/black">
-        <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black" />
-    </a>
     <a href="https://anaconda.org/lalitpagaria/obsei">
         <img src="https://img.shields.io/conda/pn/lalitpagaria/obsei" alt="Platform" />
     </a>
@@ -43,6 +40,9 @@
     </a>
     <a href="https://www.facebook.com/ai.obsei/">
         <img src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png" height="30">
+    </a>
+    <a href="https://twitter.com/ObseiAI">
+        <img src="https://img.shields.io/twitter/follow/ObseiAI?style=social">
     </a>
 </p>
 

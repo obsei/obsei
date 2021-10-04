@@ -6,9 +6,12 @@ from typing import Any, List, Optional, Tuple
 from unicodedata import normalize
 
 import nltk
+import spacy
 from dateutil.parser import parse
 from nltk.corpus import stopwords
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr, Field
+from spacy import Language
+from spacy.cli import download
 
 logger = logging.getLogger(__name__)
 
@@ -131,3 +134,43 @@ class ReplaceDomainKeywords(TextCleaningFunction):
                 text = text.replace(source_keyword, target_keyword)
         tokens = text.split()
         return tokens
+
+
+class RegExSubstitute(TextCleaningFunction):
+    pattern: Optional[str] = None
+    substitute: Optional[str] = None
+
+    def execute(self, tokens: List[str], **kwargs) -> List[str]:
+        if not self.pattern or not self.substitute:
+            return tokens
+
+        compiled_regex = re.compile(self.pattern)
+
+        return [compiled_regex.sub(self.substitute, token) for token in tokens]
+
+
+class SpacyLemmatization(TextCleaningFunction):
+    _nlp: Language = PrivateAttr()
+    model_name_or_path: Optional[str] = Field("en_core_web_sm")
+    batch_size: int = 4
+    n_process: int = 1
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        try:
+            self._nlp = spacy.load(
+                self.model_name_or_path,
+                disable=["parser", "ner"],
+            )
+        except:
+            download(self.model_name_or_path)
+            self._nlp = spacy.load(
+                self.model_name_or_path,
+                disable=["parser", "ner"],
+            )
+
+    def execute(self, tokens: List[str], **kwargs) -> List[str]:
+        processed_tokens: List[str] = []
+        for doc in self._nlp.pipe(texts=tokens, batch_size=self.batch_size, n_process=self.n_process):
+            processed_tokens.append(" ".join([token.lemma_ for token in doc]))
+        return processed_tokens

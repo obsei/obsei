@@ -150,7 +150,7 @@ class ZeroShotClassificationAnalyzer(TextClassificationAnalyzer):
             raise ValueError("`labels` can't be empty or `add_positive_negative_labels` should be False")
 
         prediction = self._pipeline(
-            texts, labels, multi_label=analyzer_config.multi_class_classification
+            texts, candidate_labels=labels, multi_label=analyzer_config.multi_class_classification
         )
         predictions = prediction if isinstance(prediction, list) else [prediction]
 

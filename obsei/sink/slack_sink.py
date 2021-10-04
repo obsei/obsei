@@ -20,6 +20,8 @@ class SlackSinkConfig(BaseSinkConfig):
     slack_token: Optional[SecretStr] = Field(None, env="slack_token")
     channel_id: Optional[str] = Field(None, env="slack_channel_id")
     jinja_template: Optional[str] = None
+    icon_url: str = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
+    is_markdown: bool = True
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -60,6 +62,8 @@ class SlackSink(BaseSink):
             response = config.get_slack_client().chat_postMessage(
                 channel=config.channel_id,
                 text=message,
+                icon_url=config.icon_url,
+                mrkdwn=config.is_markdown,
             )
             logger.info(f"response='{response}'")
             responses.append(response)

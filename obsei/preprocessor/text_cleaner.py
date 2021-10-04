@@ -1,7 +1,5 @@
 import traceback
 
-from pydantic import Field
-
 from obsei.payload import TextPayload
 from obsei.preprocessor.base_preprocessor import (
     BaseTextPreprocessor,
@@ -18,6 +16,7 @@ class TextCleanerConfig(BaseTextProcessorConfig):
     stop_words_language: Optional[str] = "english"
     stop_words: Optional[List[str]] = None
     domain_keywords: Optional[Tuple[str, str]] = None
+    disable_tokenization: bool = False
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -40,7 +39,11 @@ class TextCleanerConfig(BaseTextProcessorConfig):
 
 
 class TextCleaner(BaseTextPreprocessor):
-    text_tokenizer: BaseTextTokenizer = Field(NLTKTextTokenizer())
+    text_tokenizer: Optional[BaseTextTokenizer] = None
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self.text_tokenizer = self.text_tokenizer or NLTKTextTokenizer()
 
     def preprocess_input(  # type: ignore[override]
         self,
@@ -51,9 +54,12 @@ class TextCleaner(BaseTextPreprocessor):
         if config.cleaning_functions is None:
             return input_list
         for input_data in input_list:
-            tokens: List[str] = self.text_tokenizer.tokenize_text(
-                input_data.processed_text
-            )
+            if self.text_tokenizer is None or config.disable_tokenization:
+                tokens = [input_data.processed_text]
+            else:
+                tokens = self.text_tokenizer.tokenize_text(
+                    input_data.processed_text
+                )
             for cleaning_function in config.cleaning_functions:
                 try:
                     tokens = cleaning_function.execute(tokens)

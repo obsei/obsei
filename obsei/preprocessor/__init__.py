@@ -3,4 +3,4 @@ from obsei.preprocessor.text_splitter import TextSplitter, TextSplitterConfig, T
 from obsei.preprocessor.text_tokenizer import BaseTextTokenizer, NLTKTextTokenizer
 from obsei.preprocessor.text_cleaning_function import TextCleaningFunction, ToLowerCase, RemoveStopWords, \
     RemovePunctuation, TokenStemming, RemoveSpecialChars, RemoveWhiteSpaceAndEmptyToken, DecodeUnicode, \
-    RemoveDateTime, ReplaceDomainKeywords
+    RemoveDateTime, ReplaceDomainKeywords, SpacyLemmatization, RegExSubstitute
