@@ -34,6 +34,7 @@ requirements:
     - vadersentiment
     - transformers
     - pandas
+    - nltk
     - pip
 
   run:
@@ -60,7 +61,6 @@ requirements:
 test:
   imports:
     - obsei
-    - obsei.analyzer
   requires:
     - pytest
 

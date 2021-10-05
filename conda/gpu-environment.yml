@@ -23,6 +23,7 @@ dependencies:
 - vadersentiment
 - transformers
 - pandas
+- nltk
 - pip
 - pip:
   - presidio-analyzer
