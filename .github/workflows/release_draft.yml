@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: release-drafter/release-drafter@v5
+        with:
+          config-name: .github/release-drafter.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_DRAFT_TOKEN }}
 
@@ -26,7 +28,7 @@ jobs:
     - id: release-drafter
       uses: release-drafter/release-drafter@v5
       with:
-        # config-name: release-drafter.yaml
+        config-name: .github/release-drafter.yaml
         publish: true
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_DRAFT_TOKEN }}
