@@ -1,11 +1,7 @@
 name: release draft
 
 on:
-  push:
-    branches:
-    - master
-    tags:
-    - '**'
+  workflow_dispatch:
 
 jobs:
   draft-release:
