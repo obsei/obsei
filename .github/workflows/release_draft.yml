@@ -5,7 +5,7 @@ on:
 
 jobs:
   draft-release:
-    if: startsWith(github.ref, 'refs/tags/')
+#    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - uses: release-drafter/release-drafter@v5
