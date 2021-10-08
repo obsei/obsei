@@ -58,9 +58,13 @@ cymem==2.0.5
     #   preshed
     #   spacy
     #   thinc
+cython==0.29.23
+    # via
+    #   gensim
+    #   hdbscan
 dataclasses-json==0.5.6
     # via python-facebook-api
-dateparser==1.0.0
+dateparser==1.1.0
     # via htmldate
 deprecated==1.2.13
     # via atlassian-python-api
@@ -76,13 +80,15 @@ filelock==3.3.0
     #   huggingface-hub
     #   tldextract
     #   transformers
-gnews==0.2.0
+gensim==4.1.2
     # via -r requirements.in
-google-api-core==2.0.1
+gnews==0.2.1
+    # via -r requirements.in
+google-api-core==2.1.0
     # via google-api-python-client
-google-api-python-client==2.23.0
+google-api-python-client==2.24.0
     # via -r requirements.in
-google-auth==2.2.1
+google-auth==2.3.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -95,28 +101,39 @@ googleapis-common-protos==1.53.0
     # via google-api-core
 greenlet==1.1.2
     # via sqlalchemy
+hdbscan==0.8.27
+    # via -r requirements.in
 htmldate==0.8.1
     # via
     #   -r requirements.in
     #   trafilatura
-httplib2==0.19.1
+httplib2==0.20.1
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-huggingface-hub==0.0.17
-    # via transformers
+huggingface-hub==0.0.19
+    # via
+    #   sentence-transformers
+    #   transformers
 idna==3.2
     # via
     #   requests
     #   tldextract
-jinja2==3.0.1
+jinja2==3.0.2
     # via spacy
-joblib==1.0.1
+joblib==1.1.0
     # via
+    #   hdbscan
     #   nltk
+    #   pynndescent
     #   sacremoses
+    #   scikit-learn
 justext==2.2.0
     # via trafilatura
+llvmlite==0.37.0
+    # via
+    #   numba
+    #   pynndescent
 lxml==4.6.3
     # via
     #   htmldate
@@ -140,15 +157,29 @@ murmurhash==1.0.5
     #   thinc
 mypy-extensions==0.4.3
     # via typing-inspect
-nltk==3.6.3
-    # via -r requirements.in
-numpy==1.21.2
+nltk==3.6.4
+    # via
+    #   -r requirements.in
+    #   sentence-transformers
+numba==0.54.0
+    # via
+    #   pynndescent
+    #   umap-learn
+numpy==1.20.3
     # via
     #   blis
+    #   gensim
+    #   hdbscan
+    #   numba
     #   pandas
+    #   scikit-learn
+    #   scipy
+    #   sentence-transformers
     #   spacy
     #   thinc
+    #   torchvision
     #   transformers
+    #   umap-learn
 oauthlib==3.1.1
     # via
     #   atlassian-python-api
@@ -164,6 +195,8 @@ pathy==0.6.0
     # via spacy
 phonenumbers==8.12.24
     # via presidio-analyzer
+pillow==8.3.2
+    # via torchvision
 praw==7.4.0
     # via -r requirements.in
 prawcore==2.3.0
@@ -176,7 +209,7 @@ presidio-analyzer==2.2.22
     # via -r requirements.in
 presidio-anonymizer==2.2.22
     # via -r requirements.in
-protobuf==3.18.0
+protobuf==3.18.1
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -194,6 +227,8 @@ pydantic==1.7.4
     #   presidio-analyzer
     #   spacy
     #   thinc
+pynndescent==0.5.4
+    # via umap-learn
 pyparsing==2.4.7
     # via
     #   httplib2
@@ -216,6 +251,7 @@ pytz==2021.3
     #   zenpy
 pyyaml==5.4.1
     # via
+    #   huggingface-hub
     #   presidio-analyzer
     #   searchtweets-v2
     #   transformers
@@ -259,16 +295,36 @@ rsa==4.7.2
     # via google-auth
 sacremoses==0.0.46
     # via transformers
+scikit-learn==1.0
+    # via
+    #   -r requirements.in
+    #   hdbscan
+    #   pynndescent
+    #   sentence-transformers
+    #   umap-learn
+scipy==1.7.1
+    # via
+    #   gensim
+    #   hdbscan
+    #   pynndescent
+    #   scikit-learn
+    #   sentence-transformers
+    #   umap-learn
 searchtweets-v2==1.1.1
     # via -r requirements.in
-sentencepiece==0.1.96
+sentence-transformers==2.1.0
     # via -r requirements.in
+sentencepiece==0.1.96
+    # via
+    #   -r requirements.in
+    #   sentence-transformers
 sgmllib3k==1.0.0
     # via feedparser
 six==1.16.0
     # via
     #   atlassian-python-api
     #   google-auth-httplib2
+    #   hdbscan
     #   python-dateutil
     #   requests-file
     #   sacremoses
@@ -276,7 +332,9 @@ six==1.16.0
 slack-sdk==3.11.2
     # via -r requirements.in
 smart-open==5.2.1
-    # via pathy
+    # via
+    #   gensim
+    #   pathy
 soupsieve==2.2.1
     # via beautifulsoup4
 spacy==3.0.6
@@ -291,25 +349,37 @@ srsly==2.4.1
     #   thinc
 thinc==8.0.10
     # via spacy
+threadpoolctl==3.0.0
+    # via scikit-learn
 tld==0.12.6
     # via courlan
 tldextract==3.1.0
     # via presidio-analyzer
 tokenizers==0.10.3
-    # via transformers
-torch==1.9.1 ; sys_platform != "*win*"
-    # via -r requirements.in
+    # via
+    #   sentence-transformers
+    #   transformers
+torch==1.9.1+cu111 ; sys_platform != "*win*"
+    # via
+    #   -r requirements.in
+    #   sentence-transformers
+    #   torchvision
+torchvision==0.10.1+cu111
+    # via sentence-transformers
 tqdm==4.62.3
     # via
     #   huggingface-hub
     #   nltk
     #   sacremoses
+    #   sentence-transformers
     #   spacy
     #   transformers
 trafilatura==0.8.2
     # via -r requirements.in
-transformers==4.10.2
-    # via -r requirements.in
+transformers==4.11.3
+    # via
+    #   -r requirements.in
+    #   sentence-transformers
 tweet-preprocessor==0.6.0
     # via -r requirements.in
 typer==0.3.2
@@ -327,6 +397,8 @@ tzdata==2021.2.post0
     # via tzlocal
 tzlocal==3.0
     # via dateparser
+umap-learn==0.5.1
+    # via -r requirements.in
 update-checker==0.18.0
     # via praw
 uritemplate==3.0.1
@@ -346,7 +418,7 @@ wasabi==0.8.2
     #   thinc
 websocket-client==1.2.1
     # via praw
-wrapt==1.12.1
+wrapt==1.13.1
     # via deprecated
 zenpy==2.0.24
     # via -r requirements.in
