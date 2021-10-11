@@ -1,8 +1,6 @@
 import torch
 from gensim.models.ldamodel import LdaModel
-from typing import Dict, List
-
-from keras.losses import mean_squared_error
+from typing import Dict, List, Tuple
 
 from obsei.payload import TextPayload
 
@@ -12,15 +10,12 @@ from sklearn.feature_extraction.text import CountVectorizer
 import pandas as pd
 import hdbscan
 
-from keras.layers import Input, Dense
-from keras.models import Model
-from sklearn.model_selection import train_test_split
 import warnings
 
 warnings.filterwarnings("ignore")
 
 
-def get_umap_embedings(
+def get_umap_embeddings(
     embeddings: List[torch.Tensor], n_neighbors: int, n_component: int
 ) -> np.ndarray:
     return umap.UMAP(
@@ -87,10 +82,9 @@ def get_topics_by_cluster(
     return top_n_words_list
 
 
-def c_tf_idf(documents, m, ngram_range=(1, 1)):
-    count = CountVectorizer(ngram_range=ngram_range, stop_words="english").fit(
-        documents
-    )
+def c_tf_idf(documents, m, ngram_range=(1, 1)) -> Tuple[np.ndarray, CountVectorizer]:
+    count: CountVectorizer = CountVectorizer(ngram_range=ngram_range, stop_words="english")
+    count.fit(documents)
     t = count.transform(documents).toarray()
     w = t.sum(axis=1)
     tf = np.divide(t.T, w)
@@ -139,47 +133,3 @@ def get_vec_lda(model: LdaModel, corpus: List, k: int):
             vec_lda[i, topic] = prob
 
     return vec_lda
-
-
-class Autoencoder:
-    """
-    Autoencoder for learning latent space representation
-    architecture simplified for only one hidden layer
-    """
-
-    def __init__(self, latent_dim=32, activation="relu", epochs=200, batch_size=128):
-        self.latent_dim = latent_dim
-        self.activation = activation
-        self.epochs = epochs
-        self.batch_size = batch_size
-        self.autoencoder = None
-        self.encoder = None
-        self.decoder = None
-        self.his = None
-
-    def _compile(self, input_dim):
-        """
-        compile the computational graph
-        """
-        input_vec = Input(shape=(input_dim,))
-        encoded = Dense(self.latent_dim, activation=self.activation)(input_vec)
-        decoded = Dense(input_dim, activation=self.activation)(encoded)
-        self.autoencoder = Model(input_vec, decoded)
-        self.encoder = Model(input_vec, encoded)
-        encoded_input = Input(shape=(self.latent_dim,))
-        self.decoder = Model(encoded_input, self.autoencoder.layers[-1](encoded_input))
-        self.autoencoder.compile(optimizer="adam", loss=mean_squared_error)
-
-    def fit(self, X):
-        if not self.autoencoder:
-            self._compile(X.shape[1])
-        X_train, X_test = train_test_split(X)
-        self.his = self.autoencoder.fit(
-            X_train,
-            X_train,
-            epochs=self.epochs,
-            batch_size=self.batch_size,
-            shuffle=True,
-            validation_data=(X_test, X_test),
-            verbose=0,
-        )

@@ -157,7 +157,7 @@ murmurhash==1.0.5
     #   thinc
 mypy-extensions==0.4.3
     # via typing-inspect
-nltk==3.6.4
+nltk==3.6.3
     # via
     #   -r requirements.in
     #   sentence-transformers
