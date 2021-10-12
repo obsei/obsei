@@ -1,0 +1,14 @@
+# YAML 1.2
+---
+authors: 
+  -
+    family-names: Pagaria
+    given-names: Lalit
+
+cff-version: "1.1.0"
+license: "Apache-2.0"
+message: "If you use this software, please cite it using this metadata."
+repository-code: "https://github.com/obsei/obsei"
+title: "Obsei - a low code AI powered automation tool"
+version: "0.0.10"
+...
