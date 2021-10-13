@@ -47,9 +47,9 @@ class FacebookSourceConfig(BaseSourceConfig):
             raise AttributeError("`app_id`, `app_secret` and `long_term_token` required to connect to Facebook")
 
         self._api_client = FacebookApi(
-            app_id=self.cred_info.app_id.get_secret_value(),
-            app_secret=self.cred_info.app_secret.get_secret_value(),
-            access_token=self.cred_info.long_term_token.get_secret_value(),
+            app_id=self.cred_info.app_id.get_secret_value() if self.cred_info.app_id else None,
+            app_secret=self.cred_info.app_secret.get_secret_value() if self.cred_info.app_secret else None,
+            access_token=self.cred_info.long_term_token.get_secret_value() if self.cred_info.long_term_token else None,
             application_only_auth=application_only_auth,
         )
 
