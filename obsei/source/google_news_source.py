@@ -4,6 +4,7 @@ from urllib import parse
 import dateparser
 from gnews import GNews
 from pydantic import PrivateAttr
+from datetime import date,timedelta
 
 from obsei.payload import TextPayload
 from obsei.misc.utils import DATETIME_STRING_PATTERN, convert_utc_time
@@ -24,6 +25,8 @@ class GoogleNewsConfig(BaseSourceConfig):
     lookup_period: Optional[str] = None
     fetch_article: Optional[bool] = False
     crawler_config: Optional[BaseCrawlerConfig] = None
+    # start: Optional[str] = date.today.strftime("%d/%m/%Y")
+    # end: Optional[str] = date.today.strftime("%d/%m/%Y") - timedelta(days = 180)
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -60,48 +63,53 @@ class GoogleNewsSource(BaseSource):
         lookup_period: str = state.get("since_time", config.lookup_period)
         since_time = None if not lookup_period else convert_utc_time(lookup_period)
         last_since_time = since_time
-
+        start_time = date.today.strftime("%Y-%m-%d")
         google_news_client = config.get_client()
-        query = parse.quote(config.query, errors='ignore')
-        articles = google_news_client.get_news(query)
+        days_lookup = 0
+        while (len(source_responses) < config.max_results) or (days_lookup > lookup_period):
+            new_query = config.query + "+after:" +  start_time + "+before:" + (start_time-timedelta(days = 1)).strftime("%Y-%m-%d")
+            start_time = start_time-timedelta(days = 1)
+            days_lookup +=1 
+            query = parse.quote(new_query, errors='ignore')
+            articles = google_news_client.get_news(query)
 
-        for article in articles:
-            published_date = (
-                None
-                if article["published date"] == ""
-                else dateparser.parse(article["published date"])
-            )
-
-            if config.fetch_article and config.crawler_config:
-                extracted_data = config.crawler_config.extract_url(url=article["url"])
-
-                if extracted_data is not None and extracted_data.get("text", None) is not None:
-                    article_text = extracted_data["text"]
-                    del extracted_data["text"]
-                else:
-                    article_text = ""
-
-                article["extracted_data"] = extracted_data
-            else:
-                article_text = article["description"]
-
-            source_responses.append(
-                TextPayload(
-                    processed_text=f"{article['title']}.\n\n {article_text}",
-                    meta=vars(article) if hasattr(article, "__dict__") else article,
-                    source_name=self.NAME,
+            for article in articles:
+                published_date = (
+                    None
+                    if article["published date"] == ""
+                    else dateparser.parse(article["published date"])
                 )
-            )
 
-            if published_date and since_time and published_date < since_time:
-                break
-            if last_since_time is None or (
-                published_date and last_since_time < published_date
-            ):
-                last_since_time = published_date
+                if config.fetch_article and config.crawler_config:
+                    extracted_data = config.crawler_config.extract_url(url=article["url"])
 
-        if update_state and last_since_time and self.store is not None:
-            state["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
-            self.store.update_source_state(workflow_id=id, state=state)
+                    if extracted_data is not None and extracted_data.get("text", None) is not None:
+                        article_text = extracted_data["text"]
+                        del extracted_data["text"]
+                    else:
+                        article_text = ""
 
-        return source_responses
+                    article["extracted_data"] = extracted_data
+                else:
+                    article_text = article["description"]
+
+                source_responses.append(
+                    TextPayload(
+                        processed_text=f"{article['title']}.\n\n {article_text}",
+                        meta=vars(article) if hasattr(article, "__dict__") else article,
+                        source_name=self.NAME,
+                    )
+                )
+
+                if published_date and since_time and published_date < since_time:
+                    break
+                if last_since_time is None or (
+                    published_date and last_since_time < published_date
+                ):
+                    last_since_time = published_date
+
+            if update_state and last_since_time and self.store is not None:
+                state["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
+                self.store.update_source_state(workflow_id=id, state=state)
+
+            return source_responses
