@@ -4,7 +4,7 @@ from urllib import parse
 import dateparser
 from gnews import GNews
 from pydantic import PrivateAttr
-from datetime import date,timedelta
+from datetime import date,timedelta,datetime
 
 from obsei.payload import TextPayload
 from obsei.misc.utils import DATETIME_STRING_PATTERN, convert_utc_time
@@ -63,11 +63,11 @@ class GoogleNewsSource(BaseSource):
         lookup_period: str = state.get("since_time", config.lookup_period)
         since_time = None if not lookup_period else convert_utc_time(lookup_period)
         last_since_time = since_time
-        start_time = date.today.strftime("%Y-%m-%d")
+        start_time = date.today()
         google_news_client = config.get_client()
         days_lookup = 0
-        while (len(source_responses) < config.max_results) or (days_lookup > lookup_period):
-            new_query = config.query + "+after:" +  start_time + "+before:" + (start_time-timedelta(days = 1)).strftime("%Y-%m-%d")
+        while (len(source_responses) < config.max_results):
+            new_query = config.query + "+after:" +  start_time.strftime("%Y-%m-%d") + "+before:" + (start_time-timedelta(days = 1)).strftime("%Y-%m-%d")
             start_time = start_time-timedelta(days = 1)
             days_lookup +=1 
             query = parse.quote(new_query, errors='ignore')
@@ -112,4 +112,4 @@ class GoogleNewsSource(BaseSource):
                 state["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
                 self.store.update_source_state(workflow_id=id, state=state)
 
-            return source_responses
+        return source_responses
