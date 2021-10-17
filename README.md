@@ -52,7 +52,7 @@
 
 ---
 <span style="color:red">
-<b>Note</b>: We are working towards release 0.1.0 and making jump from 0.0.9. This release will have many breaking changes related to naming convention. We will make sure to update docker image and colab tutorials.
+<b>Note</b>: Obsei is still in alpha stage hence carefully use it in Production. Also as it is constantly undergoing development hence master branch may contains many breaking changes. Please use released version.
 </span>
 
 ---
@@ -90,6 +90,16 @@
 - Extraction of deeper insight from feedbacks on various platforms
 - Research purpose
 - Many more based on creativity 💡
+---
+## Companies/Projects using Obsei
+Here are some companies/projects (alphabetical order) using Obsei. To add your company/project to the list, please raise a PR or contact us via [email](contact@obsei.com).
+
+- [1Page](https://www.get1page.com/): Giving a better context in meetings and calls
+- [Spacepulse](http://spacepulse.in/): The operating system for spaces
+- [Superblog](https://superblog.ai/): A blazing fast alternative to WordPress and Medium
+- [Zolve](https://zolve.com/): Creating a financial world beyond borders 
+
+
 ---
 ## Tutorials
 
