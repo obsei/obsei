@@ -66,8 +66,8 @@ class GoogleNewsSource(BaseSource):
         start_time = date.today()
         google_news_client = config.get_client()
         days_lookup = 0
-        while (len(source_responses) < config.max_results):
-            new_query = config.query + "+after:" +  start_time.strftime("%Y-%m-%d") + "+before:" + (start_time-timedelta(days = 1)).strftime("%Y-%m-%d")
+        while (len(source_responses) != config.max_results):
+            new_query = config.query + "+after:" + (start_time-timedelta(days = 1)).strftime("%Y-%m-%d")  + "+before:" + start_time.strftime("%Y-%m-%d")
             start_time = start_time-timedelta(days = 1)
             days_lookup +=1 
             query = parse.quote(new_query, errors='ignore')
