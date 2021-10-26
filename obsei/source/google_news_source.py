@@ -4,7 +4,7 @@ from urllib import parse
 import dateparser
 from gnews import GNews
 from pydantic import PrivateAttr
-from datetime import date,timedelta,datetime
+from datetime import datetime, date, timedelta, time, timezone
 
 from obsei.payload import TextPayload
 from obsei.misc.utils import DATETIME_STRING_PATTERN, convert_utc_time
@@ -13,6 +13,8 @@ from obsei.source.website_crawler_source import (
     BaseCrawlerConfig,
     TrafilaturaCrawlerConfig,
 )
+
+GOOGLE_DATE_TIME_QUERY_PATTERN = "%Y-%m-%d"
 
 
 class GoogleNewsConfig(BaseSourceConfig):
@@ -23,18 +25,30 @@ class GoogleNewsConfig(BaseSourceConfig):
     language: Optional[str] = "en"
     max_results: Optional[int] = 100
     lookup_period: Optional[str] = None
+    after_date: Optional[str] = None
+    before_date: Optional[str] = None
     fetch_article: Optional[bool] = False
     crawler_config: Optional[BaseCrawlerConfig] = None
-    # start: Optional[str] = date.today.strftime("%d/%m/%Y")
-    # end: Optional[str] = date.today.strftime("%d/%m/%Y") - timedelta(days = 180)
 
     def __init__(self, **data: Any):
         super().__init__(**data)
 
+        if self.lookup_period and self.after_date:
+            raise AttributeError("Can't use `lookup_period` and `after_date` both")
+        elif not self.after_date and self.before_date:
+            raise AttributeError("Can't use `before_date` without `after_date` or `lookup_period`")
+
+        if self.lookup_period:
+            after_time = convert_utc_time(self.lookup_period)
+            self.after_date = after_time.strftime(GOOGLE_DATE_TIME_QUERY_PATTERN)
+
+        if not self.before_date:
+            before_time = datetime.combine(date.today(), time(tzinfo=timezone.utc)) + timedelta(days=1)
+            self.before_date = before_time.strftime(GOOGLE_DATE_TIME_QUERY_PATTERN)
+
         self._google_news_client = GNews(
             language=self.language,
             country=self.country,
-            period=self.lookup_period,
             max_results=self.max_results,
         )
 
@@ -60,17 +74,32 @@ class GoogleNewsSource(BaseSource):
         )
         update_state: bool = True if id else False
         state = state or dict()
-        lookup_period: str = state.get("since_time", config.lookup_period)
+        lookup_period: str = state.get("since_time", None)
         since_time = None if not lookup_period else convert_utc_time(lookup_period)
         last_since_time = since_time
-        start_time = date.today()
+
+        last_after_time = convert_utc_time(config.after_date) if config.after_date else None
+        if since_time and last_after_time:
+            last_after_time = since_time if since_time > last_after_time else last_since_time
+        elif not last_after_time:
+            last_after_time = datetime.combine(date.today(), time(tzinfo=timezone.utc))
+
+        before_time = convert_utc_time(config.before_date) if config.after_date else None
+        if not before_time or before_time > datetime.combine(date.today(), time(tzinfo=timezone.utc)):
+            before_time = datetime.combine(date.today(), time(tzinfo=timezone.utc)) + timedelta(days=1)
+
         google_news_client = config.get_client()
-        days_lookup = 0
-        while (len(source_responses) != config.max_results):
-            new_query = config.query + "+after:" + (start_time-timedelta(days = 1)).strftime("%Y-%m-%d")  + "+before:" + start_time.strftime("%Y-%m-%d")
-            start_time = start_time-timedelta(days = 1)
-            days_lookup +=1 
+        more_data_exist = True
+        while more_data_exist and before_time > last_after_time:
+            after_time = before_time - timedelta(days=1)
+            after_date = after_time.strftime(GOOGLE_DATE_TIME_QUERY_PATTERN)
+            before_date = before_time.strftime(GOOGLE_DATE_TIME_QUERY_PATTERN)
+
+            new_query = f'{config.query}+after:{after_date}+before:{before_date}'
             query = parse.quote(new_query, errors='ignore')
+
+            before_time = after_time
+
             articles = google_news_client.get_news(query)
 
             for article in articles:
@@ -101,7 +130,13 @@ class GoogleNewsSource(BaseSource):
                     )
                 )
 
+                if config.max_results is not None and len(source_responses) >= config.max_results:
+                    source_responses = source_responses[:config.max_results]
+                    more_data_exist = False
+                    break
+
                 if published_date and since_time and published_date < since_time:
+                    more_data_exist = False
                     break
                 if last_since_time is None or (
                     published_date and last_since_time < published_date
