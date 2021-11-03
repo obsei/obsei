@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
-          key: ${{ matrix.os }}-${{ env.pythonLocation }}-${{ env.date }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
+          key: ${{ matrix.os }}-${{ env.pythonLocation }}-${{ env.date }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}
 
       - name: Install Pytorch on windows
         if: ${{ matrix.os == 'windows-latest' }}
@@ -55,7 +55,6 @@ jobs:
         if: steps.cache-python-env.outputs.cache-hit != 'true'
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt -e .
           pip install --upgrade --upgrade-strategy eager -r requirements.txt -e .
 
   build:
@@ -81,7 +80,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
-          key: windows-${{ env.pythonLocation }}-${{ env.date }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
+          key: windows-${{ env.pythonLocation }}-${{ env.date }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}
 
       - name: Test with pytest
         run: |
