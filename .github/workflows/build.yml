@@ -76,12 +76,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-    - run: echo "date=$(date +'%Y-%m-%d')" >> $env:GITHUB_ENV
-    - name: Cache
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.pythonLocation }}
-        key: windows-${{ env.pythonLocation }}-${{ env.date }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
+      - run: echo "date=$(date +'%Y-%m-%d')" >> $env:GITHUB_ENV
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: windows-${{ env.pythonLocation }}-${{ env.date }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-dev.txt') }}
 
       - name: Test with pytest
         run: |
