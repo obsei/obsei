@@ -10,11 +10,15 @@ st.title("Obsei Demo").markdown(
     get_icon_name("Obsei Demo", logo_url, 60, 35), unsafe_allow_html=True
 )
 
-st.error(
+st.success(
+    """
+Please ⭐ the repo and share the feedback at https://github.com/obsei/obsei
+    """
+)
+st.warning(
     """
 **Note:** Demo run will require some secure information based on source or sink selected,
-if you don't trust this environment please close the app.\n
-Do not share and commit generated file as it may contains secure information.
+if you don't trust this environment please close the app.
 """
 )
 
@@ -26,69 +30,64 @@ Do not share and commit generated file as it may contains secure information.
     download_yaml_col,
 ) = st.columns([2, 2, 1, 1, 1])
 
-source_col, analyzer_col, sink_col = st.columns([1, 1, 1])
+col_map = dict()
+col_map["source"], col_map["analyzer"], col_map["sink"] = st.columns([1, 1, 1])
 
-source_list = [k for k in configuration["source"].keys()]
-selected_source = source_col.selectbox("Select Observer", source_list)
+selected = {}
+name_map = {"source": "Observer", "analyzer": "Analyzer", "sink": "Informer"}
 
-analyzer_list = [k for k in configuration["analyzer"].keys()]
-selected_analyzer = analyzer_col.selectbox("Select Analyzer", analyzer_list)
+for node_name, col in col_map.items():
+    item_list = [k for k in configuration[node_name].keys()]
+    selected[node_name] = col.selectbox(f"Select {name_map[node_name]}", item_list)
 
-sink_list = [k for k in configuration["sink"].keys()]
-selected_sink = sink_col.selectbox("Select Informer", sink_list)
-
-src_icon = get_icon_name(None, configuration["source"][selected_source]["_icon_"])
-analyzer_icon = get_icon_name(
-    None, configuration["analyzer"][selected_analyzer]["_icon_"]
-)
-sink_icon = get_icon_name(None, configuration["sink"][selected_sink]["_icon_"])
+icons = [get_icon_name(None, configuration[k][v]["_icon_"]) for k, v in selected.items()]
 pipeline_col.header("Pipeline").markdown(
-    f"**Pipeline:** {src_icon} ➡➡ {analyzer_icon} ➡➡ {sink_icon}",
+    f"**Pipeline:** {icons[0]} ➡➡ {icons[1]} ➡➡ {icons[2]}",
     unsafe_allow_html=True,
 )
 
-src_config = configuration["source"][selected_source]["config"]
-render_config(
-    src_config, source_col, configuration["source"][selected_source]["_help_"]
-)
+generate_config = {}
+log_component = {}
+for node_name, node_value in selected.items():
+    type_config = configuration[node_name][node_value]
+    if node_name == "analyzer":
+        type_list = []
+        for config_key in type_config.keys():
+            if config_key != "_icon_":
+                type_list.append(config_key)
+        selected_type = col_map[node_name].selectbox(f"{name_map[node_name]} Type", type_list)
+        type_config = type_config[selected_type]
 
-analyzer_type_config = configuration["analyzer"][selected_analyzer]
-analyzer_type_list = []
-for k in analyzer_type_config.keys():
-    if k != "_icon_":
-        analyzer_type_list.append(k)
-selected_analyzer_type = analyzer_col.selectbox(f"analyzer type", analyzer_type_list)
-analyzer_config = None
-if "config" in analyzer_type_config[selected_analyzer_type]:
-    analyzer_config = analyzer_type_config[selected_analyzer_type]["config"]
-render_config(
-    analyzer_config,
-    analyzer_col,
-    analyzer_type_config[selected_analyzer_type]["_help_"],
-)
-if len(analyzer_type_config[selected_analyzer_type]["analyzer"]) > 1:
-    render_config(
-        analyzer_type_config[selected_analyzer_type]["analyzer"], analyzer_col
-    )
+    config = None
+    if "config" in type_config:
+        config = type_config["config"]
+        if type_config["_help_"] is not None:
+            with col_map[node_name].expander("Config Help Info", False):
+                help_area = "\n".join(type_config["_help_"])
+                st.code(f"{help_area}")
 
-sink_config = configuration["sink"][selected_sink]["config"]
-render_config(sink_config, sink_col, configuration["sink"][selected_sink]["_help_"])
+    config_expander = None
+    if config is not None:
+        config_expander = col_map[node_name].expander(f"Configure {name_map[node_name]}", False)
+        render_config(config, config_expander)
 
-generate_config = {
-    "source": configuration["source"][selected_source]["source"],
-    "source_config": src_config,
-    "analyzer_config": analyzer_config,
-    "analyzer": analyzer_type_config[selected_analyzer_type]["analyzer"],
-    "sink": configuration["sink"][selected_sink]["sink"],
-    "sink_config": sink_config,
-}
+    if node_name == "analyzer" and node_name in type_config and len(type_config[node_name]) > 1:
+        config_expander = config_expander or col_map[node_name].expander(f"Configure {name_map[node_name]}", False)
+        render_config(type_config["analyzer"], config_expander)
+
+    generate_config[node_name] = type_config[node_name]
+    generate_config[f"{node_name}_config"] = config
+
+    log_expander = col_map[node_name].expander(f"{name_map[node_name]} Logs", False)
+    log_component[node_name] = log_expander.empty()
+    log_component[node_name].write("Run \"🚀 Execute\" first")
 
 python_code = generate_python(generate_config)
 yaml_code = generate_yaml(generate_config)
 
 execute_button = execute_col.button("🚀 Execute")
 if execute_button:
-    execute_workflow(generate_config, spinner_col)
+    execute_workflow(generate_config, spinner_col, log_component)
 
 with download_python_col:
     download_button(python_code, "generated-code.py", "🐍 Download (.py)")
