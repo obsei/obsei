@@ -26,6 +26,5 @@ presidio-anonymizer
 pandas
 nltk
 gnews
-trafilatura<0.9.0
+trafilatura
 python-facebook-api
-htmldate<0.9.0   # To handle regex conflict
