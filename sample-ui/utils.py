@@ -138,8 +138,6 @@ def render_config(config, component, help_str=None, parent_key=None):
 
 def generate_python(generate_config):
     return f"""
-import json
-
 from obsei.configuration import ObseiConfiguration
 
 # This is Obsei workflow path and filename
@@ -176,7 +174,7 @@ def generate_yaml(generate_config):
     return yaml.dump(generate_config)
 
 
-def execute_workflow(generate_config, component=None):
+def execute_workflow(generate_config, component=None, log_components=None):
     progress_show = None
     if component:
         progress_show = component.empty()
@@ -194,12 +192,18 @@ def execute_workflow(generate_config, component=None):
         sink = obsei_configuration.initialize_instance("sink")
 
         source_response_list = source.lookup(source_config)
+        log_components["source"].write([vars(response) for response in source_response_list])
 
         analyzer_response_list = analyzer.analyze_input(
             source_response_list=source_response_list, analyzer_config=analyzer_config
         )
+        log_components["analyzer"].write([vars(response) for response in analyzer_response_list])
 
         sink_response_list = sink.send_data(analyzer_response_list, sink_config)
+        if sink_response_list:
+            log_components["sink"].write([vars(response) for response in sink_response_list])
+        else:
+            log_components["sink"].write("No Data")
 
         if progress_show:
             progress_show.code("🎉🎉🎉 Processing Complete!! 🍾🍾🍾")
