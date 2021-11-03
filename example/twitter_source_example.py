@@ -48,9 +48,15 @@ sink_config = SlackSinkConfig(
 #    channel_id="CHANNEL_ID",
     jinja_template="""
 :bell: Hi there!, a new `<{{payload['meta']['tweet_url']}}|tweet>` of interest is found by *Obsei*
->Tweet Content: 
+>📝 Content: 
 ```{{payload['meta']['text']}}```
->Classifier Data:
+>ℹ️Information:
+```
+User Name: {{payload['meta']['author_info']['name']}} ({{payload['meta']['author_info']['user_url']}})
+Tweet Metrics: Retweets={{payload['meta']['public_metrics']['retweet_count']}}, Likes={{payload['meta']['public_metrics']['like_count']}}
+Author Metrics: Verified={{payload['meta']['author_info']['verified']}}, Followers={{payload['meta']['author_info']['public_metrics']['followers_count']}}
+```
+>🧠 AI Engine Data:
 ```
      {%- for key, value in payload['segmented_data']['classifier_data'].items() recursive%}
          {%- if value is mapping -%}
@@ -69,7 +75,7 @@ text_analyzer = ZeroShotClassificationAnalyzer(
 )
 
 analyzer_config = ClassificationAnalyzerConfig(
-    labels=["interface", "slow", "battery"],
+    labels=["going up", "going down"],
     add_positive_negative_labels=False,
 )
 
