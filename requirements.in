@@ -1,6 +1,6 @@
 # PyTorch
 --find-links=https://download.pytorch.org/whl/torch_stable.html
-torch; sys_platform != 'win32' and sys_platform != 'cygwin'
+torch
 vaderSentiment
 transformers
 searchtweets-v2
@@ -26,6 +26,5 @@ presidio-anonymizer
 pandas
 nltk
 gnews
-trafilatura<0.9.0
+trafilatura
 python-facebook-api
-htmldate<0.9.0   # To handle regex conflict
