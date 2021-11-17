@@ -1,6 +1,6 @@
 # PyTorch
 --find-links=https://download.pytorch.org/whl/torch_stable.html
-torch; sys_platform != 'win32' and sys_platform != 'cygwin'
+torch
 vaderSentiment
 transformers
 searchtweets-v2
