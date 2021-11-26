@@ -43,7 +43,7 @@ charset-normalizer==2.0.8
     #   htmldate
     #   requests
     #   trafilatura
-click==8.0.3
+click>=7.0
     # via
     #   nltk
     #   sacremoses
