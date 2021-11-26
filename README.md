@@ -198,7 +198,7 @@ We have a minimal [streamlit](https://streamlit.io/) based UI that you can use t
 [![Introductory and demo video](https://img.youtube.com/vi/GTF-Hy96gvY/2.jpg)](https://www.youtube.com/watch?v=GTF-Hy96gvY)
 
 
-Check demo at (https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/obsei/obsei-demo) or at [Demo Link](https://share.streamlit.io/obsei/obsei/sample-ui/ui.py)
+Check demo at [![](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/obsei/obsei-demo) or at [Demo Link](https://share.streamlit.io/obsei/obsei/sample-ui/ui.py)
 
 (**Note**: Due to rate limit sometime Streamlit demo might not work, hence please use docker image locally.)
 
