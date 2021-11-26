@@ -38,7 +38,7 @@ certifi==2021.10.8
     #   trafilatura
 chardet==4.0.0
     # via readability-lxml
-charset-normalizer==2.0.7
+charset-normalizer==2.0.8
     # via
     #   htmldate
     #   requests
@@ -160,7 +160,7 @@ oauthlib==3.1.1
     # via
     #   atlassian-python-api
     #   requests-oauthlib
-packaging==21.2
+packaging==21.3
     # via
     #   huggingface-hub
     #   spacy
@@ -202,7 +202,7 @@ pydantic==1.8.2
     #   thinc
 pymongo==3.12.1
     # via gnews
-pyparsing==2.4.7
+pyparsing==3.0.6
     # via
     #   httplib2
     #   packaging
@@ -268,7 +268,7 @@ requests-oauthlib==1.3.0
     # via
     #   atlassian-python-api
     #   python-facebook-api
-rsa==4.7.2
+rsa==4.8
     # via google-auth
 sacremoses==0.0.46
     # via transformers
@@ -287,7 +287,7 @@ six==1.16.0
     #   requests-file
     #   sacremoses
     #   zenpy
-slack-sdk==3.11.2
+slack-sdk==3.12.0
     # via -r requirements.in
 smart-open==5.2.1
     # via pathy
@@ -332,7 +332,7 @@ typer==0.4.0
     # via
     #   pathy
     #   spacy
-typing-extensions==4.0.0
+typing-extensions>=3.7.4.3
     # via
     #   huggingface-hub
     #   pydantic
