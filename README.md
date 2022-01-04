@@ -60,7 +60,7 @@
 
 ---
 
-**Obsei** is an open-source low-code AI powered automation tool. *Obsei* consist of -
+**Obsei** (pronounced "Ob see" | /əb-'sē/) is an open-source low-code AI powered automation tool. *Obsei* consist of -
  - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews, News, Website etc and feed that information to,
  - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
  - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
