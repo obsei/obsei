@@ -4,7 +4,6 @@ torch
 vaderSentiment
 transformers
 searchtweets-v2
-tweet-preprocessor
 pytz
 atlassian-python-api
 elasticsearch
@@ -19,12 +18,13 @@ praw
 mmh3
 beautifulsoup4
 slack-sdk
-zenpy
 sentencepiece
 presidio-analyzer
 presidio-anonymizer
 pandas
 nltk
 gnews
-trafilatura
 python-facebook-api
+
+## GPL dependencies (these are optional)
+# trafilatura

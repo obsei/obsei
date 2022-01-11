@@ -13,8 +13,6 @@ from searchtweets import collect_results, gen_request_parameters
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.payload import TextPayload
 
-import preprocessor as cleaning_processor
-
 from obsei.misc.utils import convert_utc_time
 
 logger = logging.getLogger(__name__)
@@ -195,7 +193,6 @@ class TwitterSource(BaseSource):
         update_state: bool = True if identifier else False
         state = state or dict()
         max_tweet_id = since_id
-        min_tweet_id = until_id
         lookup_period = config.lookup_period
         if lookup_period is None:
             start_time = None
@@ -322,12 +319,7 @@ class TwitterSource(BaseSource):
         return or_query_str + and_query_str
 
     def _get_source_output(self, tweet: Dict[str, Any]):
-        processed_text = TwitterSource.clean_tweet_text(tweet["text"])
         tweet["tweet_url"] = f'https://twitter.com/twitter/statuses/{tweet["id"]}'
         return TextPayload(
-            processed_text=processed_text, meta=tweet, source_name=self.NAME
+            processed_text=tweet["text"], meta=tweet, source_name=self.NAME
         )
-
-    @staticmethod
-    def clean_tweet_text(tweet_text: str):
-        return cleaning_processor.clean(tweet_text)

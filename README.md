@@ -55,45 +55,41 @@
 
 ---
 <span style="color:red">
-<b>Note</b>: Obsei is still in alpha stage hence carefully use it in Production. Also as it is constantly undergoing development hence master branch may contains many breaking changes. Please use released version.
+<b>Note</b>: Obsei is still in alpha stage hence carefully use it in Production. Also, as it is constantly undergoing development hence master branch may contain many breaking changes. Please use released version.
 </span>
 
 ---
 
 **Obsei** (pronounced "Ob see" | /əb-'sē/) is an open-source low-code AI powered automation tool. *Obsei* consist of -
- - **Observer**, observes platform like Twitter, Facebook, App Stores, Google reviews, Amazon reviews, News, Website etc and feed that information to,
- - **Analyzer**, which perform text analysis like classification, sentiment, translation, PII etc and feed that information to,
- - **Informer**, which send it to ticketing system, data store, dataframe etc for further action and analysis.
+ - **Observer**, collect unstructured data from various sources like tweets from Twitter, Subreddit comments on Reddit, page post's comments from Facebook, App Stores reviews, Google reviews, Amazon reviews, News, Website, etc.,
+ - **Analyzer**, analyze unstructured data collected with various AI tasks like classification, sentiment, translation, PII, etc.
+ - **Informer**, send analyzed data to various destinations like ticketing platforms, data storage, dataframe, etc. So user can take further action and perform analysis on the data.
+
+All Observers have can store state in database (Sqlite, Postgres, MySQL, etc.), which making Obsei suitable for scheduled jobs or serverless applications.
 
 ![](https://raw.githubusercontent.com/obsei/obsei-resources/master/images/Obsei_diagram.png)
 
-<details><summary>Future thoughts -</summary>
+### Future direction -
 
 - Text, Image, Audio, Documents and Video oriented workflows
 - Collect data from every possible private and public channels
 - Add each possible to AI piece which can automate manual cognitive workflows
 
+### Introduction and demo video
+[![Introduction and demo video](https://img.youtube.com/vi/bhAYLI9P9W0/2.jpg)](https://www.youtube.com/watch?v=bhAYLI9P9W0)
 
-![](https://raw.githubusercontent.com/obsei/obsei-resources/master/images/Obsei-future-concept.png)
-</details>
 
-
-### Introductory demo video
-
-[![Introductory and demo video](https://img.youtube.com/vi/bhAYLI9P9W0/2.jpg)](https://www.youtube.com/watch?v=bhAYLI9P9W0)
-
----
 ## Use cases
 *Obsei* use cases are following, but not limited to -
-- Social listening
-- Alerting/Notification when user complaints on social media
-- Automatic customer issue creation based on sentiment analysis (reduction of MTTD)
-- Proper tagging of ticket based for example login issue, signup issue, delivery issue etc (reduction of MTTR)
-- Checking effectiveness of social media marketing campaign
+- Social listening: Listening about social media posts, comments, customer feedback, etc.
+- Alerting/Notification: To get auto-alerts for events such as customer complaints, qualified sales leads, etc.
+- Automatic customer issue creation based on customer complaints on Social Media, Email, etc.
+- Automatic assignment of proper tags to tickets based content of customer complaint for example login issue, signup issue, delivery issue etc.
 - Extraction of deeper insight from feedbacks on various platforms
-- Research purpose
+- Market research purpose
+- Creation of dataset for various AI tasks
 - Many more based on creativity 💡
----
+
 ## Companies/Projects using Obsei
 Here are some companies/projects (alphabetical order) using Obsei. To add your company/project to the list, please raise a PR or contact us via [email](contact@obsei.com).
 
@@ -103,7 +99,6 @@ Here are some companies/projects (alphabetical order) using Obsei. To add your c
 - [Zolve](https://zolve.com/): Creating a financial world beyond borders 
 
 
----
 ## Tutorials
 
 <table>
@@ -187,7 +182,13 @@ Here are some companies/projects (alphabetical order) using Obsei. To add your c
 </tbody>
 </table>
 
----
+<details><summary><b>💡Tips: Handle large text classification via Obsei</b></summary>
+
+![](https://raw.githubusercontent.com/obsei/obsei-resources/master/gifs/Long_Text_Classification.gif)
+
+</details>
+
+
 ## Demo
 We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
 
@@ -211,11 +212,11 @@ docker run -d --name obesi-ui -p 8501:8501 obsei/obsei-ui-demo
 
 **To run Obsei workflow easily using GitHub Actions (no signups and cloud hosting require), refer [repo](https://github.com/obsei/demo-workflow-action) for more information.**
 
----
+
 ## Documentation
 For detailed installation instructions, usages and example refer [documentation](https://obsei.github.io/obsei/).
 
----
+
 ## Support and Release Matrix
 
 <table>
@@ -271,7 +272,7 @@ pip install python-facebook-api
 ```
 </details>
 
----
+
 ## How to use
 
 Expend following steps and create your workflow -
@@ -960,7 +961,6 @@ python example.py
 ```
 </details>
 
----
 ## Articles
 
 <table>
@@ -993,47 +993,42 @@ python example.py
 </tbody>
 </table>
 
----
-## Tips
-### Handle large text classification
-
-![](https://raw.githubusercontent.com/obsei/obsei-resources/master/gifs/Long_Text_Classification.gif)
-
----
-## Upcoming Release
-Upcoming release plan and progress can be tracked at [link](https://github.com/obsei/obsei/projects) (Suggestions are welcome).
-
----
-## Discussion Forum
+## Discussion forum
 Discussion about *Obsei* can be done at [community forum](https://github.com/obsei/obsei/discussions)
 
----
-## Contribution
-First off, thank you for even considering contributing to this package, every contribution big or small is greatly appreciated.
-Please refer our [Contribution Guideline](https://github.com/obsei/obsei/blob/master/CONTRIBUTING.md) and [Code of Conduct](https://github.com/obsei/obsei/blob/master/CODE_OF_CONDUCT.md).
 
----
-## Changelog
-Refer [releases](https://github.com/obsei/obsei/releases) and [projects](https://github.com/obsei/obsei/projects).
+## Upcoming release and changelog
+Upcoming release plan and progress can be tracked at [link](https://github.com/obsei/obsei/projects) (Suggestions are welcome).
+Refer [releases](https://github.com/obsei/obsei/releases) for changelogs.
 
----
 ## Security Issue
 For any security issue please contact us via [email](mailto:obsei.tool@gmail.com)
 
----
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/obsei/obsei.svg)](https://starchart.cc/obsei/obsei)
 
----
+## Maintainer
+
+This project is being maintained by [Lalit Pagaria](https://github.com/lalitpagaria).
+
+## License
+
+- Copyright holder: [Lalit Pagaria](https://github.com/lalitpagaria)
+- Overall Apache 2.0 and you can read [License](https://github.com/obsei/obsei/blob/master/LICENSE) file.
+- Multiple other secondary permissive or weak copyleft licenses (LGPL, MIT, BSD etc.) for third-party components refer [Attribution](https://github.com/obsei/obsei/blob/master/ATTRIBUTION.md).
+- To make project more commercial friendly, we void third party components which have strong copyleft licenses (GPL, AGPL etc.) into the project.
+
 ## Attribution
 
 This could not have been possible without these [open source software](https://github.com/obsei/obsei/blob/master/ATTRIBUTION.md).
 
----
-## Acknowledgement
+## Contribution
+First off, thank you for even considering contributing to this package, every contribution big or small is greatly appreciated.
+Please refer our [Contribution Guideline](https://github.com/obsei/obsei/blob/master/CONTRIBUTING.md) and [Code of Conduct](https://github.com/obsei/obsei/blob/master/CODE_OF_CONDUCT.md).
 
-We would like to thank [DailyGet](https://dailyget.in/) for continuous support and encouragement.
-Please check [DailyGet](https://dailyget.in/) out. it is a platform which can easily be configured to solve any business process automation requirements.
+Thanks so much to all our contributors
 
----
+<a href="https://github.com/deepset-ai/haystack/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=obsei/obsei" />
+</a>

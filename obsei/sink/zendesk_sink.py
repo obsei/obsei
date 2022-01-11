@@ -1,11 +1,12 @@
+import json
 import logging
 import textwrap
 from copy import deepcopy
+
+import requests
 from typing import Any, Dict, List, Mapping, Optional
 
-from pydantic import BaseModel, Field, PrivateAttr, SecretStr
-from zenpy import Zenpy
-from zenpy.lib.api_objects import Ticket
+from pydantic import BaseModel, Field, SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 from obsei.payload import TextPayload
@@ -15,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class ZendeskPayloadConvertor(Convertor):
+    # Refer https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/#create-ticket
+    # for the payload details
     def convert(
         self,
         analyzer_response: TextPayload,
@@ -24,11 +27,20 @@ class ZendeskPayloadConvertor(Convertor):
         summary_max_length = kwargs.get("summary_max_length", 50)
 
         payload = base_payload or dict()
-        payload["description"] = obj_to_markdown(
+
+        if "ticket" not in payload:
+            payload["ticket"] = dict()
+
+        if "comment" not in payload["ticket"]:
+            payload["ticket"]["comment"] = dict()
+
+        # For non-html content, use "body" key
+        payload["html_body"] = obj_to_markdown(
             obj=analyzer_response,
             str_enclose_start="{quote}",
             str_enclose_end="{quote}",
         )
+
         payload["subject"] = textwrap.shorten(
             text=analyzer_response.processed_text, width=summary_max_length
         )
@@ -54,18 +66,33 @@ class ZendeskCredInfo(BaseModel):
     oauth_token: Optional[SecretStr] = Field(None, env="zendesk_oauth_token")
     token: Optional[SecretStr] = Field(None, env="zendesk_token")
 
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+
+        if not self.oauth_token and not self.token and not self.email and not self.password:
+            raise ValueError("At least one credential is required")
+
+        if self.password and self.token:
+            raise ValueError("Only one of password or token can be provided")
+
+    def get_session(self) -> requests.Session:
+        session = requests.Session()
+
+        if self.oauth_token:
+            session.headers.update({"Authorization": f'Bearer {self.oauth_token.get_secret_value()}'})
+        elif self.email and self.token:
+            session.auth = (f'{self.email}/token', self.token.get_secret_value())
+        elif self.email and self.password:
+            session.auth = (self.email, self.password.get_secret_value())
+
+        return session
+
 
 class ZendeskSinkConfig(BaseSinkConfig):
-    # This is done to avoid exposing member to API response
-    _client: Zenpy = PrivateAttr()
     TYPE: str = "Zendesk"
-    # For custom domain refer http://docs.facetoe.com.au/zenpy.html#custom-domains
-    # Mainly you can do this by setting the environment variables:
-    # ZENPY_FORCE_NETLOC
-    # ZENPY_FORCE_SCHEME (default to https)
-    # when set it will force request on:
-    # {scheme}://{netloc}/endpoint
-    domain: str = Field("zendesk.com")
+    ticket_api: str = Field(default="/api/v2/tickets.json")
+    scheme: str = Field(default="https", env="zendesk_scheme")
+    domain: str = Field(default="zendesk.com", env="zendesk_domain")
     subdomain: Optional[str] = Field(None, env="zendesk_subdomain")
     cred_info: Optional[ZendeskCredInfo] = Field(None)
     summary_max_length: int = 50
@@ -77,23 +104,9 @@ class ZendeskSinkConfig(BaseSinkConfig):
 
         self.cred_info = self.cred_info or ZendeskCredInfo()
 
-        self._client = Zenpy(
-            domain=self.domain,
-            subdomain=self.subdomain,
-            email=self.cred_info.email,
-            password=None
-            if not self.cred_info.password
-            else self.cred_info.password.get_secret_value(),
-            oauth_token=None
-            if not self.cred_info.oauth_token
-            else self.cred_info.oauth_token.get_secret_value(),
-            token=None
-            if not self.cred_info.token
-            else self.cred_info.token.get_secret_value(),
-        )
-
-    def get_client(self) -> Zenpy:
-        return self._client
+    def get_endpoint(self) -> str:
+        sub_prefix = "" if self.subdomain is None or self.subdomain is '' else f"/{self.subdomain}."
+        return f'{self.scheme}://{sub_prefix}{self.domain}{self.ticket_api}'
 
 
 class ZendeskSink(BaseSink):
@@ -106,8 +119,13 @@ class ZendeskSink(BaseSink):
         config: ZendeskSinkConfig,
         **kwargs,
     ):
-        responses = []
-        payloads = []
+        responses: List[Any] = []
+        payloads: List[Dict[str, Any]] = []
+
+        if config.cred_info is None:
+            logger.error("Zendesk credentials are not provided")
+            return responses
+
         for analyzer_response in analyzer_responses:
             payloads.append(
                 self.convertor.convert(
@@ -121,7 +139,11 @@ class ZendeskSink(BaseSink):
             )
 
         for payload in payloads:
-            response = config.get_client().tickets.create(Ticket(**payload))
+            session = config.cred_info.get_session()
+            response = session.post(
+                config.get_endpoint(),
+                json=json.dumps(payload["segmented_data"], indent=2, ensure_ascii=False)
+            )
             logger.info(f"response='{response}'")
             responses.append(response)
 
