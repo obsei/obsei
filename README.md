@@ -1029,6 +1029,6 @@ Please refer our [Contribution Guideline](https://github.com/obsei/obsei/blob/ma
 
 Thanks so much to all our contributors
 
-<a href="https://github.com/deepset-ai/haystack/graphs/contributors">
+<a href="https://github.com/obsei/obsei/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=obsei/obsei" />
 </a>
