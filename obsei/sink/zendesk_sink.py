@@ -80,9 +80,9 @@ class ZendeskCredInfo(BaseModel):
 
         if self.oauth_token:
             session.headers.update({"Authorization": f'Bearer {self.oauth_token.get_secret_value()}'})
-        elif self.token:
+        elif self.email and self.token:
             session.auth = (f'{self.email}/token', self.token.get_secret_value())
-        elif self.password:
+        elif self.email and self.password:
             session.auth = (self.email, self.password.get_secret_value())
 
         return session
@@ -119,8 +119,8 @@ class ZendeskSink(BaseSink):
         config: ZendeskSinkConfig,
         **kwargs,
     ):
-        responses = []
-        payloads = []
+        responses: List[Any] = []
+        payloads: List[Dict[str, Any]] = []
 
         if config.cred_info is None:
             logger.error("Zendesk credentials are not provided")
