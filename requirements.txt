@@ -123,7 +123,7 @@ mypy-extensions==0.4.3
     # via typing-inspect
 nltk==3.6.7
     # via -r requirements.in
-numpy==1.22.0
+numpy>=1.21.4
     # via
     #   blis
     #   pandas
