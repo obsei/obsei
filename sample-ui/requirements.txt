@@ -1,2 +1,3 @@
 git+git://github.com/obsei/obsei@master#egg=obsei
 streamlit==1.2.0
+trafilatura

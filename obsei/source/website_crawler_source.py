@@ -4,7 +4,6 @@ from abc import abstractmethod
 from typing import List, Optional
 
 import mmh3
-from trafilatura import extract, feeds, fetch_url, sitemaps
 
 from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSource, BaseSourceConfig
@@ -44,6 +43,12 @@ class TrafilaturaCrawlerConfig(BaseCrawlerConfig):
     url_blacklist: Optional[List[str]] = None
 
     def extract_url(self, url: str, url_id: str = None):
+        try:
+            from trafilatura import extract, fetch_url
+        except:
+            logger.error("Trafilatura is not installed, install as follows: pip install trafilatura")
+            return []
+
         url_id = url_id or "{:02x}".format(mmh3.hash(url, signed=False))
         url_content = fetch_url(
             url=url,
@@ -74,6 +79,12 @@ class TrafilaturaCrawlerConfig(BaseCrawlerConfig):
         return extracted_dict
 
     def find_urls(self, url: str):
+        try:
+            from trafilatura import feeds, sitemaps
+        except:
+            logger.error("Trafilatura is not installed, install as follows: pip install trafilatura")
+            return []
+
         urls: List[str] = []
         if self.is_sitemap:
             urls = sitemaps.sitemap_search(url=url, target_lang=self.target_language)

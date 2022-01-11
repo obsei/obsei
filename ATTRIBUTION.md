@@ -2,7 +2,6 @@ This could not have been possible without following open source software -
 - [searchtweets-v2](https://github.com/twitterdev/search-tweets-python): For Twitter's API v2 wrapper
 - [vaderSentiment](https://github.com/cjhutto/vaderSentiment): For rule-based sentiment analysis
 - [transformers](https://github.com/huggingface/transformers): For text-classification pipeline
-- [tweet-preprocessor](https://github.com/s/preprocessor): For tweets preprocessing and cleaning
 - [atlassian-python-api](https://github.com/atlassian-api/atlassian-python-api): To interact with Jira
 - [elasticsearch](https://github.com/elastic/elasticsearch-py): To interact with Elasticsearch
 - [apscheduler](https://github.com/agronholm/apscheduler): To schedule task to execute desired workflow
@@ -13,8 +12,6 @@ This could not have been possible without following open source software -
 - [reddit-rss-reader](https://github.com/lalitpagaria/reddit-rss-reader): For Reddit scrapping
 - [app-store-reviews-reader](https://github.com/lalitpagaria/app_store_reviews_reader): For App Store reviews scrapping
 - [slack-sdk](https://github.com/slackapi/python-slack-sdk): For slack integration
-- [zenpy](https://github.com/facetoe/zenpy): For Zendesk integration
 - [presidio-anonymizer](https://github.com/microsoft/presidio): Personal information anonymizer
 - [gnews](https://github.com/ranahaani/GNews): For Google News integration
-- [trafilatura](https://github.com/adbar/trafilatura): For crawling news article
 - [python-facebook-api](https://github.com/sns-sdks/python-facebook): For facebook integration

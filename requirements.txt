@@ -8,7 +8,7 @@
 
 app-store-reviews-reader==1.2
     # via -r requirements.in
-atlassian-python-api==3.14.1
+atlassian-python-api==3.18.0
     # via -r requirements.in
 beautifulsoup4==4.9.3
     # via
@@ -23,9 +23,7 @@ blis==0.7.5
 bs4==0.0.1
     # via gnews
 cachetools==4.2.4
-    # via
-    #   google-auth
-    #   zenpy
+    # via google-auth
 catalogue==2.0.6
     # via
     #   spacy
@@ -35,14 +33,8 @@ certifi==2021.10.8
     # via
     #   elasticsearch
     #   requests
-    #   trafilatura
-chardet==4.0.0
-    # via readability-lxml
-charset-normalizer==2.0.9
-    # via
-    #   htmldate
-    #   requests
-    #   trafilatura
+charset-normalizer==2.0.10
+    # via requests
 click>=7.0
     # via
     #   nltk
@@ -52,10 +44,6 @@ colorama==0.4.4
     # via
     #   click
     #   tqdm
-courlan==0.6.0
-    # via trafilatura
-cssselect==1.1.0
-    # via readability-lxml
 cymem==2.0.6
     # via
     #   preshed
@@ -63,29 +51,27 @@ cymem==2.0.6
     #   thinc
 dataclasses-json==0.5.6
     # via python-facebook-api
-dateparser==1.1.0
-    # via htmldate
 deprecated==1.2.13
     # via atlassian-python-api
 dnspython==1.16.0
     # via gnews
-elasticsearch==7.16.1
+elasticsearch==7.16.2
     # via -r requirements.in
 feedparser==6.0.8
     # via
     #   app-store-reviews-reader
     #   gnews
     #   reddit-rss-reader
-filelock==3.4.0
+filelock==3.4.2
     # via
     #   huggingface-hub
     #   tldextract
     #   transformers
 gnews==0.2.7
     # via -r requirements.in
-google-api-core==2.3.0
+google-api-core==2.3.2
     # via google-api-python-client
-google-api-python-client==2.33.0
+google-api-python-client==2.34.0
     # via -r requirements.in
 google-auth==2.3.3
     # via
@@ -100,13 +86,11 @@ googleapis-common-protos==1.54.0
     # via google-api-core
 greenlet==1.1.2
     # via sqlalchemy
-htmldate==1.0.0
-    # via trafilatura
 httplib2==0.20.2
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-huggingface-hub==0.2.1
+huggingface-hub==0.4.0
     # via transformers
 idna==3.3
     # via
@@ -118,18 +102,8 @@ joblib==1.1.0
     # via
     #   nltk
     #   sacremoses
-justext==3.0.0
-    # via trafilatura
 langcodes==3.3.0
-    # via
-    #   courlan
-    #   spacy
-lxml==4.7.1
-    # via
-    #   htmldate
-    #   justext
-    #   readability-lxml
-    #   trafilatura
+    # via spacy
 markupsafe==2.0.1
     # via jinja2
 marshmallow==3.14.1
@@ -147,9 +121,9 @@ murmurhash==1.0.6
     #   thinc
 mypy-extensions==0.4.3
     # via typing-inspect
-nltk==3.6.5
+nltk==3.6.7
     # via -r requirements.in
-numpy==1.21.4
+numpy==1.22.0
     # via
     #   blis
     #   pandas
@@ -169,7 +143,7 @@ pandas==1.3.5
     # via -r requirements.in
 pathy==0.6.1
     # via spacy
-phonenumbers==8.12.39
+phonenumbers==8.12.41
     # via presidio-analyzer
 praw==7.5.0
     # via -r requirements.in
@@ -183,7 +157,7 @@ presidio-analyzer==2.2.23
     # via -r requirements.in
 presidio-anonymizer==2.2.23
     # via -r requirements.in
-protobuf==3.19.1
+protobuf==3.19.3
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -209,11 +183,8 @@ pyparsing==3.0.6
 python-dateutil==2.8.2
     # via
     #   -r requirements.in
-    #   dateparser
-    #   htmldate
     #   pandas
     #   searchtweets-v2
-    #   zenpy
 python-dotenv==0.19.2
     # via gnews
 python-facebook-api==0.12.4
@@ -221,24 +192,17 @@ python-facebook-api==0.12.4
 pytz==2021.3
     # via
     #   -r requirements.in
-    #   dateparser
     #   pandas
-    #   zenpy
-pytz-deprecation-shim==0.1.0.post0
-    # via tzlocal
 pyyaml==6.0
     # via
     #   huggingface-hub
     #   presidio-analyzer
     #   searchtweets-v2
     #   transformers
-readability-lxml==0.8.1
-    # via trafilatura
 reddit-rss-reader==1.3.2
     # via -r requirements.in
 regex==2021.11.10
     # via
-    #   dateparser
     #   nltk
     #   presidio-analyzer
     #   sacremoses
@@ -261,7 +225,6 @@ requests==2.26.0
     #   transformers
     #   update-checker
     #   vadersentiment
-    #   zenpy
 requests-file==1.5.1
     # via tldextract
 requests-oauthlib==1.3.0
@@ -270,7 +233,7 @@ requests-oauthlib==1.3.0
     #   python-facebook-api
 rsa==4.8
     # via google-auth
-sacremoses==0.0.46
+sacremoses==0.0.47
     # via transformers
 searchtweets-v2==1.1.1
     # via -r requirements.in
@@ -286,7 +249,6 @@ six==1.16.0
     #   python-dateutil
     #   requests-file
     #   sacremoses
-    #   zenpy
 slack-sdk==3.13.0
     # via -r requirements.in
 smart-open==5.2.1
@@ -299,7 +261,7 @@ spacy-legacy==3.0.8
     # via spacy
 spacy-loggers==1.0.1
     # via spacy
-sqlalchemy==1.4.28
+sqlalchemy==1.4.29
     # via -r requirements.in
 srsly==2.4.2
     # via
@@ -307,13 +269,11 @@ srsly==2.4.2
     #   thinc
 thinc==8.0.13
     # via spacy
-tld==0.12.6
-    # via courlan
 tldextract==3.1.2
     # via presidio-analyzer
 tokenizers==0.10.3
     # via transformers
-torch==1.10.0 ; sys_platform != 'win32' and sys_platform != 'cygwin'
+torch==1.10.1 ; sys_platform != 'win32' and sys_platform != 'cygwin'
     # via -r requirements.in
 tqdm==4.62.3
     # via
@@ -322,11 +282,7 @@ tqdm==4.62.3
     #   sacremoses
     #   spacy
     #   transformers
-trafilatura==1.0.0
-    # via -r requirements.in
-transformers==4.13.0
-    # via -r requirements.in
-tweet-preprocessor==0.6.0
+transformers==4.15.0
     # via -r requirements.in
 typer==0.4.0
     # via
@@ -340,21 +296,14 @@ typing-extensions>=3.7.4.3
     #   typing-inspect
 typing-inspect==0.7.1
     # via dataclasses-json
-tzdata==2021.5
-    # via tzlocal
-tzlocal==4.1
-    # via dateparser
 update-checker==0.18.0
     # via praw
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==1.26.7
+urllib3==1.26.8
     # via
-    #   courlan
     #   elasticsearch
-    #   htmldate
     #   requests
-    #   trafilatura
 vadersentiment==3.3.2
     # via -r requirements.in
 wasabi==0.9.0
@@ -366,8 +315,6 @@ websocket-client==1.2.3
     # via praw
 wrapt==1.13.3
     # via deprecated
-zenpy==2.0.24
-    # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
