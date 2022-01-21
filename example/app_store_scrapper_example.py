@@ -4,10 +4,7 @@ from datetime import datetime, timedelta
 
 import pytz
 
-from obsei.analyzer.classification_analyzer import (
-    ClassificationAnalyzerConfig,
-    ZeroShotClassificationAnalyzer,
-)
+from obsei.analyzer.classification_analyzer import ClassificationAnalyzerConfig, ZeroShotClassificationAnalyzer
 from obsei.misc.utils import DATETIME_STRING_PATTERN
 from obsei.source.appstore_scrapper import (
     AppStoreScrapperConfig,
@@ -19,7 +16,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 since_time = datetime.utcnow().astimezone(pytz.utc) + timedelta(days=-5)
 source_config = AppStoreScrapperConfig(
-    app_url="https://apps.apple.com/us/app/gmail-email-by-google/id422689480",
+    app_url='https://apps.apple.com/us/app/gmail-email-by-google/id422689480',
     lookup_period=since_time.strftime(DATETIME_STRING_PATTERN),
     max_count=10,
 )

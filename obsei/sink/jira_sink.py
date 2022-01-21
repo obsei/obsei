@@ -56,7 +56,9 @@ class JiraSinkConfig(BaseSinkConfig):
     def __init__(self, **data: Any):
         super().__init__(**data)
         if self.username is None or self.password is None:
-            raise AttributeError("Jira informer need username and password")
+            raise AttributeError(
+                "Jira informer need username and password"
+            )
 
         self._jira_client = Jira(
             url=self.url,

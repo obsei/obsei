@@ -23,7 +23,8 @@ for idx, source_response in enumerate(source_response_list):
 # This will execute analyzer (Sentiment, classification etc) on source data with provided analyzer_config
 # Analyzer will it's output to `segmented_data` inside `analyzer_response`
 analyzer_response_list = analyzer.analyze_input(
-    source_response_list=source_response_list, analyzer_config=analyzer_config
+    source_response_list=source_response_list,
+    analyzer_config=analyzer_config
 )
 for idx, analyzer_response in enumerate(analyzer_response_list):
     logger.info(f"source_response#'{idx}'='{vars(analyzer_response)}'")

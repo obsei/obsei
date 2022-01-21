@@ -10,7 +10,7 @@ import spacy
 from dateutil.parser import parse
 from nltk.corpus import stopwords
 from pydantic import BaseModel, PrivateAttr, Field
-from spacy.language import Language
+from spacy import Language
 from spacy.cli import download
 
 logger = logging.getLogger(__name__)
@@ -171,8 +171,6 @@ class SpacyLemmatization(TextCleaningFunction):
 
     def execute(self, tokens: List[str], **kwargs) -> List[str]:
         processed_tokens: List[str] = []
-        for doc in self._nlp.pipe(
-            texts=tokens, batch_size=self.batch_size, n_process=self.n_process
-        ):
+        for doc in self._nlp.pipe(texts=tokens, batch_size=self.batch_size, n_process=self.n_process):
             processed_tokens.append(" ".join([token.lemma_ for token in doc]))
         return processed_tokens

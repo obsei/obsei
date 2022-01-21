@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 class BaseInferenceAggregateFunction(BaseModel):
     @abstractmethod
-    def execute(self, input_list: List[TextPayload], **kwargs) -> List[TextPayload]:
+    def execute(
+        self, input_list: List[TextPayload], **kwargs
+    ) -> List[TextPayload]:
         pass
 
     @staticmethod
@@ -35,7 +37,9 @@ class ClassificationAverageScore(BaseInferenceAggregateFunction):
     name: str = "ClassificationAverageScore"
     default_value: float = 0.0
 
-    def execute(self, input_list: List[TextPayload], **kwargs) -> List[TextPayload]:
+    def execute(
+        self, input_list: List[TextPayload], **kwargs
+    ) -> List[TextPayload]:
         if len(input_list) == 0:
             logger.warning("Can't aggregate empty list")
             return input_list
@@ -56,9 +60,7 @@ class ClassificationAverageScore(BaseInferenceAggregateFunction):
         scores: Dict[str, float] = {}
         for payload in input_list:
             if payload.segmented_data:
-                for key, value in payload.segmented_data.get(
-                    "classifier_data", {}
-                ).items():
+                for key, value in payload.segmented_data.get("classifier_data", {}).items():
                     ratio = len(payload.processed_text) / document_length
                     scores[key] = scores.get(key, default_value) + value * ratio
 
@@ -81,7 +83,9 @@ class ClassificationMaxCategories(BaseInferenceAggregateFunction):
     name: str = "ClassificationMaxCategories"
     score_threshold: float = 0.5
 
-    def execute(self, input_list: List[TextPayload], **kwargs) -> List[TextPayload]:
+    def execute(
+        self, input_list: List[TextPayload], **kwargs
+    ) -> List[TextPayload]:
         if len(input_list) == 0:
             logger.warning("Can't aggregate empty list")
             return input_list
@@ -102,9 +106,7 @@ class ClassificationMaxCategories(BaseInferenceAggregateFunction):
         category_count: Dict[str, int] = {}
         for payload in input_list:
             if payload.segmented_data:
-                for key, value in payload.segmented_data.get(
-                    "classifier_data", {}
-                ).items():
+                for key, value in payload.segmented_data.get("classifier_data", {}).items():
                     if value > score_threshold:
                         category_count[key] = category_count.get(key, 0) + 1
                         max_scores[key] = max(max_scores.get(key, 0.0), value)

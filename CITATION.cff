@@ -1,6 +1,6 @@
 # YAML 1.2
 ---
-authors:
+authors: 
   -
     family-names: Pagaria
     given-names: Lalit

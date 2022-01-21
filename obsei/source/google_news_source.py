@@ -36,18 +36,14 @@ class GoogleNewsConfig(BaseSourceConfig):
         if self.lookup_period and self.after_date:
             raise AttributeError("Can't use `lookup_period` and `after_date` both")
         elif not self.after_date and self.before_date:
-            raise AttributeError(
-                "Can't use `before_date` without `after_date` or `lookup_period`"
-            )
+            raise AttributeError("Can't use `before_date` without `after_date` or `lookup_period`")
 
         if self.lookup_period:
             after_time = convert_utc_time(self.lookup_period)
             self.after_date = after_time.strftime(GOOGLE_DATE_TIME_QUERY_PATTERN)
 
         if not self.before_date:
-            before_time = datetime.combine(
-                date.today(), time(tzinfo=timezone.utc)
-            ) + timedelta(days=1)
+            before_time = datetime.combine(date.today(), time(tzinfo=timezone.utc)) + timedelta(days=1)
             self.before_date = before_time.strftime(GOOGLE_DATE_TIME_QUERY_PATTERN)
 
         self._google_news_client = GNews(
@@ -82,25 +78,15 @@ class GoogleNewsSource(BaseSource):
         since_time = None if not lookup_period else convert_utc_time(lookup_period)
         last_since_time = since_time
 
-        last_after_time = (
-            convert_utc_time(config.after_date) if config.after_date else None
-        )
+        last_after_time = convert_utc_time(config.after_date) if config.after_date else None
         if since_time and last_after_time:
-            last_after_time = (
-                since_time if since_time > last_after_time else last_since_time
-            )
+            last_after_time = since_time if since_time > last_after_time else last_since_time
         elif not last_after_time:
             last_after_time = datetime.combine(date.today(), time(tzinfo=timezone.utc))
 
-        before_time = (
-            convert_utc_time(config.before_date) if config.after_date else None
-        )
-        if not before_time or before_time > datetime.combine(
-            date.today(), time(tzinfo=timezone.utc)
-        ):
-            before_time = datetime.combine(
-                date.today(), time(tzinfo=timezone.utc)
-            ) + timedelta(days=1)
+        before_time = convert_utc_time(config.before_date) if config.after_date else None
+        if not before_time or before_time > datetime.combine(date.today(), time(tzinfo=timezone.utc)):
+            before_time = datetime.combine(date.today(), time(tzinfo=timezone.utc)) + timedelta(days=1)
 
         google_news_client = config.get_client()
         more_data_exist = True
@@ -109,8 +95,8 @@ class GoogleNewsSource(BaseSource):
             after_date = after_time.strftime(GOOGLE_DATE_TIME_QUERY_PATTERN)
             before_date = before_time.strftime(GOOGLE_DATE_TIME_QUERY_PATTERN)
 
-            new_query = f"{config.query}+after:{after_date}+before:{before_date}"
-            query = parse.quote(new_query, errors="ignore")
+            new_query = f'{config.query}+after:{after_date}+before:{before_date}'
+            query = parse.quote(new_query, errors='ignore')
 
             before_time = after_time
 
@@ -124,14 +110,9 @@ class GoogleNewsSource(BaseSource):
                 )
 
                 if config.fetch_article and config.crawler_config:
-                    extracted_data = config.crawler_config.extract_url(
-                        url=article["url"]
-                    )
+                    extracted_data = config.crawler_config.extract_url(url=article["url"])
 
-                    if (
-                        extracted_data is not None
-                        and extracted_data.get("text", None) is not None
-                    ):
+                    if extracted_data is not None and extracted_data.get("text", None) is not None:
                         article_text = extracted_data["text"]
                         del extracted_data["text"]
                     else:
@@ -149,11 +130,8 @@ class GoogleNewsSource(BaseSource):
                     )
                 )
 
-                if (
-                    config.max_results is not None
-                    and len(source_responses) >= config.max_results
-                ):
-                    source_responses = source_responses[: config.max_results]
+                if config.max_results is not None and len(source_responses) >= config.max_results:
+                    source_responses = source_responses[:config.max_results]
                     more_data_exist = False
                     break
 

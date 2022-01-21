@@ -36,19 +36,19 @@ source_config = TwitterSourceConfig(
     expansions=["author_id"],
     place_fields=None,
     max_tweets=10,
-    cred_info=twitter_cred_info or None,
+    cred_info=twitter_cred_info or None
 )
 
 source = TwitterSource()
 
 
 sink_config = SlackSinkConfig(
-    # Uncomment below lines if you like to pass credentials directly instead of env variables
-    #    slack_token="SLACK_TOKEN",
-    #    channel_id="CHANNEL_ID",
+# Uncomment below lines if you like to pass credentials directly instead of env variables
+#    slack_token="SLACK_TOKEN",
+#    channel_id="CHANNEL_ID",
     jinja_template="""
 :bell: Hi there!, a new `<{{payload['meta']['tweet_url']}}|tweet>` of interest is found by *Obsei*
->📝 Content:
+>📝 Content: 
 ```{{payload['meta']['text']}}```
 >ℹ️Information:
 ```

@@ -40,9 +40,7 @@ for node_name, col in col_map.items():
     item_list = [k for k in configuration[node_name].keys()]
     selected[node_name] = col.selectbox(f"Select {name_map[node_name]}", item_list)
 
-icons = [
-    get_icon_name(None, configuration[k][v]["_icon_"]) for k, v in selected.items()
-]
+icons = [get_icon_name(None, configuration[k][v]["_icon_"]) for k, v in selected.items()]
 pipeline_col.header("Pipeline").markdown(
     f"**Pipeline:** {icons[0]} ➡➡ {icons[1]} ➡➡ {icons[2]}",
     unsafe_allow_html=True,
@@ -57,9 +55,7 @@ for node_name, node_value in selected.items():
         for config_key in type_config.keys():
             if config_key != "_icon_":
                 type_list.append(config_key)
-        selected_type = col_map[node_name].selectbox(
-            f"{name_map[node_name]} Type", type_list
-        )
+        selected_type = col_map[node_name].selectbox(f"{name_map[node_name]} Type", type_list)
         type_config = type_config[selected_type]
 
     config = None
@@ -72,19 +68,11 @@ for node_name, node_value in selected.items():
 
     config_expander = None
     if config is not None:
-        config_expander = col_map[node_name].expander(
-            f"Configure {name_map[node_name]}", False
-        )
+        config_expander = col_map[node_name].expander(f"Configure {name_map[node_name]}", False)
         render_config(config, config_expander)
 
-    if (
-        node_name == "analyzer"
-        and node_name in type_config
-        and len(type_config[node_name]) > 1
-    ):
-        config_expander = config_expander or col_map[node_name].expander(
-            f"Configure {name_map[node_name]}", False
-        )
+    if node_name == "analyzer" and node_name in type_config and len(type_config[node_name]) > 1:
+        config_expander = config_expander or col_map[node_name].expander(f"Configure {name_map[node_name]}", False)
         render_config(type_config["analyzer"], config_expander)
 
     generate_config[node_name] = type_config[node_name]
@@ -92,7 +80,7 @@ for node_name, node_value in selected.items():
 
     log_expander = col_map[node_name].expander(f"{name_map[node_name]} Logs", False)
     log_component[node_name] = log_expander.empty()
-    log_component[node_name].write('Run "🚀 Execute" first')
+    log_component[node_name].write("Run \"🚀 Execute\" first")
 
 python_code = generate_python(generate_config)
 yaml_code = generate_yaml(generate_config)

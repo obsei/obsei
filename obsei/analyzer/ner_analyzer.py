@@ -116,11 +116,11 @@ class SpacyNERAnalyzer(BaseAnalyzer):
         for index in range(0, len(texts), batch_size):
             yield (
                 self._nlp.pipe(
-                    texts=texts[index : index + batch_size],
+                    texts=texts[index: index + batch_size],
                     batch_size=batch_size,
                     n_process=self.n_process,
                 ),
-                source_response_list[index : index + batch_size],
+                source_response_list[index: index + batch_size],
             )
 
     def analyze_input(

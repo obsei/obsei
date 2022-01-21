@@ -26,15 +26,9 @@ class BaseAnalyzerConfig(BaseSettings):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-        if (
-            self.use_splitter_and_aggregator
-            and not self.splitter_config
-            and not self.aggregator_config
-        ):
-            raise AttributeError(
-                "Need splitter_config and aggregator_config if enabling use_splitter_and_aggregator "
-                "option"
-            )
+        if self.use_splitter_and_aggregator and not self.splitter_config and not self.aggregator_config:
+            raise AttributeError("Need splitter_config and aggregator_config if enabling use_splitter_and_aggregator "
+                                 "option")
 
     class Config:
         arbitrary_types_allowed = True

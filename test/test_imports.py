@@ -13,16 +13,8 @@ def test_imports():
     from obsei.source import PlayStoreScrapperSource, PlayStoreScrapperConfig
     from obsei.source import RedditSource, RedditConfig, RedditCredInfo
     from obsei.source import RedditScrapperSource, RedditScrapperConfig
-    from obsei.source.twitter_source import (
-        TwitterSource,
-        TwitterSourceConfig,
-        TwitterCredentials,
-    )
-    from obsei.source.website_crawler_source import (
-        BaseCrawlerConfig,
-        TrafilaturaCrawlerSource,
-        TrafilaturaCrawlerConfig,
-    )
+    from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig, TwitterCredentials
+    from obsei.source.website_crawler_source import BaseCrawlerConfig, TrafilaturaCrawlerSource, TrafilaturaCrawlerConfig
 
     from obsei.sink.base_sink import BaseSink, BaseSinkConfig
     from obsei.sink import DailyGetSink, DailyGetSinkConfig, PayloadConvertor
@@ -37,57 +29,22 @@ def test_imports():
     from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig
     from obsei.analyzer import DummyAnalyzer, DummyAnalyzerConfig
     from obsei.analyzer import TransformersNERAnalyzer, SpacyNERAnalyzer
-    from obsei.analyzer import (
-        PresidioPIIAnalyzer,
-        PresidioPIIAnalyzerConfig,
-        PresidioAnonymizerConfig,
-        PresidioModelConfig,
-        PresidioEngineConfig,
-    )
-    from obsei.analyzer import (
-        VaderSentimentAnalyzer,
-        TransformersSentimentAnalyzerConfig,
-        TransformersSentimentAnalyzer,
-    )
+    from obsei.analyzer import PresidioPIIAnalyzer, PresidioPIIAnalyzerConfig, PresidioAnonymizerConfig, PresidioModelConfig, PresidioEngineConfig
+    from obsei.analyzer import VaderSentimentAnalyzer, TransformersSentimentAnalyzerConfig, TransformersSentimentAnalyzer
     from obsei.analyzer import TranslationAnalyzer
-    from obsei.analyzer import (
-        ClassificationAnalyzerConfig,
-        ZeroShotClassificationAnalyzer,
-        TextClassificationAnalyzer,
-    )
+    from obsei.analyzer import ClassificationAnalyzerConfig, ZeroShotClassificationAnalyzer, TextClassificationAnalyzer
 
-    from obsei.postprocessor.base_postprocessor import (
-        BasePostprocessor,
-        BasePostprocessorConfig,
-    )
+    from obsei.postprocessor.base_postprocessor import BasePostprocessor, BasePostprocessorConfig
     from obsei.postprocessor import InferenceAggregatorConfig, InferenceAggregator
-    from obsei.postprocessor import (
-        BaseInferenceAggregateFunction,
-        ClassificationAverageScore,
-        ClassificationMaxCategories,
-    )
+    from obsei.postprocessor import BaseInferenceAggregateFunction, ClassificationAverageScore, ClassificationMaxCategories
 
-    from obsei.preprocessor.base_preprocessor import (
-        BaseTextPreprocessor,
-        BaseTextProcessorConfig,
-    )
+    from obsei.preprocessor.base_preprocessor import BaseTextPreprocessor, BaseTextProcessorConfig
     from obsei.preprocessor import TextCleaner, TextCleanerConfig
     from obsei.preprocessor import TextSplitter, TextSplitterConfig, TextSplitterPayload
     from obsei.preprocessor import BaseTextTokenizer, NLTKTextTokenizer
-    from obsei.preprocessor import (
-        TextCleaningFunction,
-        ToLowerCase,
-        RemoveStopWords,
-        RemovePunctuation,
-        TokenStemming,
-        RemoveSpecialChars,
-        RemoveWhiteSpaceAndEmptyToken,
-        DecodeUnicode,
-        RemoveDateTime,
-        ReplaceDomainKeywords,
-        RegExSubstitute,
-        SpacyLemmatization,
-    )
+    from obsei.preprocessor import TextCleaningFunction, ToLowerCase, RemoveStopWords, \
+        RemovePunctuation, TokenStemming, RemoveSpecialChars, RemoveWhiteSpaceAndEmptyToken, DecodeUnicode, \
+        RemoveDateTime, ReplaceDomainKeywords, RegExSubstitute, SpacyLemmatization
 
     from obsei.workflow.base_store import BaseStore
     from obsei.workflow.store import WorkflowStore, WorkflowTable

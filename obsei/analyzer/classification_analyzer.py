@@ -65,11 +65,8 @@ class TextClassificationAnalyzer(BaseAnalyzer):
         label_map = label_map or {}
         return [
             {
-                label_map.get(prediction["label"], prediction["label"]): prediction[
-                    "score"
-                ]
-            }
-            for prediction in predictions
+                label_map.get(prediction["label"], prediction["label"]): prediction["score"]
+            } for prediction in predictions
         ]
 
     def analyze_input(  # type: ignore[override]
@@ -96,12 +93,12 @@ class TextClassificationAnalyzer(BaseAnalyzer):
                 for source_response in batch_responses
             ]
 
-            batch_predictions = self.prediction_from_model(
-                texts=texts, analyzer_config=analyzer_config
-            )
+            batch_predictions = self.prediction_from_model(texts=texts, analyzer_config=analyzer_config)
 
             for score_dict, source_response in zip(batch_predictions, batch_responses):
-                segmented_data = {"classifier_data": score_dict}
+                segmented_data = {
+                    "classifier_data": score_dict
+                }
 
                 if source_response.segmented_data:
                     segmented_data = {
@@ -150,21 +147,14 @@ class ZeroShotClassificationAnalyzer(TextClassificationAnalyzer):
                 labels.append("negative")
 
         if len(labels) == 0:
-            raise ValueError(
-                "`labels` can't be empty or `add_positive_negative_labels` should be False"
-            )
+            raise ValueError("`labels` can't be empty or `add_positive_negative_labels` should be False")
 
         prediction = self._pipeline(
-            texts,
-            candidate_labels=labels,
-            multi_label=analyzer_config.multi_class_classification,
+            texts, candidate_labels=labels, multi_label=analyzer_config.multi_class_classification
         )
         predictions = prediction if isinstance(prediction, list) else [prediction]
 
-        return [
-            dict(zip(prediction["labels"], prediction["scores"]))
-            for prediction in predictions
-        ]
+        return [dict(zip(prediction["labels"], prediction["scores"])) for prediction in predictions]
 
     def analyze_input(  # type: ignore[override]
         self,
@@ -178,5 +168,5 @@ class ZeroShotClassificationAnalyzer(TextClassificationAnalyzer):
         return super().analyze_input(
             source_response_list=source_response_list,
             analyzer_config=analyzer_config,
-            **kwargs,
+            **kwargs
         )

@@ -57,7 +57,9 @@ class TextCleaner(BaseTextPreprocessor):
             if self.text_tokenizer is None or config.disable_tokenization:
                 tokens = [input_data.processed_text]
             else:
-                tokens = self.text_tokenizer.tokenize_text(input_data.processed_text)
+                tokens = self.text_tokenizer.tokenize_text(
+                    input_data.processed_text
+                )
             for cleaning_function in config.cleaning_functions:
                 try:
                     tokens = cleaning_function.execute(tokens)

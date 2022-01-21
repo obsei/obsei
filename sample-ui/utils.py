@@ -192,22 +192,16 @@ def execute_workflow(generate_config, component=None, log_components=None):
         sink = obsei_configuration.initialize_instance("sink")
 
         source_response_list = source.lookup(source_config)
-        log_components["source"].write(
-            [vars(response) for response in source_response_list]
-        )
+        log_components["source"].write([vars(response) for response in source_response_list])
 
         analyzer_response_list = analyzer.analyze_input(
             source_response_list=source_response_list, analyzer_config=analyzer_config
         )
-        log_components["analyzer"].write(
-            [vars(response) for response in analyzer_response_list]
-        )
+        log_components["analyzer"].write([vars(response) for response in analyzer_response_list])
 
         sink_response_list = sink.send_data(analyzer_response_list, sink_config)
         if sink_response_list:
-            log_components["sink"].write(
-                [vars(response) for response in sink_response_list]
-            )
+            log_components["sink"].write([vars(response) for response in sink_response_list])
         else:
             log_components["sink"].write("No Data")
 

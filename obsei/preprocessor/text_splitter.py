@@ -29,14 +29,14 @@ class TextSplitterConfig(BaseTextProcessorConfig):
     document_id_key: Optional[str]  # document_id in meta
     enable_sentence_split: bool = False
     honor_paragraph_boundary: bool = False
-    paragraph_marker: str = "\n\n"
-    sentence_tokenizer: str = "tokenizers/punkt/PY3/english.pickle"
+    paragraph_marker: str = '\n\n'
+    sentence_tokenizer: str = 'tokenizers/punkt/PY3/english.pickle'
 
     def __init__(self, **data: Any):
         super().__init__(**data)
 
         if self.enable_sentence_split:
-            nltk.download("punkt")
+            nltk.download('punkt')
 
 
 class TextSplitter(BaseTextPreprocessor):
@@ -78,7 +78,10 @@ class TextSplitter(BaseTextPreprocessor):
                 while start_idx < text_length:
                     if config.split_stride > 0 and start_idx > 0:
                         start_idx = (
-                            self._valid_index(text, start_idx - config.split_stride) + 1
+                            self._valid_index(
+                                text, start_idx - config.split_stride
+                            )
+                            + 1
                         )
                     end_idx = self._valid_index(
                         text,
