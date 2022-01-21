@@ -798,12 +798,6 @@ from obsei.sink.zendesk_sink import ZendeskSink, ZendeskSinkConfig, ZendeskCredI
 
 # initialize zendesk sink config
 sink_config = ZendeskSinkConfig(
-   # For custom domain refer http://docs.facetoe.com.au/zenpy.html#custom-domains
-   # Mainly you can do this by setting the environment variables:
-   # ZENPY_FORCE_NETLOC
-   # ZENPY_FORCE_SCHEME (default to https)
-   # when set it will force request on:
-   # {scheme}://{netloc}/endpoint
    # provide zendesk domain
    domain="zendesk.com",
    # provide subdomain if you have one
