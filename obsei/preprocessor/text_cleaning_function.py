@@ -10,7 +10,7 @@ import spacy
 from dateutil.parser import parse
 from nltk.corpus import stopwords
 from pydantic import BaseModel, PrivateAttr, Field
-from spacy import Language
+from spacy.language import Language
 from spacy.cli import download
 
 logger = logging.getLogger(__name__)
