@@ -8,8 +8,8 @@ from obsei.source.google_news_source import GoogleNewsConfig, GoogleNewsSource
 source_config_without_full_text = GoogleNewsConfig(
     query="bitcoin",
     max_results=150,
-    after_date='2021-10-01',
-    before_date='2021-10-31',
+    after_date="2021-10-01",
+    before_date="2021-10-31",
 )
 
 # Fetch full news article

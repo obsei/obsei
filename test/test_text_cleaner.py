@@ -1,8 +1,17 @@
 from obsei.payload import TextPayload
 from obsei.preprocessor.text_cleaner import TextCleanerConfig
-from obsei.preprocessor.text_cleaning_function import DecodeUnicode, RemoveDateTime, RemovePunctuation, \
-    RemoveSpecialChars, RemoveStopWords, RemoveWhiteSpaceAndEmptyToken, ReplaceDomainKeywords, ToLowerCase, \
-    RegExSubstitute, SpacyLemmatization
+from obsei.preprocessor.text_cleaning_function import (
+    DecodeUnicode,
+    RemoveDateTime,
+    RemovePunctuation,
+    RemoveSpecialChars,
+    RemoveStopWords,
+    RemoveWhiteSpaceAndEmptyToken,
+    ReplaceDomainKeywords,
+    ToLowerCase,
+    RegExSubstitute,
+    SpacyLemmatization,
+)
 
 TEXT_WITH_WHITE_SPACES = """        If anyone is interested... these are our hosts. I can’t recommend them enough,
 Abc & Pbc.         """
@@ -141,30 +150,23 @@ def test_regex(text_cleaner):
     request = TextPayload(processed_text="Obsei-is-a-lowcode-lib")
 
     config = TextCleanerConfig(
-        cleaning_functions=[
-            RegExSubstitute(
-                pattern=r'-',
-                substitute=" "
-            )
-        ]
+        cleaning_functions=[RegExSubstitute(pattern=r"-", substitute=" ")]
     )
 
     cleaner_responses = text_cleaner.preprocess_input(
         config=config, input_list=[request]
     )
     cleaner_response = cleaner_responses[0]
-    assert (
-        "Obsei is a lowcode lib"
-        == cleaner_response.processed_text
-    )
+    assert "Obsei is a lowcode lib" == cleaner_response.processed_text
 
 
 def test_spacy_lemmatizer(text_cleaner):
-    request = TextPayload(processed_text=u'the bats saw the cats with best stripes hanging upside down by their feet')
+    request = TextPayload(
+        processed_text=u"the bats saw the cats with best stripes hanging upside down by their feet"
+    )
 
     config = TextCleanerConfig(
-        disable_tokenization=True,
-        cleaning_functions=[SpacyLemmatization()]
+        disable_tokenization=True, cleaning_functions=[SpacyLemmatization()]
     )
 
     cleaner_responses = text_cleaner.preprocess_input(
@@ -172,6 +174,6 @@ def test_spacy_lemmatizer(text_cleaner):
     )
     cleaner_response = cleaner_responses[0]
     assert (
-        'the bat see the cat with good stripe hang upside down by their foot'
+        "the bat see the cat with good stripe hang upside down by their foot"
         == cleaner_response.processed_text
     )

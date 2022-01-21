@@ -69,7 +69,12 @@ class ZendeskCredInfo(BaseModel):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-        if not self.oauth_token and not self.token and not self.email and not self.password:
+        if (
+            not self.oauth_token
+            and not self.token
+            and not self.email
+            and not self.password
+        ):
             raise ValueError("At least one credential is required")
 
         if self.password and self.token:
@@ -79,9 +84,11 @@ class ZendeskCredInfo(BaseModel):
         session = requests.Session()
 
         if self.oauth_token:
-            session.headers.update({"Authorization": f'Bearer {self.oauth_token.get_secret_value()}'})
+            session.headers.update(
+                {"Authorization": f"Bearer {self.oauth_token.get_secret_value()}"}
+            )
         elif self.email and self.token:
-            session.auth = (f'{self.email}/token', self.token.get_secret_value())
+            session.auth = (f"{self.email}/token", self.token.get_secret_value())
         elif self.email and self.password:
             session.auth = (self.email, self.password.get_secret_value())
 
@@ -105,8 +112,12 @@ class ZendeskSinkConfig(BaseSinkConfig):
         self.cred_info = self.cred_info or ZendeskCredInfo()
 
     def get_endpoint(self) -> str:
-        sub_prefix = "" if self.subdomain is None or self.subdomain is '' else f"/{self.subdomain}."
-        return f'{self.scheme}://{sub_prefix}{self.domain}{self.ticket_api}'
+        sub_prefix = (
+            ""
+            if self.subdomain is None or self.subdomain is ""
+            else f"/{self.subdomain}."
+        )
+        return f"{self.scheme}://{sub_prefix}{self.domain}{self.ticket_api}"
 
 
 class ZendeskSink(BaseSink):
@@ -142,7 +153,9 @@ class ZendeskSink(BaseSink):
             session = config.cred_info.get_session()
             response = session.post(
                 config.get_endpoint(),
-                json=json.dumps(payload["segmented_data"], indent=2, ensure_ascii=False)
+                json=json.dumps(
+                    payload["segmented_data"], indent=2, ensure_ascii=False
+                ),
             )
             logger.info(f"response='{response}'")
             responses.append(response)

@@ -10,7 +10,7 @@ from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSourceConfig, BaseSource
 
 logger = logging.getLogger(__name__)
-OUTSCRAPPER_API_URL = 'https://api.app.outscraper.com'
+OUTSCRAPPER_API_URL = "https://api.app.outscraper.com"
 
 
 class OSGoogleMapsReviewsConfig(BaseSourceConfig):
@@ -58,44 +58,58 @@ class OSGoogleMapsReviewsSource(BaseSource):
         state = state or dict()
 
         since_timestamp: Optional[int] = (
-            config.since_timestamp or None if state is None else state.get("since_timestamp", None)
+            config.since_timestamp or None
+            if state is None
+            else state.get("since_timestamp", None)
         )
         if since_timestamp is None and config.lookup_period is not None:
             if len(config.lookup_period) <= 5:
                 since_time = convert_utc_time(config.lookup_period)
             else:
-                since_time = datetime.strptime(config.lookup_period, DATETIME_STRING_PATTERN)
+                since_time = datetime.strptime(
+                    config.lookup_period, DATETIME_STRING_PATTERN
+                )
 
             since_timestamp = int(since_time.timestamp())
 
         last_reviews_since_time = since_timestamp
 
         params: Dict[str, Any] = {
-            'query': config.queries,
-            'reviewsLimit': config.number_of_reviews,
-            'limit': config.number_of_places_per_query,
-            'sort': config.sort,
-            'start': since_timestamp,
-            'cutoff': config.until_timestamp,
-            'ignoreEmpty': config.ignore_empty_reviews,
-            'coordinates': config.central_coordinates,
-            'language': config.language,
-            'region': config.country,
-            'async': False,
+            "query": config.queries,
+            "reviewsLimit": config.number_of_reviews,
+            "limit": config.number_of_places_per_query,
+            "sort": config.sort,
+            "start": since_timestamp,
+            "cutoff": config.until_timestamp,
+            "ignoreEmpty": config.ignore_empty_reviews,
+            "coordinates": config.central_coordinates,
+            "language": config.language,
+            "region": config.country,
+            "async": False,
         }
 
-        response = requests.get(f'{OUTSCRAPPER_API_URL}/maps/reviews-v2', params=params, headers={
-            'X-API-KEY': "" if config.api_key is None else config.api_key.get_secret_value(),
-        })
+        response = requests.get(
+            f"{OUTSCRAPPER_API_URL}/maps/reviews-v2",
+            params=params,
+            headers={
+                "X-API-KEY": ""
+                if config.api_key is None
+                else config.api_key.get_secret_value(),
+            },
+        )
 
         queries_data = []
         if response.status_code == 200:
-            queries_data = response.json().get('data', [])
+            queries_data = response.json().get("data", [])
         else:
             logger.warning(f"API call failed with error: {response.json()}")
 
         for query_data in queries_data:
-            reviews = [] if "reviews_data" not in query_data else query_data.pop("reviews_data")
+            reviews = (
+                []
+                if "reviews_data" not in query_data
+                else query_data.pop("reviews_data")
+            )
 
             for review in reviews:
                 source_responses.append(
@@ -107,7 +121,10 @@ class OSGoogleMapsReviewsSource(BaseSource):
                 )
                 review_time = review["review_timestamp"]
 
-                if last_reviews_since_time is None or last_reviews_since_time < review_time:
+                if (
+                    last_reviews_since_time is None
+                    or last_reviews_since_time < review_time
+                ):
                     last_reviews_since_time = review_time
 
         state["since_timestamp"] = last_reviews_since_time

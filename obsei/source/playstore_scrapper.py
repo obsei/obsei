@@ -33,7 +33,11 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
         super().__init__(**data)
 
         if self.app_url is not None:
-            self.package_name, self.countries, self.language = PlayStoreScrapperConfig.parse_app_url(self.app_url)
+            (
+                self.package_name,
+                self.countries,
+                self.language,
+            ) = PlayStoreScrapperConfig.parse_app_url(self.app_url)
         else:
             if not self.package_name and self.app_name:
                 self.package_name = PlayStoreScrapperConfig.search_package_name(
@@ -41,7 +45,9 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
                 )
 
         if not self.package_name:
-            raise ValueError("Valid `package_name`, `app_name` or `app_url` is mandatory")
+            raise ValueError(
+                "Valid `package_name`, `app_name` or `app_url` is mandatory"
+            )
 
         self.language = self.language or "en"
         self.countries = self.countries or ["us"]
@@ -52,15 +58,15 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
 
         parsed_url = parse.urlparse(app_url)
         query_dict = parse.parse_qs(parsed_url.query)
-        countries = query_dict.get('gl', None)
+        countries = query_dict.get("gl", None)
 
         language = None
-        languages = query_dict.get('hl', None)
+        languages = query_dict.get("hl", None)
         if languages is not None:
             language = languages[0]
 
         package_name = None
-        package_ids = query_dict.get('id', None)
+        package_ids = query_dict.get("id", None)
         if package_ids is not None:
             package_name = package_ids[0]
 

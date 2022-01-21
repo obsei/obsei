@@ -99,5 +99,5 @@ That we do not have any potential problems later it is sadly necessary to sign a
 
 ---
 
-_This guide was inspired by the [transformers-interpret](https://github.com/cdpierse/transformers-interpret/blob/master/CONTRIBUTING.md), 
+_This guide was inspired by the [transformers-interpret](https://github.com/cdpierse/transformers-interpret/blob/master/CONTRIBUTING.md),
 [Haystack](https://github.com/deepset-ai/haystack/blob/master/CONTRIBUTING.md) and [n8n](https://github.com/n8n-io/n8n/blob/master/CONTRIBUTOR_LICENSE_AGREEMENT.md)_

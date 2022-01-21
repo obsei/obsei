@@ -46,12 +46,15 @@ def test_zero_shot_analyzer(zero_shot_analyzer):
 
 
 @pytest.mark.parametrize(
-    "label_map, expected", [
+    "label_map, expected",
+    [
         (None, ["LABEL_1", "LABEL_0"]),
-        ({"LABEL_1": "Buy", "LABEL_0": "Sell"}, ["Buy", "Sell"])
-    ]
+        ({"LABEL_1": "Buy", "LABEL_0": "Sell"}, ["Buy", "Sell"]),
+    ],
 )
-def test_text_classification_analyzer(text_classification_analyzer, label_map, expected):
+def test_text_classification_analyzer(
+    text_classification_analyzer, label_map, expected
+):
     source_responses = [
         TextPayload(processed_text=text, source_name="sample")
         for text in BUY_SELL_TEXTS
@@ -67,7 +70,9 @@ def test_text_classification_analyzer(text_classification_analyzer, label_map, e
 
     for analyzer_response in analyzer_responses:
         assert analyzer_response.segmented_data["classifier_data"] is not None
-        assert analyzer_response.segmented_data["classifier_data"].keys() <= set(expected)
+        assert analyzer_response.segmented_data["classifier_data"].keys() <= set(
+            expected
+        )
 
 
 @pytest.mark.parametrize(

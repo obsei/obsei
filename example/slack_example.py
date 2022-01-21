@@ -20,8 +20,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 workflow_store = WorkflowStore()
 
 source_config = PlayStoreScrapperConfig(
-    app_url='https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en_IN&gl=US',
-    max_count=3
+    app_url="https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en_IN&gl=US",
+    max_count=3,
 )
 
 source = PlayStoreScrapperSource(store=workflow_store)
@@ -39,7 +39,7 @@ sink_config = SlackSinkConfig(
          {%- endif %}
      {%- endfor%}
 ```
-   """
+   """,
 )
 sink = SlackSink(store=workflow_store)
 

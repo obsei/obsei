@@ -33,7 +33,10 @@ class PlayStoreConfig(BaseSourceConfig):
 
         self.cred_info = self.cred_info or GoogleCredInfo()
 
-        if self.cred_info.service_cred_file is None or self.cred_info.developer_key is None:
+        if (
+            self.cred_info.service_cred_file is None
+            or self.cred_info.developer_key is None
+        ):
             raise ValueError("`service_cred_file` and `developer_key` can't be empty")
 
         self._credentials = service_account.Credentials.from_service_account_file(
@@ -41,7 +44,9 @@ class PlayStoreConfig(BaseSourceConfig):
         )
 
         if self.with_quota_project_id is not None:
-            self._credentials = self._credentials.with_quota_project(self.with_quota_project_id)
+            self._credentials = self._credentials.with_quota_project(
+                self.with_quota_project_id
+            )
 
         if self.with_subject is not None:
             self._credentials = self._credentials.with_subject(self.with_subject)
@@ -53,6 +58,7 @@ class PlayStoreConfig(BaseSourceConfig):
         if self.cred_info is None or self.cred_info.developer_key is None:
             raise ValueError("`developer_key` can't be empty")
         return self.cred_info.developer_key.get_secret_value()
+
 
 class PlayStoreSource(BaseSource):
     NAME: str = "PlayStore"

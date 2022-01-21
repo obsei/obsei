@@ -107,7 +107,10 @@ class TwitterSourceConfig(BaseSourceConfig):
             self.cred_info = self.credential
 
         if self.cred_info.bearer_token is None:
-            if self.cred_info.consumer_key is None and self.cred_info.consumer_secret is None:
+            if (
+                self.cred_info.consumer_key is None
+                and self.cred_info.consumer_secret is None
+            ):
                 raise AttributeError(
                     "consumer_key and consumer_secret required to generate bearer_token via Twitter"
                 )
@@ -115,7 +118,9 @@ class TwitterSourceConfig(BaseSourceConfig):
             self.cred_info.bearer_token = SecretStr(self.generate_bearer_token())
 
         if self.max_tweets > 100:
-            logger.warning("Twitter API support max 100 tweets per call, hence resetting `max_tweets` to 100")
+            logger.warning(
+                "Twitter API support max 100 tweets per call, hence resetting `max_tweets` to 100"
+            )
             self.max_tweets = 100
 
     def get_twitter_credentials(self):
@@ -243,9 +248,14 @@ class TwitterSource(BaseSource):
             logger.info("No Tweets found")
         else:
             tweets = tweets_output[0]["data"] if "data" in tweets_output[0] else tweets
-            if "includes" in tweets_output[0] and "users" in tweets_output[0]["includes"]:
+            if (
+                "includes" in tweets_output[0]
+                and "users" in tweets_output[0]["includes"]
+            ):
                 users = tweets_output[0]["includes"]["users"]
-            meta_info = tweets_output[0]["meta"] if "meta" in tweets_output[0] else meta_info
+            meta_info = (
+                tweets_output[0]["meta"] if "meta" in tweets_output[0] else meta_info
+            )
 
         # Extract user info and create user map
         user_map: Dict[str, Dict[str, Any]] = {}
@@ -270,7 +280,9 @@ class TwitterSource(BaseSource):
                 if start_time > created_date:
                     break
 
-        max_tweet_id = meta_info["newest_id"] if "newest_id" in meta_info else max_tweet_id
+        max_tweet_id = (
+            meta_info["newest_id"] if "newest_id" in meta_info else max_tweet_id
+        )
         # min_tweet_id = meta_info["oldest_id"] if "oldest_id" in meta_info else min_tweet_id
 
         if update_state and self.store is not None:

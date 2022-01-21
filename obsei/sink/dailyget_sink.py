@@ -108,10 +108,14 @@ class PayloadConvertor(Convertor):
                 "userProfile": user_url,
                 "sentiment": sentiment,
                 "predictedCategories": ",".join(classification_list),
-                "metadata": str(json.dumps(analyzer_response.segmented_data, ensure_ascii=False)),
+                "metadata": str(
+                    json.dumps(analyzer_response.segmented_data, ensure_ascii=False)
+                ),
                 "originatedAt": created_at_str,
             }
-            request_payload["messageDetail"] = str(json.dumps(message, ensure_ascii=False))
+            request_payload["messageDetail"] = str(
+                json.dumps(message, ensure_ascii=False)
+            )
 
         return request_payload
 
@@ -148,7 +152,7 @@ class DailyGetSink(HttpSink):
                     else deepcopy(config.base_payload),
                     source_information=config.source_information,
                     use_enquiry_api=config.use_enquiry_api,
-                    partner_id=config.partner_id
+                    partner_id=config.partner_id,
                 )
             )
 

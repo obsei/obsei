@@ -46,7 +46,9 @@ class TrafilaturaCrawlerConfig(BaseCrawlerConfig):
         try:
             from trafilatura import extract, fetch_url
         except:
-            logger.error("Trafilatura is not installed, install as follows: pip install trafilatura")
+            logger.error(
+                "Trafilatura is not installed, install as follows: pip install trafilatura"
+            )
             return []
 
         url_id = url_id or "{:02x}".format(mmh3.hash(url, signed=False))
@@ -82,7 +84,9 @@ class TrafilaturaCrawlerConfig(BaseCrawlerConfig):
         try:
             from trafilatura import feeds, sitemaps
         except:
-            logger.error("Trafilatura is not installed, install as follows: pip install trafilatura")
+            logger.error(
+                "Trafilatura is not installed, install as follows: pip install trafilatura"
+            )
             return []
 
         urls: List[str] = []

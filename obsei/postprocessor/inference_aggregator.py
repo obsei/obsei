@@ -4,7 +4,9 @@ from obsei.postprocessor.base_postprocessor import (
     BasePostprocessor,
     TextPayload,
 )
-from obsei.postprocessor.inference_aggregator_function import BaseInferenceAggregateFunction
+from obsei.postprocessor.inference_aggregator_function import (
+    BaseInferenceAggregateFunction,
+)
 from obsei.preprocessor.text_splitter import TextSplitterPayload
 
 
@@ -20,9 +22,7 @@ class InferenceAggregator(BasePostprocessor):
         aggregated_payloads = self.segregate_payload(input_list)
         postproces_output: List[TextPayload] = []
         for key, payload_list in aggregated_payloads.items():
-            postproces_output.extend(
-                config.aggregate_function.execute(payload_list)
-            )
+            postproces_output.extend(config.aggregate_function.execute(payload_list))
 
         return postproces_output
 

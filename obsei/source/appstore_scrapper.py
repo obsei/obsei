@@ -31,19 +31,25 @@ class AppStoreScrapperConfig(BaseSourceConfig):
         super().__init__(**data)
 
         if self.app_url is not None:
-            self.app_id, self.countries, self.app_name = AppStoreScrapperConfig.parse_app_url(self.app_url)
+            (
+                self.app_id,
+                self.countries,
+                self.app_name,
+            ) = AppStoreScrapperConfig.parse_app_url(self.app_url)
         else:
             if not self.app_id and self.app_name:
                 self.app_id = AppStoreScrapperConfig.search_id(self.app_name)
 
         if not self.app_id:
-            raise ValueError("Valid `package_name`, `app_name` or `app_url` is mandatory")
+            raise ValueError(
+                "Valid `package_name`, `app_name` or `app_url` is mandatory"
+            )
 
         self.countries = self.countries or ["us"]
         self.app_name = self.app_name or self.app_id
 
     @classmethod
-    def parse_app_url(cls, app_url:str):
+    def parse_app_url(cls, app_url: str):
         parsed_url = parse.urlparse(app_url)
         url_paths = parsed_url.path.split("/")
 

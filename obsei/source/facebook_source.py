@@ -41,15 +41,25 @@ class FacebookSourceConfig(BaseSourceConfig):
 
         if self.cred_info.long_term_token is not None:
             application_only_auth = False
-        elif self.cred_info.app_id is not None and self.cred_info.app_secret is not None:
+        elif (
+            self.cred_info.app_id is not None and self.cred_info.app_secret is not None
+        ):
             application_only_auth = True
         else:
-            raise AttributeError("`app_id`, `app_secret` and `long_term_token` required to connect to Facebook")
+            raise AttributeError(
+                "`app_id`, `app_secret` and `long_term_token` required to connect to Facebook"
+            )
 
         self._api_client = FacebookApi(
-            app_id=self.cred_info.app_id.get_secret_value() if self.cred_info.app_id else None,
-            app_secret=self.cred_info.app_secret.get_secret_value() if self.cred_info.app_secret else None,
-            access_token=self.cred_info.long_term_token.get_secret_value() if self.cred_info.long_term_token else None,
+            app_id=self.cred_info.app_id.get_secret_value()
+            if self.cred_info.app_id
+            else None,
+            app_secret=self.cred_info.app_secret.get_secret_value()
+            if self.cred_info.app_secret
+            else None,
+            access_token=self.cred_info.long_term_token.get_secret_value()
+            if self.cred_info.long_term_token
+            else None,
             application_only_auth=application_only_auth,
         )
 

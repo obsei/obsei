@@ -49,7 +49,7 @@ store.add_workflow(workflow)
 for i in range(1, 4):
     print_state(workflow.id)
     # Now always pass workflow id to lookup function
-    # Observer will fetch old data from DB suing this id and later store new updated state data against this id to DB 
+    # Observer will fetch old data from DB suing this id and later store new updated state data against this id to DB
     source_response_list = source.lookup(source_config, id=workflow.id)
 
     if source_response_list is None or len(source_response_list) == 0:

@@ -35,6 +35,7 @@ class WorkflowTable(ORMBase):
 
 class WorkflowStore(BaseStore):
     from obsei.workflow.workflow import Workflow, WorkflowState
+
     _session: sessionmaker = PrivateAttr()
 
     def __init__(self, url: str = "sqlite:///obsei.db", **data: Any):
@@ -86,7 +87,11 @@ class WorkflowStore(BaseStore):
         return None if row[0].sink_state is None else json.loads(row[0].sink_state)
 
     def get_analyzer_state(self, identifier: str) -> Optional[Dict[str, Any]]:
-        row = self._session.query(WorkflowTable.analyzer_state).filter(id=identifier).all()
+        row = (
+            self._session.query(WorkflowTable.analyzer_state)
+            .filter(id=identifier)
+            .all()
+        )
         return (
             None if row[0].analyzer_state is None else json.loads(row[0].analyzer_state)
         )
