@@ -3,23 +3,25 @@
 # Code Commit: https://github.com/egbertbouman/youtube-comment-downloader/commit/9a15b8e3fbaebad660875409fb1bbe74db17f304
 
 import json
+import logging
 import time
 import re
+from datetime import datetime, timezone
 
-from typing import Optional, Any
+import dateparser
+from typing import Optional, Any, List, Dict
 
 import requests
 from pydantic import BaseModel
 
-from obsei.misc.utils import convert_datetime_str_to_epoch
+logger = logging.getLogger(__name__)
 
 
 class YouTubeCommentExtractor(BaseModel):
     _YT_URL: str = 'https://www.youtube.com'
-    _YT_VIDEO_URL: str = 'https://www.youtube.com/watch?v={youtube_id}'
     _YT_CFG_REGEX: str = r'ytcfg\.set\s*\(\s*({.+?})\s*\)\s*;'
     _YT_INITIAL_DATA_REGEX: str = r'(?:window\s*\[\s*["\']ytInitialData["\']\s*\]|ytInitialData)\s*=\s*({.+?})\s*;\s*(?:var\s+meta|</script|\n)'
-    video_id: str
+    video_url: str
     user_agent: str = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
     sort_by: int = 1  # 0 = sort by popular, 1 = sort by recent
     max_comments: Optional[int] = 20
@@ -69,14 +71,14 @@ class YouTubeCommentExtractor(BaseModel):
                 for value in current_item:
                     stack.append(value)
 
-    def _fetch_comments(self):
+    def _fetch_comments(self, until_datetime: Optional[datetime] = None):
         session = requests.Session()
         session.headers['User-Agent'] = self.user_agent
-        response = session.get(self._YT_VIDEO_URL.format(youtube_id=self.video_id))
+        response = session.get(self.video_url)
 
         if 'uxe=' in response.request.url:
             session.cookies.set('CONSENT', 'YES+cb', domain='.youtube.com')
-            response = session.get(self._YT_VIDEO_URL.format(youtube_id=self.video_id))
+            response = session.get(self.video_url)
 
         html = response.text
         ytcfg = json.loads(self._regex_search(html, self._YT_CFG_REGEX, default=''))
@@ -102,7 +104,8 @@ class YouTubeCommentExtractor(BaseModel):
             if not response:
                 break
             if list(self._search_dict(response, 'externalErrorMessage')):
-                raise RuntimeError('Error returned from server: ' + next(self._search_dict(response, 'externalErrorMessage')))
+                logger.warning('Error returned from server: %s', next(self._search_dict(response, 'externalErrorMessage')))
+                return
 
             if needs_sorting:
                 sort_menu = next(self._search_dict(response, 'sortFilterSubMenuRenderer'), {}).get('subMenuItems', [])
@@ -128,9 +131,16 @@ class YouTubeCommentExtractor(BaseModel):
             for comment in reversed(list(self._search_dict(response, 'commentRenderer'))):
                 if not self.fetch_replies and "." in comment['commentId']:
                     continue
-                yield {'cid': comment['commentId'],
+
+                comment_time = dateparser.parse(
+                    comment['publishedTimeText']['runs'][0]['text']
+                ).replace(tzinfo=timezone.utc)
+                if until_datetime and until_datetime > comment_time:
+                    return
+
+                yield {'comment_id': comment['commentId'],
                        'text': ''.join([c['text'] for c in comment['contentText'].get('runs', [])]),
-                       'time': convert_datetime_str_to_epoch(comment['publishedTimeText']['runs'][0]['text']),
+                       'time': comment_time,
                        'author': comment.get('authorText', {}).get('simpleText', ''),
                        'channel': comment['authorEndpoint']['browseEndpoint'].get('browseId', ''),
                        'votes': comment.get('voteCount', {}).get('simpleText', '0'),
@@ -139,9 +149,9 @@ class YouTubeCommentExtractor(BaseModel):
 
             time.sleep(self.sleep_time)
 
-    def fetch_comments(self):
-        comments = []
-        for comment in self._fetch_comments():
+    def fetch_comments(self, until_datetime: Optional[datetime] = None) -> List[Dict[str, Any]]:
+        comments: List[Dict[str, Any]] = []
+        for comment in self._fetch_comments(until_datetime=until_datetime):
             comments.append(comment)
             if self.max_comments and self.max_comments == len(comments):
                 break
