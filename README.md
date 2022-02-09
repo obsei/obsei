@@ -271,8 +271,9 @@ pip install searchtweets-v2
 pip install google-play-scraper
 pip install tweet-preprocessor
 pip install gnews
-pip install trafilatura
 pip install python-facebook-api
+# GPL dependency
+pip install trafilatura
 ```
 
 </details>
@@ -359,6 +360,27 @@ source_config = TwitterSourceConfig(
 
 # initialize tweets retriever
 source = TwitterSource()
+```
+
+</details>
+</td>
+</tr>
+<tr>
+<td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/Youtube.png" width="20" height="20"><b>Youtube Scrapper</b></summary><hr>
+
+```python
+from obsei.source.youtube_scrapper import YoutubeScrapperSource, YoutubeScrapperConfig
+
+# initialize Youtube source config
+source_config = YoutubeScrapperConfig(
+    video_url="https://www.youtube.com/watch?v=uZfns0JIlFk", # Youtube video URL
+    fetch_replies=True, # Fetch replies to comments
+    max_comments=10, # Total number of comments and replies to fetch
+    lookup_period="1Y", # Lookup period from current time, format: `<number><d|h|m|M|Y>` (day|hour|minute|month|year)
+)
+
+# initialize Youtube comments retriever
+source = YoutubeScrapperSource()
 ```
 
 </details>

@@ -1,4 +1,15 @@
 source:
+  Youtube Scrapper:
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/Youtube.png"
+    _help_:
+      - '`video url` is Youtube video url.'
+    source:
+      _target_: obsei.source.YoutubeScrapperSource
+    config:
+      _target_: obsei.source.YoutubeScrapperConfig
+      video_url: "https://www.youtube.com/watch?v=uZfns0JIlFk"
+      lookup_period: "1Y"
+      max_comments: 10
   Appstore Scrapper:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/appstore.png"
     _help_:

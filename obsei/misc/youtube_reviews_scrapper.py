@@ -37,9 +37,9 @@ class YouTubeCommentExtractor(BaseModel):
             raise ValueError('sort_by must be either 0 or 1')
 
     @staticmethod
-    def _regex_search(text, pattern: str, group: int = 1, default: Optional[str] = None) -> Optional[str]:
+    def _regex_search(text, pattern: str, group: int = 1) -> str:
         match = re.search(pattern, text)
-        return match.group(group) if match else default
+        return match.group(group) if match else ''
 
     def _ajax_request(self, session, endpoint, ytcfg):
         url = self._YT_URL + endpoint['commandMetadata']['webCommandMetadata']['apiUrl']
@@ -76,18 +76,18 @@ class YouTubeCommentExtractor(BaseModel):
         session.headers['User-Agent'] = self.user_agent
         response = session.get(self.video_url)
 
-        if 'uxe=' in response.request.url:
+        if response.request and response.request.url and 'uxe=' in response.request.url:
             session.cookies.set('CONSENT', 'YES+cb', domain='.youtube.com')
             response = session.get(self.video_url)
 
         html = response.text
-        ytcfg = json.loads(self._regex_search(html, self._YT_CFG_REGEX, default=''))
+        ytcfg = json.loads(self._regex_search(html, self._YT_CFG_REGEX))
         if not ytcfg:
             return  # Unable to extract configuration
         if self.lang_code:
             ytcfg['INNERTUBE_CONTEXT']['client']['hl'] = self.lang_code
 
-        data = json.loads(self._regex_search(html, self._YT_INITIAL_DATA_REGEX, default=''))
+        data = json.loads(self._regex_search(html, self._YT_INITIAL_DATA_REGEX))
 
         section = next(self._search_dict(data, 'itemSectionRenderer'), None)
         renderer = next(self._search_dict(section, 'continuationItemRenderer'), None) if section else None
@@ -108,7 +108,8 @@ class YouTubeCommentExtractor(BaseModel):
                 return
 
             if needs_sorting:
-                sort_menu = next(self._search_dict(response, 'sortFilterSubMenuRenderer'), {}).get('subMenuItems', [])
+                sub_menu: Dict[str, Any] = next(self._search_dict(response, 'sortFilterSubMenuRenderer'), {})
+                sort_menu = sub_menu.get('subMenuItems', [])
                 if self.sort_by < len(sort_menu):
                     continuations = [sort_menu[self.sort_by]['serviceEndpoint']]
                     needs_sorting = False
@@ -134,9 +135,12 @@ class YouTubeCommentExtractor(BaseModel):
 
                 comment_time = dateparser.parse(
                     comment['publishedTimeText']['runs'][0]['text']
-                ).replace(tzinfo=timezone.utc)
-                if until_datetime and until_datetime > comment_time:
-                    return
+                )
+
+                if comment_time:
+                    comment_time = comment_time.replace(tzinfo=timezone.utc)
+                    if until_datetime and until_datetime > comment_time:
+                        return
 
                 yield {'comment_id': comment['commentId'],
                        'text': ''.join([c['text'] for c in comment['contentText'].get('runs', [])]),

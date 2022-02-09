@@ -151,7 +151,7 @@ class RegExSubstitute(TextCleaningFunction):
 
 class SpacyLemmatization(TextCleaningFunction):
     _nlp: Language = PrivateAttr()
-    model_name_or_path: Optional[str] = Field("en_core_web_sm")
+    model_name_or_path: str = Field("en_core_web_sm")
     batch_size: int = 4
     n_process: int = 1
 

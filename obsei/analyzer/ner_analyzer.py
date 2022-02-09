@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple, Iterator
 from pydantic import PrivateAttr
 from transformers import (
     AutoModelForTokenClassification,
@@ -112,7 +112,7 @@ class SpacyNERAnalyzer(BaseAnalyzer):
         texts: List[str],
         batch_size: int,
         source_response_list: List[TextPayload],
-    ) -> Generator[Tuple[List[Doc], List[TextPayload]], None, None]:
+    ) -> Generator[Tuple[Iterator[Doc], List[TextPayload]], None, None]:
         for index in range(0, len(texts), batch_size):
             yield (
                 self._nlp.pipe(
