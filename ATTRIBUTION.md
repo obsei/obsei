@@ -15,3 +15,4 @@ This could not have been possible without following open source software -
 - [presidio-anonymizer](https://github.com/microsoft/presidio): Personal information anonymizer
 - [gnews](https://github.com/ranahaani/GNews): For Google News integration
 - [python-facebook-api](https://github.com/sns-sdks/python-facebook): For facebook integration
+- [youtube-comment-downloader](https://github.com/egbertbouman/youtube-comment-downloader): For Youtube video comments extraction code
