@@ -1,4 +1,7 @@
 import json
+import math
+import time
+
 import dateparser
 from datetime import datetime, timezone
 from importlib import import_module
@@ -134,6 +137,8 @@ def convert_utc_time(datetime_str):
                 _date = _date + relativedelta(minutes=-num)
             elif "M" in datetime_str:
                 _date = _date + relativedelta(months=-num)
+            elif "Y" in datetime_str:
+                _date = _date + relativedelta(years=-num)
         elif not {"-", ":"} & set(datetime_str):
             _date = datetime.strptime(datetime_str, "%Y%m%d%H%M")
         elif "T" in datetime_str:
@@ -151,7 +156,8 @@ def convert_datetime_str_to_epoch(datetime_str):
     if not datetime_str:
         return None
     parsed_datetime = dateparser.parse(datetime_str)
-    return parsed_datetime.timestamp()
+    unix_timestamp = time.mktime(parsed_datetime.timetuple())
+    return math.trunc(unix_timestamp)
 
 
 def tag_visible(element):

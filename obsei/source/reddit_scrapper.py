@@ -49,13 +49,13 @@ class RedditScrapperSource(BaseSource):
         source_responses: List[TextPayload] = []
 
         # Get data from state
-        id: str = kwargs.get("id", None)
+        identifier: str = kwargs.get("id", None)
         state: Optional[Dict[str, Any]] = (
             None
-            if id is None or self.store is None
-            else self.store.get_source_state(id)
+            if identifier is None or self.store is None
+            else self.store.get_source_state(identifier)
         )
-        update_state: bool = True if id else False
+        update_state: bool = True if identifier else False
         state = state or dict()
 
         scrapper_stat: Dict[str, Any] = (
@@ -106,6 +106,6 @@ class RedditScrapperSource(BaseSource):
         scrapper_stat["since_id"] = last_index
 
         if update_state and self.store is not None:
-            self.store.update_source_state(workflow_id=id, state=state)
+            self.store.update_source_state(workflow_id=identifier, state=state)
 
         return source_responses

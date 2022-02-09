@@ -10,3 +10,4 @@ from obsei.source.reddit_scrapper import RedditScrapperSource, RedditScrapperCon
 from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig, TwitterCredentials
 from obsei.source.website_crawler_source import BaseCrawlerConfig, TrafilaturaCrawlerSource, TrafilaturaCrawlerConfig
 from obsei.source.google_maps_reviews import OSGoogleMapsReviewsConfig, OSGoogleMapsReviewsSource
+from obsei.source.youtube_scrapper import YoutubeScrapperSource, YoutubeScrapperConfig
