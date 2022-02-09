@@ -200,7 +200,9 @@ def execute_workflow(generate_config, component=None, log_components=None):
         log_components["analyzer"].write([vars(response) for response in analyzer_response_list])
 
         sink_response_list = sink.send_data(analyzer_response_list, sink_config)
-        if sink_response_list:
+        if sink.TYPE == 'Pandas':
+            log_components["sink"].write(sink_response_list)
+        elif sink_response_list is not None:
             log_components["sink"].write([vars(response) for response in sink_response_list])
         else:
             log_components["sink"].write("No Data")

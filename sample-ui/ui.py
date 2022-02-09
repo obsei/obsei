@@ -12,7 +12,7 @@ st.title("Obsei Demo").markdown(
 
 st.success(
     """
-Please ⭐ the repo and share the feedback at https://github.com/obsei/obsei
+Please ⭐ the repo and share the feedback at https://github.com/obsei/obsei?utm_source=streamlit
     """
 )
 st.warning(
@@ -78,7 +78,7 @@ for node_name, node_value in selected.items():
     generate_config[node_name] = type_config[node_name]
     generate_config[f"{node_name}_config"] = config
 
-    log_expander = col_map[node_name].expander(f"{name_map[node_name]} Logs", False)
+    log_expander = col_map[node_name].expander(f"{name_map[node_name]} Logs", True)
     log_component[node_name] = log_expander.empty()
     log_component[node_name].write("Run \"🚀 Execute\" first")
 

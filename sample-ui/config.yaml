@@ -4,9 +4,9 @@ source:
     _help_:
       - '`video url` is Youtube video url.'
     source:
-      _target_: obsei.source.YoutubeScrapperSource
+      _target_: obsei.source.youtube_scrapper.YoutubeScrapperSource
     config:
-      _target_: obsei.source.YoutubeScrapperConfig
+      _target_: obsei.source.youtube_scrapper.YoutubeScrapperConfig
       video_url: "https://www.youtube.com/watch?v=uZfns0JIlFk"
       lookup_period: "1Y"
       max_comments: 10
@@ -154,6 +154,20 @@ source:
       urls:
         - 'https://obsei.github.io/obsei/'
 sink:
+  Panda Dataframe:
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/pandas.svg"
+    _help_: null
+    sink:
+      _target_: obsei.sink.pandas_sink.PandasSink
+    config:
+      _target_: obsei.sink.pandas_sink.PandasSinkConfig
+  Logger:
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/logger.png"
+    _help_: null
+    sink:
+      _target_: obsei.sink.LoggerSink
+    config:
+      _target_: obsei.sink.LoggerSinkConfig
   Jira:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/jira.png"
     _help_:
@@ -211,6 +225,18 @@ sink:
       _target_: obsei.sink.SlackSinkConfig
       slack_token: ''
       channel_id: ''
+      jinja_template: |
+        :bell: Hi there!, a new notification by *Obsei*
+        >Content:
+        ```
+          {%- for key, value in payload.items() recursive%}
+            {%- if value is mapping -%}
+              {{loop(value.items())}}
+            {%- else %}
+              {{key}}: {{value}}
+            {%- endif %}
+          {%- endfor%}
+        ```
   Elastic:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/elastic.png"
     _help_:
@@ -239,15 +265,29 @@ sink:
       url: 'https://localhost:8080/api/path'
       headers:
         Content-type: "application/json"
-  Logger:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/logger.png"
-    _help_: null
-    sink:
-      _target_: obsei.sink.LoggerSink
-    config:
-      _target_: obsei.sink.LoggerSinkConfig
-
 analyzer:
+  Sentiment:
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/sentiment.png"
+    Transformer:
+      _help_:
+        - 'For supported models refer https://huggingface.co/models?filter=zero-shot-classification'
+        - ''
+        - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
+      config:
+        _target_: obsei.analyzer.TransformersSentimentAnalyzerConfig
+        labels:
+          - "positive"
+          - "negative"
+        multi_class_classification: false
+      analyzer:
+        _target_: obsei.analyzer.TransformersSentimentAnalyzer
+        model_name_or_path: "typeform/mobilebert-uncased-mnli"
+        device: "auto"
+    Vader:
+      _help_:
+        - 'Vader is less resource hungry dictionary based Vader Sentiment detector'
+      analyzer:
+        _target_: obsei.analyzer.VaderSentimentAnalyzer
   Classification:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/classification.png"
     Transformer:
@@ -266,28 +306,6 @@ analyzer:
         multi_class_classification: true
       analyzer:
         _target_: obsei.analyzer.ZeroShotClassificationAnalyzer
-        model_name_or_path: "typeform/mobilebert-uncased-mnli"
-        device: "auto"
-  Sentiment:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/sentiment.png"
-    Vader:
-      _help_:
-        - 'Vader is less resource hungry dictionary based Vader Sentiment detector'
-      analyzer:
-        _target_: obsei.analyzer.VaderSentimentAnalyzer
-    Transformer:
-      _help_:
-        - 'For supported models refer https://huggingface.co/models?filter=zero-shot-classification'
-        - ''
-        - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
-      config:
-        _target_: obsei.analyzer.TransformersSentimentAnalyzerConfig
-        labels:
-          - "positive"
-          - "negative"
-        multi_class_classification: false
-      analyzer:
-        _target_: obsei.analyzer.TransformersSentimentAnalyzer
         model_name_or_path: "typeform/mobilebert-uncased-mnli"
         device: "auto"
   Named Entity Recognition:
