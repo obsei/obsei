@@ -133,8 +133,10 @@ class YouTubeCommentExtractor(BaseModel):
                 if not self.fetch_replies and "." in comment['commentId']:
                     continue
 
+                comment_time_string = comment['publishedTimeText']['runs'][0]['text']
+                comment_time_string = comment_time_string or ''
                 comment_time = dateparser.parse(
-                    comment['publishedTimeText']['runs'][0]['text']
+                    comment_time_string.split('(edited)', 1)[0].strip(),
                 )
 
                 if comment_time:
