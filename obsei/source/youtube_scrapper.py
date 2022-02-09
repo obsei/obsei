@@ -96,7 +96,7 @@ class YoutubeScrapperSource(BaseSource):
 
             comment_time = comment["time"]
 
-            if last_since_time is None or last_since_time < comment_time:
+            if comment_time is not None and (last_since_time is None or last_since_time < comment_time):
                 last_since_time = comment_time
             if last_index is None:
                 # Assuming list is sorted based on time
