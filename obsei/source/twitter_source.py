@@ -158,7 +158,7 @@ class TwitterSource(BaseSource):
             not config.query
             and not config.keywords
             and not config.hashtags
-            and config.usernames
+            and not config.usernames
         ):
             raise AttributeError(
                 "At least one non empty parameter required (query, keywords, hashtags, and usernames)"

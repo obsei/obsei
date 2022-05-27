@@ -29,6 +29,7 @@ class GoogleNewsConfig(BaseSourceConfig):
     before_date: Optional[str] = None
     fetch_article: Optional[bool] = False
     crawler_config: Optional[BaseCrawlerConfig] = None
+    proxy: Optional[str] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -50,6 +51,7 @@ class GoogleNewsConfig(BaseSourceConfig):
             language=self.language,
             country=self.country,
             max_results=self.max_results,
+            proxy=self.proxy
         )
 
         if not self.crawler_config:
