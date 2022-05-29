@@ -13,7 +13,7 @@
     </a>
     <a href="https://pypi.org/project/obsei">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
-    </a>d
+    </a>
     <a href="https://anaconda.org/lalitpagaria/obsei">
         <img src="https://img.shields.io/conda/pn/lalitpagaria/obsei" alt="Platform" />
     </a>
