@@ -18,6 +18,7 @@ source_config_with_full_text = GoogleNewsConfig(
     max_results=5,
     fetch_article=True,
     lookup_period="1d",
+    # proxy="http://127.0.0.1:8080"
 )
 
 source = GoogleNewsSource()

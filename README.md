@@ -13,7 +13,7 @@
     </a>
     <a href="https://pypi.org/project/obsei">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
-    </a>
+    </a>d
     <a href="https://anaconda.org/lalitpagaria/obsei">
         <img src="https://img.shields.io/conda/pn/lalitpagaria/obsei" alt="Platform" />
     </a>
@@ -578,6 +578,7 @@ source_config = GoogleNewsConfig(
    # To fetch full article text enable `fetch_article` flag
    # By default google news gives title and highlight
    fetch_article=True,
+   # proxy='http://127.0.0.1:8080'
 )
 
 # initialize Google News retriever
