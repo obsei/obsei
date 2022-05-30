@@ -35,7 +35,7 @@ certifi==2021.10.8
     #   requests
 charset-normalizer==2.0.10
     # via requests
-click>=7.0
+click==8.0.4
     # via
     #   nltk
     #   sacremoses
