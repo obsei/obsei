@@ -578,6 +578,7 @@ source_config = GoogleNewsConfig(
    # To fetch full article text enable `fetch_article` flag
    # By default google news gives title and highlight
    fetch_article=True,
+   # proxy='http://127.0.0.1:8080'
 )
 
 # initialize Google News retriever
