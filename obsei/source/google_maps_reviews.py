@@ -75,8 +75,8 @@ class OSGoogleMapsReviewsSource(BaseSource):
             'reviewsLimit': config.number_of_reviews,
             'limit': config.number_of_places_per_query,
             'sort': config.sort,
-            'start': since_timestamp,
-            'cutoff': config.until_timestamp,
+            'cutoff': since_timestamp,
+            'start': config.until_timestamp,
             'ignoreEmpty': config.ignore_empty_reviews,
             'coordinates': config.central_coordinates,
             'language': config.language,
@@ -84,7 +84,7 @@ class OSGoogleMapsReviewsSource(BaseSource):
             'async': False,
         }
 
-        response = requests.get(f'{OUTSCRAPPER_API_URL}/maps/reviews-v2', params=params, headers={
+        response = requests.get(f'{OUTSCRAPPER_API_URL}/maps/reviews-v3', params=params, headers={
             'X-API-KEY': "" if config.api_key is None else config.api_key.get_secret_value(),
         })
 
