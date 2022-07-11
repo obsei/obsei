@@ -102,6 +102,7 @@ Here are some companies/projects (alphabetical order) using Obsei. To add your c
 - [Spacepulse](http://spacepulse.in/): The operating system for spaces
 - [Superblog](https://superblog.ai/): A blazing fast alternative to WordPress and Medium
 - [Zolve](https://zolve.com/): Creating a financial world beyond borders
+- [Utilize](https://www.utilize.app/): No-code app builder for businesses with a deskless workforce
 
 ## Tutorials
 
