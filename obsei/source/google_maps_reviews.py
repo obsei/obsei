@@ -59,8 +59,9 @@ class OSGoogleMapsReviewsSource(BaseSource):
         state = state or dict()
 
         since_timestamp: Optional[int] = (
-            config.since_timestamp or None if state is None else state.get("since_timestamp", None)
+             None if state is None else state.get("since_timestamp", None)
         )
+        since_timestamp = since_timestamp or config.since_timestamp
         if since_timestamp is None and config.lookup_period is not None:
             if len(config.lookup_period) <= 5:
                 since_time = convert_utc_time(config.lookup_period)
