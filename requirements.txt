@@ -134,7 +134,7 @@ packaging==21.3
     #   marshmallow
     #   spacy
     #   transformers
-pandas==1.4.3
+pandas>=1.3.5 # Pandas dropped support for 3.7 hence keeping it less strict
     # via -r requirements.in
 pathy==0.6.2
     # via spacy
