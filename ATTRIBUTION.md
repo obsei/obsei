@@ -16,3 +16,4 @@ This could not have been possible without following open source software -
 - [gnews](https://github.com/ranahaani/GNews): For Google News integration
 - [python-facebook-api](https://github.com/sns-sdks/python-facebook): For facebook integration
 - [youtube-comment-downloader](https://github.com/egbertbouman/youtube-comment-downloader): For Youtube video comments extraction code
+- [dateparser](https://github.com/scrapinghub/dateparser): To parse date properly (where format is ambiguous)
