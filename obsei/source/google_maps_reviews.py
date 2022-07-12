@@ -25,6 +25,7 @@ class OSGoogleMapsReviewsConfig(BaseSourceConfig):
     number_of_reviews: int = 10
     number_of_places_per_query: int = 1
     country: Optional[str] = None
+    filtered_fields: List[str] = None
     # parameter defines the coordinates of the location where you want your query to be applied.
     # It has to be constructed in the next sequence: "@" + "latitude" + "," + "longitude" + "," + "zoom"
     # (e.g. "@41.3954381,2.1628662,15.1z").
@@ -34,6 +35,8 @@ class OSGoogleMapsReviewsConfig(BaseSourceConfig):
 
     def __init__(self, **values: Any):
         super().__init__(**values)
+
+        self.filtered_fields = self.filtered_fields or ['reviews_data']
 
         if self.api_key is None:
             raise ValueError("OutScrapper API key require to fetch reviews data")
@@ -75,15 +78,20 @@ class OSGoogleMapsReviewsSource(BaseSource):
             'reviewsLimit': config.number_of_reviews,
             'limit': config.number_of_places_per_query,
             'sort': config.sort,
+            # Reviews are sorted from latest to oldest in case cutoff or start is passed
+            # cutoff is oldest timestamp till reviews are needed
             'cutoff': since_timestamp,
+            # start is newest timestamp from reviews are needed
             'start': config.until_timestamp,
             'ignoreEmpty': config.ignore_empty_reviews,
             'coordinates': config.central_coordinates,
             'language': config.language,
             'region': config.country,
+            'fields': config.filtered_fields,
             'async': False,
         }
 
+        # For API doc refer https://app.outscraper.com/api-docs#tag/Google-Reviews
         response = requests.get(f'{OUTSCRAPPER_API_URL}/maps/reviews-v3', params=params, headers={
             'X-API-KEY': "" if config.api_key is None else config.api_key.get_secret_value(),
         })
