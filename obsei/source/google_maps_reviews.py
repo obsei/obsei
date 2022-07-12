@@ -25,7 +25,7 @@ class OSGoogleMapsReviewsConfig(BaseSourceConfig):
     number_of_reviews: int = 10
     number_of_places_per_query: int = 1
     country: Optional[str] = None
-    filtered_fields: List[str] = None
+    filtered_fields: List[str] = Field(['reviews_data'])
     # parameter defines the coordinates of the location where you want your query to be applied.
     # It has to be constructed in the next sequence: "@" + "latitude" + "," + "longitude" + "," + "zoom"
     # (e.g. "@41.3954381,2.1628662,15.1z").
@@ -35,8 +35,6 @@ class OSGoogleMapsReviewsConfig(BaseSourceConfig):
 
     def __init__(self, **values: Any):
         super().__init__(**values)
-
-        self.filtered_fields = self.filtered_fields or ['reviews_data']
 
         if self.api_key is None:
             raise ValueError("OutScrapper API key require to fetch reviews data")
@@ -87,7 +85,7 @@ class OSGoogleMapsReviewsSource(BaseSource):
             'coordinates': config.central_coordinates,
             'language': config.language,
             'region': config.country,
-            'fields': config.filtered_fields,
+            'fields': ",".join(config.filtered_fields),
             'async': False,
         }
 
