@@ -1,14 +1,11 @@
 import logging
 import sys
-import time
 from datetime import datetime, timedelta
 
 import pytz
 
 from obsei.misc.utils import DATETIME_STRING_PATTERN
 from obsei.source.reddit_scrapper import RedditScrapperConfig, RedditScrapperSource
-from obsei.workflow.store import WorkflowStore
-from obsei.workflow.workflow import Workflow, WorkflowConfig
 
 
 def print_state(id: str):
@@ -26,26 +23,8 @@ source_config = RedditScrapperConfig(
     lookup_period=since_time.strftime(DATETIME_STRING_PATTERN),
 )
 
-source = RedditScrapperSource(store=WorkflowStore())
+source = RedditScrapperSource()
 
-workflow = Workflow(
-    config=WorkflowConfig(
-        source_config=source_config,
-    ),
-)
-source.store.add_workflow(workflow)
-
-
-for i in range(1, 4):
-    print_state(workflow.id)
-    source_response_list = source.lookup(source_config, id=workflow.id)
-
-    if source_response_list is None or len(source_response_list) == 0:
-        break
-
-    for source_response in source_response_list:
-        logger.info(source_response.__dict__)
-
-    time.sleep(30)
-
-print_state(workflow.id)
+source_response_list = source.lookup(source_config)
+for source_response in source_response_list:
+    logger.info(source_response.__dict__)

@@ -63,10 +63,7 @@ class RedditScrapperSource(BaseSource):
         )
         lookup_period: str = scrapper_stat.get("since_time", config.lookup_period)
         lookup_period = lookup_period or DEFAULT_LOOKUP_PERIOD
-        if len(lookup_period) <= 5:
-            since_time = convert_utc_time(lookup_period)
-        else:
-            since_time = datetime.strptime(lookup_period, DATETIME_STRING_PATTERN)
+        since_time = convert_utc_time(lookup_period)
 
         last_since_time: datetime = since_time
 

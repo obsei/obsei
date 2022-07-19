@@ -114,7 +114,9 @@ class YouTubeCommentExtractor(BaseModel):
                     continuations = [sort_menu[self.sort_by]['serviceEndpoint']]
                     needs_sorting = False
                     continue
-                raise RuntimeError('Failed to set sorting')
+                # TODO: Fix it. Causing observer to fail silently\
+                logger.warning("Unable to set sorting")
+                # raise RuntimeError('Failed to set sorting')
 
             actions = list(self._search_dict(response, 'reloadContinuationItemsCommand')) + \
                       list(self._search_dict(response, 'appendContinuationItemsAction'))
@@ -125,6 +127,7 @@ class YouTubeCommentExtractor(BaseModel):
                         # Process continuations for comments and replies.
                         continuations[:0] = [ep for ep in self._search_dict(item, 'continuationEndpoint')]
                     if self.fetch_replies:
+                        # TODO: Fix it. This functionality is broken
                         if action['targetId'].startswith('comment-replies-item') and 'continuationItemRenderer' in item:
                             # Process the 'Show more replies' button
                             continuations.append(next(self._search_dict(item, 'buttonRenderer'))['command'])

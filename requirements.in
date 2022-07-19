@@ -25,6 +25,7 @@ pandas
 nltk
 gnews
 python-facebook-api
+dateparser
 
 ## GPL dependencies (these are optional)
 # trafilatura

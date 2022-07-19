@@ -105,7 +105,7 @@ class ZendeskSinkConfig(BaseSinkConfig):
         self.cred_info = self.cred_info or ZendeskCredInfo()
 
     def get_endpoint(self) -> str:
-        sub_prefix = "" if self.subdomain is None or self.subdomain is '' else f"/{self.subdomain}."
+        sub_prefix = "" if self.subdomain is None or self.subdomain == '' else f"/{self.subdomain}."
         return f'{self.scheme}://{sub_prefix}{self.domain}{self.ticket_api}'
 
 
