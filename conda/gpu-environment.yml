@@ -24,6 +24,7 @@ dependencies:
 - transformers
 - pandas
 - nltk
+- numpy
 - pip
 - pip:
   - presidio-analyzer
