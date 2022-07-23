@@ -35,6 +35,7 @@ requirements:
     - transformers
     - pandas
     - nltk
+    - numpy
     - pip
 
   run:
