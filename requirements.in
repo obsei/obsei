@@ -1,8 +1,6 @@
 # PyTorch
 --find-links=https://download.pytorch.org/whl/torch_stable.html
-torch
 vaderSentiment
-transformers
 searchtweets-v2
 pytz
 atlassian-python-api
@@ -10,7 +8,6 @@ elasticsearch
 pydantic
 python-dateutil
 SQLAlchemy
-google-api-python-client
 google-play-scraper
 app-store-reviews-reader
 reddit-rss-reader
@@ -19,12 +16,8 @@ mmh3
 beautifulsoup4
 slack-sdk
 sentencepiece
-presidio-analyzer
-presidio-anonymizer
 pandas
 nltk
-gnews
-python-facebook-api
 dateparser
 
 ## GPL dependencies (these are optional)
