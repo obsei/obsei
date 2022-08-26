@@ -44,7 +44,7 @@ twitter-api = ["searchtweets-v2"]
 google-play-scraper = ["google-play-scraper"]
 google-play-api = ["google-api-python-client"]
 app-store-scraper = ["app-store-reviews-reader"]
-reddit-scrapper = ["reddit-rss-reader"]
+reddit-scraper = ["reddit-rss-reader"]
 reddit-api = ["praw"]
 pandas = ["pandas"]
 google-news-scraper = ["gnews"]
@@ -55,7 +55,7 @@ slack-api = ["slack-sdk"]
 
 source = [
     "obsei[twitter-api,google-play-scraper,google-play-api,app-store-scraper]",
-    "obsei[reddit-scrapper,reddit-api,pandas,google-news-scraper,facebook-api]",
+    "obsei[reddit-scraper,reddit-api,pandas,google-news-scraper,facebook-api]",
 ]
 
 sink = ["obsei[atlassian-api,elasticsearch,slack-api,pandas]"]
@@ -95,3 +95,6 @@ repository = "https://github.com/obsei/obsei"
 
 [tool.setuptools]
 package-dir = { "" = "obsei" }
+
+[tool.distutils.bdist_wheel]
+universal = true
