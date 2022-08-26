@@ -91,4 +91,5 @@ all = ["obsei[analyzer,source,sink]"]
 repository = "https://github.com/obsei/obsei"
 
 [tool.setuptools]
+package-dir = { "" = "obsei" }
 packages = ["obsei"]
