@@ -9,7 +9,6 @@ version = "0.0.12"
 authors = [{ name = "Lalit Pagaria", email = "pagaria.lalit@gmail.com" }]
 description = "Obsei is an automation tool for text analysis need"
 readme = "README.md"
-#readme_content_type = "text/markdown"
 license = { text = "Apache Version 2.0" }
 
 classifiers = [
@@ -35,6 +34,7 @@ dependencies = [
     "mmh3",
     "beautifulsoup4",
     "dateparser",
+    "requests",
 ]
 
 
@@ -92,13 +92,6 @@ gpl = ["trafilatura"]
 
 [project.urls]
 repository = "https://github.com/obsei/obsei"
-
-# [tool.setuptools]
-# package-dir = { "" = "obsei" }
-
-# [tool.setuptools.packages.find]
-# where = ["obsei"]
-# namespaces = false
 
 [tool.hatch.build.targets.sdist]
 include = ["/obsei"]
