@@ -446,7 +446,7 @@ source = EmailSource()
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/google_maps.png" width="20" height="20"><b>Google Maps Reviews Scrapper</b></summary><hr>
 
 ```python
-from obsei.source import OSGoogleMapsReviewsSource, OSGoogleMapsReviewsConfig
+from obsei.source.google_maps_reviews import OSGoogleMapsReviewsSource, OSGoogleMapsReviewsConfig
 
 # initialize Outscrapper Maps review source config
 source_config = OSGoogleMapsReviewsConfig(

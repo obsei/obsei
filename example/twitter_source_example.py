@@ -1,9 +1,9 @@
 import logging
 import sys
 
-from obsei.analyzer import ZeroShotClassificationAnalyzer, ClassificationAnalyzerConfig
-from obsei.sink import SlackSinkConfig, SlackSink
-from obsei.source import TwitterSourceConfig, TwitterSource, TwitterCredentials
+from obsei.analyzer.classification_analyzer import ZeroShotClassificationAnalyzer, ClassificationAnalyzerConfig
+from obsei.sink.slack_sink import SlackSinkConfig, SlackSink
+from obsei.source.twitter_source import TwitterSourceConfig, TwitterSource, TwitterCredentials
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -43,9 +43,9 @@ source = TwitterSource()
 
 
 sink_config = SlackSinkConfig(
-# Uncomment below lines if you like to pass credentials directly instead of env variables
-#    slack_token="SLACK_TOKEN",
-#    channel_id="CHANNEL_ID",
+    # Uncomment below lines if you like to pass credentials directly instead of env variables
+    #    slack_token="SLACK_TOKEN",
+    #    channel_id="CHANNEL_ID",
     jinja_template="""
 :bell: Hi there!, a new `<{{payload['meta']['tweet_url']}}|tweet>` of interest is found by *Obsei*
 >📝 Content: 

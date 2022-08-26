@@ -1,10 +1,12 @@
 import logging
 import os
 import sys
+
 from obsei.analyzer.dummy_analyzer import DummyAnalyzer, DummyAnalyzerConfig
 from obsei.processor import Processor
 from obsei.sink.slack_sink import SlackSink, SlackSinkConfig
-from obsei.source import PlayStoreScrapperConfig, PlayStoreScrapperSource
+from obsei.source.playstore_scrapper import (PlayStoreScrapperConfig,
+                                             PlayStoreScrapperSource)
 from obsei.workflow.store import WorkflowStore
 from obsei.workflow.workflow import Workflow, WorkflowConfig
 

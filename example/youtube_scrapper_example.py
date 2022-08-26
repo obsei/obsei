@@ -2,10 +2,9 @@ import logging
 import sys
 
 from obsei.analyzer.classification_analyzer import (
-    ClassificationAnalyzerConfig,
-    ZeroShotClassificationAnalyzer,
-)
-from obsei.source import YoutubeScrapperSource, YoutubeScrapperConfig
+    ClassificationAnalyzerConfig, ZeroShotClassificationAnalyzer)
+from obsei.source.youtube_scrapper import (YoutubeScrapperConfig,
+                                           YoutubeScrapperSource)
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
