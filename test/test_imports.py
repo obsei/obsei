@@ -1,8 +1,12 @@
-def test_imports():
-    from obsei.configuration import ObseiConfiguration
-    from obsei.payload import BasePayload, TextPayload
-    from obsei.processor import Processor
 
+def test_imports_all():
+    test_core()
+    test_sources()
+    test_sink()
+    test_analyzer()
+
+
+def test_sources():
     from obsei.source.base_source import BaseSource, BaseSourceConfig
     from obsei.source import AppStoreScrapperSource, AppStoreScrapperConfig
     from obsei.source import EmailSource, EmailConfig, EmailCredInfo
@@ -16,6 +20,8 @@ def test_imports():
     from obsei.source.twitter_source import TwitterSource, TwitterSourceConfig, TwitterCredentials
     from obsei.source.website_crawler_source import BaseCrawlerConfig, TrafilaturaCrawlerSource, TrafilaturaCrawlerConfig
 
+
+def test_sink():
     from obsei.sink.base_sink import BaseSink, BaseSinkConfig
     from obsei.sink import DailyGetSink, DailyGetSinkConfig, PayloadConvertor
     from obsei.sink import ElasticSearchSink, ElasticSearchSinkConfig
@@ -26,6 +32,8 @@ def test_imports():
     from obsei.sink import SlackSink, SlackSinkConfig
     from obsei.sink import ZendeskSink, ZendeskSinkConfig
 
+
+def test_analyzer():
     from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig
     from obsei.analyzer import DummyAnalyzer, DummyAnalyzerConfig
     from obsei.analyzer import TransformersNERAnalyzer, SpacyNERAnalyzer
@@ -45,6 +53,12 @@ def test_imports():
     from obsei.preprocessor import TextCleaningFunction, ToLowerCase, RemoveStopWords, \
         RemovePunctuation, TokenStemming, RemoveSpecialChars, RemoveWhiteSpaceAndEmptyToken, DecodeUnicode, \
         RemoveDateTime, ReplaceDomainKeywords, RegExSubstitute, SpacyLemmatization
+
+
+def test_core():
+    from obsei.configuration import ObseiConfiguration
+    from obsei.payload import BasePayload, TextPayload
+    from obsei.processor import Processor
 
     from obsei.workflow.base_store import BaseStore
     from obsei.workflow.store import WorkflowStore, WorkflowTable
