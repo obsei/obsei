@@ -96,5 +96,6 @@ repository = "https://github.com/obsei/obsei"
 [tool.setuptools]
 package-dir = { "" = "obsei" }
 
-[tool.distutils.bdist_wheel]
-universal = true
+[tool.setuptools.packages.find]
+where = ["obsei"]
+namespaces = false
