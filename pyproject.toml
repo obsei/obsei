@@ -92,4 +92,3 @@ repository = "https://github.com/obsei/obsei"
 
 [tool.setuptools]
 package-dir = { "" = "obsei" }
-packages = ["obsei"]
