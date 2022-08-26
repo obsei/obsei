@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["hatchling>=1.8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -93,9 +93,15 @@ gpl = ["trafilatura"]
 [project.urls]
 repository = "https://github.com/obsei/obsei"
 
-[tool.setuptools]
-package-dir = { "" = "obsei" }
+# [tool.setuptools]
+# package-dir = { "" = "obsei" }
 
-[tool.setuptools.packages.find]
-where = ["obsei"]
-namespaces = false
+# [tool.setuptools.packages.find]
+# where = ["obsei"]
+# namespaces = false
+
+[tool.hatch.build.targets.sdist]
+include = ["/obsei"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["obsei"]
