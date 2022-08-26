@@ -57,6 +57,12 @@ analyzer = [
 # NOTE: For windows platform install torch manually. Refer https://pytorch.org/get-started/locally/
 # -------------------------------------------------------------------------------------------------
 
+orbsight = [
+    "searchtweets-v2",
+    "google-play-scraper",
+    "app-store-reviews-reader",
+]
+
 source = [
     "searchtweets-v2",
     "google-api-python-client",
