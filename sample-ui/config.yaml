@@ -16,9 +16,9 @@ source:
       - '`app_url` is application url on app store.
       - For example for Xcode - https://apps.apple.com/us/app/xcode/id497799835'
     source:
-      _target_: obsei.source.AppStoreScrapperSource
+      _target_: obsei.source.appstore_scrapper.AppStoreScrapperSource
     config:
-      _target_: obsei.source.AppStoreScrapperConfig
+      _target_: obsei.source.appstore_scrapper.AppStoreScrapperConfig
       app_url: "https://apps.apple.com/us/app/gmail-email-by-google/id422689480"
       lookup_period: "1h"
       max_count: 5
@@ -42,9 +42,9 @@ source:
       - 'For `queries` enter google maps urls or place ids, for example'
       - "https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"
     source:
-      _target_: obsei.source.OSGoogleMapsReviewsSource
+      _target_: obsei.source.playstore_scrapper.OSGoogleMapsReviewsSource
     config:
-      _target_: obsei.source.OSGoogleMapsReviewsConfig
+      _target_: obsei.source.playstore_scrapper.OSGoogleMapsReviewsConfig
       api_key: ''
       queries:
         - "https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"
@@ -55,9 +55,9 @@ source:
       - 'Reddit subreddit, search etc rss url. For proper url refer following link -'
       - 'https://www.reddit.com/r/pathogendavid/comments/tv8m9/pathogendavids_guide_to_rss_and_reddit/'
     source:
-      _target_: obsei.source.RedditScrapperSource
+      _target_: obsei.source.reddit_source.RedditScrapperSource
     config:
-      _target_: obsei.source.RedditScrapperConfig
+      _target_: obsei.source.reddit_source.RedditScrapperConfig
       url: 'https://www.reddit.com/r/wallstreetbets/comments/.rss?sort=new'
       lookup_period: "1h"
   Twitter:
@@ -67,14 +67,14 @@ source:
       - ''
       - 'Need twitter `consumer key` and `secret`, get it from https://developer.twitter.com/en/apply-for-access'
     source:
-      _target_: obsei.source.TwitterSource
+      _target_: obsei.source.twitter_source.TwitterSource
     config:
-      _target_: obsei.source.TwitterSourceConfig
+      _target_: obsei.source.twitter_source.TwitterSourceConfig
       query: "@Twitter"
       lookup_period: "1h"
       max_tweets: 10
       cred_info:
-        _target_: obsei.source.TwitterCredentials
+        _target_: obsei.source.twitter_source.TwitterCredentials
         consumer_key: ''
         consumer_secret: ''
   Facebook:
@@ -84,13 +84,13 @@ source:
       - ''
       - 'Need facebook app_id, app_secret and long_term_token. Get it from https://developers.facebook.com/apps/'
     source:
-      _target_: obsei.source.FacebookSource
+      _target_: obsei.source.facebook_source.FacebookSource
     config:
-      _target_: obsei.source.FacebookSourceConfig
+      _target_: obsei.source.facebook_source.FacebookSourceConfig
       page_id: "110844591144719"
       lookup_period: "1h"
       cred_info:
-        _target_: obsei.source.FacebookCredentials
+        _target_: obsei.source.facebook_source.FacebookCredentials
         app_id: ''
         app_secret: ''
         long_term_token: ''
@@ -103,12 +103,12 @@ source:
       - 'https://myaccount.google.com/lesssecureapps?pli=1'
       - 'Also enable IMAP access - https://mail.google.com/mail/u/0/#settings/fwdandpop'
     source:
-      _target_: obsei.source.EmailSource
+      _target_: obsei.source.email_source.EmailSource
     config:
-      _target_: obsei.source.EmailConfig
+      _target_: obsei.source.email_source.EmailConfig
       imap_server: 'imap.gmail.com'
       cred_info:
-        _target_: obsei.source.EmailCredInfo
+        _target_: obsei.source.email_source.EmailCredInfo
         username: ''
         password: ''
       lookup_period: "1h"
@@ -118,13 +118,13 @@ source:
       - 'Reddit account `username` and `password` require'
       - 'Enter list of `subreddits`'
     source:
-      _target_: obsei.source.RedditSource
+      _target_: obsei.source.reddit_source.RedditSource
     config:
-      _target_: obsei.source.RedditConfig
+      _target_: obsei.source.reddit_source.RedditConfig
       subreddits:
         - 'wallstreetbets'
       cred_info:
-        _target_: obsei.source.RedditCredInfo
+        _target_: obsei.source.reddit_source.RedditCredInfo
         username: ''
         password: ''
       lookup_period: "1h"
@@ -133,9 +133,9 @@ source:
     _help_:
       - '`fetch_article` use crawler to fetch full article'
     source:
-      _target_: obsei.source.GoogleNewsSource
+      _target_: obsei.source.google_news_source.GoogleNewsSource
     config:
-      _target_: obsei.source.GoogleNewsConfig
+      _target_: obsei.source.google_news_source.GoogleNewsConfig
       query: "bitcoin"
       max_results: 3
       lookup_period: "1d"
@@ -148,9 +148,9 @@ source:
       - 'For example - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en&gl=US'
       - '`com.google.android.gm` is the `package name` for xcode and `us` is `country`.'
     source:
-      _target_: obsei.source.TrafilaturaCrawlerSource
+      _target_: obsei.source.website_crawler_source.TrafilaturaCrawlerSource
     config:
-      _target_: obsei.source.TrafilaturaCrawlerConfig
+      _target_: obsei.source.website_crawler_source.TrafilaturaCrawlerConfig
       urls:
         - 'https://obsei.github.io/obsei/'
 sink:
@@ -165,9 +165,9 @@ sink:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/logger.png"
     _help_: null
     sink:
-      _target_: obsei.sink.LoggerSink
+      _target_: obsei.sink.logger_sink.LoggerSink
     config:
-      _target_: obsei.sink.LoggerSinkConfig
+      _target_: obsei.sink.logger_sink.LoggerSinkConfig
   Jira:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/jira.png"
     _help_:
@@ -182,9 +182,9 @@ sink:
       - '`project` in which issue to be created, for more information refer -'
       - 'https://support.atlassian.com/jira-software-cloud/docs/what-is-a-jira-software-project/'
     sink:
-      _target_: obsei.sink.JiraSink
+      _target_: obsei.sink.jira_sink.JiraSink
     config:
-      _target_: obsei.sink.JiraSinkConfig
+      _target_: obsei.sink.jira_sink.JiraSinkConfig
       url: 'http://localhost:2990/jira'
       username: ''
       password: ''
@@ -202,13 +202,13 @@ sink:
       - ''
       - 'Provide zendesk account `email` and `password`'
     sink:
-      _target_: obsei.sink.ZendeskSink
+      _target_: obsei.sink.zendesk_sink.ZendeskSink
     config:
-      _target_: obsei.sink.ZendeskSinkConfig
+      _target_: obsei.sink.zendesk_sink.ZendeskSinkConfig
       domain: "zendesk.com"
       subdomain: null
       cred_info:
-        _target_: obsei.sink.ZendeskCredInfo
+        _target_: obsei.sink.zendesk_sink.ZendeskCredInfo
         email: ''
         password: ''
   Slack:
@@ -220,9 +220,9 @@ sink:
       - 'To get `channel id` refer -'
       - 'https://stackoverflow.com/questions/40940327/what-is-the-simplest-way-to-find-a-slack-team-id-and-a-channel-id'
     sink:
-      _target_: obsei.sink.SlackSink
+      _target_: obsei.sink.slack_sink.SlackSink
     config:
-      _target_: obsei.sink.SlackSinkConfig
+      _target_: obsei.sink.slack_sink.SlackSinkConfig
       slack_token: ''
       channel_id: ''
       jinja_template: |
@@ -245,9 +245,9 @@ sink:
       - ''
       - ' Provide server `hostname`, `port` along with `index` to be used'
     sink:
-      _target_: obsei.sink.ElasticSearchSink
+      _target_: obsei.sink.elasticsearch_sink.ElasticSearchSink
     config:
-      _target_: obsei.sink.ElasticSearchSinkConfig
+      _target_: obsei.sink.elasticsearch_sink.ElasticSearchSinkConfig
       host: "localhost"
       port: 9200
       index_name: "test"
@@ -259,9 +259,9 @@ sink:
       - ''
       - 'Provide http server `url` and `headers`'
     sink:
-      _target_: obsei.sink.HttpSink
+      _target_: obsei.sink.http_sink.HttpSink
     config:
-      _target_: obsei.sink.HttpSinkConfig
+      _target_: obsei.sink.http_sink.HttpSinkConfig
       url: 'https://localhost:8080/api/path'
       headers:
         Content-type: "application/json"
@@ -274,20 +274,20 @@ analyzer:
         - ''
         - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
       config:
-        _target_: obsei.analyzer.TransformersSentimentAnalyzerConfig
+        _target_: obsei.analyzer.sentiment_analyzer.TransformersSentimentAnalyzerConfig
         labels:
           - "positive"
           - "negative"
         multi_class_classification: false
       analyzer:
-        _target_: obsei.analyzer.TransformersSentimentAnalyzer
+        _target_: obsei.analyzer.sentiment_analyzer.TransformersSentimentAnalyzer
         model_name_or_path: "typeform/mobilebert-uncased-mnli"
         device: "auto"
     Vader:
       _help_:
         - 'Vader is less resource hungry dictionary based Vader Sentiment detector'
       analyzer:
-        _target_: obsei.analyzer.VaderSentimentAnalyzer
+        _target_: obsei.analyzer.sentiment_analyzer.VaderSentimentAnalyzer
   Classification:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/classification.png"
     Transformer:
@@ -298,14 +298,14 @@ analyzer:
         - ''
         - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
       config:
-        _target_: obsei.analyzer.ClassificationAnalyzerConfig
+        _target_: obsei.analyzer.classification_analyzer.ClassificationAnalyzerConfig
         labels:
           - "service"
           - "content"
           - "interface"
         multi_class_classification: true
       analyzer:
-        _target_: obsei.analyzer.ZeroShotClassificationAnalyzer
+        _target_: obsei.analyzer.classification_analyzer.ZeroShotClassificationAnalyzer
         model_name_or_path: "typeform/mobilebert-uncased-mnli"
         device: "auto"
   Named Entity Recognition:
@@ -316,14 +316,14 @@ analyzer:
         - ''
         - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
       analyzer:
-        _target_: obsei.analyzer.TransformersNERAnalyzer
+        _target_: obsei.analyzer.ner_analyzer.TransformersNERAnalyzer
         model_name_or_path: "elastic/distilbert-base-cased-finetuned-conll03-english"
         device: "auto"
     Spacy:
       _help_:
         - 'For supported models refer https://spacy.io/models'
       analyzer:
-        _target_: obsei.analyzer.SpacyNERAnalyzer
+        _target_: obsei.analyzer.ner_analyzer.SpacyNERAnalyzer
         model_name_or_path: "en_core_web_sm"
   Translation:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/translator.png"
@@ -333,7 +333,7 @@ analyzer:
         - ''
         - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
       analyzer:
-        _target_: obsei.analyzer.TranslationAnalyzer
+        _target_: obsei.analyzer.translation_analyzer.TranslationAnalyzer
         model_name_or_path: "Helsinki-NLP/opus-mt-en-hi"
         device: "auto"
   PII Anonymizer:
@@ -349,16 +349,16 @@ analyzer:
         - ''
         - 'Provide `model_name` and `lang_code` of the model'
       config:
-        _target_: obsei.analyzer.PresidioPIIAnalyzerConfig
+        _target_: obsei.analyzer.pii_analyzer.PresidioPIIAnalyzerConfig
         analyze_only: false
         return_decision_process: false
       analyzer:
-        _target_: obsei.analyzer.PresidioPIIAnalyzer
+        _target_: obsei.analyzer.pii_analyzer.PresidioPIIAnalyzer
         engine_config:
-          _target_: obsei.analyzer.PresidioEngineConfig
+          _target_: obsei.analyzer.pii_analyzer.PresidioEngineConfig
           nlp_engine_name: "spacy"
           models:
-            - _target_: obsei.analyzer.PresidioModelConfig
+            - _target_: obsei.analyzer.pii_analyzer.PresidioModelConfig
               model_name: "en_core_web_md"
               lang_code: "en"
   Dummy:
@@ -367,6 +367,6 @@ analyzer:
       _help_:
         - 'Dummy Analyzer, do nothing it simply used for transforming input to output'
       config:
-        _target_: obsei.analyzer.DummyAnalyzerConfig
+        _target_: obsei.analyzer.dummy_analyzer.DummyAnalyzerConfig
       analyzer:
-        _target_: obsei.analyzer.DummyAnalyzer
+        _target_: obsei.analyzer.dummy_analyzer.DummyAnalyzer
