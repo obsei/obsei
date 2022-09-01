@@ -1,0 +1,100 @@
+[build-system]
+requires = ["hatchling>=1.8.0"]
+build-backend = "hatchling.build"
+
+[project]
+requires-python = ">=3.7.0"
+name = "obsei"
+version = "0.0.12"
+authors = [{ name = "Lalit Pagaria", email = "pagaria.lalit@gmail.com" }]
+description = "Obsei is an automation tool for text analysis need"
+readme = "README.md"
+license = { text = "Apache Version 2.0" }
+
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Customer Service",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "pytz",
+    "pydantic",
+    "python-dateutil",
+    "SQLAlchemy",
+    "mmh3",
+    "beautifulsoup4",
+    "dateparser",
+    "requests",
+]
+
+
+[project.optional-dependencies]
+
+twitter-api = ["searchtweets-v2"]
+google-play-scraper = ["google-play-scraper"]
+google-play-api = ["google-api-python-client"]
+app-store-scraper = ["app-store-reviews-reader"]
+reddit-scraper = ["reddit-rss-reader"]
+reddit-api = ["praw"]
+pandas = ["pandas"]
+google-news-scraper = ["gnews"]
+facebook-api = ["python-facebook-api"]
+atlassian-api = ["atlassian-python-api"]
+elasticsearch = ["elasticsearch"]
+slack-api = ["slack-sdk"]
+
+source = [
+    "obsei[twitter-api,google-play-scraper,google-play-api,app-store-scraper]",
+    "obsei[reddit-scraper,reddit-api,pandas,google-news-scraper,facebook-api]",
+]
+
+sink = ["obsei[atlassian-api,elasticsearch,slack-api,pandas]"]
+
+analyzer = [
+    "torch",
+    "vaderSentiment",
+    "transformers",
+    "nltk",
+    "sentencepiece",
+    "presidio-analyzer",
+    "presidio-anonymizer",
+    "spacy",
+]
+
+dev = [
+    "pre-commit",
+    "black",
+    "mypy",
+    "types-requests",
+    "types-python-dateutil",
+    "types-PyYAML",
+    "types-dateparser",
+    "types-protobuf",
+    "types-pytz",
+    "pytest",
+    "pip-tools",
+]
+
+all = ["obsei[analyzer,source,sink]"]
+
+## GPL dependencies (these are optional)
+gpl = ["trafilatura"]
+
+[project.urls]
+repository = "https://github.com/obsei/obsei"
+
+[tool.hatch.build.targets.sdist]
+include = ["/obsei"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["obsei"]
