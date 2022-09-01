@@ -81,8 +81,6 @@ google-play-scraper==1.2.0
     # via -r requirements.in
 googleapis-common-protos==1.56.3
     # via google-api-core
-greenlet==1.1.2
-    # via sqlalchemy
 httplib2==0.20.4
     # via
     #   google-api-python-client
@@ -118,7 +116,7 @@ mypy-extensions==0.4.3
     # via typing-inspect
 nltk==3.7
     # via -r requirements.in
-numpy>=1.21.4
+numpy==1.23.2
     # via
     #   pandas
     #   spacy
@@ -134,7 +132,7 @@ packaging==21.3
     #   marshmallow
     #   spacy
     #   transformers
-pandas>=1.3.5 # Pandas dropped support for 3.7 hence keeping it less strict
+pandas==1.4.4
     # via -r requirements.in
 pathy==0.6.2
     # via spacy
@@ -234,7 +232,7 @@ rsa==4.8
     # via google-auth
 searchtweets-v2==1.1.1
     # via -r requirements.in
-sentencepiece==0.1.96
+sentencepiece==0.1.97
     # via -r requirements.in
 sgmllib3k==1.0.0
     # via feedparser
@@ -269,7 +267,7 @@ tldextract==3.3.1
     # via presidio-analyzer
 tokenizers==0.12.1
     # via transformers
-torch==1.12.0 ; sys_platform != 'win32' and sys_platform != 'cygwin'
+torch==1.12.0
     # via -r requirements.in
 tqdm==4.64.0
     # via
@@ -283,7 +281,7 @@ typer==0.4.2
     # via
     #   pathy
     #   spacy
-typing-extensions>=3.7.4.3
+typing-extensions==4.3.0
     # via
     #   huggingface-hub
     #   pydantic

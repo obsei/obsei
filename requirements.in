@@ -18,7 +18,7 @@ praw
 mmh3
 beautifulsoup4
 slack-sdk
-sentencepiece
+sentencepiece>=0.1.97
 presidio-analyzer
 presidio-anonymizer
 pandas
