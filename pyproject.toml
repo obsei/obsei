@@ -1,11 +1,11 @@
 [build-system]
-requires = ["hatchling>=1.8.0"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-requires-python = ">=3.7.0"
+dynamic = ["version"]
+requires-python = ">=3.7"
 name = "obsei"
-version = "0.0.12"
 authors = [{ name = "Lalit Pagaria", email = "pagaria.lalit@gmail.com" }]
 description = "Obsei is an automation tool for text analysis need"
 readme = "README.md"
@@ -19,9 +19,11 @@ classifiers = [
     "Intended Audience :: Information Technology",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -98,3 +100,7 @@ include = ["/obsei"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["obsei"]
+
+[tool.hatch.version]
+path = "obsei/_version.py"
+

@@ -1,9 +1,9 @@
 name: Publish Conda Package
 
 on:
-  workflow_dispatch:
-  release:
-    types: [published]
+#  workflow_dispatch:
+#  release:
+#    types: [published]
 
 jobs:
   build:
