@@ -24,8 +24,8 @@ class LoggerSink(BaseSink):
         self,
         analyzer_responses: List[TextPayload],
         config: LoggerSinkConfig,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         converted_responses = []
         for analyzer_response in analyzer_responses:
             converted_responses.append(

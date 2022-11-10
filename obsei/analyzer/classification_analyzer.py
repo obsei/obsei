@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from pydantic import Field, PrivateAttr
-from transformers import Pipeline, pipeline
+from transformers import Pipeline, pipeline  # type: ignore
 
 from obsei.analyzer.base_analyzer import (
     BaseAnalyzer,
@@ -73,7 +73,7 @@ class TextClassificationAnalyzer(BaseAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[ClassificationAnalyzerConfig] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[TextPayload]:
         analyzer_output: List[TextPayload] = []
 
@@ -160,7 +160,7 @@ class ZeroShotClassificationAnalyzer(TextClassificationAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[ClassificationAnalyzerConfig] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[TextPayload]:
         if analyzer_config is None:
             raise ValueError("analyzer_config can't be None")

@@ -1,7 +1,7 @@
 from typing import Any, List, Optional
 
 from pydantic import PrivateAttr
-from transformers import pipeline, Pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import pipeline, Pipeline, AutoTokenizer, AutoModelForSeq2SeqLM  # type: ignore
 
 from obsei.analyzer.base_analyzer import (
     BaseAnalyzer,
@@ -33,7 +33,7 @@ class TranslationAnalyzer(BaseAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[BaseAnalyzerConfig] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[TextPayload]:
 
         analyzer_output = []

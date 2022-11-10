@@ -32,7 +32,7 @@ class PresidioEngineConfig(BaseModel):
             self.models = [PresidioModelConfig()]
 
 
-class PresidioAnonymizerConfig(OperatorConfig, BaseModel):
+class PresidioAnonymizerConfig(OperatorConfig, BaseModel): # type: ignore
     def __init__(self, anonymizer_name: str, params: Optional[Dict[str, Any]] = None):
         super().__init__(anonymizer_name=anonymizer_name, params=params)
 
@@ -96,7 +96,7 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
                     logger.warning(
                         f"Downloading spacy model {model_config.model_name}, it might take some time"
                     )
-                    from spacy.cli import download
+                    from spacy.cli import download  # type: ignore
 
                     download(model_config.model_name)
 
@@ -122,7 +122,7 @@ class PresidioPIIAnalyzer(BaseAnalyzer):
         source_response_list: List[TextPayload],
         analyzer_config: Optional[PresidioPIIAnalyzerConfig] = None,
         language: Optional[str] = "en",
-        **kwargs,
+        **kwargs: Any,
     ) -> List[TextPayload]:
         if analyzer_config is None:
             raise ValueError("analyzer_config can't be None")

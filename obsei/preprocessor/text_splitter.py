@@ -41,7 +41,7 @@ class TextSplitterConfig(BaseTextProcessorConfig):
 
 class TextSplitter(BaseTextPreprocessor):
     def preprocess_input(  # type: ignore[override]
-        self, input_list: List[TextPayload], config: TextSplitterConfig, **kwargs
+        self, input_list: List[TextPayload], config: TextSplitterConfig, **kwargs: Any
     ) -> List[TextPayload]:
         text_splits: List[TextPayload] = []
 
@@ -116,7 +116,7 @@ class TextSplitter(BaseTextPreprocessor):
         return text_splits
 
     @staticmethod
-    def _valid_index(document: str, idx: int):
+    def _valid_index(document: str, idx: int) -> int:
         if idx <= 0:
             return 0
         if idx >= len(document):

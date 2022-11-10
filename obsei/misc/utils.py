@@ -37,7 +37,7 @@ def flatten_dict(
     return out
 
 
-def obj_to_json(obj: Any, sort_keys: bool = False, indent: Optional[int] = None) -> Union[str, bytes, None]:
+def obj_to_json(obj: Any, sort_keys: bool = False, indent: Optional[int] = None) -> Union[bytes, None]:
     if obj is None:
         return None
     return json.dumps(
@@ -100,7 +100,7 @@ def is_collection(obj: Any) -> bool:
 
 
 # Copied from searchtweets-v2 and bit modified
-def convert_utc_time(datetime_str: str) -> Optional[datetime]:
+def convert_utc_time(datetime_str: str) -> datetime:
     """
     Handles datetime argument conversion to the Labs API format, which is
     `YYYY-MM-DDTHH:mm:ssZ`.
@@ -121,9 +121,6 @@ def convert_utc_time(datetime_str: str) -> Optional[datetime]:
     Returns:
         string of ISO formatted date.
     """
-
-    if not datetime_str:
-        return None
     try:
         if len(datetime_str) <= 5:
             _date = datetime.utcnow()
@@ -153,8 +150,6 @@ def convert_utc_time(datetime_str: str) -> Optional[datetime]:
 
 
 def convert_datetime_str_to_epoch(datetime_str: str) -> Optional[int]:
-    if not datetime_str:
-        return None
     parsed_datetime = dateparser.parse(datetime_str)
     if not parsed_datetime:
         return None

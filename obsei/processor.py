@@ -28,7 +28,7 @@ class Processor(BaseModel):
         sink_config: Optional[BaseSinkConfig] = None,
         analyzer: Optional[BaseAnalyzer] = None,
         analyzer_config: Optional[BaseAnalyzerConfig] = None,
-    ):
+    ) -> None:
         source = source or self.source
         sink = sink or self.sink
         analyzer = analyzer or self.analyzer

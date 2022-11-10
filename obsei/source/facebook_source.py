@@ -60,7 +60,7 @@ class FacebookSourceConfig(BaseSourceConfig):
 class FacebookSource(BaseSource):
     NAME: str = "Facebook"
 
-    def lookup(self, config: FacebookSourceConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+    def lookup(self, config: FacebookSourceConfig, **kwargs: Any) -> List[TextPayload]:  # type: ignore[override]
         source_responses: List[TextPayload] = []
 
         # Get data from state
@@ -97,14 +97,17 @@ class FacebookSource(BaseSource):
             post_ids = []
             for post in posts:
                 post_update_time = convert_datetime_str_to_epoch(post["updated_time"])
-                if post_update_time < since_timestamp:
-                    break
+                if post_update_time is not None:
+                    if post_update_time < since_timestamp:
+                        break
 
-                if (
-                    post_last_since_time is None
-                    or post_last_since_time < post_update_time
-                ):
-                    post_last_since_time = post_update_time
+                    if (
+                        post_last_since_time is None
+                        or post_last_since_time < post_update_time
+                    ):
+                        post_last_since_time = post_update_time
+                else:
+                    logger.warning("Unable to parse post update time: {}", post["updated_time"])
 
                 post_ids.append(post["id"])
 
@@ -169,5 +172,5 @@ class FacebookSource(BaseSource):
         return source_responses
 
     @staticmethod
-    def log_object(message, result):
+    def log_object(message: str, result: Any) -> None:
         logger.debug(message + str(obj_to_json(result)))

@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Generator, List, Optional, Tuple, Iterator
 from pydantic import PrivateAttr
-from transformers import (
+from transformers import (  # type: ignore
     AutoModelForTokenClassification,
     AutoTokenizer,
     Pipeline,
@@ -52,7 +52,7 @@ class TransformersNERAnalyzer(BaseAnalyzer):
 
     def _prediction_from_model(self, texts: List[str]) -> List[List[Dict[str, float]]]:
         prediction = self._pipeline(texts)
-        return (
+        return (   # type: ignore[no-any-return]
             prediction
             if len(prediction) and isinstance(prediction[0], list)
             else [prediction]
@@ -62,7 +62,7 @@ class TransformersNERAnalyzer(BaseAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[BaseAnalyzerConfig] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[TextPayload]:
         analyzer_output: List[TextPayload] = []
 
@@ -127,7 +127,7 @@ class SpacyNERAnalyzer(BaseAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[BaseAnalyzerConfig] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[TextPayload]:
         analyzer_output: List[TextPayload] = []
         texts = [

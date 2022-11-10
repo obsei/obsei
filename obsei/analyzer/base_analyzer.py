@@ -65,7 +65,7 @@ class BaseAnalyzer(BaseSettings):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[BaseAnalyzerConfig] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[TextPayload]:
         pass
 

@@ -22,7 +22,7 @@ jobs:
           pip install mypy
           # Refer http://mypy-lang.blogspot.com/2021/06/mypy-0900-released.html
           pip install mypy types-requests types-python-dateutil types-PyYAML types-dateparser types-protobuf types-pytz
-          mypy obsei
+          mypy --strict obsei
 
   build-cache:
     needs: type-check

@@ -1,4 +1,6 @@
 import traceback
+import logging
+from typing import List, Any, Optional, Tuple
 
 from obsei.payload import TextPayload
 from obsei.preprocessor.base_preprocessor import (
@@ -8,7 +10,7 @@ from obsei.preprocessor.base_preprocessor import (
 from obsei.preprocessor.text_cleaning_function import *
 from obsei.preprocessor.text_tokenizer import BaseTextTokenizer, NLTKTextTokenizer
 
-logger = logging.getLogger(__name__)
+cleaner_logger: logging.Logger = logging.getLogger(__name__)
 
 
 class TextCleanerConfig(BaseTextProcessorConfig):
@@ -49,7 +51,7 @@ class TextCleaner(BaseTextPreprocessor):
         self,
         input_list: List[TextPayload],
         config: TextCleanerConfig,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[TextPayload]:
         if config.cleaning_functions is None:
             return input_list
@@ -64,7 +66,7 @@ class TextCleaner(BaseTextPreprocessor):
                 try:
                     tokens = cleaning_function.execute(tokens)
                 except Exception as ex:
-                    logger.warning(f"Received exception: {ex}")
+                    cleaner_logger.warning(f"Received exception: {ex}")
                     traceback.print_exc()
 
             input_data.processed_text = " ".join(tokens)

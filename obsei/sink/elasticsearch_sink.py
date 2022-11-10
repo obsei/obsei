@@ -23,7 +23,7 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
     verify_certs: bool = False
     create_index: bool = True
     timeout = 30
-    custom_mapping: Optional[dict] = None
+    custom_mapping: Optional[Dict[str, Any]] = None
     refresh_type: str = "wait_for"
     base_payload: Optional[Dict[str, Any]] = None
 
@@ -46,7 +46,7 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
         if self.create_index:
             self._create_index(self.index_name)
 
-    def _create_index(self, index_name):
+    def _create_index(self, index_name: str) -> None:
         if self.custom_mapping:
             mapping = self.custom_mapping
         else:
@@ -65,7 +65,7 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
             }
 
         try:
-            self._es_client.indices.create(index=index_name, body=mapping)
+            self._es_client.indices.create(index=index_name, mappings=mapping)
         except RequestError as e:
             # With multiple workers we need to avoid race conditions, where:
             # - there's no index in the beginning
@@ -74,7 +74,7 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
             if not self._es_client.indices.exists(index=index_name):
                 raise e
 
-    def bulk(self, payloads):
+    def bulk(self, payloads: List[Dict[str, Any]]) -> Any:
         return bulk(
             self._es_client, payloads, request_timeout=300, refresh=self.refresh_type
         )
@@ -88,8 +88,8 @@ class ElasticSearchSink(BaseSink):
         self,
         analyzer_responses: List[TextPayload],
         config: ElasticSearchSinkConfig,
-        **kwargs
-    ):
+        **kwargs: Any
+    ) -> Any:
 
         payloads = []
         for analyzer_response in analyzer_responses:

@@ -1,7 +1,7 @@
 import json
 import logging
 from abc import abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 import mmh3
 
@@ -15,11 +15,11 @@ class BaseCrawlerConfig(BaseSourceConfig):
     TYPE: str = "BaseCrawler"
 
     @abstractmethod
-    def extract_url(self, url: str, url_id: Optional[str] = None):
+    def extract_url(self, url: str, url_id: Optional[str] = None) -> Dict[str, Any]:
         pass
 
     @abstractmethod
-    def find_urls(self, url: str):
+    def find_urls(self, url: str) -> List[str]:
         pass
 
 
@@ -42,19 +42,19 @@ class TrafilaturaCrawlerConfig(BaseCrawlerConfig):
     target_language: Optional[str] = None
     url_blacklist: Optional[List[str]] = None
 
-    def extract_url(self, url: str, url_id: Optional[str] = None):
+    def extract_url(self, url: str, url_id: Optional[str] = None) -> Dict[str, Any]:
         try:
             from trafilatura import extract, fetch_url
         except:
             logger.error("Trafilatura is not installed, install as follows: pip install trafilatura")
-            return []
+            return {}
 
         url_id = url_id or "{:02x}".format(mmh3.hash(url, signed=False))
         url_content = fetch_url(
             url=url,
             no_ssl=self.no_ssl,
         )
-        extracted_dict = None
+        extracted_dict: Dict[str, Any] = {}
         if url_content is not None:
             extracted_data = extract(
                 filecontent=url_content,
@@ -78,7 +78,7 @@ class TrafilaturaCrawlerConfig(BaseCrawlerConfig):
 
         return extracted_dict
 
-    def find_urls(self, url: str):
+    def find_urls(self, url: str) -> List[str]:
         try:
             from trafilatura import feeds, sitemaps
         except:
@@ -98,7 +98,7 @@ class TrafilaturaCrawlerSource(BaseSource):
     NAME: Optional[str] = "Crawler"
 
     def lookup(  # type: ignore[override]
-        self, config: TrafilaturaCrawlerConfig, **kwargs
+        self, config: TrafilaturaCrawlerConfig, **kwargs: Any
     ) -> List[TextPayload]:
         source_responses: List[TextPayload] = []
 

@@ -25,7 +25,7 @@ class PayloadConvertor(Convertor):
         self,
         analyzer_response: TextPayload,
         base_payload: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         request_payload = base_payload or {}
         use_enquiry_api = kwargs.get("use_enquiry_api", False)
@@ -133,8 +133,8 @@ class DailyGetSink(HttpSink):
         self,
         analyzer_responses: List[TextPayload],
         config: DailyGetSinkConfig,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         headers = config.headers
 
         payloads = []

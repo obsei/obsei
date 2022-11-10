@@ -62,7 +62,7 @@ class EmailConfig(BaseSourceConfig):
             password=self.cred_info.password.get_secret_value(),
         )
 
-    def __del__(self):
+    def __del__(self) -> None:
         # self._imap_client.close()
         self._imap_client.logout()
 
@@ -74,11 +74,11 @@ class EmailSource(BaseSource):
     NAME: str = "Email"
 
     @staticmethod
-    def clean(text):
+    def clean(text: str) -> str:
         # clean text for creating a folder
         return "".join(c if c.isalnum() else "_" for c in text)
 
-    def lookup(self, config: EmailConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+    def lookup(self, config: EmailConfig, **kwargs: Any) -> List[TextPayload]:  # type: ignore[override]
         source_responses: List[TextPayload] = []
 
         # Get data from state
@@ -274,7 +274,7 @@ class EmailSource(BaseSource):
         return source_responses
 
     @staticmethod
-    def _email_cleanup(content: str):
+    def _email_cleanup(content: str):  # type: ignore[no-untyped-def]
         # TODO: Implement the method to cleanup email contents
         pass
 
@@ -284,4 +284,4 @@ class EmailSource(BaseSource):
         if isinstance(value, bytes):
             # if it's a bytes, decode to str
             return "" if not encoding else value.decode(encoding)
-        return value
+        return str(value)

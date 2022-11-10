@@ -22,8 +22,8 @@ class ZendeskPayloadConvertor(Convertor):
         self,
         analyzer_response: TextPayload,
         base_payload: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> dict:
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
         summary_max_length = kwargs.get("summary_max_length", 50)
 
         payload = base_payload or dict()
@@ -50,10 +50,8 @@ class ZendeskPayloadConvertor(Convertor):
         ):
             labels_count = kwargs.get("labels_count", 1)
             labels = [
-                v
-                for k, v in sorted(
-                    analyzer_response.segmented_data.items(), key=lambda item: item[1]
-                )
+                str(v)
+                for k, v in analyzer_response.segmented_data.items()
             ]
             payload["tags"] = [label for label in labels[:labels_count]]
 
@@ -117,8 +115,8 @@ class ZendeskSink(BaseSink):
         self,
         analyzer_responses: List[TextPayload],
         config: ZendeskSinkConfig,
-        **kwargs: Dict[str, Any],
-    ):
+        **kwargs: Any,
+    ) -> Any:
         responses: List[Any] = []
         payloads: List[Dict[str, Any]] = []
 

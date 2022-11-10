@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional
 
-from google.auth.credentials import Credentials  # type: ignore
-from google.oauth2 import service_account  # type: ignore
+from google.auth.credentials import Credentials
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from pydantic import BaseSettings, Field, SecretStr, PrivateAttr
 
@@ -54,17 +54,18 @@ class PlayStoreConfig(BaseSourceConfig):
             raise ValueError("`developer_key` can't be empty")
         return self.cred_info.developer_key.get_secret_value()
 
+
 class PlayStoreSource(BaseSource):
     NAME: str = "PlayStore"
 
-    def lookup(self, config: PlayStoreConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+    def lookup(self, config: PlayStoreConfig, **kwargs: Any) -> List[TextPayload]:  # type: ignore[override]
         source_responses: List[TextPayload] = []
         # Refer https://github.com/googleapis/google-api-python-client/blob/master/docs/start.md
         with build(
-            serviceName="androidpublisher",
-            version="v3",
-            credentials=config.get_google_credentials(),
-            developerKey=config.get_developer_key(),
+                serviceName="androidpublisher",
+                version="v3",
+                credentials=config.get_google_credentials(),
+                developerKey=config.get_developer_key(),
         ) as service:
             reviews = service.reviews()
             pagination_token: Optional[str] = None

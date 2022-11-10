@@ -17,8 +17,8 @@ class JiraPayloadConvertor(Convertor):
         self,
         analyzer_response: TextPayload,
         base_payload: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ) -> dict:
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
         summary_max_length = kwargs.get("summary_max_length", 50)
 
         payload = base_payload or dict()
@@ -67,7 +67,7 @@ class JiraSinkConfig(BaseSinkConfig):
             verify_ssl=self.verify_ssl,
         )
 
-    def get_jira_client(self):
+    def get_jira_client(self) -> Jira:
         return self._jira_client
 
 
@@ -79,8 +79,8 @@ class JiraSink(BaseSink):
         self,
         analyzer_responses: List[TextPayload],
         config: JiraSinkConfig,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         responses = []
         payloads = []
         for analyzer_response in analyzer_responses:

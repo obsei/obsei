@@ -9,10 +9,11 @@ import re
 from datetime import datetime, timezone
 
 import dateparser
-from typing import Optional, Any, List, Dict
+from typing import Optional, Any, List, Dict, Generator
 
 import requests
 from pydantic import BaseModel
+from requests import Session
 
 logger = logging.getLogger(__name__)
 
@@ -30,18 +31,18 @@ class YouTubeCommentExtractor(BaseModel):
     sleep_time: float = 0.1
     request_retries: int = 5
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
         if self.sort_by not in [0, 1]:
             raise ValueError('sort_by must be either 0 or 1')
 
     @staticmethod
-    def _regex_search(text, pattern: str, group: int = 1) -> str:
+    def _regex_search(text: str, pattern: str, group: int = 1) -> str:
         match = re.search(pattern, text)
         return match.group(group) if match else ''
 
-    def _ajax_request(self, session, endpoint, ytcfg):
+    def _ajax_request(self, session: Session, endpoint: Dict[str, Any], ytcfg: Dict[str, Any]) -> Any:
         url = self._YT_URL + endpoint['commandMetadata']['webCommandMetadata']['apiUrl']
 
         data = {'context': ytcfg['INNERTUBE_CONTEXT'],
@@ -57,7 +58,7 @@ class YouTubeCommentExtractor(BaseModel):
                 time.sleep(self.sleep_time)
 
     @staticmethod
-    def _search_dict(partial: Any, search_key: str):
+    def _search_dict(partial: Any, search_key: str) -> Generator[Any, Any, None]:
         stack = [partial]
         while stack:
             current_item = stack.pop()
@@ -71,13 +72,13 @@ class YouTubeCommentExtractor(BaseModel):
                 for value in current_item:
                     stack.append(value)
 
-    def _fetch_comments(self, until_datetime: Optional[datetime] = None):
+    def _fetch_comments(self, until_datetime: Optional[datetime] = None) -> Generator[Any, Any, None]:
         session = requests.Session()
         session.headers['User-Agent'] = self.user_agent
         response = session.get(self.video_url)
 
         if response.request and response.request.url and 'uxe=' in response.request.url:
-            session.cookies.set('CONSENT', 'YES+cb', domain='.youtube.com')
+            session.cookies.set('CONSENT', 'YES+cb', domain='.youtube.com')  # type: ignore[no-untyped-call]
             response = session.get(self.video_url)
 
         html = response.text

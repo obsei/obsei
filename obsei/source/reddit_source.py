@@ -67,7 +67,7 @@ class RedditConfig(BaseSourceConfig):
 class RedditSource(BaseSource):
     NAME: str = "Reddit"
 
-    def lookup(self, config: RedditConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+    def lookup(self, config: RedditConfig, **kwargs: Any) -> List[TextPayload]:  # type: ignore[override]
         source_responses: List[TextPayload] = []
 
         # Get data from state

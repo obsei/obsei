@@ -43,7 +43,7 @@ class OSGoogleMapsReviewsConfig(BaseSourceConfig):
 class OSGoogleMapsReviewsSource(BaseSource):
     NAME: str = "Maps Reviews Scrapper"
 
-    def lookup(self, config: OSGoogleMapsReviewsConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+    def lookup(self, config: OSGoogleMapsReviewsConfig, **kwargs: Any) -> List[TextPayload]:  # type: ignore[override]
         source_responses: List[TextPayload] = []
 
         # Get data from state
