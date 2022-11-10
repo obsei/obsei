@@ -1,7 +1,6 @@
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Union, Mapping
+from typing import Any, Dict, List, Optional, Union
 
-from elastic_transport import NodeConfig
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from elasticsearch.exceptions import RequestError
@@ -15,7 +14,7 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
     # This is done to avoid exposing member to API response
     _es_client: Elasticsearch = PrivateAttr()
     TYPE: str = "Elasticsearch"
-    hosts: Union[str, List[Union[str, Mapping[str, Union[str, int]], NodeConfig]], None]
+    hosts: Union[str, List[str], None]
     index_name: str = "es_index"
     username: SecretStr = Field(SecretStr(""), env="elasticsearch_username")
     password: SecretStr = Field(SecretStr(""), env="elasticsearch_password")
