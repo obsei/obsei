@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Generator, List, Optional, Tuple, Iterator
 from pydantic import PrivateAttr
-from transformers import (  # type: ignore
+from transformers import (
     AutoModelForTokenClassification,
     AutoTokenizer,
     Pipeline,

@@ -1,7 +1,7 @@
 from typing import Any, List, Optional
 
 from pydantic import PrivateAttr
-from transformers import pipeline, Pipeline, AutoTokenizer, AutoModelForSeq2SeqLM  # type: ignore
+from transformers import pipeline, Pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 
 from obsei.analyzer.base_analyzer import (
     BaseAnalyzer,

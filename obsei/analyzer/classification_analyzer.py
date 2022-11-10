@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from pydantic import Field, PrivateAttr
-from transformers import Pipeline, pipeline  # type: ignore
+from transformers import Pipeline, pipeline
 
 from obsei.analyzer.base_analyzer import (
     BaseAnalyzer,
