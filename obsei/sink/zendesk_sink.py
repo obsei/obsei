@@ -117,7 +117,7 @@ class ZendeskSink(BaseSink):
         self,
         analyzer_responses: List[TextPayload],
         config: ZendeskSinkConfig,
-        **kwargs,
+        **kwargs: Dict[str, Any],
     ):
         responses: List[Any] = []
         payloads: List[Dict[str, Any]] = []

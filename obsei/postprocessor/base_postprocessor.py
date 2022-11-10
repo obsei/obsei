@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 from obsei.payload import TextPayload
 from pydantic import BaseSettings
 from abc import abstractmethod
@@ -16,7 +16,7 @@ class BasePostprocessor(BaseSettings):
 
     @abstractmethod
     def postprocess_input(
-        self, input_list: List[TextPayload], config: BasePostprocessorConfig, **kwargs
+        self, input_list: List[TextPayload], config: BasePostprocessorConfig, **kwargs: Any
     ) -> List[TextPayload]:
         pass
 

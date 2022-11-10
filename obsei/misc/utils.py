@@ -5,7 +5,7 @@ import time
 import dateparser
 from datetime import datetime, timezone
 from importlib import import_module
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment
@@ -21,7 +21,7 @@ def flatten_dict(
     round_the_float: bool = True,
     float_round_format_str: str = ".2f",
     separator: str = "_",
-):
+) -> Dict[str, Any]:
     out: Dict[str, Any] = {}
     for key, val in dictionary.items():
         if isinstance(val, dict):
@@ -37,7 +37,7 @@ def flatten_dict(
     return out
 
 
-def obj_to_json(obj: Any, sort_keys=False, indent=None):
+def obj_to_json(obj: Any, sort_keys: bool = False, indent: Optional[int] = None) -> Union[str, bytes, None]:
     if obj is None:
         return None
     return json.dumps(
@@ -95,12 +95,12 @@ def obj_to_markdown(
     return "\n".join(markdowns)
 
 
-def is_collection(obj: Any):
+def is_collection(obj: Any) -> bool:
     return isinstance(obj, (dict, list)) or hasattr(obj, "__dict__")
 
 
 # Copied from searchtweets-v2 and bit modified
-def convert_utc_time(datetime_str):
+def convert_utc_time(datetime_str: str) -> Optional[datetime]:
     """
     Handles datetime argument conversion to the Labs API format, which is
     `YYYY-MM-DDTHH:mm:ssZ`.
@@ -152,15 +152,17 @@ def convert_utc_time(datetime_str):
     return _date.replace(tzinfo=timezone.utc)
 
 
-def convert_datetime_str_to_epoch(datetime_str):
+def convert_datetime_str_to_epoch(datetime_str: str) -> Optional[int]:
     if not datetime_str:
         return None
     parsed_datetime = dateparser.parse(datetime_str)
+    if not parsed_datetime:
+        return None
     unix_timestamp = time.mktime(parsed_datetime.timetuple())
     return math.trunc(unix_timestamp)
 
 
-def tag_visible(element):
+def tag_visible(element: Any) -> bool:
     if element.parent.name in [
         "style",
         "script",
@@ -175,7 +177,7 @@ def tag_visible(element):
     return True
 
 
-def text_from_html(body):
+def text_from_html(body: Union[str, bytes]) -> str:
     soup = BeautifulSoup(body, "html.parser")
     texts = soup.findAll(text=True)
     visible_texts = filter(tag_visible, texts)
@@ -205,7 +207,7 @@ def dict_to_object(
     return class_ref(**new_dict)
 
 
-def datetime_handler(x):
+def datetime_handler(x: Any) -> Optional[Any]:
     if x is None:
         return None
     elif isinstance(x, datetime):

@@ -32,7 +32,7 @@ class VaderSentimentAnalyzer(BaseAnalyzer):
     def analyze_input(
         self,
         source_response_list: List[TextPayload],
-        analyzer_config: BaseAnalyzerConfig = None,
+        analyzer_config: Optional[BaseAnalyzerConfig] = None,
         **kwargs,
     ) -> List[TextPayload]:
         analyzer_output: List[TextPayload] = []

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import yaml
 from pydantic import BaseSettings, Field
@@ -24,7 +24,7 @@ class ObseiConfiguration(BaseSettings):
             )
         logger.debug(f"Configuration: {self.configuration}")
 
-    def initialize_instance(self, key_name: str = None):
+    def initialize_instance(self, key_name: Optional[str] = None) -> Union[Any]:
         if (
             key_name is None
             or self.configuration is None

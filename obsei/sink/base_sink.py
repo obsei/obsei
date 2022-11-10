@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type, TypeVar
 
 from pydantic import Field, BaseSettings
 
@@ -9,11 +9,11 @@ from obsei.workflow.base_store import BaseStore
 
 class Convertor(BaseSettings):
     def convert(
-        self,
-        analyzer_response: TextPayload,
-        base_payload: Optional[Dict[str, Any]] = None,
-        **kwargs
-    ) -> dict:
+            self,
+            analyzer_response: TextPayload,
+            base_payload: Optional[Dict[str, Any]] = None,
+            **kwargs: Any
+    ) -> Dict[str, Any]:
         base_payload = base_payload or dict()
         return (
             {**base_payload, **analyzer_response.to_dict()}
@@ -25,11 +25,14 @@ class Convertor(BaseSettings):
         arbitrary_types_allowed = True
 
 
+T = TypeVar('T', bound='BaseSinkConfig')
+
+
 class BaseSinkConfig(BaseSettings):
     TYPE: str = "Base"
 
     @classmethod
-    def from_dict(cls, config: Dict[str, Any]):
+    def from_dict(cls: Type[T], config: Dict[str, Any]) -> T:  # type: ignore[empty-body]
         pass
 
     class Config:
@@ -42,8 +45,8 @@ class BaseSink(BaseSettings):
 
     @abstractmethod
     def send_data(
-        self, analyzer_responses: List[TextPayload], config: BaseSinkConfig, **kwargs
-    ):
+            self, analyzer_responses: List[TextPayload], config: BaseSinkConfig, **kwargs: Any
+    ) -> Any:
         pass
 
     class Config:

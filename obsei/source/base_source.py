@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from pydantic import BaseSettings
 
@@ -18,7 +18,7 @@ class BaseSource(BaseSettings):
     store: Optional[BaseStore] = None
 
     @abstractmethod
-    def lookup(self, config: BaseSourceConfig, **kwargs) -> List[TextPayload]:
+    def lookup(self, config: BaseSourceConfig, **kwargs: Any) -> List[TextPayload]:
         pass
 
     class Config:

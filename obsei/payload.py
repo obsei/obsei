@@ -15,7 +15,7 @@ class BasePayload(BaseModel):
 class TextPayload(BasePayload):
     processed_text: str
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "processed_text": self.processed_text,
             "segmented_data": self.segmented_data,

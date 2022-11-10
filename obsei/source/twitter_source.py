@@ -281,11 +281,11 @@ class TwitterSource(BaseSource):
 
     @staticmethod
     def _generate_query_string(
-        query: str = None,
-        keywords: List[str] = None,
-        hashtags: List[str] = None,
-        usernames: List[str] = None,
-        operators: List[str] = None,
+        query: Optional[str] = None,
+        keywords: Optional[List[str]] = None,
+        hashtags: Optional[List[str]] = None,
+        usernames: Optional[List[str]] = None,
+        operators: Optional[List[str]] = None,
     ) -> str:
         if query:
             return query

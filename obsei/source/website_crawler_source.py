@@ -15,7 +15,7 @@ class BaseCrawlerConfig(BaseSourceConfig):
     TYPE: str = "BaseCrawler"
 
     @abstractmethod
-    def extract_url(self, url: str, url_id: str = None):
+    def extract_url(self, url: str, url_id: Optional[str] = None):
         pass
 
     @abstractmethod
@@ -42,7 +42,7 @@ class TrafilaturaCrawlerConfig(BaseCrawlerConfig):
     target_language: Optional[str] = None
     url_blacklist: Optional[List[str]] = None
 
-    def extract_url(self, url: str, url_id: str = None):
+    def extract_url(self, url: str, url_id: Optional[str] = None):
         try:
             from trafilatura import extract, fetch_url
         except:
