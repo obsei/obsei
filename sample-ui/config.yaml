@@ -28,9 +28,9 @@ source:
       - '`app_url` is application url on play store'
       - 'For example for Gmail - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en_IN&gl=US'
     source:
-      _target_: obsei.source.PlayStoreScrapperSource
+      _target_: obsei.source.playstore_scrapper.PlayStoreScrapperSource
     config:
-      _target_: obsei.source.PlayStoreScrapperConfig
+      _target_: obsei.source.playstore_scrapper.PlayStoreScrapperConfig
       app_url: "https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en_IN&gl=US"
       lookup_period: "1h"
       max_count: 5
@@ -42,9 +42,9 @@ source:
       - 'For `queries` enter google maps urls or place ids, for example'
       - "https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"
     source:
-      _target_: obsei.source.playstore_scrapper.OSGoogleMapsReviewsSource
+      _target_: obsei.source.google_maps_reviews.OSGoogleMapsReviewsSource
     config:
-      _target_: obsei.source.playstore_scrapper.OSGoogleMapsReviewsConfig
+      _target_: obsei.source.google_maps_reviews.OSGoogleMapsReviewsConfig
       api_key: ''
       queries:
         - "https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"

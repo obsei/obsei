@@ -3,7 +3,11 @@
 </p>
 
 ---
-
+<p align="center">
+    <a href="https://www.oraika.com">
+            <img src="https://static.wixstatic.com/media/59bc4e_971f153f107e48c7912b9b2d4cd1b1a4~mv2.png/v1/fill/w_177,h_49,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/3_edited.png" />
+    </a>
+</p>
 <p align="center">
     <a href="https://github.com/obsei/obsei/actions">
         <img alt="Test" src="https://github.com/obsei/obsei/workflows/CI/badge.svg?branch=master">
@@ -13,12 +17,6 @@
     </a>
     <a href="https://pypi.org/project/obsei">
         <img src="https://img.shields.io/pypi/pyversions/obsei" alt="PyPI - Python Version" />
-    </a>
-    <a href="https://anaconda.org/lalitpagaria/obsei">
-        <img src="https://img.shields.io/conda/pn/lalitpagaria/obsei" alt="Platform" />
-    </a>
-    <a href="https://anaconda.org/lalitpagaria/obsei">
-        <img src="https://anaconda.org/lalitpagaria/obsei/badges/version.svg" alt="Conda" />
     </a>
     <a href="https://pypi.org/project/obsei/">
         <img alt="Release" src="https://img.shields.io/pypi/v/obsei">
@@ -40,9 +38,6 @@
     </a>
     <a href="https://join.slack.com/t/obsei-community/shared_invite/zt-r0wnuz02-FAkAmhTAUoc6pD4SLB9Ikg">
         <img src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/Slack_join.svg" height="30">
-    </a>
-    <a href="https://www.facebook.com/ai.obsei/">
-        <img src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png" height="30">
     </a>
     <a href="https://twitter.com/ObseiAI">
         <img src="https://img.shields.io/twitter/follow/ObseiAI?style=social">
@@ -98,6 +93,7 @@ _Obsei_ use cases are following, but not limited to -
 
 Here are some companies/projects (alphabetical order) using Obsei. To add your company/project to the list, please raise a PR or contact us via [email](contact@obsei.com).
 
+- [Oraika](https://www.oraika.com): Contextually understand customer feedback
 - [1Page](https://www.get1page.com/): Giving a better context in meetings and calls
 - [Spacepulse](http://spacepulse.in/): The operating system for spaces
 - [Superblog](https://superblog.ai/): A blazing fast alternative to WordPress and Medium
@@ -203,7 +199,7 @@ We have a minimal [streamlit](https://streamlit.io/) based UI that you can use t
 
 [![Introductory and demo video](https://img.youtube.com/vi/GTF-Hy96gvY/2.jpg)](https://www.youtube.com/watch?v=GTF-Hy96gvY)
 
-Check demo at [![](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/obsei/obsei-demo) or at [Demo Link](https://share.streamlit.io/obsei/obsei/sample-ui/ui.py)
+Check demo at [![](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/obsei/obsei-demo)
 
 (**Note**: Sometimes the Streamlit demo might not work due to rate limiting, use the docker image (locally) in such cases.)
 
@@ -229,7 +225,7 @@ For detailed installation instructions, usages and examples, refer to our [docum
 <th></th>
 <th>Linux</th>
 <th>Mac</th>
-<th>Windows<sup id="a1"><a href="#f1">1</a></sup></th>
+<th>Windows</th>
 <th>Remark</th>
 </tr>
 </thead>
@@ -249,35 +245,15 @@ For detailed installation instructions, usages and examples, refer to our [docum
 <td>Fully Supported</td>
 </tr>
 <tr>
-<td>Conda<sup id="a2"><a href="#f2">2</a></sup></td>
-<td style="text-align:center">✅</td>
-<td style="text-align:center">✅</td>
-<td style="text-align:center">✅</td>
-<td>Partially Supported</td>
+<td>Conda</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">❌</td>
+<td>Not Supported</td>
 </tr>
 </tbody>
 </table>
 
-<b id="f1">1.</b> On Windows you have to install pytorch manually. Refer to the Pytorch official [instruction](https://pytorch.org/get-started/locally/). [↩](#a1)
-
-<b id="f2">2.</b> Conda channel is missing few dependencies, hence install missing dependencies manually - [↩](#a2)
-
-<details><summary>Missing Conda dependencies -</summary>
-
-```shell
-pip install presidio-analyzer
-pip install presidio-anonymizer
-pip install zenpy
-pip install searchtweets-v2
-pip install google-play-scraper
-pip install tweet-preprocessor
-pip install gnews
-pip install python-facebook-api
-# GPL dependency
-pip install trafilatura
-```
-
-</details>
 
 ## How to use
 
@@ -288,8 +264,7 @@ Expand the following steps and create your workflow -
 Install the following (if not present already) -
 
 - Install [Python 3.7+](https://www.python.org/downloads/)
-- Install [PIP](https://pip.pypa.io/en/stable/installing/) (_Optional if you prefer Conda_)
-- Install [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) (_Optional if you prefer PIP_)
+- Install [PIP](https://pip.pypa.io/en/stable/installing/)
 </details>
 
 <details><summary><b>Step 2: Install Obsei</b></summary>
@@ -303,7 +278,7 @@ You can install Obsei either via PIP or Conda based on your preference.
 To install latest released version -
 
 ```shell
-pip install obsei
+pip install obsei[all]
 ```
 
 Install from master branch (if you want to try the latest features) -
@@ -311,32 +286,25 @@ Install from master branch (if you want to try the latest features) -
 ```shell
 git clone https://github.com/obsei/obsei.git
 cd obsei
-pip install --editable .
+pip install --editable .[all]
 ```
 
-#### Install via Conda:
-
-To install the latest version -
-
-```shell
-conda install -c lalitpagaria obsei
-```
-
-Install from master branch (if you want to try the latest features) -
-
-```shell
-git clone https://github.com/obsei/obsei.git
-cd obsei
-conda env create -f conda/environment.yml
-```
-
-For GPU based local environment -
-
-```shell
-git clone https://github.com/obsei/obsei.git
-cd obsei
-conda env create -f conda/gpu-environment.yml
-```
+Alternatively following options are available to install minimal dependencies as per need -
+ - `pip install obsei[source]`: To install dependencies related to all observers
+ - `pip install obsei[sink]`: To install dependencies related to all informers
+ - `pip install obsei[analyzer]`:  To install dependencies related to all analyzers, it will install pytorch as well
+ - `pip install obsei[twitter-api]`: To install dependencies related to Twitter observer
+ - `pip install obsei[google-play-scraper]`: To install dependencies related to Play Store review scrapper observer
+ - `pip install obsei[google-play-api]`: To install dependencies related to Google official play store review API based observer
+ - `pip install obsei[app-store-scraper]`: To install dependencies related to Apple App Store review scrapper observer
+ - `pip install obsei[reddit-scraper]`: To install dependencies related to Reddit post and comment scrapper observer
+ - `pip install obsei[reddit-api]`: To install dependencies related to Reddit official api based observer
+ - `pip install obsei[pandas]`: To install dependencies related to TSV/CSV/Pandas based observer and informer
+ - `pip install obsei[google-news-scraper]`: To install dependencies related to Google news scrapper observer
+ - `pip install obsei[facebook-api]`: To install dependencies related to Facebook official page post and comments api based observer
+ - `pip install obsei[atlassian-api]`: To install dependencies related to Jira official api based informer
+ - `pip install obsei[elasticsearch]`: To install dependencies related to elasticsearch informer
+ - `pip install obsei[slack-api]`:To install dependencies related to Slack official api based informer
 
 </details>
 <details><summary><b>Step 3: Configure Source/Observer</b></summary>
@@ -1062,26 +1030,25 @@ python example.py
 
 Discussion about _Obsei_ can be done at [community forum](https://github.com/obsei/obsei/discussions)
 
-## Upcoming release and changelog
+## Changelogs
 
-Upcoming release plan and progress can be tracked at [link](https://github.com/obsei/obsei/projects) (Suggestions are welcome).
-Refer [releases](https://github.com/obsei/obsei/releases) for changelogs.
+Refer [releases](https://github.com/obsei/obsei/releases) for changelogs
 
 ## Security Issue
 
-For any security issue please contact us via [email](mailto:obsei.tool@gmail.com)
+For any security issue please contact us via [email](mailto:contact@oraika.com)
 
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/obsei/obsei.svg)](https://starchart.cc/obsei/obsei)
 
-## Maintainer
+## Maintainers
 
-This project is being maintained by [Lalit Pagaria](https://github.com/lalitpagaria).
+This project is being maintained by [Oraika Technologies](https://www.oraika.com). [Lalit Pagaria](https://github.com/lalitpagaria) and [Girish Patel](https://github.com/GirishPatel) are maintainers of this project.
 
 ## License
 
-- Copyright holder: [Lalit Pagaria](https://github.com/lalitpagaria)
+- Copyright holder: [Oraika Technologies](https://www.oraika.com)
 - Overall Apache 2.0 and you can read [License](https://github.com/obsei/obsei/blob/master/LICENSE) file.
 - Multiple other secondary permissive or weak copyleft licenses (LGPL, MIT, BSD etc.) for third-party components refer [Attribution](https://github.com/obsei/obsei/blob/master/ATTRIBUTION.md).
 - To make project more commercial friendly, we void third party components which have strong copyleft licenses (GPL, AGPL etc.) into the project.
