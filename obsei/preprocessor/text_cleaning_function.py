@@ -3,9 +3,6 @@ import re
 import string
 from abc import abstractmethod
 from typing import Any, List, Optional, Tuple
-
-from spacy import Language  # type: ignore
-from spacy.cli import download  # type: ignore
 from unicodedata import normalize
 
 import nltk
@@ -13,6 +10,8 @@ import spacy
 from dateutil.parser import parse
 from nltk.corpus import stopwords
 from pydantic import BaseModel, PrivateAttr, Field
+from spacy import Language  # type: ignore
+from spacy.cli import download  # type: ignore
 
 cleaner_func_logger: logging.Logger = logging.getLogger(__name__)
 
