@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class BaseInferenceAggregateFunction(BaseModel):
     @abstractmethod
     def execute(
-        self, input_list: List[TextPayload], **kwargs
+        self, input_list: List[TextPayload], **kwargs: Any
     ) -> List[TextPayload]:
         pass
 
@@ -38,7 +38,7 @@ class ClassificationAverageScore(BaseInferenceAggregateFunction):
     default_value: float = 0.0
 
     def execute(
-        self, input_list: List[TextPayload], **kwargs
+        self, input_list: List[TextPayload], **kwargs: Any
     ) -> List[TextPayload]:
         if len(input_list) == 0:
             logger.warning("Can't aggregate empty list")
@@ -84,7 +84,7 @@ class ClassificationMaxCategories(BaseInferenceAggregateFunction):
     score_threshold: float = 0.5
 
     def execute(
-        self, input_list: List[TextPayload], **kwargs
+        self, input_list: List[TextPayload], **kwargs: Any
     ) -> List[TextPayload]:
         if len(input_list) == 0:
             logger.warning("Can't aggregate empty list")

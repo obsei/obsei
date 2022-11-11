@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 Base = declarative_base()  # type: Any
 
 
-class ORMBase(Base):
+class ORMBase(Base): # type: ignore
     __abstract__ = True
 
     id = Column(String(100), default=lambda: str(uuid4()), primary_key=True)
@@ -91,7 +91,7 @@ class WorkflowStore(BaseStore):
             None if row[0].analyzer_state is None else json.loads(row[0].analyzer_state)
         )
 
-    def add_workflow(self, workflow: Workflow):
+    def add_workflow(self, workflow: Workflow) -> None:
         self._session.add(
             WorkflowTable(
                 id=workflow.id,
@@ -103,7 +103,7 @@ class WorkflowStore(BaseStore):
         )
         self._commit_transaction()
 
-    def update_workflow(self, workflow: Workflow):
+    def update_workflow(self, workflow: Workflow) -> None:
         self._session.query(WorkflowTable).filter_by(id=workflow.id).update(
             {
                 WorkflowTable.config: obj_to_json(workflow.config),
@@ -117,7 +117,7 @@ class WorkflowStore(BaseStore):
         )
         self._commit_transaction()
 
-    def update_workflow_state(self, workflow_id: str, workflow_state: WorkflowState):
+    def update_workflow_state(self, workflow_id: str, workflow_state: WorkflowState) -> None:
         self._session.query(WorkflowTable).filter_by(id=workflow_id).update(
             {
                 WorkflowTable.source_state: obj_to_json(workflow_state.source_state),
@@ -130,30 +130,30 @@ class WorkflowStore(BaseStore):
         )
         self._commit_transaction()
 
-    def update_source_state(self, workflow_id: str, state: Dict[str, Any]):
+    def update_source_state(self, workflow_id: str, state: Dict[str, Any]) -> None:
         self._session.query(WorkflowTable).filter_by(id=workflow_id).update(
             {WorkflowTable.source_state: obj_to_json(state)}, synchronize_session=False
         )
         self._commit_transaction()
 
-    def update_sink_state(self, workflow_id: str, state: Dict[str, Any]):
+    def update_sink_state(self, workflow_id: str, state: Dict[str, Any]) -> None:
         self._session.query(WorkflowTable).filter_by(id=workflow_id).update(
             {WorkflowTable.sink_state: obj_to_json(state)}, synchronize_session=False
         )
         self._commit_transaction()
 
-    def update_analyzer_state(self, workflow_id: str, state: Dict[str, Any]):
+    def update_analyzer_state(self, workflow_id: str, state: Dict[str, Any]) -> None:
         self._session.query(WorkflowTable).filter_by(id=workflow_id).update(
             {WorkflowTable.analyzer_state: obj_to_json(state)},
             synchronize_session=False,
         )
         self._commit_transaction()
 
-    def delete_workflow(self, id: str):
+    def delete_workflow(self, id: str) -> None:
         self._session.query(WorkflowTable).filter_by(id=id).delete()
         self._commit_transaction()
 
-    def _commit_transaction(self):
+    def _commit_transaction(self) -> Any:
         try:
             self._session.commit()
         except Exception as ex:
@@ -163,7 +163,7 @@ class WorkflowStore(BaseStore):
             raise ex
 
     @staticmethod
-    def _convert_sql_row_to_workflow_state(row) -> Optional[WorkflowState]:
+    def _convert_sql_row_to_workflow_state(row: Any) -> Optional[WorkflowState]:
         from obsei.workflow.workflow import WorkflowState
 
         if row is None:
@@ -188,7 +188,7 @@ class WorkflowStore(BaseStore):
         return workflow_states
 
     @staticmethod
-    def _convert_sql_row_to_workflow_data(row) -> Workflow:
+    def _convert_sql_row_to_workflow_data(row: Any) -> Workflow:
         from obsei.workflow.workflow import WorkflowConfig, Workflow
 
         config_dict = json.loads(row.config)

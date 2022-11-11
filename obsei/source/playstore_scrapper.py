@@ -1,7 +1,7 @@
 import logging
 import re
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from urllib import parse
 
 from google_play_scraper import Sort, reviews
@@ -48,7 +48,7 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
         self.app_name = self.app_name or self.package_name
 
     @classmethod
-    def parse_app_url(cls, app_url: str):
+    def parse_app_url(cls, app_url: str) -> Tuple[Optional[str], Optional[List[str]], Optional[str]]:
 
         parsed_url = parse.urlparse(app_url)
         query_dict = parse.parse_qs(parsed_url.query)
@@ -67,7 +67,7 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
         return package_name, countries, language
 
     @classmethod
-    def search_package_name(cls, app_name: str):
+    def search_package_name(cls, app_name: str) -> str:
         base_request_url = f"https://play.google.com"
         search_response = perform_search(
             request_url=base_request_url, query=f"play store {app_name}"
@@ -76,7 +76,7 @@ class PlayStoreScrapperConfig(BaseSourceConfig):
         pattern = r"play.google.com/store/apps/details.+?id=([0-9a-z.]+)"
         match_object = re.search(pattern, search_response.text)
         if match_object:
-            app_id = match_object.group(1)
+            app_id = str(match_object.group(1))
         else:
             raise RuntimeError("Pattern matching is not found")
         return app_id
@@ -86,7 +86,7 @@ class PlayStoreScrapperSource(BaseSource):
     NAME: Optional[str] = "PlayStoreScrapper"
 
     def lookup(  # type: ignore[override]
-        self, config: PlayStoreScrapperConfig, **kwargs
+        self, config: PlayStoreScrapperConfig, **kwargs: Any
     ) -> List[TextPayload]:
         source_responses: List[TextPayload] = []
 

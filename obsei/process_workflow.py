@@ -1,6 +1,9 @@
 import logging
 
+from obsei.analyzer.base_analyzer import BaseAnalyzer, BaseAnalyzerConfig
 from obsei.configuration import ObseiConfiguration
+from obsei.sink.base_sink import BaseSink, BaseSinkConfig
+from obsei.source.base_source import BaseSourceConfig, BaseSource
 
 logger = logging.getLogger(__name__)
 
@@ -8,12 +11,12 @@ logger = logging.getLogger(__name__)
 obsei_configuration = ObseiConfiguration()
 
 # Initialize objects using configuration
-source_config = obsei_configuration.initialize_instance("source_config")
-source = obsei_configuration.initialize_instance("source")
-analyzer = obsei_configuration.initialize_instance("analyzer")
-analyzer_config = obsei_configuration.initialize_instance("analyzer_config")
-sink_config = obsei_configuration.initialize_instance("sink_config")
-sink = obsei_configuration.initialize_instance("sink")
+source_config: BaseSourceConfig = obsei_configuration.initialize_instance("source_config")
+source: BaseSource = obsei_configuration.initialize_instance("source")
+analyzer: BaseAnalyzer = obsei_configuration.initialize_instance("analyzer")
+analyzer_config: BaseAnalyzerConfig = obsei_configuration.initialize_instance("analyzer_config")
+sink_config: BaseSinkConfig = obsei_configuration.initialize_instance("sink_config")
+sink: BaseSink = obsei_configuration.initialize_instance("sink")
 
 # This will fetch information from configured source ie twitter, app store etc
 source_response_list = source.lookup(source_config)

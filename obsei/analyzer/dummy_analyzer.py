@@ -20,7 +20,7 @@ class DummyAnalyzer(BaseAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[DummyAnalyzerConfig] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[TextPayload]:
         responses = []
         for source_response in source_response_list:

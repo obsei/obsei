@@ -39,7 +39,7 @@ class YoutubeScrapperConfig(BaseSourceConfig):
 class YoutubeScrapperSource(BaseSource):
     NAME: Optional[str] = "YoutubeScrapper"
 
-    def lookup(self, config: YoutubeScrapperConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+    def lookup(self, config: YoutubeScrapperConfig, **kwargs: Any) -> List[TextPayload]:  # type: ignore[override]
         source_responses: List[TextPayload] = []
 
         # Get data from state
@@ -68,7 +68,7 @@ class YoutubeScrapperSource(BaseSource):
             if not config.video_url:
                 raise RuntimeError("`video_url` in config should not be empty or None")
 
-            scrapper = YouTubeCommentExtractor(
+            scrapper: YouTubeCommentExtractor = YouTubeCommentExtractor(
                 video_url=config.video_url,
                 user_agent=config.user_agent,
                 sort_by=config.sort_by,

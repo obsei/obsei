@@ -1,6 +1,6 @@
 import logging
 from abc import abstractmethod
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import nltk
 from nltk import word_tokenize
@@ -25,5 +25,5 @@ class NLTKTextTokenizer(BaseTextTokenizer):
         except LookupError:
             nltk.download(f"{self.tokenizer_name}")
 
-    def tokenize_text(self, text: str) -> List[str]:
+    def tokenize_text(self, text: str) -> Any:
         return word_tokenize(text)

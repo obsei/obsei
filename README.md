@@ -877,14 +877,12 @@ sink = JiraSink()
 from obsei.sink.elasticsearch_sink import ElasticSearchSink, ElasticSearchSinkConfig
 
 # For testing purpose you can start Elasticsearch server locally via docker
-# `docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" elasticsearch:7.9.2`
+# `docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" elasticsearch:8.5.0`
 
 # initialize Elasticsearch sink config
 sink_config = ElasticSearchSinkConfig(
-   # Elasticsearch server hostname
-   host="localhost",
-   # Elasticsearch server port
-   port=9200,
+   # Elasticsearch server
+   hosts="http://localhost:9200",
    # Index name, it will create if not exist
    index_name="test",
 )

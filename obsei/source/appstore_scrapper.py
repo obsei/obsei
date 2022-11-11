@@ -1,7 +1,7 @@
 import logging
 import re
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from urllib import parse
 
 from app_store.app_store_reviews_reader import AppStoreReviewsReader
@@ -43,7 +43,7 @@ class AppStoreScrapperConfig(BaseSourceConfig):
         self.app_name = self.app_name or self.app_id
 
     @classmethod
-    def parse_app_url(cls, app_url:str):
+    def parse_app_url(cls, app_url: str) -> Tuple[Optional[str], Optional[List[str]], Optional[str]]:
         parsed_url = parse.urlparse(app_url)
         url_paths = parsed_url.path.split("/")
 
@@ -58,7 +58,7 @@ class AppStoreScrapperConfig(BaseSourceConfig):
 
     # Code is influenced from https://github.com/cowboy-bebug/app-store-scraper
     @classmethod
-    def search_id(cls, app_name: str, store: str = "app"):
+    def search_id(cls, app_name: str, store: str = "app") -> str:
         if store == "app":
             landing_url = "apps.apple.com"
             request_host = "amp-api.apps.apple.com"
@@ -74,7 +74,7 @@ class AppStoreScrapperConfig(BaseSourceConfig):
         pattern = fr"{landing_url}/[a-z]{{2}}/.+?/id([0-9]+)"
         match_object = re.search(pattern, search_response.text)
         if match_object:
-            app_id = match_object.group(1)
+            app_id = str(match_object.group(1))
         else:
             raise RuntimeError("Pattern matching is not found")
         return app_id
@@ -83,7 +83,7 @@ class AppStoreScrapperConfig(BaseSourceConfig):
 class AppStoreScrapperSource(BaseSource):
     NAME: Optional[str] = "AppStoreScrapper"
 
-    def lookup(self, config: AppStoreScrapperConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+    def lookup(self, config: AppStoreScrapperConfig, **kwargs: Any) -> List[TextPayload]:  # type: ignore[override]
         source_responses: List[TextPayload] = []
 
         # Get data from state

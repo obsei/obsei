@@ -12,7 +12,7 @@ class PandasConvertor(Convertor):
         self,
         analyzer_response: TextPayload,
         base_payload: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         base_payload = base_payload or {}
         merged_dict = {**base_payload, **analyzer_response.to_dict()}
@@ -42,8 +42,8 @@ class PandasSink(BaseSink):
         self,
         analyzer_responses: List[TextPayload],
         config: PandasSinkConfig,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         responses = []
         for analyzer_response in analyzer_responses:
             converted_response = self.convertor.convert(

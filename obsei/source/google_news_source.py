@@ -7,7 +7,7 @@ from pydantic import PrivateAttr
 from datetime import datetime, date, timedelta, time, timezone
 
 from obsei.payload import TextPayload
-from obsei.misc.utils import DATETIME_STRING_PATTERN, convert_utc_time
+from obsei.misc.utils import DATETIME_STRING_PATTERN, convert_utc_time, DEFAULT_LOOKUP_PERIOD
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.source.website_crawler_source import (
     BaseCrawlerConfig,
@@ -25,8 +25,8 @@ class GoogleNewsConfig(BaseSourceConfig):
     language: Optional[str] = "en"
     max_results: Optional[int] = 100
     lookup_period: Optional[str] = None
-    after_date: Optional[str] = None
-    before_date: Optional[str] = None
+    after_date: Optional[str] = None  # latest time
+    before_date: Optional[str] = None  # oldest time
     fetch_article: Optional[bool] = False
     crawler_config: Optional[BaseCrawlerConfig] = None
     proxy: Optional[str] = None
@@ -64,7 +64,7 @@ class GoogleNewsConfig(BaseSourceConfig):
 class GoogleNewsSource(BaseSource):
     NAME: Optional[str] = "GoogleNews"
 
-    def lookup(self, config: GoogleNewsConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+    def lookup(self, config: GoogleNewsConfig, **kwargs: Any) -> List[TextPayload]:  # type: ignore[override]
         source_responses: List[TextPayload] = []
 
         # Get data from state
@@ -76,19 +76,32 @@ class GoogleNewsSource(BaseSource):
         )
         update_state: bool = True if id else False
         state = state or dict()
-        lookup_period: str = state.get("since_time", None)
-        since_time = None if not lookup_period else convert_utc_time(lookup_period)
+        lookup_period: str = state.get("since_time", None) or DEFAULT_LOOKUP_PERIOD
+        since_time: datetime = convert_utc_time(lookup_period)
         last_since_time = since_time
 
-        last_after_time = convert_utc_time(config.after_date) if config.after_date else None
-        if since_time and last_after_time:
-            last_after_time = since_time if since_time > last_after_time else last_since_time
-        elif not last_after_time:
-            last_after_time = datetime.combine(date.today(), time(tzinfo=timezone.utc))
+        today_start_of_day: datetime = datetime.combine(date.today(), time(tzinfo=timezone.utc))
+        today_end_of_day: datetime = today_start_of_day + timedelta(days=1)
 
-        before_time = convert_utc_time(config.before_date) if config.after_date else None
-        if not before_time or before_time > datetime.combine(date.today(), time(tzinfo=timezone.utc)):
-            before_time = datetime.combine(date.today(), time(tzinfo=timezone.utc)) + timedelta(days=1)
+        last_after_time: datetime  # start_time
+        if config.after_date:
+            last_after_time = convert_utc_time(config.after_date)
+        else:
+            last_after_time = today_start_of_day
+
+        if since_time:
+            last_after_time = since_time \
+                if since_time > last_after_time \
+                else last_since_time
+
+        before_time: datetime  # end time
+        if config.before_date and config.after_date:
+            before_time = convert_utc_time(config.before_date)
+        else:
+            before_time = today_end_of_day
+
+        if before_time > today_start_of_day:
+            before_time = today_end_of_day
 
         google_news_client = config.get_client()
         more_data_exist = True
@@ -114,7 +127,7 @@ class GoogleNewsSource(BaseSource):
                 if config.fetch_article and config.crawler_config:
                     extracted_data = config.crawler_config.extract_url(url=article["url"])
 
-                    if extracted_data is not None and extracted_data.get("text", None) is not None:
+                    if extracted_data.get("text", None) is not None:
                         article_text = extracted_data["text"]
                         del extracted_data["text"]
                     else:
@@ -141,7 +154,7 @@ class GoogleNewsSource(BaseSource):
                     more_data_exist = False
                     break
                 if last_since_time is None or (
-                    published_date and last_since_time < published_date
+                        published_date and last_since_time < published_date
                 ):
                     last_since_time = published_date
 

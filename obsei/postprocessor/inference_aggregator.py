@@ -1,8 +1,9 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
+
+from obsei.payload import TextPayload
 from obsei.postprocessor.base_postprocessor import (
     BasePostprocessorConfig,
-    BasePostprocessor,
-    TextPayload,
+    BasePostprocessor
 )
 from obsei.postprocessor.inference_aggregator_function import BaseInferenceAggregateFunction
 from obsei.preprocessor.text_splitter import TextSplitterPayload
@@ -14,7 +15,7 @@ class InferenceAggregatorConfig(BasePostprocessorConfig):
 
 class InferenceAggregator(BasePostprocessor):
     def postprocess_input(  # type: ignore[override]
-        self, input_list: List[TextPayload], config: InferenceAggregatorConfig, **kwargs
+        self, input_list: List[TextPayload], config: InferenceAggregatorConfig, **kwargs: Any
     ) -> List[TextPayload]:
 
         aggregated_payloads = self.segregate_payload(input_list)
@@ -49,6 +50,6 @@ class InferenceAggregator(BasePostprocessor):
                 and payloads[0].meta
                 and payloads[0].meta.get("splitter", None)
             ):
-                payloads.sort(key=lambda x: x.meta["splitter"].chunk_id)
+                payloads.sort(key=lambda x: x.meta["splitter"].chunk_id)  # type: ignore[no-any-return]
 
         return segregated_payload

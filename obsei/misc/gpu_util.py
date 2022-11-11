@@ -1,11 +1,11 @@
 import torch
 
 
-def is_gpu_available():
+def is_gpu_available() -> bool:
     return torch.cuda.is_available()
 
 
-def get_device_id(device):
+def get_device_id(device: str) -> int:
     if device == "cpu":
         return -1
     elif device == "auto":

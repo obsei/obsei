@@ -36,7 +36,7 @@ class PandasSourceConfig(BaseSourceConfig):
 class PandasSource(BaseSource):
     NAME: Optional[str] = "Pandas"
 
-    def lookup(self, config: PandasSourceConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+    def lookup(self, config: PandasSourceConfig, **kwargs: Any) -> List[TextPayload]:  # type: ignore[override]
         df_to_records = config.dataframe.to_dict("records")
         source_responses: List[TextPayload] = [
             TextPayload(

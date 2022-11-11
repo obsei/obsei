@@ -27,13 +27,13 @@ class VaderSentimentAnalyzer(BaseAnalyzer):
 
     def _get_sentiment_score_from_vader(self, text: str) -> float:
         scores = self._model.polarity_scores(text)
-        return scores["compound"]
+        return float(scores["compound"])
 
     def analyze_input(
         self,
         source_response_list: List[TextPayload],
-        analyzer_config: BaseAnalyzerConfig = None,
-        **kwargs,
+        analyzer_config: Optional[BaseAnalyzerConfig] = None,
+        **kwargs: Any,
     ) -> List[TextPayload]:
         analyzer_output: List[TextPayload] = []
 
@@ -84,7 +84,7 @@ class TransformersSentimentAnalyzer(ZeroShotClassificationAnalyzer):
         self,
         source_response_list: List[TextPayload],
         analyzer_config: Optional[TransformersSentimentAnalyzerConfig] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> List[TextPayload]:
         return super().analyze_input(
             source_response_list=source_response_list,

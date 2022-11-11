@@ -18,21 +18,21 @@ class SlackSinkConfig(BaseSinkConfig):
     TYPE: str = "Slack"
 
     slack_token: Optional[SecretStr] = Field(None, env="slack_token")
-    channel_id: Optional[str] = Field(None, env="slack_channel_id")
+    channel_id: str = Field("", env="slack_channel_id")
     jinja_template: Optional[str] = None
     icon_url: str = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
     is_markdown: bool = True
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        if self.slack_token is None or self.channel_id is None:
+        if self.slack_token is None or self.channel_id == '':
             raise AttributeError(
                 "Slack informer need slack_token and channel_id"
             )
 
         self._slack_client = WebClient(token=self.slack_token.get_secret_value())
 
-    def get_slack_client(self):
+    def get_slack_client(self) -> WebClient:
         return self._slack_client
 
 
@@ -44,8 +44,8 @@ class SlackSink(BaseSink):
         self,
         analyzer_responses: List[TextPayload],
         config: SlackSinkConfig,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         responses = []
         payloads = []
         for analyzer_response in analyzer_responses:

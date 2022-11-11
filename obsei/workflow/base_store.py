@@ -18,17 +18,17 @@ class BaseStore(BaseSettings):
         pass
 
     @abstractmethod
-    def update_source_state(self, workflow_id: str, state: Dict[str, Any]):
+    def update_source_state(self, workflow_id: str, state: Dict[str, Any]) -> Optional[Any]:
         pass
 
     @abstractmethod
-    def update_sink_state(self, workflow_id: str, state: Dict[str, Any]):
+    def update_sink_state(self, workflow_id: str, state: Dict[str, Any]) -> None:
         pass
 
     @abstractmethod
-    def update_analyzer_state(self, workflow_id: str, state: Dict[str, Any]):
+    def update_analyzer_state(self, workflow_id: str, state: Dict[str, Any]) -> None:
         pass
 
     @abstractmethod
-    def delete_workflow(self, id: str):
+    def delete_workflow(self, id: str) -> None:
         pass

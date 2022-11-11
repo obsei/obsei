@@ -70,9 +70,9 @@ DEFAULT_OPERATORS = ["-is:reply", "-is:retweet"]
 
 
 class TwitterCredentials(BaseSettings):
-    bearer_token: Optional[SecretStr] = Field(None, env="twitter_bearer_token")
-    consumer_key: Optional[SecretStr] = Field(None, env="twitter_consumer_key")
-    consumer_secret: Optional[SecretStr] = Field(None, env="twitter_consumer_secret")
+    bearer_token: SecretStr = Field("", env="twitter_bearer_token")
+    consumer_key: SecretStr = Field("", env="twitter_consumer_key")
+    consumer_secret: SecretStr = Field("", env="twitter_consumer_secret")
     endpoint: str = Field(
         "https://api.twitter.com/2/tweets/search/recent", env="twitter_endpoint"
     )
@@ -106,8 +106,9 @@ class TwitterSourceConfig(BaseSourceConfig):
             logger.warning("`credential` is deprecated; use `cred_info`")
             self.cred_info = self.credential
 
-        if self.cred_info.bearer_token is None:
-            if self.cred_info.consumer_key is None and self.cred_info.consumer_secret is None:
+        if self.cred_info.bearer_token.get_secret_value() == '':
+            if self.cred_info.consumer_key.get_secret_value() == '' \
+                    or self.cred_info.consumer_secret.get_secret_value() == '':
                 raise AttributeError(
                     "consumer_key and consumer_secret required to generate bearer_token via Twitter"
                 )
@@ -118,9 +119,9 @@ class TwitterSourceConfig(BaseSourceConfig):
             logger.warning("Twitter API support max 100 tweets per call, hence resetting `max_tweets` to 100")
             self.max_tweets = 100
 
-    def get_twitter_credentials(self):
-        if self.cred_info.bearer_token is None:
-            self.cred_info.bearer_token = self.generate_bearer_token()
+    def get_twitter_credentials(self) -> Dict[str, Any]:
+        if self.cred_info.bearer_token.get_secret_value() == '':
+            self.cred_info.bearer_token = SecretStr(self.generate_bearer_token())
 
         return {
             "bearer_token": self.cred_info.bearer_token.get_secret_value(),
@@ -129,7 +130,7 @@ class TwitterSourceConfig(BaseSourceConfig):
         }
 
     # Copied from Twitter searchtweets-v2 lib
-    def generate_bearer_token(self):
+    def generate_bearer_token(self) -> str:
         """
         Return the bearer token for a given pair of consumer key and secret values.
         """
@@ -147,13 +148,13 @@ class TwitterSourceConfig(BaseSourceConfig):
             logger.error(resp.text)
             resp.raise_for_status()
 
-        return resp.json()["access_token"]
+        return str(resp.json()["access_token"])
 
 
 class TwitterSource(BaseSource):
     NAME: str = "Twitter"
 
-    def lookup(self, config: TwitterSourceConfig, **kwargs) -> List[TextPayload]:  # type: ignore[override]
+    def lookup(self, config: TwitterSourceConfig, **kwargs: Any) -> List[TextPayload]:  # type: ignore[override]
         if (
             not config.query
             and not config.keywords
@@ -281,11 +282,11 @@ class TwitterSource(BaseSource):
 
     @staticmethod
     def _generate_query_string(
-        query: str = None,
-        keywords: List[str] = None,
-        hashtags: List[str] = None,
-        usernames: List[str] = None,
-        operators: List[str] = None,
+        query: Optional[str] = None,
+        keywords: Optional[List[str]] = None,
+        hashtags: Optional[List[str]] = None,
+        usernames: Optional[List[str]] = None,
+        operators: Optional[List[str]] = None,
     ) -> str:
         if query:
             return query
@@ -318,7 +319,7 @@ class TwitterSource(BaseSource):
 
         return or_query_str + and_query_str
 
-    def _get_source_output(self, tweet: Dict[str, Any]):
+    def _get_source_output(self, tweet: Dict[str, Any]) -> TextPayload:
         tweet["tweet_url"] = f'https://twitter.com/twitter/statuses/{tweet["id"]}'
         return TextPayload(
             processed_text=tweet["text"], meta=tweet, source_name=self.NAME
