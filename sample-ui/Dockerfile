@@ -2,7 +2,7 @@ FROM python:3.10-slim-bullseye
 
 WORKDIR /home/user
 
-RUN apt-get update && apt-get install -y curl pkg-config cmake git
+RUN apt-get update && apt-get install -y curl pkg-config cmake git g++
 RUN apt-get clean autoclean && apt-get autoremove -y
 RUN rm -rf /var/lib/{apt,dpkg,cache,log}/
 
