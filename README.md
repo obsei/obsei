@@ -72,10 +72,6 @@ All the Observers can store their state in databases (Sqlite, Postgres, MySQL, e
 - Collect data from every possible private and public channels
 - Add every possible workflow to an AI downstream application to automate manual cognitive workflows
 
-### Introduction and demo video
-
-[![Introduction and demo video](https://img.youtube.com/vi/bhAYLI9P9W0/2.jpg)](https://www.youtube.com/watch?v=bhAYLI9P9W0)
-
 ## Use cases
 
 _Obsei_ use cases are following, but not limited to -
@@ -89,192 +85,19 @@ _Obsei_ use cases are following, but not limited to -
 - Creation of dataset for various AI tasks
 - Many more based on creativity 💡
 
-## Companies/Projects using Obsei
 
-Here are some companies/projects (alphabetical order) using Obsei. To add your company/project to the list, please raise a PR or contact us via [email](contact@obsei.com).
+## Installation
 
-- [Oraika](https://www.oraika.com): Contextually understand customer feedback
-- [1Page](https://www.get1page.com/): Giving a better context in meetings and calls
-- [Spacepulse](http://spacepulse.in/): The operating system for spaces
-- [Superblog](https://superblog.ai/): A blazing fast alternative to WordPress and Medium
-- [Zolve](https://zolve.com/): Creating a financial world beyond borders
-- [Utilize](https://www.utilize.app/): No-code app builder for businesses with a deskless workforce
-
-## Tutorials
-
-<table>
-<thead>
-<tr class="header">
-<th>Sr. No.</th>
-<th>Workflow</th>
-<th>Colab</th>
-<th>Binder</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td rowspan="2">1</td>
-<td colspan="3">Observe app reviews from Google play store, Analyze them by performing text classification and then Inform them on console via logger</td>
-</tr>
-<tr>
-<td>PlayStore Reviews → Classification → Logger</td>
-<td>
-    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/01_PlayStore_Classification_Logger.ipynb">
-        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
-    </a>
-</td>
-<td>
-    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F01_PlayStore_Classification_Logger.ipynb">
-        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
-    </a>
-</td>
-</tr>
-<tr>
-<td rowspan="2">2</td>
-<td colspan="3">Observe app reviews from Google play store, PreProcess text via various text cleaning functions, Analyze them by performing text classification, Inform them to Pandas DataFrame and store resultant CSV to Google Drive</td>
-</tr>
-<tr>
-<td>PlayStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive</td>
-<td>
-    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/02_PlayStore_PreProc_Classification_Pandas.ipynb">
-        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
-    </a>
-</td>
-<td>
-    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F02_PlayStore_PreProc_Classification_Pandas.ipynb">
-        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
-    </a>
-</td>
-</tr>
-<tr>
-<td rowspan="2">3</td>
-<td colspan="3">Observe app reviews from Apple app store, PreProcess text via various text cleaning function, Analyze them by performing text classification, Inform them to Pandas DataFrame and store resultant CSV to Google Drive</td>
-</tr>
-<tr>
-<td>AppStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive</td>
-<td>
-    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/03_AppStore_PreProc_Classification_Pandas.ipynb">
-        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
-    </a>
-</td>
-<td>
-    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F03_AppStore_PreProc_Classification_Pandas.ipynb">
-        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
-    </a>
-</td>
-</tr>
-<tr>
-<td rowspan="2">4</td>
-<td colspan="3">Observe news article from Google news, PreProcess text via various text cleaning function, Analyze them via performing text classification while splitting text in small chunks and later computing final inference using given formula</td>
-</tr>
-<tr>
-<td>Google News → Text Cleaner → Text Splitter → Classification → Inference Aggregator</td>
-<td>
-    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/04_GoogleNews_Cleaner_Splitter_Classification_Aggregator.ipynb">
-        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
-    </a>
-</td>
-<td>
-    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F04_GoogleNews_Cleaner_Splitter_Classification_Aggregator.ipynb">
-        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
-    </a>
-</td>
-</tr>
-</tbody>
-</table>
-
-<details><summary><b>💡Tips: Handle large text classification via Obsei</b></summary>
-
-![](https://raw.githubusercontent.com/obsei/obsei-resources/master/gifs/Long_Text_Classification.gif)
-
-</details>
-
-## Demo
-
-We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
-
-![Screenshot](https://raw.githubusercontent.com/obsei/obsei-resources/master/images/obsei-ui-demo.png)
-
-### Watch UI demo video
-
-[![Introductory and demo video](https://img.youtube.com/vi/GTF-Hy96gvY/2.jpg)](https://www.youtube.com/watch?v=GTF-Hy96gvY)
-
-Check demo at [![](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/obsei/obsei-demo)
-
-(**Note**: Sometimes the Streamlit demo might not work due to rate limiting, use the docker image (locally) in such cases.)
-
-To test locally, just run
-
-```
-docker run -d --name obesi-ui -p 8501:8501 obsei/obsei-ui-demo
-
-# You can find the UI at http://localhost:8501
-```
-
-**To run Obsei workflow easily using GitHub Actions (no sign ups and cloud hosting required), refer to this [repo](https://github.com/obsei/demo-workflow-action)**.
-
-## Documentation
-
-For detailed installation instructions, usages and examples, refer to our [documentation](https://obsei.github.io/obsei/).
-
-## Support and Release Matrix
-
-<table>
-<thead>
-<tr class="header">
-<th></th>
-<th>Linux</th>
-<th>Mac</th>
-<th>Windows</th>
-<th>Remark</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Tests</td>
-<td style="text-align:center">✅</td>
-<td style="text-align:center">✅</td>
-<td style="text-align:center">✅</td>
-<td>Low Coverage as difficult to test 3rd party libs</td>
-</tr>
-<tr>
-<td>PIP</td>
-<td style="text-align:center">✅</td>
-<td style="text-align:center">✅</td>
-<td style="text-align:center">✅</td>
-<td>Fully Supported</td>
-</tr>
-<tr>
-<td>Conda</td>
-<td style="text-align:center">❌</td>
-<td style="text-align:center">❌</td>
-<td style="text-align:center">❌</td>
-<td>Not Supported</td>
-</tr>
-</tbody>
-</table>
-
-
-## How to use
-
-Expand the following steps and create your workflow -
-
-<details><summary><b>Step 1: Prerequisite</b></summary>
+### Prerequisite
 
 Install the following (if not present already) -
 
 - Install [Python 3.7+](https://www.python.org/downloads/)
 - Install [PIP](https://pip.pypa.io/en/stable/installing/)
-</details>
 
-<details><summary><b>Step 2: Install Obsei</b></summary>
+### Install Obsei
 
 You can install Obsei either via PIP or Conda based on your preference.
-
-**NOTE**: On Windows you have to install pytorch manually. Refer to https://pytorch.org/get-started/locally/.
-
-#### Install via PIP:
-
 To install latest released version -
 
 ```shell
@@ -288,8 +111,8 @@ git clone https://github.com/obsei/obsei.git
 cd obsei
 pip install --editable .[all]
 ```
-
-Alternatively following options are available to install minimal dependencies as per need -
+  
+Note: `all` option will install all the dependencies which might not be needed for your workflow, alternatively following options are available to install minimal dependencies as per need -
  - `pip install obsei[source]`: To install dependencies related to all observers
  - `pip install obsei[sink]`: To install dependencies related to all informers
  - `pip install obsei[analyzer]`:  To install dependencies related to all analyzers, it will install pytorch as well
@@ -306,8 +129,12 @@ Alternatively following options are available to install minimal dependencies as
  - `pip install obsei[elasticsearch]`: To install dependencies related to elasticsearch informer
  - `pip install obsei[slack-api]`:To install dependencies related to Slack official api based informer
 
-</details>
-<details><summary><b>Step 3: Configure Source/Observer</b></summary>
+
+## How to use
+
+Expand the following steps and create a workflow -
+
+<details><summary><b>Step 1: Configure Source/Observer</b></summary>
 
 <table ><tbody ><tr></tr><tr>
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/twitter.png" width="20" height="20"><b>Twitter</b></summary><hr>
@@ -606,7 +433,7 @@ sink = PandasSource()
 
 </details>
 
-<details><summary><b>Step 4: Configure Analyzer</b></summary>
+<details><summary><b>Step 2: Configure Analyzer</b></summary>
 
 <i>Note: To run transformers in an offline mode, check [transformers offline mode](https://huggingface.co/transformers/installation.html#offline-mode).</i>
 
@@ -758,7 +585,7 @@ analyzer = DummyAnalyzer()
 
 </details>
 
-<details><summary><b>Step 5: Configure Sink/Informer</b></summary>
+<details><summary><b>Step 3: Configure Sink/Informer</b></summary>
 
 <table ><tbody ><tr></tr><tr>
 <td><details ><summary><img style="vertical-align:middle;margin:2px 10px" src="https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/slack.svg" width="25" height="25"><b>Slack</b></summary><hr>
@@ -941,7 +768,7 @@ sink = LoggerSink()
 
 </details>
 
-<details><summary><b>Step 6: Join and create workflow</b></summary>
+<details><summary><b>Step 4: Join and create workflow</b></summary>
 
 `source` will fetch data from the selected source, then feed it to the `analyzer` for processing, whose output we feed into a `sink` to get notified at that sink.
 
@@ -985,14 +812,50 @@ sink_response_list = sink.send_data(analyzer_response_list, sink_config)
 
 </details>
 
-<details><summary><b>Step 7: Execute workflow</b></summary>
-Copy the code snippets from <b>Steps 3 to 6</b> into a python file, for example <code>example.py</code> and execute the following command -
+<details><summary><b>Step 5: Execute workflow</b></summary>
+Copy the code snippets from <b>Steps 1 to 4</b> into a python file, for example <code>example.py</code> and execute the following command -
 
 ```shell
 python example.py
 ```
 
 </details>
+
+## Demo
+
+We have a minimal [streamlit](https://streamlit.io/) based UI that you can use to test Obsei.
+
+![Screenshot](https://raw.githubusercontent.com/obsei/obsei-resources/master/images/obsei-ui-demo.png)
+
+### Watch UI demo video
+
+[![Introductory and demo video](https://img.youtube.com/vi/GTF-Hy96gvY/2.jpg)](https://www.youtube.com/watch?v=GTF-Hy96gvY)
+
+Check demo at [![](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/obsei/obsei-demo)
+
+(**Note**: Sometimes the Streamlit demo might not work due to rate limiting, use the docker image (locally) in such cases.)
+
+To test locally, just run
+
+```
+docker run -d --name obesi-ui -p 8501:8501 obsei/obsei-ui-demo
+
+# You can find the UI at http://localhost:8501
+```
+
+**To run Obsei workflow easily using GitHub Actions (no sign ups and cloud hosting required), refer to this [repo](https://github.com/obsei/demo-workflow-action)**.
+
+
+## Companies/Projects using Obsei
+
+Here are some companies/projects (alphabetical order) using Obsei. To add your company/project to the list, please raise a PR or contact us via [email](contact@obsei.com).
+
+- [Oraika](https://www.oraika.com): Contextually understand customer feedback
+- [1Page](https://www.get1page.com/): Giving a better context in meetings and calls
+- [Spacepulse](http://spacepulse.in/): The operating system for spaces
+- [Superblog](https://superblog.ai/): A blazing fast alternative to WordPress and Medium
+- [Zolve](https://zolve.com/): Creating a financial world beyond borders
+- [Utilize](https://www.utilize.app/): No-code app builder for businesses with a deskless workforce
 
 ## Articles
 
@@ -1025,6 +888,138 @@ python example.py
 </tr>
 </tbody>
 </table>
+
+## Tutorials
+
+<table>
+<thead>
+<tr class="header">
+<th>Sr. No.</th>
+<th>Workflow</th>
+<th>Colab</th>
+<th>Binder</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td rowspan="2">1</td>
+<td colspan="3">Observe app reviews from Google play store, Analyze them by performing text classification and then Inform them on console via logger</td>
+</tr>
+<tr>
+<td>PlayStore Reviews → Classification → Logger</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/01_PlayStore_Classification_Logger.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F01_PlayStore_Classification_Logger.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+<tr>
+<td rowspan="2">2</td>
+<td colspan="3">Observe app reviews from Google play store, PreProcess text via various text cleaning functions, Analyze them by performing text classification, Inform them to Pandas DataFrame and store resultant CSV to Google Drive</td>
+</tr>
+<tr>
+<td>PlayStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/02_PlayStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F02_PlayStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+<tr>
+<td rowspan="2">3</td>
+<td colspan="3">Observe app reviews from Apple app store, PreProcess text via various text cleaning function, Analyze them by performing text classification, Inform them to Pandas DataFrame and store resultant CSV to Google Drive</td>
+</tr>
+<tr>
+<td>AppStore Reviews → PreProcessing → Classification → Pandas DataFrame → CSV in Google Drive</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/03_AppStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F03_AppStore_PreProc_Classification_Pandas.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+<tr>
+<td rowspan="2">4</td>
+<td colspan="3">Observe news article from Google news, PreProcess text via various text cleaning function, Analyze them via performing text classification while splitting text in small chunks and later computing final inference using given formula</td>
+</tr>
+<tr>
+<td>Google News → Text Cleaner → Text Splitter → Classification → Inference Aggregator</td>
+<td>
+    <a href="https://colab.research.google.com/github/obsei/obsei/blob/master/tutorials/04_GoogleNews_Cleaner_Splitter_Classification_Aggregator.ipynb">
+        <img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg">
+    </a>
+</td>
+<td>
+    <a href="https://mybinder.org/v2/gh/obsei/obsei/HEAD?filepath=tutorials%2F04_GoogleNews_Cleaner_Splitter_Classification_Aggregator.ipynb">
+        <img alt="Colab" src="https://mybinder.org/badge_logo.svg">
+    </a>
+</td>
+</tr>
+</tbody>
+</table>
+
+<details><summary><b>💡Tips: Handle large text classification via Obsei</b></summary>
+
+![](https://raw.githubusercontent.com/obsei/obsei-resources/master/gifs/Long_Text_Classification.gif)
+
+</details>
+
+
+## Documentation
+
+For detailed installation instructions, usages and examples, refer to our [documentation](https://obsei.github.io/obsei/).
+
+## Support and Release Matrix
+
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Linux</th>
+<th>Mac</th>
+<th>Windows</th>
+<th>Remark</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tests</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td>Low Coverage as difficult to test 3rd party libs</td>
+</tr>
+<tr>
+<td>PIP</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td>Fully Supported</td>
+</tr>
+<tr>
+<td>Conda</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">❌</td>
+<td>Not Supported</td>
+</tr>
+</tbody>
+</table>
+
 
 ## Discussion forum
 
