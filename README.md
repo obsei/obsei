@@ -111,7 +111,8 @@ cd obsei
 pip install --editable .[all]
 ```
   
-Note: `all` option will install all the dependencies which might not be needed for your workflow, alternatively following options are available to install minimal dependencies as per need -
+Note: `all` option will install all the dependencies which might not be needed for your workflow, alternatively 
+following options are available to install minimal dependencies as per need -
  - `pip install obsei[source]`: To install dependencies related to all observers
  - `pip install obsei[sink]`: To install dependencies related to all informers
  - `pip install obsei[analyzer]`:  To install dependencies related to all analyzers, it will install pytorch as well
@@ -127,6 +128,12 @@ Note: `all` option will install all the dependencies which might not be needed f
  - `pip install obsei[atlassian-api]`: To install dependencies related to Jira official api based informer
  - `pip install obsei[elasticsearch]`: To install dependencies related to elasticsearch informer
  - `pip install obsei[slack-api]`:To install dependencies related to Slack official api based informer
+
+You can also mix multiple dependencies together in single installation command. For example to install dependencies 
+Twitter observer, all analyzer, and Slack informer use following command -
+```shell
+pip install obsei[twitter-api, analyzer, slack-api]
+```
 
 
 ## How to use
