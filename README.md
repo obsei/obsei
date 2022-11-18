@@ -976,7 +976,6 @@ Here are some companies/projects (alphabetical order) using Obsei. To add your c
 
 </details>
 
-
 ## Documentation
 
 For detailed installation instructions, usages and examples, refer to our [documentation](https://obsei.github.io/obsei/).
@@ -1017,7 +1016,6 @@ For detailed installation instructions, usages and examples, refer to our [docum
 </tr>
 </tbody>
 </table>
-
 
 ## Discussion forum
 
