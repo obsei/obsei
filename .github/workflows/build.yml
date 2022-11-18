@@ -90,4 +90,4 @@ jobs:
           python -m spacy download en_core_web_sm
           coverage run -m pytest
           coverage report -m
-          bash <(curl -Ls https://coverage.codacy.com/get.sh)
+          # bash <(curl -Ls https://coverage.codacy.com/get.sh) -> Currently only works in ubuntu
