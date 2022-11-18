@@ -68,7 +68,10 @@ google-play-api = ["google-api-python-client >= 2.66.0"]
 app-store-scraper = ["app-store-reviews-reader >= 1.2"]
 reddit-scraper = ["reddit-rss-reader >= 1.3.2"]
 reddit-api = ["praw >= 7.6.1"]
-pandas = ["pandas >= 1.5.1"]
+pandas = [
+    "pandas >= 1.5.1; python_version >= '3.8'",
+    "pandas >= 1.3.5; python_version == '3.7'"
+]
 google-news-scraper = ["gnews >= 0.2.7"]
 facebook-api = ["python-facebook-api >= 0.15.0"]
 atlassian-api = ["atlassian-python-api >= 3.31.0"]
