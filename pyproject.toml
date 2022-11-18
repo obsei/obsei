@@ -108,6 +108,7 @@ dev = [
     "types-pytz",
     "pytest >= 7.2.0",
     "pip-tools >= 6.10.0",
+    "coverage >= 6.5.0",
 ]
 
 all = ["obsei[analyzer,source,sink]"]
