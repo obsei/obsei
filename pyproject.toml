@@ -13,7 +13,7 @@ maintainers = [
 ]
 description = "Obsei is an automation tool for text analysis need"
 readme = "README.md"
-license = "Apache-2.0"
+license = { text = "Apache Version 2.0" }
 
 keywords = [
     "workflow",

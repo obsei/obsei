@@ -83,11 +83,8 @@ jobs:
           key: cache-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Test with pytest
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         run: |
           python -m spacy download en_core_web_lg
           python -m spacy download en_core_web_sm
           coverage run -m pytest
           coverage report -m
-          # bash <(curl -Ls https://coverage.codacy.com/get.sh) -> Currently only works in ubuntu
