@@ -85,7 +85,6 @@ _Obsei_ use cases are following, but not limited to -
 - Creation of dataset for various AI tasks
 - Many more based on creativity 💡
 
-
 ## Installation
 
 ### Prerequisite
@@ -844,7 +843,6 @@ docker run -d --name obesi-ui -p 8501:8501 obsei/obsei-ui-demo
 ```
 
 **To run Obsei workflow easily using GitHub Actions (no sign ups and cloud hosting required), refer to this [repo](https://github.com/obsei/demo-workflow-action)**.
-
 
 ## Companies/Projects using Obsei
 
