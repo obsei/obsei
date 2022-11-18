@@ -16,7 +16,7 @@ ENV OBSEI_CONFIG_FILENAME ""
 RUN mkdir -p /usr/share/man/man1
 
 # install few required tools
-RUN apt-get update && apt-get upgrade -y && apt-get install -y curl git pkg-config cmake libncurses5 g++
+RUN apt-get update && apt-get install -y --no-install-recommends curl git pkg-config cmake libncurses5 g++
 RUN apt-get clean autoclean && apt-get autoremove -y
 RUN rm -rf /var/lib/{apt,dpkg,cache,log}/
 

@@ -10,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 
 from obsei.misc.utils import obj_to_json
 from obsei.workflow.base_store import BaseStore
+from obsei.workflow.workflow import WorkflowState, WorkflowConfig, Workflow
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +165,6 @@ class WorkflowStore(BaseStore):
 
     @staticmethod
     def _convert_sql_row_to_workflow_state(row: Any) -> Optional[WorkflowState]:
-        from obsei.workflow.workflow import WorkflowState
 
         if row is None:
             return None
@@ -189,7 +189,6 @@ class WorkflowStore(BaseStore):
 
     @staticmethod
     def _convert_sql_row_to_workflow_data(row: Any) -> Workflow:
-        from obsei.workflow.workflow import WorkflowConfig, Workflow
 
         config_dict = json.loads(row.config)
         workflow = Workflow(
