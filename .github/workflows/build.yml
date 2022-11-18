@@ -86,4 +86,5 @@ jobs:
         run: |
           python -m spacy download en_core_web_lg
           python -m spacy download en_core_web_sm
-          python -m pytest
+          coverage run -m pytest
+          coverage report -m
