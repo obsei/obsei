@@ -16,7 +16,7 @@ jobs:
   deploy-ui-docker:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3.3.0
+    - uses: actions/checkout@v3.5.1
 
     - name: Docker meta
       id: docker_meta
