@@ -16,7 +16,7 @@ jobs:
   deploy-sdk-docker:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3.5.2
+    - uses: actions/checkout@v3.5.3
 
     - name: Docker meta
       id: docker_meta
