@@ -50,7 +50,7 @@ classifiers = [
 
 dependencies = [
     "pytz >= 2022.6",
-    "pydantic >= 1.10.2",
+    "pydantic == 1.10.2",
     "python-dateutil >= 2.8.2",
     "SQLAlchemy >= 1.4.44",
     "mmh3 >= 3.0.0",
