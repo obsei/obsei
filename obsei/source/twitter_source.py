@@ -6,8 +6,10 @@ import requests
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 from pydantic.types import SecretStr
+
 from searchtweets import collect_results, gen_request_parameters
 
 from obsei.source.base_source import BaseSource, BaseSourceConfig

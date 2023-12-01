@@ -2,7 +2,9 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from praw import Reddit
-from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
+
+from pydantic import Field, PrivateAttr, SecretStr
+from pydantic_settings import BaseSettings
 
 from obsei.payload import TextPayload
 from obsei.misc.utils import (
