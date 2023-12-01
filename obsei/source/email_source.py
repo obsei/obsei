@@ -7,7 +7,9 @@ from email.message import Message
 from typing import Any, Dict, List, Optional
 
 import pytz
-from pydantic import BaseSettings, Field, PrivateAttr, SecretStr
+
+from pydantic import Field, PrivateAttr, SecretStr
+from pydantic_settings import BaseSettings
 
 from obsei.payload import TextPayload
 from obsei.misc.utils import (
