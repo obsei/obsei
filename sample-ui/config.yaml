@@ -334,7 +334,9 @@ analyzer:
         - 'Possible device values are `auto` (cuda:0 if available otherwise cpu), `cpu` and `cuda:{id}` (cuda device id)'
       analyzer:
         _target_: obsei.analyzer.translation_analyzer.TranslationAnalyzer
-        model_name_or_path: "Helsinki-NLP/opus-mt-en-hi"
+#        model_name_or_path: "Helsinki-NLP/opus-mt-en-hi"
+        model_name_or_path: "Helsinki-NLP/opus-mt-en-vi"
+
         device: "auto"
   PII Anonymizer:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/pii.png"

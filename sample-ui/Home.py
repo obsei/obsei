@@ -22,6 +22,7 @@ st.title("Obsei").markdown(
 # """
 # )
 
+
 (
     pipeline_col,
     spinner_col,
@@ -87,7 +88,7 @@ yaml_code = generate_yaml(generate_config)
 
 execute_button = execute_col.button("🚀 Execute")
 if execute_button:
-    execute_workflow(generate_config, spinner_col, log_component)
+    execute_workflow(generate_config, spinner_col, log_component, save_generate_config(generate_config))
 
 with download_python_col:
     download_button(python_code, "generated-code.py", "🐍 Download (.py)")

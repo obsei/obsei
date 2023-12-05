@@ -130,4 +130,3 @@ packages = ["obsei"]
 
 [tool.hatch.version]
 path = "obsei/_version.py"
-

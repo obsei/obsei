@@ -8,10 +8,31 @@ import uuid
 import streamlit as st
 import yaml
 
-from obsei.configuration import ObseiConfiguration
+import inspect
+import textwrap
 
+
+from obsei.configuration import ObseiConfiguration
+import pymongo
+import datetime
+
+ct = datetime.datetime.now()
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+
+
+@st.cache_resource
+def save_generate_config(config_generated):
+    client = pymongo.MongoClient(**st.secrets["mongo"])
+    db = client.obsei
+    generate_configs_table = db.generate_configs
+    config_generated['created_at'] = ct
+
+    result = generate_configs_table.insert_one(config_generated)
+
+    if result.inserted_id:
+        print("Document inserted.")
+        return result.inserted_id
 
 
 def img_to_bytes(img_path):
@@ -22,7 +43,7 @@ def img_to_bytes(img_path):
 
 # Copied from https://github.com/jrieke/traingenerator/blob/main/app/utils.py
 def download_button(
-    object_to_download, download_filename, button_text  # , pickle_it=False
+        object_to_download, download_filename, button_text  # , pickle_it=False
 ):
     try:
         # some strings <-> bytes conversions necessary here
@@ -62,8 +83,8 @@ def download_button(
         </style> """
 
     dl_link = (
-        custom_css
-        + f'<a download="{download_filename}" id="{button_id}" href="data:file/txt;base64,{b64}">{button_text}</a><br><br>'
+            custom_css
+            + f'<a download="{download_filename}" id="{button_id}" href="data:file/txt;base64,{b64}">{button_text}</a><br><br>'
     )
     # dl_link = f'<a download="{download_filename}" id="{button_id}" href="data:file/txt;base64,{b64}"><input type="button" kind="primary" value="{button_text}"></a><br></br>'
 
@@ -174,7 +195,7 @@ def generate_yaml(generate_config):
     return yaml.dump(generate_config)
 
 
-def execute_workflow(generate_config, component=None, log_components=None):
+def execute_workflow(generate_config, component=None, log_components=None, inserted_id=None):
     progress_show = None
     if component:
         progress_show = component.empty()
@@ -199,7 +220,8 @@ def execute_workflow(generate_config, component=None, log_components=None):
         )
         log_components["analyzer"].write([vars(response) for response in analyzer_response_list])
 
-        sink_response_list = sink.send_data(analyzer_response_list, sink_config)
+        sink_response_list = sink.send_data(analyzer_response_list, sink_config, inserted_id)
+
         if sink.TYPE == 'Pandas':
             log_components["sink"].write(sink_response_list)
         elif sink_response_list is not None:
@@ -216,8 +238,6 @@ def execute_workflow(generate_config, component=None, log_components=None):
         raise ex
 
 
-import inspect
-import textwrap
 def show_code(demo):
     """Showing the code of the demo."""
     show_code = st.sidebar.checkbox("Show code", True)

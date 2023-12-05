@@ -1065,3 +1065,10 @@ Thanks so much to all our contributors
 <a href="https://github.com/obsei/obsei/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=obsei/obsei" />
 </a>
+
+
+
+## RUN APP MANUAL
+```angular2html
+streamlit run sample-ui/Home.py --server.fileWatcherType none
+```
