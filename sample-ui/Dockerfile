@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl pkg-config
     && apt-get clean autoclean && apt-get autoremove -y \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
-COPY ui.py /home/user/
+COPY Home.py /home/user/
 COPY utils.py /home/user/
 COPY config.yaml /home/user/
 COPY requirements.txt /home/user/

@@ -77,7 +77,7 @@ def get_obsei_config(current_path, file_name):
     ).configuration
 
 
-@st.cache
+@st.cache_data
 def get_icon_name(name, icon, icon_size=40, font_size=1):
     if not name:
         return f'<img style="vertical-align:middle;margin:5px 5px" src="{icon}" width="{icon_size}" height="{icon_size}">'
@@ -214,3 +214,15 @@ def execute_workflow(generate_config, component=None, log_components=None):
             progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 ({str(ex)})")
 
         raise ex
+
+
+import inspect
+import textwrap
+def show_code(demo):
+    """Showing the code of the demo."""
+    show_code = st.sidebar.checkbox("Show code", True)
+    if show_code:
+        # Showing the code of the demo.
+        st.markdown("## Code")
+        sourcelines, _ = inspect.getsourcelines(demo)
+        st.code(textwrap.dedent("".join(sourcelines[1:])))

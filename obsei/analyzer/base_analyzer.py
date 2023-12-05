@@ -21,8 +21,8 @@ DEFAULT_BATCH_SIZE_CPU: int = 4
 class BaseAnalyzerConfig(BaseSettings):
     TYPE: str = "Base"
     use_splitter_and_aggregator: Optional[bool] = False
-    splitter_config: Optional[TextSplitterConfig]
-    aggregator_config: Optional[InferenceAggregatorConfig]
+    splitter_config: Optional[TextSplitterConfig] = None
+    aggregator_config: Optional[InferenceAggregatorConfig] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)

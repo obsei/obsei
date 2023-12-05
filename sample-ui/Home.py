@@ -4,23 +4,23 @@ current_path = pathlib.Path(__file__).parent.absolute().as_posix()
 configuration = get_obsei_config(current_path, "config.yaml")
 logo_url = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
 
-st.set_page_config(page_title="Obsei Demo", layout="wide", page_icon=logo_url)
+st.set_page_config(page_title="Obsei", layout="wide", page_icon=logo_url)
 
-st.title("Obsei Demo").markdown(
-    get_icon_name("Obsei Demo", logo_url, 60, 35), unsafe_allow_html=True
+st.title("Obsei").markdown(
+    get_icon_name("Obsei", logo_url, 60, 35), unsafe_allow_html=True
 )
 
-st.success(
-    """
-Please ⭐ the repo and share the feedback at https://github.com/obsei/obsei?utm_source=streamlit
-    """
-)
-st.warning(
-    """
-**Note:** Demo run will require some secure information based on source or sink selected,
-if you don't trust this environment please close the app.
-"""
-)
+# st.success(
+#     """
+# Please ⭐ the repo and share the feedback at https://github.com/obsei/obsei?utm_source=streamlit
+#     """
+# )
+# st.warning(
+#     """
+# **Note:** Demo run will require some secure information based on source or sink selected,
+# if you don't trust this environment please close the app.
+# """
+# )
 
 (
     pipeline_col,

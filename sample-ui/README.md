@@ -10,7 +10,7 @@ This is a minimal UI that can spin up to test Obsei. It's based on streamlit and
 Execute in this folder:
 ```shell
 pip install -r requirements.txt
-streamlit run ui.py
+streamlit run Home.py
 ```
 
 ### Option 2: Container
