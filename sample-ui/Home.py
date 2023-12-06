@@ -88,10 +88,19 @@ yaml_code = generate_yaml(generate_config)
 
 execute_button = execute_col.button("🚀 Execute")
 if execute_button:
-    execute_workflow(generate_config, spinner_col, log_component, save_generate_config(generate_config))
+    # results = YoutubeSearch('eminem', max_results=10).to_json()
+    # results_dict = json.loads(results)
+    # for v in results_dict['videos']:
+    #     print('https://www.youtube.com' + v['link'])
+    # print(results_dict)
+    if generate_config['source']['_target_'] == 'obsei.source.youtube_scrapper.YoutubeScrapperSource':
+        save_youtube_analyze(generate_config, spinner_col, log_component)
+    else:
+        execute_workflow(generate_config, spinner_col, log_component, None)
 
 with download_python_col:
     download_button(python_code, "generated-code.py", "🐍 Download (.py)")
 
 with download_yaml_col:
     download_button(yaml_code, "generated-config.yaml", "📖 Download (.yaml)")
+

@@ -7,7 +7,7 @@ source:
       _target_: obsei.source.youtube_scrapper.YoutubeScrapperSource
     config:
       _target_: obsei.source.youtube_scrapper.YoutubeScrapperConfig
-      video_url: "https://www.youtube.com/watch?v=uZfns0JIlFk"
+      video_url: "https://www.youtube.com/watch?v=uZfns0JIlFk ; https://www.youtube.com/watch?v=OqEc_169ywY&list=RDQegcGsE9tYE&index=9"
       lookup_period: "1Y"
       max_comments: 10
   Appstore Scrapper:

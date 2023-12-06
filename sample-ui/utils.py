@@ -4,6 +4,8 @@ import pathlib
 import re
 import sys
 import uuid
+from youtube_search import YoutubeSearch
+import json
 
 import streamlit as st
 import yaml
@@ -11,12 +13,12 @@ import yaml
 import inspect
 import textwrap
 
+from bson import ObjectId
 
 from obsei.configuration import ObseiConfiguration
 import pymongo
 import datetime
 import urllib
-
 # Replace these with your server details
 MONGO_HOST = "localhost"
 MONGO_PORT = "27017"
@@ -30,21 +32,31 @@ ct = datetime.datetime.now()
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
+def save_youtube_analyze(generate_config, spinner_col, log_component) :
+    urls = generate_config['source_config']['video_url'].split(";")
+    for url in urls:
+        generate_config['source_config']['video_url'] = url.strip()
+        generate_config['created_at'] = ct
+        save_generate_config(generate_config, spinner_col, log_component)
 
-@st.cache_resource
-def save_generate_config(config_generated):
-    # client = pymongo.MongoClient("mongodb://root:Aa@123456@SERVER_IP/prod-db")
+
+def save_generate_config(config_generated, spinner_col, log_component):
     client = pymongo.MongoClient(uri)
-    # client = pymongo.MongoClient(**st.secrets["mongo"])
     db = client.obsei
     generate_configs_table = db.generate_configs
-    config_generated['created_at'] = ct
 
-    result = generate_configs_table.insert_one(config_generated)
+    try:
+        config_generated["_id"] = ObjectId()  # Generate a unique _id for each document
+        generate_configs_table.insert_one(config_generated)
+        execute_workflow(config_generated, spinner_col, log_component, config_generated["_id"])
 
-    if result.inserted_id:
-        print("Document inserted.")
-        return result.inserted_id
+        print("Documents inserted successfully")
+
+    except pymongo.errors.PyMongoError as e:
+        print("Error:", str(e))
+
+    finally:
+        client.close()
 
 
 def img_to_bytes(img_path):
