@@ -15,6 +15,16 @@ import textwrap
 from obsei.configuration import ObseiConfiguration
 import pymongo
 import datetime
+import urllib
+
+# Replace these with your server details
+MONGO_HOST = "localhost"
+MONGO_PORT = "27017"
+MONGO_DB = "obsei"
+MONGO_USER = "root"
+MONGO_PASS = "Aa@123456"
+
+uri = "mongodb://" + MONGO_USER + ":" + urllib.parse.quote(MONGO_PASS) + "@localhost:27017/"+ MONGO_DB
 
 ct = datetime.datetime.now()
 logger = logging.getLogger(__name__)
@@ -23,7 +33,9 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 @st.cache_resource
 def save_generate_config(config_generated):
-    client = pymongo.MongoClient(**st.secrets["mongo"])
+    # client = pymongo.MongoClient("mongodb://root:Aa@123456@SERVER_IP/prod-db")
+    client = pymongo.MongoClient(uri)
+    # client = pymongo.MongoClient(**st.secrets["mongo"])
     db = client.obsei
     generate_configs_table = db.generate_configs
     config_generated['created_at'] = ct
