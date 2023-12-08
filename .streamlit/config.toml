@@ -1,0 +1,5 @@
+[server]
+port = 8501
+sslCertFile = '/etc/nginx/ssl-certificates/listener.vcontent.info.crt'
+sslKeyFile = '/etc/nginx/ssl-certificates/listener.vcontent.info.key'
+runOnSave = true
