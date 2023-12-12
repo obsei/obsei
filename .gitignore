@@ -146,3 +146,5 @@ models*
 
 # VS code configuration
 .vscode/*
+.venv/
+archive.zip
