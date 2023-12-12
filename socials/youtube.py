@@ -1,0 +1,97 @@
+from database import *
+from utils import save_generate_config, execute_workflow
+from youtube_search import YoutubeSearch
+import json, datetime, re
+
+ct = datetime.datetime.now()
+url_youtube = 'https://www.youtube.com/watch?v='
+
+
+def execute_youtube(config_id, spinner_col, log_component):
+    generate_config = get_generate_config(config_id)
+
+    urls_table = get_list_urls(config_id)
+    for record in urls_table:
+        generate_config['source_config']['video_url'] = record['url']
+        execute_workflow(generate_config, spinner_col, log_component, record["_id"])
+
+
+def save_youtube_analyze(generate_config, spinner_col, log_component, progress_show):
+    try:
+        with client.start_session() as session:
+            # Start a transaction
+            with session.start_transaction():
+                generate_config = save_generate_config(generate_config)
+                generate_config_converted = get_url_video_by_keywords(generate_config)
+                convert_data_urls(generate_config_converted['_id'], generate_config_converted['source_config'])
+                execute_youtube(generate_config_converted['_id'], spinner_col, log_component)
+                session.abort_transaction()
+        client.close()
+
+    except pymongo.errors.PyMongoError as e:
+        print("Error:", str(e))
+
+    except Exception as ex:
+        if progress_show:
+            progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 ({str(ex)})")
+
+        raise ex
+
+
+def get_list_urls(config_id):
+    results = database.urls.find({'generated_config_id': ObjectId(config_id)})
+    return results
+
+
+def get_generate_config(config_id):
+    results = database.generate_configs.find_one({'_id': ObjectId(config_id)})
+    return results
+
+
+def save_urls(object_urls):
+    if object_urls is not None:
+        database.urls.insert_many(object_urls)
+
+
+def convert_data_urls(generated_config_id, source_config):
+    if 'video_url' in source_config:
+        array_urls = []
+        for url in source_config['video_url']:
+            array_url = {'generated_config_id': generated_config_id, 'url': url, 'created_at': ct}
+            array_urls.append(array_url)
+        if len(array_urls) > 0:
+            save_urls(array_urls)
+
+    if 'keywords' in source_config:
+        keywords = source_config['keywords']
+        for keyword in keywords:
+            array_url = []
+            for url in keywords[keyword]:
+                array_url_keyword = {'generated_config_id': generated_config_id, 'keyword': keyword,
+                                     'url': url,
+                                     'created_at': ct}
+                array_url.append(array_url_keyword)
+            if len(array_url) > 0:
+                save_urls(array_url)
+
+
+def get_url_video_by_keywords(generate_config):
+    if 'keywords' not in generate_config['source_config'] or len(generate_config['source_config']['keywords']) == 0:
+        return
+
+    keyword_objects = {}
+    for keyword in generate_config['source_config']['keywords']:
+        if keyword == '':
+            continue
+
+        results = YoutubeSearch(keyword, max_results=int(generate_config['source_config']['max_search_video'])).to_json()
+        results_dict = json.loads(results)
+        list_url = []
+        for video in results_dict['videos']:
+            list_url.append(url_youtube + video['id'])
+
+        keyword_objects[keyword] = list_url
+
+    generate_config['source_config']['keywords'] = keyword_objects
+
+    return generate_config

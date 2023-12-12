@@ -1,4 +1,5 @@
 from utils import *
+from socials.youtube import save_youtube_analyze
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
 configuration = get_obsei_config(current_path, "config.yaml")
@@ -22,14 +23,16 @@ st.title("Obsei").markdown(
 # """
 # )
 
+columns_ui = [2, 2, 2]
+# columns_ui = [2, 2, 1, 1, 1]
 
 (
     pipeline_col,
     spinner_col,
     execute_col,
-    download_python_col,
-    download_yaml_col,
-) = st.columns([2, 2, 1, 1, 1])
+    # download_python_col,
+    # download_yaml_col,
+) = st.columns(columns_ui)
 
 col_map = dict()
 col_map["source"], col_map["analyzer"], col_map["sink"] = st.columns([1, 1, 1])
@@ -88,20 +91,26 @@ yaml_code = generate_yaml(generate_config)
 
 execute_button = execute_col.button("🚀 Execute")
 if execute_button:
-    # results = YoutubeSearch('eminem', max_results=10).to_json()
-    # results_dict = json.loads(results)
-    # for v in results_dict['videos']:
-    #     print('https://www.youtube.com' + v['link'])
-    # print(results_dict)
-    if generate_config['source']['_target_'] == 'obsei.source.youtube_scrapper.YoutubeScrapperSource':
-        save_youtube_analyze(generate_config, spinner_col, log_component)
-    else:
-        execute_workflow(generate_config, spinner_col, log_component, None)
+    progress_show = None
+    if spinner_col:
+        progress_show = spinner_col.empty()
+        progress_show.code("🏄🏄🏄 Processing 🐢🐢🐢")
 
-with download_python_col:
-    download_button(python_code, "generated-code.py", "🐍 Download (.py)")
+        if generate_config['source']['_target_'] == 'obsei.source.youtube_scrapper.YoutubeScrapperSource':
+            save_youtube_analyze(generate_config, spinner_col, log_component, progress_show)
+        else:
+            execute_workflow(generate_config, spinner_col, log_component, None)
 
-with download_yaml_col:
-    download_button(yaml_code, "generated-config.yaml", "📖 Download (.yaml)")
+        if progress_show:
+            progress_show.code("🎉🎉🎉 Processing Complete!! 🍾🍾🍾")
+
+
+#   hiding button download
+#
+# with download_python_col:
+#     download_button(python_code, "generated-code.py", "🐍 Download (.py)")
+#
+# with download_yaml_col:
+#     download_button(yaml_code, "generated-config.yaml", "📖 Download (.yaml)")
     
     

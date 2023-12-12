@@ -3,8 +3,7 @@ from pandas import DataFrame, concat
 from obsei.payload import TextPayload
 from obsei.misc.utils import flatten_dict
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from pymongo import MongoClient
-
+from database import *
 
 class PandasConvertor(Convertor):
     def convert(
@@ -53,13 +52,11 @@ class PandasSink(BaseSink):
                 response = converted_response
 
             if inserted_id is not None:
-                response['generate_config_id'] = inserted_id
+                response['url_id'] = inserted_id
             responses.append(response)
 
         if len(responses) > 0:
-            client = MongoClient("mongodb://localhost:27017")
-            collection = client.obsei.data_analyzed
-            collection.insert_many(responses)
+            database.data_analyzed.insert_many(responses)
 
         if config.dataframe is not None:
             responses_df = DataFrame(responses)

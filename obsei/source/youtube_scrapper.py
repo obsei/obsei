@@ -15,11 +15,13 @@ logger = logging.getLogger(__name__)
 class YoutubeScrapperConfig(BaseSourceConfig):
     _YT_VIDEO_URL: str = PrivateAttr('https://www.youtube.com/watch?v={video_id}')
     TYPE: str = "YoutubeScrapper"
+    keywords: Optional[list] = []
     video_id: Optional[str] = None
     video_url: Optional[str] = None
     user_agent: str = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
     sort_by: int = 1  # 0 = sort by popular, 1 = sort by recent
     max_comments: Optional[int] = 20
+    max_search_video: Optional[int] = 20
     fetch_replies: bool = False
     lang_code: Optional[str] = None
     sleep_time: float = 0.1
@@ -29,8 +31,8 @@ class YoutubeScrapperConfig(BaseSourceConfig):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-        if not self.video_id and not self.video_url:
-            raise ValueError("Either `video_id` or `video_url` is required")
+        if not self.video_id and not self.video_url and not self.keywords:
+            raise ValueError("Either `keywords` or `video_url` is required")
 
         if not self.video_url:
             self.video_url = self._YT_VIDEO_URL.format(video_id=self.video_id)
@@ -65,14 +67,16 @@ class YoutubeScrapperSource(BaseSource):
 
         comments: Optional[List[Dict[str, Any]]] = None
         try:
-            if not config.video_url:
-                raise RuntimeError("`video_url` in config should not be empty or None")
+            if not config.video_url and not config.keywords:
+                raise RuntimeError("`video_url` or `keywords` in config should not be empty or None")
 
             scrapper: YouTubeCommentExtractor = YouTubeCommentExtractor(
+                keywords=config.keywords,
                 video_url=config.video_url,
                 user_agent=config.user_agent,
                 sort_by=config.sort_by,
                 max_comments=config.max_comments,
+                max_search_video=config.max_search_video,
                 fetch_replies=config.fetch_replies,
                 lang_code=config.lang_code,
                 sleep_time=config.sleep_time,

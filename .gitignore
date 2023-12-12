@@ -148,3 +148,5 @@ models*
 .vscode/*
 .venv/
 archive.zip
+
+.streamlit/
