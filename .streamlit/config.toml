@@ -1,6 +1,6 @@
 [server]
 port = 8502
-sslCertFile = '/etc/nginx/ssl-certificates/listener.vcontent.info.crt'
-sslKeyFile = '/etc/nginx/ssl-certificates/listener.vcontent.info.key'
+#sslCertFile = '/etc/nginx/ssl-certificates/listener.vcontent.info.crt'
+#sslKeyFile = '/etc/nginx/ssl-certificates/listener.vcontent.info.key'
 runOnSave = true
 enableCORS = false
