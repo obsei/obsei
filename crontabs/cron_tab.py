@@ -16,7 +16,7 @@ database = client.obsei
 
 cron = CronTab(user=SERVER_USERNAME)
 
-command = "python3 python/obsei/crontabs/youtube.py  >> out.txt  2>&1"
+# command = "python3 python/obsei/crontabs/youtube.py  >> out.txt  2>&1"
 result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
 output = result.stdout
 
@@ -24,7 +24,7 @@ output = result.stdout
 COMAND_DEFINED = 'python3 /htdocs/listener.vcontent.info/crontabs/youtube.py >> out.txt  2>&1 # youtube scrapper'
 COMAND_LOCAL_DEFINED = 'python3 python/obsei/crontabs/youtube.py >> out.txt  2>&1 # youtube scrapper'
 
-if command in output:
+if COMAND_DEFINED in output:
     print("The command is present in the crontab.")
     for job in cron:
         if job.comment == 'youtube scrapper':
