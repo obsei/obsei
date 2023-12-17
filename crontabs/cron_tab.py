@@ -47,8 +47,7 @@ else:
         'type': 'minute',
         'time': 10
     })
-    job = cron.new(command=COMAND_DEFINED,
-                   comment='youtube scrapper')
+    job = cron.new(command=COMAND_DEFINED)
     job.minute.every(10)
     job.enable()
     cron.write()
