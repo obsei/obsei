@@ -3,7 +3,7 @@ import subprocess
 import pymongo
 import urllib
 
-SERVER_USERNAME = 'namtong'
+SERVER_USERNAME = 'vcontent-listener'
 
 # from database import *
 MONGO_DB = "obsei"

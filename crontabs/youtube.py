@@ -6,8 +6,6 @@ import urllib
 from bson import ObjectId
 from obsei.configuration import ObseiConfiguration
 
-MONGO_HOST = "localhost"
-MONGO_PORT = "27017"
 MONGO_DB = "obsei"
 MONGO_USER = "root"
 MONGO_PASS = "Aa@123456"
