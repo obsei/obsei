@@ -20,12 +20,16 @@ command = "python3 python/obsei/crontabs/youtube.py  >> out.txt  2>&1"
 result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
 output = result.stdout
 
+
+COMAND_DEFINED = 'python3 /home/vcontent-listener/htdocs/listener.vcontent.info/crontabs/youtube.py >> out.txt  2>&1'
+COMAND_LOCAL_DEFINED = 'python3 python/obsei/crontabs/youtube.py >> out.txt  2>&1'
+
 if command in output:
     print("The command is present in the crontab.")
     for job in cron:
         if job.comment == 'youtube scrapper':
             database.crontabs.update_one({
-                'command': 'python3 python/obsei/crontabs/youtube.py  >> out.txt  2>&1 # youtube scrapper',
+                'command': COMAND_DEFINED + ' # youtube scrapper',
             }, {'$set': {
                 'type': 'minute',
                 'time': 100
@@ -39,11 +43,11 @@ if command in output:
 else:
     print("The command is not found in the crontab.")
     database.crontabs.insert_one({
-        'command': 'python3 python/obsei/crontabs/youtube.py  >> out.txt  2>&1 # youtube scrapper',
+        'command': COMAND_DEFINED +' # youtube scrapper',
         'type': 'minute',
         'time': 10
     })
-    job = cron.new(command='python3 python/obsei/crontabs/youtube.py  >> out.txt  2>&1',
+    job = cron.new(command=COMAND_DEFINED,
                    comment='youtube scrapper')
     job.minute.every(10)
     job.enable()
