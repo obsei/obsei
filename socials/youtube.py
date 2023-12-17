@@ -57,6 +57,9 @@ def convert_data_urls(generated_config_id, source_config):
     if 'video_url' in source_config:
         array_urls = []
         for url in source_config['video_url']:
+            if url == '':
+                continue
+            
             array_url = {'generated_config_id': generated_config_id, 'url': url, 'created_at': ct}
             array_urls.append(array_url)
         if len(array_urls) > 0:

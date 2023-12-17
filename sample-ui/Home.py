@@ -6,8 +6,8 @@ configuration = get_obsei_config(current_path, "config.yaml")
 logo_url = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
 
 
-st.set_page_config(page_title="Obsei", layout="wide", page_icon=logo_url, initial_sidebar_state="collapsed")
-st.title("Obsei").markdown(
+st.set_page_config(page_title="Data Analysis", layout="wide", page_icon=logo_url, initial_sidebar_state="collapsed")
+st.title("Data Analysis").markdown(
     get_icon_name("Data Analysis", logo_url, 60, 35), unsafe_allow_html=True
 )
 

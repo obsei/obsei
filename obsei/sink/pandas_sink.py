@@ -3,7 +3,19 @@ from pandas import DataFrame, concat
 from obsei.payload import TextPayload
 from obsei.misc.utils import flatten_dict
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
-from database import *
+import pymongo
+from pymongo import InsertOne
+import urllib
+
+# from database import *
+MONGO_DB = "obsei"
+MONGO_USER = "root"
+MONGO_PASS = "Aa@123456"
+
+uri_mongo = "mongodb://" + MONGO_USER + ":" + urllib.parse.quote(MONGO_PASS) + "@localhost:27017/" + MONGO_DB
+client = pymongo.MongoClient(uri_mongo)
+database = client.obsei
+
 
 class PandasConvertor(Convertor):
     def convert(
@@ -56,7 +68,28 @@ class PandasSink(BaseSink):
             responses.append(response)
 
         if len(responses) > 0:
-            database.data_analyzed.insert_many(responses)
+            bulk_operations = []
+            for record in responses:
+                meta_comment_id = record['meta_comment_id']
+                existing_record = database.data_analyzed.find_one({'meta_comment_id': meta_comment_id})
+
+                if existing_record is None:
+                    bulk_operations.append(InsertOne(record))
+                else:
+                    print(f"Skipped record: {meta_comment_id} (already exists)")
+
+            # Execute bulk operations for non-existing records
+            if bulk_operations:
+                result = database.data_analyzed.bulk_write(bulk_operations)
+                print("Inserted Count:", result.inserted_count)
+
+            # array = []
+            # for response in responses:
+            #     array.append(
+            #         UpdateOne({'meta_comment_id': response['meta_comment_id']}, {'$set': response}, upsert=True))
+            # result = database.data_analyzed.bulk_write(array)
+            # print("Upserted Count:", result.upserted_count)
+            # print("Modified Count:", result.modified_count)
 
         if config.dataframe is not None:
             responses_df = DataFrame(responses)

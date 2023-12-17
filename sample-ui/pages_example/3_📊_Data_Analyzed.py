@@ -26,43 +26,64 @@ from urllib.error import URLError
 from IPython.display import HTML
 
 def data_frame():
-    @st.cache_resource
+    def make_clickable(val):
+        return '<a href="{}">{}</a>'.format(val, val)
+
+    # @st.cache_resource
     def get_data_analyzed():
-        results = database['data_analyzed'].find({}, {
-            'processed_text',
-            'segmented_data_classifier_data_positive',
-            'segmented_data_classifier_data_negative',
-            'meta_comment_id',
-            'meta_text',
-            'meta_time',
-            'meta_author',
-            'meta_channel',
-            'meta_votes',
-            'meta_photo',
-            'meta_heart',
-            'source_name',
-        })
+        results = database.data_analyzed.aggregate([
+            {
+                '$lookup': {
+                    'from': 'urls',
+                    'localField': 'url_id',
+                    'foreignField': '_id',
+                    'as': 'joined_data'
+                }
+            },
+            {
+                '$unwind': '$joined_data'  # Optional: Unwind the joined array if needed
+            }
+        ])
+
         arrays = []
         counter = 0
         for record in results:
+            url = ''
+            keyword = ''
+            if 'joined_data' in record:
+                url = record['joined_data']['url']
+                if 'keyword' in record['joined_data']:
+                    keyword = record['joined_data']['keyword']
+
             counter += 1
             record['_id'] = counter
+            record['url'] = url
+            record['keyword'] = keyword
+            del record['joined_data']
+            del record['meta_text']
+            del record['meta_comment_id']
+            del record['meta_photo']
+            del record['url_id']
+            del record['source_name']
             arrays.append(record)
 
         df = pd.DataFrame(arrays)
-
-        df['meta_photo'] = df['meta_photo'].apply(lambda x: f'<img src="{x}" style="max-height:124px;">')
+        df.style.format(make_clickable)
 
         HTML(df.to_html(escape=False))
 
-        return df.set_index("source_name")
+        return df.set_index('title')
 
     try:
         df = get_data_analyzed()
 
         analyzers = st.multiselect(
-            "Choose Analyzer", list(set(list(df.index))), ['YoutubeScrapper']
+            "Choose Analyzer", list(set(list(df.index))), [list(set(list(df.index)))[0]]
         )
+
+        # analyzer_urls = st.multiselect(
+        #     "Choose URLs", list(set(list(df.index))), ['1']
+        # )
         if not analyzers:
             st.error("Please select at least one analyzer.")
         else:
@@ -87,7 +108,7 @@ def data_frame():
     except URLError as e:
         st.error(
             """
-            **This demo requires internet access.**
+            **This UI requires internet access.**
             Connection error: %s
         """
             % e.reason

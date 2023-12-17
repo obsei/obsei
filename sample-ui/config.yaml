@@ -1,5 +1,5 @@
 source:
-  Youtube Scrapper:
+  Youtube:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/Youtube.png"
     _help_:
       - '`keywords` is top Youtube video searched by this keyword.'
@@ -9,15 +9,13 @@ source:
     config:
       _target_: obsei.source.youtube_scrapper.YoutubeScrapperConfig
       keywords:
-        - 'trending reels'
-        - 'trending video'
+        - ''
       video_url:
-       - 'https://www.youtube.com/watch?v=uZfns0JIlFk'
-       - 'https://www.youtube.com/watch?v=GTF-Hy96gvY'
+       - ''
       lookup_period: "1Y"
       max_comments: 10
       max_search_video: 10
-  Appstore Scrapper:
+  Appstore:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/appstore.png"
     _help_:
       - '`app_url` is application url on app store.
@@ -29,7 +27,7 @@ source:
       app_url: "https://apps.apple.com/us/app/gmail-email-by-google/id422689480"
       lookup_period: "1h"
       max_count: 5
-  Playstore Scrapper:
+  Playstore:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/playstore.png"
     _help_:
       - '`app_url` is application url on play store'
@@ -41,7 +39,7 @@ source:
       app_url: "https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en_IN&gl=US"
       lookup_period: "1h"
       max_count: 5
-  Maps Reviews Scrapper:
+  Maps Reviews:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/google_maps.png"
     _help_:
       - 'Collect `api_key` from https://outscraper.com/'
@@ -56,7 +54,7 @@ source:
       queries:
         - "https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"
       number_of_reviews: 5
-  Reddit Scrapper:
+  Reddit URL:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
     _help_:
       - 'Reddit subreddit, search etc rss url. For proper url refer following link -'
@@ -147,7 +145,7 @@ source:
       max_results: 3
       lookup_period: "1d"
       fetch_article: true
-  Website Crawler:
+  Website:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/webcrawler.png"
     _help_:
       - '`package name` can be found at the end of the url of app in play store.'
@@ -161,7 +159,7 @@ source:
       urls:
         - 'https://obsei.github.io/obsei/'
 sink:
-  Panda Dataframe:
+  Save Data Analysis:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/pandas.svg"
     _help_: null
     sink:

@@ -83,7 +83,7 @@ def get_obsei_config(current_path, file_name):
 
 
 @st.cache_data
-def get_icon_name(name, icon = '', icon_size=40, font_size=1):
+def get_icon_name(name, icon='', icon_size=40, font_size=1):
     if not name:
         return f'<img style="vertical-align:middle;margin:5px 5px" src="{icon}" width="{icon_size}" height="{icon_size}">'
     return (
@@ -92,6 +92,7 @@ def get_icon_name(name, icon = '', icon_size=40, font_size=1):
         f"{name}</p>"
         """
         <style>
+            [data-testid="stSidebar"],
             .st-emotion-cache-iiif1v,
             header {
               display: none !important;
@@ -226,7 +227,7 @@ def execute_workflow(generate_config, component=None, log_components=None, inser
             log_components["sink"].write("No Data")
 
         # if progress_show:
-            # progress_show.code("🎉🎉🎉 Processing Complete!! 🍾🍾🍾")
+        # progress_show.code("🎉🎉🎉 Processing Complete!! 🍾🍾🍾")
     except Exception as ex:
         if progress_show:
             progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 ({str(ex)})")
