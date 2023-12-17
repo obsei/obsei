@@ -90,18 +90,6 @@ def get_icon_name(name, icon='', icon_size=40, font_size=1):
         f'<p style="font-size:{font_size}px">'
         # f'<img style="vertical-align:middle;margin:1px 5px" src="{icon}" width="{icon_size}" height="{icon_size}">'
         f"{name}</p>"
-        """
-        <style>
-            [data-testid="stSidebar"],
-            .st-emotion-cache-iiif1v,
-            header {
-              display: none !important;
-            }
-            .st-emotion-cache-z5fcl4 {
-                padding-top: 0
-            }
-        </style>
-        """
     )
 
 
@@ -192,7 +180,7 @@ def generate_yaml(generate_config):
 
 
 def execute_workflow(generate_config, component=None, log_components=None, inserted_id=None):
-    progress_show = None
+progress_show = None
 
     # if component:
     #     progress_show = component.empty()
