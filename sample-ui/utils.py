@@ -180,7 +180,7 @@ def generate_yaml(generate_config):
 
 
 def execute_workflow(generate_config, component=None, log_components=None, inserted_id=None):
-progress_show = None
+    # progress_show = None
 
     # if component:
     #     progress_show = component.empty()
