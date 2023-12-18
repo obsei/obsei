@@ -8,6 +8,9 @@ url_youtube = 'https://www.youtube.com/watch?v='
 
 
 def execute_youtube(config_id, spinner_col, log_component):
+    # đánh index cho các cột cần search
+    # vidu:db.data_analyzed.createIndex({ processed_text: "text"})
+    # lưu thêm user_id vào các bảng theo user_id trên url
     generate_config = get_generate_config(config_id)
 
     urls_table = get_list_urls(config_id)
