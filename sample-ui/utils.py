@@ -82,7 +82,7 @@ def get_obsei_config(current_path, file_name):
     ).configuration
 
 
-@st.cache_data
+# @st.cache_data
 def get_icon_name(name, icon='', icon_size=40, font_size=1):
     if not name:
         return f'<img style="vertical-align:middle;margin:5px 5px" src="{icon}" width="{icon_size}" height="{icon_size}">'
