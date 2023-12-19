@@ -20,6 +20,16 @@ def execute_youtube(config_id, log_component):
 
 
 def save_youtube_analyze(generate_config, log_component, progress_show):
+    filtered_keywords = [value for value in generate_config['source_config']['keywords'] if value != '']
+    filtered_video_url = [value for value in generate_config['source_config']['video_url'] if value != '']
+
+    if progress_show and len(filtered_keywords) == 0 and len(filtered_video_url) == 0:
+        progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 (`video_url` or `keywords` in config should not "
+                           f"be empty or None)")
+        progress_show = None
+
+        return progress_show
+
     try:
         with client.start_session() as session:
             # Start a transaction
@@ -39,6 +49,8 @@ def save_youtube_analyze(generate_config, log_component, progress_show):
             progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 ({str(ex)})")
 
         raise ex
+
+    return progress_show
 
 
 def get_list_urls(config_id):

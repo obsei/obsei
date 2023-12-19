@@ -118,7 +118,7 @@ def data_frame():
 st.set_page_config(page_title="Data Analyzed", page_icon="📊", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("# Data Analyzed")
 st.markdown(
-    get_icon_name("Data Analysis"), unsafe_allow_html=True
+    get_icon_name("Data Social Listener"), unsafe_allow_html=True
 )
 
 st.sidebar.header("Data Analyzed")

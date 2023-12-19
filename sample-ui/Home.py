@@ -1,26 +1,16 @@
 from utils import *
 from socials.youtube import save_youtube_analyze
+import sys
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
 configuration = get_obsei_config(current_path, "config.yaml")
 logo_url = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
 
-st.set_page_config(page_title="Data Analysis", layout="wide", page_icon=logo_url, initial_sidebar_state="collapsed")
-st.title("Data Analysis").markdown(
-    get_icon_name("Data Analysis", logo_url, 60, 35), unsafe_allow_html=True
+st.set_page_config(page_title="Social Listener", layout="wide", page_icon=logo_url, initial_sidebar_state="collapsed")
+st.title("Data Social Listener").markdown(
+    get_icon_name("Social Listener", logo_url, 60, 35), unsafe_allow_html=True
 )
 
-# st.success(
-#     """
-# Please ⭐ the repo and share the feedback at https://github.com/obsei/obsei?utm_source=streamlit
-#     """
-# )
-# st.warning(
-#     """
-# **Note:** Demo run will require some secure information based on source or sink selected,
-# if you don't trust this environment please close the app.
-# """
-# )
 
 columns_ui = [2, 2, 2]
 # columns_ui = [2, 2, 1, 1, 1]
@@ -90,32 +80,19 @@ yaml_code = generate_yaml(generate_config)
 
 execute_button = execute_col.button("🚀 Execute")
 if execute_button:
-    progress_show = None
-    if spinner_col:
-        progress_show = spinner_col.empty()
-        progress_show.code("🏄🏄🏄 Processing 🐢🐢🐢")
+    if spinner_col is None:
+        sys.exit()
 
-        params = st.experimental_get_query_params()
+    progress_show = spinner_col.empty()
+    progress_show.code("🏄🏄🏄 Processing 🐢🐢🐢")
 
-        if 'uid' in params:
-            generate_config['user_id'] = params['uid'][0]
-        else:
-            progress_show = False
-            progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 (Please login Vplaner)")
-            print("No 'uid' parameter found in the URL.")
+    params = st.experimental_get_query_params()
+    progress_show = check_system(generate_config, params, progress_show)
 
-        if generate_config['source']['_target_'] == 'obsei.source.youtube_scrapper.YoutubeScrapperSource':
-            save_youtube_analyze(generate_config, log_component, progress_show)
-        else:
-            execute_workflow(generate_config, log_component, None, None, progress_show)
+    if generate_config['source']['_target_'] == 'obsei.source.youtube_scrapper.YoutubeScrapperSource':
+        progress_show = save_youtube_analyze(generate_config, log_component, progress_show)
+    else:
+        execute_workflow(generate_config, log_component, None, None, progress_show)
 
-        if progress_show:
-            progress_show.code("🎉🎉🎉 Processing Complete!! 🍾🍾🍾")
-
-#   hiding button download
-#
-# with download_python_col:
-#     download_button(python_code, "generated-code.py", "🐍 Download (.py)")
-#
-# with download_yaml_col:
-#     download_button(yaml_code, "generated-config.yaml", "📖 Download (.yaml)")
+    if progress_show:
+        progress_show.code("🎉🎉🎉 Processing Complete!! 🍾🍾🍾")

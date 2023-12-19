@@ -216,6 +216,17 @@ def execute_workflow(generate_config, log_components=None, inserted_id=None, use
         raise ex
 
 
+def check_system(generate_config, params, progress_show):
+    if 'uid' in params:
+        generate_config['user_id'] = params['uid'][0]
+    else:
+        progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 (Please login Vplaner)")
+        progress_show = None
+        print("No 'uid' parameter found in the URL.")
+
+    return progress_show
+
+
 def show_code(demo):
     """Showing the code of the demo."""
     show_code = st.sidebar.checkbox("Show code", True)

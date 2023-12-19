@@ -6,6 +6,9 @@ from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
 import pymongo
 from pymongo import InsertOne
 import urllib
+import datetime
+
+now = datetime.datetime.now()
 
 # from database import *
 MONGO_DB = "obsei"
@@ -65,6 +68,7 @@ class PandasSink(BaseSink):
             else:
                 response = converted_response
 
+            response['created_at'] = now
             if inserted_id is not None:
                 response['url_id'] = inserted_id
 
@@ -75,7 +79,8 @@ class PandasSink(BaseSink):
 
         if len(responses) > 0:
             bulk_operations = []
-            database.data_analyzed.create_index('processed_text')
+
+            database.data_analyzed.create_index([('processed_text', pymongo.TEXT), ], name='text_index')
 
             for record in responses:
                 meta_comment_id = record['meta_comment_id']
@@ -84,13 +89,13 @@ class PandasSink(BaseSink):
                 if existing_record is None:
                     bulk_operations.append(InsertOne(record))
                 else:
+                    database.data_analyzed.update_one({'meta_comment_id': meta_comment_id}, {'$set': record})
                     print(f"Skipped record: {meta_comment_id} (already exists)")
 
             # Execute bulk operations for non-existing records
             if bulk_operations:
                 result = database.data_analyzed.bulk_write(bulk_operations)
                 print("Inserted Count:", result.inserted_count)
-
 
         if config.dataframe is not None:
             responses_df = DataFrame(responses)
