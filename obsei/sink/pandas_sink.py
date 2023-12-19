@@ -50,7 +50,9 @@ class PandasSink(BaseSink):
             self,
             analyzer_responses: List[TextPayload],
             config: PandasSinkConfig,
-            inserted_id=None
+            inserted_id=None,
+            user_id=None
+
     ) -> Any:
         responses = []
         for analyzer_response in analyzer_responses:
@@ -65,10 +67,16 @@ class PandasSink(BaseSink):
 
             if inserted_id is not None:
                 response['url_id'] = inserted_id
+
+            if user_id is not None:
+                response['user_id'] = user_id
+
             responses.append(response)
 
         if len(responses) > 0:
             bulk_operations = []
+            database.data_analyzed.create_index('processed_text')
+
             for record in responses:
                 meta_comment_id = record['meta_comment_id']
                 existing_record = database.data_analyzed.find_one({'meta_comment_id': meta_comment_id})
@@ -83,13 +91,6 @@ class PandasSink(BaseSink):
                 result = database.data_analyzed.bulk_write(bulk_operations)
                 print("Inserted Count:", result.inserted_count)
 
-            # array = []
-            # for response in responses:
-            #     array.append(
-            #         UpdateOne({'meta_comment_id': response['meta_comment_id']}, {'$set': response}, upsert=True))
-            # result = database.data_analyzed.bulk_write(array)
-            # print("Upserted Count:", result.upserted_count)
-            # print("Modified Count:", result.modified_count)
 
         if config.dataframe is not None:
             responses_df = DataFrame(responses)

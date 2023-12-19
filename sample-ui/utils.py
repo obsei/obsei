@@ -179,12 +179,7 @@ def generate_yaml(generate_config):
     return yaml.dump(generate_config)
 
 
-def execute_workflow(generate_config, component=None, log_components=None, inserted_id=None):
-    # progress_show = None
-
-    # if component:
-    #     progress_show = component.empty()
-    #     progress_show.code("🏄🏄🏄 Processing 🐢🐢🐢")
+def execute_workflow(generate_config, log_components=None, inserted_id=None, user_id=None, progress_show=None):
     try:
         obsei_configuration = ObseiConfiguration(configuration=generate_config)
 
@@ -205,7 +200,7 @@ def execute_workflow(generate_config, component=None, log_components=None, inser
         )
         log_components["analyzer"].write([vars(response) for response in analyzer_response_list])
 
-        sink_response_list = sink.send_data(analyzer_response_list, sink_config, inserted_id)
+        sink_response_list = sink.send_data(analyzer_response_list, sink_config, inserted_id, user_id)
 
         if sink.TYPE == 'Pandas':
             log_components["sink"].write(sink_response_list)
@@ -214,8 +209,6 @@ def execute_workflow(generate_config, component=None, log_components=None, inser
         else:
             log_components["sink"].write("No Data")
 
-        # if progress_show:
-        # progress_show.code("🎉🎉🎉 Processing Complete!! 🍾🍾🍾")
     except Exception as ex:
         if progress_show:
             progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 ({str(ex)})")

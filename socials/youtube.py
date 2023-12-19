@@ -7,7 +7,7 @@ ct = datetime.datetime.now()
 url_youtube = 'https://www.youtube.com/watch?v='
 
 
-def execute_youtube(config_id, spinner_col, log_component):
+def execute_youtube(config_id, log_component):
     # đánh index cho các cột cần search
     # vidu:db.data_analyzed.createIndex({ processed_text: "text"})
     # lưu thêm user_id vào các bảng theo user_id trên url
@@ -16,10 +16,10 @@ def execute_youtube(config_id, spinner_col, log_component):
     urls_table = get_list_urls(config_id)
     for record in urls_table:
         generate_config['source_config']['video_url'] = record['url']
-        execute_workflow(generate_config, spinner_col, log_component, record["_id"])
+        execute_workflow(generate_config, log_component, record["_id"], generate_config['user_id'])
 
 
-def save_youtube_analyze(generate_config, spinner_col, log_component, progress_show):
+def save_youtube_analyze(generate_config, log_component, progress_show):
     try:
         with client.start_session() as session:
             # Start a transaction
@@ -27,7 +27,7 @@ def save_youtube_analyze(generate_config, spinner_col, log_component, progress_s
                 generate_config = save_generate_config(generate_config)
                 generate_config_converted = get_url_video_by_keywords(generate_config)
                 convert_data_urls(generate_config_converted['_id'], generate_config_converted['source_config'])
-                execute_youtube(generate_config_converted['_id'], spinner_col, log_component)
+                execute_youtube(generate_config_converted['_id'], log_component)
                 session.abort_transaction()
         client.close()
 
@@ -62,7 +62,7 @@ def convert_data_urls(generated_config_id, source_config):
         for url in source_config['video_url']:
             if url == '':
                 continue
-            
+
             array_url = {'generated_config_id': generated_config_id, 'url': url, 'created_at': ct}
             array_urls.append(array_url)
         if len(array_urls) > 0:
@@ -90,7 +90,8 @@ def get_url_video_by_keywords(generate_config):
         if keyword == '':
             continue
 
-        results = YoutubeSearch(keyword, max_results=int(generate_config['source_config']['max_search_video'])).to_json()
+        results = YoutubeSearch(keyword,
+                                max_results=int(generate_config['source_config']['max_search_video'])).to_json()
         results_dict = json.loads(results)
         list_url = []
         for video in results_dict['videos']:
