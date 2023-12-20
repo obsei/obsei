@@ -1,5 +1,7 @@
 import logging
 from datetime import datetime
+# pip3 install searchtweets-v2
+#pip install vaderSentiment
 
 import pytz
 import requests

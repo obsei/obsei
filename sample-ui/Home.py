@@ -1,5 +1,6 @@
 from utils import *
 from socials.youtube import save_youtube_analyze
+from socials.play_app_store import save_analyze
 import sys
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
@@ -10,7 +11,6 @@ st.set_page_config(page_title="Social Listener", layout="wide", page_icon=logo_u
 st.title("Data Social Listener").markdown(
     get_icon_name("Social Listener", logo_url, 60, 35), unsafe_allow_html=True
 )
-
 
 columns_ui = [2, 2, 2]
 # columns_ui = [2, 2, 1, 1, 1]
@@ -91,6 +91,9 @@ if execute_button:
 
     if generate_config['source']['_target_'] == 'obsei.source.youtube_scrapper.YoutubeScrapperSource':
         progress_show = save_youtube_analyze(generate_config, log_component, progress_show)
+    if generate_config['source']['_target_'] == 'obsei.source.appstore_scrapper.AppStoreScrapperSource' or \
+            generate_config['source']['_target_'] == 'obsei.source.playstore_scrapper.PlayStoreScrapperSource':
+        progress_show = save_analyze(generate_config, log_component, progress_show)
     else:
         execute_workflow(generate_config, log_component, None, None, progress_show)
 
