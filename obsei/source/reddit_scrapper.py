@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 import mmh3
 from pydantic import PrivateAttr
 from reddit_rss_reader.reader import RedditContent, RedditRSSReader
-
+# pip install reddit_rss_reader
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.payload import TextPayload
 from obsei.misc.utils import (

@@ -15,6 +15,7 @@ from obsei.misc.utils import (
 )
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 
+import pytz
 
 class RedditCredInfo(BaseSettings):
     # Create credential at https://www.reddit.com/prefs/apps
@@ -119,9 +120,13 @@ class RedditSource(BaseSource):
                 if config.include_post_meta:
                     comment_data[config.post_meta_field] = post_data
 
-                comment_time = datetime.utcfromtimestamp(
-                    int(comment_data["created_utc"])
-                )
+                # comment_time = datetime.utcfromtimestamp(
+                #     int(comment_data["created_utc"])
+                # )
+
+                comment_time = datetime.utcfromtimestamp(int(comment_data["created_utc"]))
+                comment_time = pytz.utc.localize(comment_time)  # Convert to offset-aware datetime using UTC timezone
+
                 comment_id = comment_data["id"]
 
                 if comment_time < since_time:

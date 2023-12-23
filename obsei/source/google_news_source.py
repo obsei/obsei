@@ -16,7 +16,7 @@ from obsei.source.website_crawler_source import (
 
 GOOGLE_DATE_TIME_QUERY_PATTERN = "%Y-%m-%d"
 
-
+# pip install trafilatura
 class GoogleNewsConfig(BaseSourceConfig):
     _google_news_client: GNews = PrivateAttr()
     TYPE: str = "GoogleNews"

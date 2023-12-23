@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import Field, PrivateAttr
 from pydantic_settings import BaseSettings
 from pydantic.types import SecretStr
-
+#pip install python-facebook-api
 from pyfacebook import FacebookApi
 
 from obsei.misc.utils import (

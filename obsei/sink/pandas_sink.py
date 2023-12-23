@@ -43,36 +43,35 @@ class PandasSinkConfig(BaseSinkConfig):
         self.dataframe = self.dataframe or DataFrame()
 
 
-def save_analysis(responses):
+def save_analysis(record, key, bulk_operations):
+    item = record[key]
+    existing_record = database.data_analyzed.find_one({key: item})
+    if existing_record is None:
+        bulk_operations.append(InsertOne(record))
+    else:
+        database.data_analyzed.update_one({key: item}, {'$set': record})
+        print(f"Skipped record: {item} (already exists)")
+
+def prepare_data_analysis(responses):
     bulk_operations = []
     if len(responses) > 0:
         database.data_analyzed.create_index([('processed_text', pymongo.TEXT), ], name='text_index')
 
     for record in responses:
         if record['source_name'] == 'YoutubeScrapper':
-            meta_comment_id = record['meta_comment_id']
-            existing_record = database.data_analyzed.find_one({'meta_comment_id': record['meta_comment_id']})
-            if existing_record is None:
-                bulk_operations.append(InsertOne(record))
-            else:
-                database.data_analyzed.update_one({'meta_comment_id': meta_comment_id}, {'$set': record})
-                print(f"Skipped record: {meta_comment_id} (already exists)")
+            save_analysis(record, 'meta_comment_id', bulk_operations)
 
-        if record['source_name'] == 'AppStoreScrapper':
-            existing_record = database.data_analyzed.find_one({'meta_id': record['meta_id']})
-            if existing_record is None:
-                bulk_operations.append(InsertOne(record))
-            else:
-                database.data_analyzed.update_one({'meta_id': record['meta_id']}, {'$set': record})
-                print(f"Skipped record: {record['meta_id']} (already exists)")
+        if record['source_name'] == 'AppStoreScrapper' or record['source_name'] == 'RedditScrapper':
+            save_analysis(record, 'meta_id', bulk_operations)
 
         if record['source_name'] == 'PlayStoreScrapper':
-            existing_record = database.data_analyzed.find_one({'meta_reviewId': record['meta_reviewId']})
-            if existing_record is None:
-                bulk_operations.append(InsertOne(record))
-            else:
-                database.data_analyzed.update_one({'meta_reviewId': record['meta_reviewId']}, {'$set': record})
-                print(f"Skipped record: {record['meta_reviewId']} (already exists)")
+            save_analysis(record, 'meta_reviewId', bulk_operations)
+
+        if record['source_name'] == 'GoogleNews':
+            save_analysis(record, 'meta_url', bulk_operations)
+
+        if record['source_name'] == 'Crawler':
+            save_analysis(record, 'meta_source', bulk_operations)
 
     # Execute bulk operations for non-existing records
     if bulk_operations:
@@ -113,7 +112,7 @@ class PandasSink(BaseSink):
                 response['user_id'] = user_id
 
             responses.append(response)
-            save_analysis(responses)
+            prepare_data_analysis(responses)
 
         if config.dataframe is not None:
             responses_df = DataFrame(responses)

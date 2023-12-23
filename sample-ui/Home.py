@@ -1,6 +1,9 @@
 from utils import *
 from socials.youtube import save_youtube_analyze
 from socials.play_app_store import save_analyze
+from socials.google_news import save_google_news_analyze
+from socials.crawler import save_crawler_analyze
+from socials.reddit_rss import save_reddit_rss_analyze
 import sys
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
@@ -91,9 +94,20 @@ if execute_button:
 
     if generate_config['source']['_target_'] == 'obsei.source.youtube_scrapper.YoutubeScrapperSource':
         progress_show = save_youtube_analyze(generate_config, log_component, progress_show)
+
     if generate_config['source']['_target_'] == 'obsei.source.appstore_scrapper.AppStoreScrapperSource' or \
             generate_config['source']['_target_'] == 'obsei.source.playstore_scrapper.PlayStoreScrapperSource':
         progress_show = save_analyze(generate_config, log_component, progress_show)
+
+    if generate_config['source']['_target_'] == 'obsei.source.google_news_source.GoogleNewsSource':
+        progress_show = save_google_news_analyze(generate_config, log_component, progress_show)
+
+    if generate_config['source']['_target_'] == 'obsei.source.website_crawler_source.TrafilaturaCrawlerSource':
+        progress_show = save_crawler_analyze(generate_config, log_component, progress_show)
+
+    if generate_config['source']['_target_'] == 'obsei.source.reddit_scrapper.RedditScrapperSource':
+        progress_show = save_reddit_rss_analyze(generate_config, log_component, progress_show)
+
     else:
         execute_workflow(generate_config, log_component, None, None, progress_show)
 

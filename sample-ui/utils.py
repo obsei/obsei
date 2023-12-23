@@ -227,6 +227,10 @@ def check_system(generate_config, params, progress_show):
     return progress_show
 
 
+def get_list_urls(config_id):
+    results = database.urls.find({'generated_config_id': ObjectId(config_id)})
+    return results
+
 def show_code(demo):
     """Showing the code of the demo."""
     show_code = st.sidebar.checkbox("Show code", True)

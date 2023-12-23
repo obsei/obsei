@@ -1,5 +1,5 @@
 from database import *
-from utils import save_generate_config, execute_workflow
+from utils import save_generate_config, execute_workflow, get_list_urls
 from youtube_search import YoutubeSearch
 import json, datetime, re
 
@@ -51,11 +51,6 @@ def save_youtube_analyze(generate_config, log_component, progress_show):
         raise ex
 
     return progress_show
-
-
-def get_list_urls(config_id):
-    results = database.urls.find({'generated_config_id': ObjectId(config_id)})
-    return results
 
 
 def get_generate_config(config_id):

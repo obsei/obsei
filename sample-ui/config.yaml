@@ -1,4 +1,36 @@
 source:
+  #  Reddit:
+  #    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
+  #    _help_:
+  #      - 'Reddit account `username` and `password` require'
+  #      - 'Enter list of `subreddits`'
+  #    source:
+  #      _target_: obsei.source.reddit_source.RedditSource
+  #    config:
+  #      _target_: obsei.source.reddit_source.RedditConfig
+  #      subreddits:
+  #        - 'wallstreetbets'
+  #      cred_info:
+  #        _target_: obsei.source.reddit_source.RedditCredInfo
+  #        username: 'WolverineFun2585'
+  #        password: 'Vdt@#2023'
+  #        client_id: 'YbKwnAy4VTDfJ1scPuq_SA'
+  #        client_secret: 'eb07MnV9FlvMbCEw2zxnVkJeTn0zfA'
+  #      lookup_period: "1h"
+
+  Reddit RSS URL:
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
+    _help_:
+      - 'Reddit subreddit, search etc rss url. For proper url refer following link -'
+      - 'https://www.reddit.com/r/pathogendavid/comments/tv8m9/pathogendavids_guide_to_rss_and_reddit/'
+    source:
+      _target_: obsei.source.reddit_scrapper.RedditScrapperSource
+    config:
+      _target_: obsei.source.reddit_scrapper.RedditScrapperConfig
+      url:
+        - 'https://www.reddit.com/r/wallstreetbets/comments/.rss?sort=new'
+        - 'https://www.reddit.com/r/me_irl/.rss?sort=new'
+      lookup_period: "1h"
   #  Facebook:
   #    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png"
   #    _help_:
@@ -18,24 +50,69 @@ source:
   #        app_id: '2090150478011935'
   #        app_secret: '4eebfada4ac229f829ae8487df8c0e95'
   #        long_term_token: 'EAAdsZBxTE3h8BO2qE4VNHPBIL8BFsovvkc6fxnhM487i3Xp8c1wZA2j9QCVYvOYZCIU4yrTZCgPNb2IOt3jS3lsZAsLkAO9IajeSnjne5YxsLGEralluJnUA05XDjQH7pNXZAZBkZColYH66RGKi6uOAI1CWhnzOI9WEpRQNaDsmyJ2jB1U3ZBDUC1NGQZBcCfWRaq'
-  Twitter:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/twitter.png"
+  Website:
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/webcrawler.png"
     _help_:
-      - '`query` accept search string, @user or #hashtags also'
+      - '`package name` can be found at the end of the url of app in play store.'
       - ''
-      - 'Need twitter `consumer key` and `secret`, get it from https://developer.twitter.com/en/apply-for-access'
+      - 'For example - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en&gl=US'
+      - '`com.google.android.gm` is the `package name` for xcode and `us` is `country`.'
     source:
-      _target_: obsei.source.twitter_source.TwitterSource
+      _target_: obsei.source.website_crawler_source.TrafilaturaCrawlerSource
     config:
-      _target_: obsei.source.twitter_source.TwitterSourceConfig
-      query: "@fasc1nate"
-      lookup_period: "10h"
-      max_tweets: 10
-      cred_info:
-        _target_: obsei.source.twitter_source.TwitterCredentials
-        consumer_key: 'Y3qNoghkoFpMAUW8d2AeeqBT6'
-        consumer_secret: 'X9kmrtTSL1OOkSkCBZe4IIAGjFEzrBb0CrxTM4dotHMQ4eEY6a'
-          
+      _target_: obsei.source.website_crawler_source.TrafilaturaCrawlerConfig
+      urls:
+        - 'https://vnexpress.net/'
+        - 'https://dantri.com.vn/'
+  #  Email:
+  #    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/gmail.png"
+  #    _help_:
+  #      - 'List of IMAP servers for most commonly used email providers https://www.systoolsgroup.com/imap/'
+  #      - ''
+  #      - 'Also, if you are using a `Gmail` account then make sure you allow less secure apps on your account'
+  #      - 'https://myaccount.google.com/lesssecureapps?pli=1'
+  #      - 'Also enable IMAP access - https://mail.google.com/mail/u/0/#settings/fwdandpop'
+  #    source:
+  #      _target_: obsei.source.email_source.EmailSource
+  #    config:
+  #      _target_: obsei.source.email_source.EmailConfig
+  #      imap_server: 'imap.gmail.com'
+  #      cred_info:
+  #        _target_: obsei.source.email_source.EmailCredInfo
+  #        username: 'gvaswomen@gmail.com'
+  #        password: 'Vdt@2023'
+  #      lookup_period: "1h"
+  Google News:
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/googlenews.png"
+    _help_:
+      - '`fetch_article` use crawler to fetch full article'
+    source:
+      _target_: obsei.source.google_news_source.GoogleNewsSource
+    config:
+      _target_: obsei.source.google_news_source.GoogleNewsConfig
+      query:
+        - "bitcoin"
+      max_results: 3
+      lookup_period: "1d"
+      fetch_article: true
+  #  Twitter:
+  #    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/twitter.png"
+  #    _help_:
+  #      - '`query` accept search string, @user or #hashtags also'
+  #      - ''
+  #      - 'Need twitter `consumer key` and `secret`, get it from https://developer.twitter.com/en/apply-for-access'
+  #    source:
+  #      _target_: obsei.source.twitter_source.TwitterSource
+  #    config:
+  #      _target_: obsei.source.twitter_source.TwitterSourceConfig
+  #      query: "@GvasWomen54241"
+  #      lookup_period: "10h"
+  #      max_tweets: 10
+  #      cred_info:
+  #        _target_: obsei.source.twitter_source.TwitterCredentials
+  #        consumer_key: 'atJNVcbPD7yGebjQwdBJPtieQ'
+  #        consumer_secret: '9hkfWQML1DMjv0x0bfslN7QNdL87NEhK0fcRXWClK7495hNYwg'
+
   Youtube:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/Youtube.png"
     _help_:
@@ -81,93 +158,23 @@ source:
 
 
 
-  #  Maps Reviews:
-  #    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/google_maps.png"
-  #    _help_:
-  #      - 'Collect `api_key` from https://outscraper.com/'
-  #      - ''
-  #      - 'For `queries` enter google maps urls or place ids, for example'
-  #      - "https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"
-  #    source:
-  #      _target_: obsei.source.google_maps_reviews.OSGoogleMapsReviewsSource
-  #    config:
-  #      _target_: obsei.source.google_maps_reviews.OSGoogleMapsReviewsConfig
-  #      api_key: ''
-  #      queries:
-  #        - "https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"
-  #      number_of_reviews: 5
-  #  Reddit URL:
-  #    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
-  #    _help_:
-  #      - 'Reddit subreddit, search etc rss url. For proper url refer following link -'
-  #      - 'https://www.reddit.com/r/pathogendavid/comments/tv8m9/pathogendavids_guide_to_rss_and_reddit/'
-  #    source:
-  #      _target_: obsei.source.reddit_source.RedditScrapperSource
-  #    config:
-  #      _target_: obsei.source.reddit_source.RedditScrapperConfig
-  #      url: 'https://www.reddit.com/r/wallstreetbets/comments/.rss?sort=new'
-  #      lookup_period: "1h"
+    #  Maps Reviews:
+    #    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/google_maps.png"
+    #    _help_:
+    #      - 'Collect `api_key` from https://outscraper.com/'
+    #      - ''
+    #      - 'For `queries` enter google maps urls or place ids, for example'
+    #      - "https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"
+    #    source:
+    #      _target_: obsei.source.google_maps_reviews.OSGoogleMapsReviewsSource
+    #    config:
+    #      _target_: obsei.source.google_maps_reviews.OSGoogleMapsReviewsConfig
+    #      api_key: ''
+    #      queries:
+    #        - "https://www.google.co.in/maps/place/Taj+Mahal/@27.1751496,78.0399535,17z/data=!4m5!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422"
+    #      number_of_reviews: 5
 
 
-  Email:
-    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/gmail.png"
-    _help_:
-      - 'List of IMAP servers for most commonly used email providers https://www.systoolsgroup.com/imap/'
-      - ''
-      - 'Also, if you are using a `Gmail` account then make sure you allow less secure apps on your account'
-      - 'https://myaccount.google.com/lesssecureapps?pli=1'
-      - 'Also enable IMAP access - https://mail.google.com/mail/u/0/#settings/fwdandpop'
-    source:
-      _target_: obsei.source.email_source.EmailSource
-    config:
-      _target_: obsei.source.email_source.EmailConfig
-      imap_server: 'imap.gmail.com'
-      cred_info:
-        _target_: obsei.source.email_source.EmailCredInfo
-        username: ''
-        password: ''
-      lookup_period: "1h"
-#  Reddit:
-#    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
-#    _help_:
-#      - 'Reddit account `username` and `password` require'
-#      - 'Enter list of `subreddits`'
-#    source:
-#      _target_: obsei.source.reddit_source.RedditSource
-#    config:
-#      _target_: obsei.source.reddit_source.RedditConfig
-#      subreddits:
-#        - 'wallstreetbets'
-#      cred_info:
-#        _target_: obsei.source.reddit_source.RedditCredInfo
-#        username: ''
-#        password: ''
-#      lookup_period: "1h"
-#  Google News:
-#    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/googlenews.png"
-#    _help_:
-#      - '`fetch_article` use crawler to fetch full article'
-#    source:
-#      _target_: obsei.source.google_news_source.GoogleNewsSource
-#    config:
-#      _target_: obsei.source.google_news_source.GoogleNewsConfig
-#      query: "bitcoin"
-#      max_results: 3
-#      lookup_period: "1d"
-#      fetch_article: true
-#  Website:
-#    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/webcrawler.png"
-#    _help_:
-#      - '`package name` can be found at the end of the url of app in play store.'
-#      - ''
-#      - 'For example - https://play.google.com/store/apps/details?id=com.google.android.gm&hl=en&gl=US'
-#      - '`com.google.android.gm` is the `package name` for xcode and `us` is `country`.'
-#    source:
-#      _target_: obsei.source.website_crawler_source.TrafilaturaCrawlerSource
-#    config:
-#      _target_: obsei.source.website_crawler_source.TrafilaturaCrawlerConfig
-#      urls:
-#        - 'https://obsei.github.io/obsei/'
 sink:
   Save Social Listener:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/pandas.svg"
