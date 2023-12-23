@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class YoutubeScrapperConfig(BaseSourceConfig):
     _YT_VIDEO_URL: str = PrivateAttr('https://www.youtube.com/watch?v={video_id}')
     TYPE: str = "YoutubeScrapper"
-    keywords: Optional[list] = []
+    keywords: Optional[Any] = []
     video_id: Optional[str] = None
     video_url: Optional[str] = None
     user_agent: str = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'

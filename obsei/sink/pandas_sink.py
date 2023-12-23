@@ -54,8 +54,8 @@ def save_analysis(record, key, bulk_operations):
 
 def prepare_data_analysis(responses):
     bulk_operations = []
-    if len(responses) > 0:
-        database.data_analyzed.create_index([('processed_text', pymongo.TEXT), ], name='text_index')
+    # if len(responses) > 0:
+    #     database.data_analyzed.create_index([('processed_text', pymongo.TEXT), ], name='text_index')
 
     for record in responses:
         if record['source_name'] == 'YoutubeScrapper':
