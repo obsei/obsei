@@ -30,7 +30,7 @@ col_map = dict()
 col_map["source"], col_map["analyzer"], col_map["sink"] = st.columns([1, 1, 1])
 
 selected = {}
-name_map = {"source": "Observer", "analyzer": "Analyzer", "sink": "Informer"}
+name_map = {"source": "Platforms", "analyzer": "Analyzer", "sink": "Informer"}
 
 for node_name, col in col_map.items():
     item_list = [k for k in configuration[node_name].keys()]
