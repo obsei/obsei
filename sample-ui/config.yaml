@@ -17,6 +17,22 @@ source:
   #        client_id: 'YbKwnAy4VTDfJ1scPuq_SA'
   #        client_secret: 'eb07MnV9FlvMbCEw2zxnVkJeTn0zfA'
   #      lookup_period: "1h"
+  Tiktok:
+    _icon_: "https://cdn4.iconfinder.com/data/icons/social-media-flat-7/64/Social-media_Tiktok-512.png"
+    _help_:
+      - '`keywords` is top Tiktok video searched by this keyword.'
+      - '`video url` is Tiktok video url.'
+    source:
+      _target_: obsei.source.tiktok_scrapper.TiktokScrapperSource
+    config:
+      _target_: obsei.source.tiktok_scrapper.TiktokScrapperConfig
+      keywords:
+        - ''
+      video_url:
+        - ''
+      lookup_period: "1Y"
+      max_comments: 10
+      max_search_video: 10
 
   Reddit RSS URL:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
