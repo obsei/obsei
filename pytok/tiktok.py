@@ -87,8 +87,7 @@ class PyTok:
         self._playwright = await async_playwright().start()
         device_config = self._playwright.devices['Desktop Chrome']
         # To open browser
-        # self._browser = await self._playwright.chromium.launch(headless=self._headless)
-        self._browser = await self._playwright.chromium.launch()
+        self._browser = await self._playwright.chromium.launch(headless=self._headless)
         self._context = await self._browser.new_context(**device_config)
         self._page = await self._context.new_page()
         await stealth_async(self._page)

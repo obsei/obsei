@@ -19,7 +19,7 @@ class TiktokCommentsScrapper(BaseModel):
         comments = []
         video = self.video_url
 
-        async with PyTok(headless=False) as api:
+        async with PyTok(headless=True) as api:
             async for comment in api.video(url=video).comments(count=1000):
                 comment_time: Optional[float] = float(comment['create_time'])
                 timestamp_datetime = datetime.datetime.fromtimestamp(comment_time, pytz.UTC)

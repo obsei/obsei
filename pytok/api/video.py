@@ -119,6 +119,7 @@ class Video(Base):
         url = self._get_url()
         async with page.expect_request(url) as event:
             await page.goto(url)
+            await page.screenshot(path="example.png")
             request = await event.value
             response = await request.response()
             if response.status >= 300:
@@ -227,6 +228,7 @@ class Video(Base):
 
     async def comments(self, count=200, batch_size=100):
         await self.view()
+        await self.parent._page.screenshot(path="view-comment.png")
         await self.wait_for_content_or_unavailable_or_captcha('css=[data-e2e=comment-level-1]',
                                                               'Be the first to comment!')
         # TODO allow multi layer comment fetch
