@@ -46,6 +46,7 @@ class PandasSinkConfig(BaseSinkConfig):
 def save_analysis(record, key, bulk_operations):
     item = record[key]
     existing_record = database.data_analyzed.find_one({key: item})
+
     if existing_record is None:
         bulk_operations.append(InsertOne(record))
     else:
@@ -72,6 +73,9 @@ def prepare_data_analysis(responses):
 
         if record['source_name'] == 'Crawler':
             save_analysis(record, 'meta_source', bulk_operations)
+
+        if record['source_name'] == 'TiktokScrapper':
+            save_analysis(record, 'meta_cid', bulk_operations)
 
     # Execute bulk operations for non-existing records
     if bulk_operations:

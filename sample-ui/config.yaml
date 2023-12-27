@@ -20,19 +20,16 @@ source:
   Tiktok:
     _icon_: "https://cdn4.iconfinder.com/data/icons/social-media-flat-7/64/Social-media_Tiktok-512.png"
     _help_:
-      - '`keywords` is top Tiktok video searched by this keyword.'
       - '`video url` is Tiktok video url.'
     source:
       _target_: obsei.source.tiktok_scrapper.TiktokScrapperSource
     config:
       _target_: obsei.source.tiktok_scrapper.TiktokScrapperConfig
-      keywords:
-        - ''
       video_url:
-        - ''
+        - 'https://www.tiktok.com/@cat_funny_dog/video/7316821665202097454'
+#        - 'https://www.tiktok.com/@thekittyandrea/video/7315823368660340001'
       lookup_period: "1Y"
       max_comments: 10
-      max_search_video: 10
 
   Reddit RSS URL:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"

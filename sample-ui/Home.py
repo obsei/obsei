@@ -4,6 +4,7 @@ from socials.play_app_store import save_analyze
 from socials.google_news import save_google_news_analyze
 from socials.crawler import save_crawler_analyze
 from socials.reddit_rss import save_reddit_rss_analyze
+from socials.tiktok import save_tiktok_analyze
 import sys
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
@@ -107,6 +108,10 @@ if execute_button:
 
     if generate_config['source']['_target_'] == 'obsei.source.reddit_scrapper.RedditScrapperSource':
         progress_show = save_reddit_rss_analyze(generate_config, log_component, progress_show)
+
+    if generate_config['source']['_target_'] == 'obsei.source.tiktok_scrapper.TiktokScrapperSource':
+        progress_show = save_tiktok_analyze(generate_config, log_component, progress_show)
+
 
     else:
         execute_workflow(generate_config, log_component, None, None, progress_show)

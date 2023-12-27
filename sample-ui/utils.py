@@ -5,8 +5,6 @@ import base64, logging, pathlib, re, sys, uuid, yaml, inspect, textwrap
 import streamlit as st
 
 from obsei.configuration import ObseiConfiguration
-from PIL import Image
-import validators
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
