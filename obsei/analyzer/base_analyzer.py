@@ -1,7 +1,8 @@
 from abc import abstractmethod
 from typing import Any, Generator, List, Optional
 
-from pydantic import BaseSettings, Field, PrivateAttr
+from pydantic import Field, PrivateAttr
+from pydantic.v1 import BaseSettings
 
 from obsei.misc import gpu_util
 from obsei.payload import TextPayload
