@@ -24,7 +24,7 @@ jobs:
           pip install mypy types-requests types-python-dateutil types-PyYAML types-dateparser types-protobuf types-pytz
           mypy obsei
 
-  build-cache:
+  build-and-test:
     needs: type-check
     runs-on: ${{ matrix.os }}
     strategy:
