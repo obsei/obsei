@@ -2,8 +2,9 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseSettings, Field, PrivateAttr
+from pydantic import Field, PrivateAttr
 from pydantic.types import SecretStr
+from pydantic_settings import BaseSettings
 from pyfacebook import FacebookApi
 
 from obsei.misc.utils import (

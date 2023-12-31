@@ -6,15 +6,15 @@ from obsei.source.google_news_source import GoogleNewsConfig, GoogleNewsSource
 
 # Only fetch title and highlight
 source_config_without_full_text = GoogleNewsConfig(
-    query="bitcoin",
+    query="ai",
     max_results=150,
-    after_date='2021-10-01',
-    before_date='2021-10-31',
+    after_date='2023-12-01',
+    before_date='2023-12-31',
 )
 
 # Fetch full news article
 source_config_with_full_text = GoogleNewsConfig(
-    query="bitcoin",
+    query="ai",
     max_results=5,
     fetch_article=True,
     lookup_period="1d",

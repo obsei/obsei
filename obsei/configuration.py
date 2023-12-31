@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Union
 
 import yaml
 from pydantic import Field
-from pydantic.v1 import BaseSettings
+from pydantic_settings import BaseSettings
 
 from obsei.misc.utils import dict_to_object
 

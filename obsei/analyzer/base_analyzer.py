@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Any, Generator, List, Optional
 
 from pydantic import Field, PrivateAttr
-from pydantic.v1 import BaseSettings
+from pydantic_settings import BaseSettings
 
 from obsei.misc import gpu_util
 from obsei.payload import TextPayload
@@ -21,8 +21,8 @@ DEFAULT_BATCH_SIZE_CPU: int = 4
 class BaseAnalyzerConfig(BaseSettings):
     TYPE: str = "Base"
     use_splitter_and_aggregator: Optional[bool] = False
-    splitter_config: Optional[TextSplitterConfig]
-    aggregator_config: Optional[InferenceAggregatorConfig]
+    splitter_config: Optional[TextSplitterConfig] = None
+    aggregator_config: Optional[InferenceAggregatorConfig] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -41,8 +41,8 @@ class BaseAnalyzer(BaseSettings):
     store: Optional[BaseStore] = None
     device: str = "auto"
     batch_size: int = -1
-    splitter: TextSplitter = Field(TextSplitter())
-    aggregator: InferenceAggregator = Field(InferenceAggregator())
+    splitter: TextSplitter = Field(default=TextSplitter())
+    aggregator: InferenceAggregator = Field(default=InferenceAggregator())
 
     """
         auto: choose gpu if present else use cpu

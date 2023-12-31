@@ -52,6 +52,7 @@ classifiers = [
 dependencies = [
     "pytz >= 2023.3.post1",
     "pydantic >= 2.5.3",
+    "pydantic-settings >= 2.1.0",
     "python-dateutil >= 2.8.2",
     "SQLAlchemy >= 2.0.24",
     "mmh3 >= 4.0.1",
@@ -70,7 +71,7 @@ app-store-scraper = ["app-store-reviews-reader >= 1.2"]
 reddit-scraper = ["reddit-rss-reader >= 1.3.2"]
 reddit-api = ["praw >= 7.7.1"]
 pandas = ["pandas >= 2.0.3"]
-google-news-scraper = ["gnews >= 0.3.6"]
+google-news-scraper = ["GoogleNews >= 1.6.12"]
 facebook-api = ["python-facebook-api >= 0.15.0"]
 atlassian-api = ["atlassian-python-api >= 3.41.4"]
 elasticsearch = ["elasticsearch >= 8.11.1"]
@@ -112,7 +113,7 @@ dev = [
 all = ["obsei[analyzer,source,sink]"]
 
 ## GPL dependencies (these are optional)
-gpl = ["trafilatura"]
+gpl = ["trafilatura >= 1.6.3"]
 
 [project.urls]
 repository = "https://github.com/obsei/obsei"
