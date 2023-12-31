@@ -1,6 +1,8 @@
 from typing import List, Any
+
+from pydantic_settings import BaseSettings
+
 from obsei.payload import TextPayload
-from pydantic import BaseSettings
 from abc import abstractmethod
 
 

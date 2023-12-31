@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Any, Dict, Optional
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class BaseStore(BaseSettings):

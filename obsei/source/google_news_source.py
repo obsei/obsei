@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional
 from urllib import parse
 
 import dateparser
-from gnews import GNews
+from GoogleNews import GoogleNews
 from pydantic import PrivateAttr
 from datetime import datetime, date, timedelta, time, timezone
 
@@ -18,7 +18,7 @@ GOOGLE_DATE_TIME_QUERY_PATTERN = "%Y-%m-%d"
 
 
 class GoogleNewsConfig(BaseSourceConfig):
-    _google_news_client: GNews = PrivateAttr()
+    _google_news_client: GoogleNews = PrivateAttr()
     TYPE: str = "GoogleNews"
     query: str
     country: Optional[str] = "US"
@@ -29,7 +29,6 @@ class GoogleNewsConfig(BaseSourceConfig):
     before_date: Optional[str] = None  # oldest time
     fetch_article: Optional[bool] = False
     crawler_config: Optional[BaseCrawlerConfig] = None
-    proxy: Optional[str] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -47,17 +46,15 @@ class GoogleNewsConfig(BaseSourceConfig):
             before_time = datetime.combine(date.today(), time(tzinfo=timezone.utc)) + timedelta(days=1)
             self.before_date = before_time.strftime(GOOGLE_DATE_TIME_QUERY_PATTERN)
 
-        self._google_news_client = GNews(
-            language=self.language,
-            country=self.country,
-            max_results=self.max_results,
-            proxy=self.proxy
+        self._google_news_client = GoogleNews(
+            lang=self.language,
+            region=self.country
         )
 
         if not self.crawler_config:
             self.crawler_config = TrafilaturaCrawlerConfig(urls=[])
 
-    def get_client(self) -> GNews:
+    def get_client(self) -> GoogleNews:
         return self._google_news_client
 
 
@@ -89,7 +86,7 @@ class GoogleNewsSource(BaseSource):
         else:
             last_after_time = today_start_of_day
 
-        if since_time:
+        if state.get("since_time", None) is not None:
             last_after_time = since_time \
                 if since_time > last_after_time \
                 else last_since_time
@@ -111,31 +108,29 @@ class GoogleNewsSource(BaseSource):
             before_date = before_time.strftime(GOOGLE_DATE_TIME_QUERY_PATTERN)
 
             new_query = f'{config.query}+after:{after_date}+before:{before_date}'
-            query = parse.quote(new_query, errors='ignore')
+            # query = parse.quote(new_query, errors='ignore')
 
             before_time = after_time
 
-            articles = google_news_client.get_news(query)
+            google_news_client.get_news(new_query)
+            articles = google_news_client.results(sort=True)
 
             for article in articles:
                 published_date = (
                     None
-                    if article["published date"] == ""
-                    else dateparser.parse(article["published date"])
+                    if article["datetime"] is None
+                    else article["datetime"].replace(tzinfo=timezone.utc)
                 )
 
+                article_text: str = ""
                 if config.fetch_article and config.crawler_config:
-                    extracted_data = config.crawler_config.extract_url(url=article["url"])
+                    extracted_data = config.crawler_config.extract_url(url=article["link"])
 
                     if extracted_data.get("text", None) is not None:
                         article_text = extracted_data["text"]
                         del extracted_data["text"]
-                    else:
-                        article_text = ""
 
                     article["extracted_data"] = extracted_data
-                else:
-                    article_text = article["description"]
 
                 source_responses.append(
                     TextPayload(

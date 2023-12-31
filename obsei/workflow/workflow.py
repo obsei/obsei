@@ -9,19 +9,19 @@ from obsei.source.base_source import BaseSourceConfig
 
 
 class WorkflowConfig(BaseModel):
-    source_config: Optional[BaseSourceConfig]
-    sink_config: Optional[BaseSinkConfig]
-    analyzer_config: Optional[BaseAnalyzerConfig]
-    time_in_seconds: Optional[int]
+    source_config: Optional[BaseSourceConfig] = None
+    sink_config: Optional[BaseSinkConfig] = None
+    analyzer_config: Optional[BaseAnalyzerConfig] = None
+    time_in_seconds: Optional[int] = None
 
     class Config:
         arbitrary_types_allowed = True
 
 
 class WorkflowState(BaseModel):
-    source_state: Optional[Dict[str, Any]]
-    sink_state: Optional[Dict[str, Any]]
-    analyzer_state: Optional[Dict[str, Any]]
+    source_state: Optional[Dict[str, Any]] = None
+    sink_state: Optional[Dict[str, Any]] = None
+    analyzer_state: Optional[Dict[str, Any]] = None
 
     class Config:
         arbitrary_types_allowed = True

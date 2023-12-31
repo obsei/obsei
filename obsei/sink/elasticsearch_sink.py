@@ -1,9 +1,8 @@
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Union
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, RequestError
 from elasticsearch.helpers import bulk
-from elasticsearch.exceptions import RequestError
 from pydantic import Field, PrivateAttr, SecretStr
 
 from obsei.sink.base_sink import BaseSink, BaseSinkConfig, Convertor
@@ -21,7 +20,7 @@ class ElasticSearchSinkConfig(BaseSinkConfig):
     ca_certs: str = Field("<DEFAULT>")
     verify_certs: bool = False
     create_index: bool = True
-    timeout = 30
+    timeout: int = 30
     custom_mapping: Optional[Dict[str, Any]] = None
     refresh_type: str = "wait_for"
     base_payload: Optional[Dict[str, Any]] = None

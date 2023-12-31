@@ -49,7 +49,7 @@ class PandasSink(BaseSink):
             converted_response = self.convertor.convert(
                 analyzer_response=analyzer_response
             )
-            response: Optional[Dict[str, Any]]
+            response: Optional[Dict[str, Any]] = None
             if config.include_columns_list:
                 response = dict()
                 for k, v in converted_response.items():

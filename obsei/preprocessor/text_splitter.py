@@ -20,13 +20,13 @@ class TextSplitterPayload(BaseModel):
     chunk_id: int
     chunk_length: int
     document_id: str
-    total_chunks: Optional[int]
+    total_chunks: Optional[int] = None
 
 
 class TextSplitterConfig(BaseTextProcessorConfig):
     max_split_length: int = 512
     split_stride: int = 0  # overlap length
-    document_id_key: Optional[str]  # document_id in meta
+    document_id_key: Optional[str] = None  # document_id in meta
     enable_sentence_split: bool = False
     honor_paragraph_boundary: bool = False
     paragraph_marker: str = '\n\n'

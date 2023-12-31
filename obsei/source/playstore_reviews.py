@@ -3,7 +3,8 @@ from typing import Any, Dict, List, Optional
 from google.auth.credentials import Credentials
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from pydantic import BaseSettings, Field, SecretStr, PrivateAttr
+from pydantic import Field, SecretStr, PrivateAttr
+from pydantic_settings import BaseSettings
 
 from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSource, BaseSourceConfig

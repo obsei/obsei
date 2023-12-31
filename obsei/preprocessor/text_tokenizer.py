@@ -1,6 +1,6 @@
 import logging
 from abc import abstractmethod
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
 import nltk
 from nltk import word_tokenize

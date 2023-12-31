@@ -51,7 +51,7 @@ class JiraSinkConfig(BaseSinkConfig):
     update_history: bool = True
     verify_ssl: bool = False
     summary_max_length: int = 50
-    labels_count = 2  # Number of labels to fetch
+    labels_count: int = 2  # Number of labels to fetch
 
     def __init__(self, **data: Any):
         super().__init__(**data)
