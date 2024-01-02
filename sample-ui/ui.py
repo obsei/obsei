@@ -2,12 +2,13 @@ from utils import *
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
 configuration = get_obsei_config(current_path, "config.yaml")
-logo_url = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
+obsei_logo_url = "https://cdn.jsdelivr.net/gh/obsei/obsei-resources/logos/obsei_200x200.png"
+oraika_logo_url = "https://oraika.com/_next/static/media/oraika-logo.65075a75.png"
 
-st.set_page_config(page_title="Obsei Demo", layout="wide", page_icon=logo_url)
+st.set_page_config(page_title="Obsei Demo", layout="wide", page_icon=obsei_logo_url)
 
 st.title("Obsei Demo").markdown(
-    get_icon_name("Obsei Demo", logo_url, 60, 35), unsafe_allow_html=True
+    get_title_bar(obsei_logo_url, oraika_logo_url), unsafe_allow_html=True
 )
 
 st.success(

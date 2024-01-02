@@ -77,7 +77,7 @@ def get_obsei_config(current_path, file_name):
     ).configuration
 
 
-@st.cache
+@st.cache_data
 def get_icon_name(name, icon, icon_size=40, font_size=1):
     if not name:
         return f'<img style="vertical-align:middle;margin:5px 5px" src="{icon}" width="{icon_size}" height="{icon_size}">'
@@ -86,6 +86,17 @@ def get_icon_name(name, icon, icon_size=40, font_size=1):
         f'<img style="vertical-align:middle;margin:1px 5px" src="{icon}" width="{icon_size}" height="{icon_size}">'
         f"{name}</p>"
     )
+
+@st.cache_data
+def get_title_bar(obsei_logo_url, oraika_logo_url, font_size=35):
+    return (
+        f'<p style="font-size:{font_size}px">'
+        f'<img style="vertical-align:middle;margin:1px 5px" src="{obsei_logo_url}" width="60" height="60">'
+        f" By "
+        f'<img style="vertical-align:middle;margin:1px 5px" src="{oraika_logo_url}" height="45">'
+        f" Demo </p>"
+    )
+
 
 
 def render_config(config, component, help_str=None, parent_key=None):

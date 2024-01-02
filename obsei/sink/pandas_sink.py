@@ -60,6 +60,6 @@ class PandasSink(BaseSink):
             responses.append(response)
 
         if config.dataframe is not None:
-            config.dataframe = config.dataframe.append(responses)
+            config.dataframe = config.dataframe.concat(responses)
 
         return config.dataframe
