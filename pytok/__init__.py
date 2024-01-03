@@ -1,1 +1,0 @@
-__docformat__ = "restructuredtext"

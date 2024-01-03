@@ -4,11 +4,13 @@ from obsei.misc.utils import DEFAULT_LOOKUP_PERIOD, convert_utc_time, DATETIME_S
 from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSource, BaseSourceConfig
 from obsei.misc.tiktok_comments_scrapper import TiktokCommentsScrapper
+from database import *
 
 logger = logging.getLogger(__name__)
 
 
 class TiktokScrapperConfig(BaseSourceConfig):
+    ms_token: Optional[str] = None
     video_url: Optional[str] = None
     max_comments: Optional[int] = 20
     lookup_period: Optional[str] = None
@@ -48,42 +50,69 @@ class TiktokScrapperSource(BaseSource):
         last_index = since_id
 
         comments: Optional[List[Dict[str, Any]]] = None
+        isSuccess = False
 
         try:
             if not config.video_url:
                 raise RuntimeError("`video_url` in config should not be empty or None")
 
+            if not config.ms_token:
+                raise RuntimeError("`ms_token` in config should not be empty or None")
+
             scrapper: TiktokCommentsScrapper = TiktokCommentsScrapper(
+                ms_token=config.ms_token,
                 video_url=config.video_url,
                 max_comments=config.max_comments,
             )
 
-            comments = asyncio.run(scrapper.fetch_tiktok_comments(until_datetime=since_time))
+            isSuccess = asyncio.run(scrapper.fetch_tiktok_comments(until_datetime=since_time))
+
         except RuntimeError as ex:
             logger.warning(ex.__cause__)
 
-        for comment in comments:
-            source_responses.append(
-                TextPayload(
-                    processed_text=comment['text'],
-                    meta=comment,
-                    source_name=self.NAME,
+            
+        if isSuccess is True:
+            comments = database.tiktok_listeners.find({'original_video_url': config.video_url}, {'_id': False})
+            for comment in comments:
+                comment = self.flatten_specific_key(comment, '', ['share_info' ,'avatar_thumb', 'text_extra'])
+
+                source_responses.append(
+                    TextPayload(
+                        processed_text=comment['text'],
+                        meta=comment,
+                        source_name=self.NAME,
+                    )
                 )
-            )
 
-            comment_time = float(comment['create_time'])
-            comment_time = datetime.datetime.fromtimestamp(comment_time, pytz.UTC)
+                comment_time = float(comment['create_time'])
+                comment_time = datetime.datetime.fromtimestamp(comment_time, pytz.UTC)
 
-            if comment_time is not None and (last_since_time is None or last_since_time < comment_time):
-                last_since_time = comment_time
-            if last_index is None:
-                # Assuming list is sorted based on time
-                last_index = comment["aweme_id"]
+                if comment_time is not None and (last_since_time is None or last_since_time < comment_time):
+                    last_since_time = comment_time
+                if last_index is None:
+                    # Assuming list is sorted based on time
+                    last_index = comment["cid"]
 
-        state["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
-        state["since_id"] = last_index
+            state["since_time"] = last_since_time.strftime(DATETIME_STRING_PATTERN)
+            state["since_id"] = last_index
 
-        if update_state and self.store is not None:
-            self.store.update_source_state(workflow_id=identifier, state=state)
+            if update_state and self.store is not None:
+                self.store.update_source_state(workflow_id=identifier, state=state)
 
         return source_responses
+
+    def flatten_specific_key(self, obj, prefix='', exclude_key=[]):
+        flat_dict = {}
+        for key, value in obj.items():
+            if key in exclude_key:  # Exclude specified key
+                continue
+
+            if isinstance(value, dict):
+                if key == 'user':
+                    flat_dict.update(self.flatten_specific_key(value, prefix, exclude_key))
+                else:
+                    flat_dict.update(self.flatten_specific_key(value, prefix + key + '.', exclude_key))
+            else:
+                flat_dict[prefix + key] = value
+        return flat_dict
+
