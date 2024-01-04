@@ -10,9 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class TiktokScrapperConfig(BaseSourceConfig):
+    keywords: Optional[list] = None
     ms_token: Optional[str] = None
     video_url: Optional[str] = None
     max_comments: Optional[int] = 20
+    max_videos: Optional[int] = 20
     lookup_period: Optional[str] = None
 
     def __init__(self, **data: Any):

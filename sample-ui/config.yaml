@@ -27,10 +27,14 @@ source:
       _target_: obsei.source.tiktok_scrapper.TiktokScrapperConfig
       ms_token: 'fOKaVGcLVaHb09QJ15aVjncVQ7iMumi6tEcKvqstrVAIMFAIVsoBiP3Jrmc7Hw10fNztwxtZw_A9jwJ6vUf7QTYI2wey9DCt0FEy_qPSOQ-0MaXtxm6KbzAA3GwL4-vJTzV6Sws3dsgRzdjB'
       video_url:
-        - 'https://www.tiktok.com/@gordonramsayofficial/video/7248300636498890011'
-#        - 'https://www.tiktok.com/@thekittyandrea/video/7315823368660340001'
+#        - 'https://www.tiktok.com/@gordonramsayofficial/video/7248300636498890011'
+        - ''
+      keywords:
+        - 'gordon ramsay'
+        - 'messi'
       lookup_period: "1Y"
-      max_comments: 100
+      max_comments: 10
+      max_videos: 10
 
   Reddit RSS URL:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
