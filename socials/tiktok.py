@@ -1,14 +1,8 @@
 from database import *
 from utils import save_generate_config, execute_workflow, get_list_urls
-<<<<<<< HEAD
 from libs.tiktok.TikTokApi import TikTokApi
 
-import subprocess, datetime
-import asyncio
-=======
-
 import subprocess, datetime, time
->>>>>>> search-tiktok-keyword
 
 ct = datetime.datetime.now()
 
