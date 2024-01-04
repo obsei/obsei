@@ -1,9 +1,14 @@
 from database import *
 from utils import save_generate_config, execute_workflow, get_list_urls
+<<<<<<< HEAD
 from libs.tiktok.TikTokApi import TikTokApi
 
 import subprocess, datetime
 import asyncio
+=======
+
+import subprocess, datetime, time
+>>>>>>> search-tiktok-keyword
 
 ct = datetime.datetime.now()
 
@@ -30,8 +35,8 @@ def save_tiktok_analyze(generate_config, log_component, progress_show):
             with session.start_transaction():
                 config = save_generate_config(generate_config)
                 convert_data_urls(config)
-                asyncio.run(search_videos(keywords, max_videos, token, config['_id']))
-                # save_url_video_by_keywords(filtered_keywords, max_videos, token, str(config['_id']))
+                save_url_video_by_keywords(filtered_keywords, max_videos, token, str(config['_id']))
+                time.sleep(2)
                 execute_tiktok_url(config, log_component)
                 session.abort_transaction()
         client.close()
@@ -50,6 +55,7 @@ def save_tiktok_analyze(generate_config, log_component, progress_show):
 
 def execute_tiktok_url(generate_config, log_component):
     urls_table = get_list_urls(generate_config['_id'])
+    print(database.urls.count({'generated_config_id': ObjectId(generate_config['_id'])}))
     for record in urls_table:
         generate_config['source_config']['video_url'] = record['url']
         execute_workflow(generate_config, log_component, record["_id"], generate_config['user_id'])
@@ -71,25 +77,8 @@ def convert_data_urls(generate_config):
         save_urls(array_urls)
 
 
-async def search_videos(keywords, max, token, config_id):
-    async with TikTokApi() as api:
-        for keyword in keywords:
-            await api.create_sessions(
-                ms_tokens=[token],
-                num_sessions=1,
-                sleep_after=3,
-                headless=False)
-            array = []
-            async for video_url in api.search.videos(keyword, count=int(max)):
-                array.append({'generated_config_id': config_id, 'url': video_url, 'created_at': datetime.datetime.now()})
-
-            database.urls.insert_many(array)
-
-# def save_url_video_by_keywords(keywords, max_videos, ms_token, generate_config_id):
-#     try:
-#         for keyword in keywords:
-#             keyword = "_".join(keyword.split())
-#             command = "xvfb-run -a python3 libs/tiktok/search_tiktok.py " + keyword + ' ' + ms_token + ' ' + max_videos + ' ' + generate_config_id
-#             subprocess.run(command, shell=True, stderr=subprocess.STDOUT)
-#     except subprocess.CalledProcessError as e:
-#         print(f"Command failed with error: {e.output.decode('utf-8').strip()}")
+def save_url_video_by_keywords(keywords, max_videos, ms_token, generate_config_id):
+    for keyword in keywords:
+        keyword = "_".join(keyword.split())
+        command = "xvfb-run -a python3 libs/tiktok/search_tiktok.py " + keyword + ' ' + ms_token + ' ' + max_videos + ' ' + generate_config_id
+        p = subprocess.run(command, shell=True, capture_output=True, text=True)
