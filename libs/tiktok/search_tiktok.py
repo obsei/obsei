@@ -15,7 +15,12 @@ async def search_videos(keyword, max, token, config_id):
             headless=False)
         array = []
         async for video_url in api.search.videos(keyword, count=int(max)):
-            array.append({'generated_config_id': ObjectId(config_id), 'url': video_url, 'created_at': datetime.datetime.now()})
+            array.append({
+                'generated_config_id': ObjectId(config_id), 
+                'url': video_url, 
+                'keyword': keyword, 
+                'created_at': datetime.datetime.now()
+                })
 
         database.urls.insert_many(array)
 

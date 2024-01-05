@@ -23,7 +23,6 @@ def save_google_news_analyze(generate_config, log_component, progress_show):
                 save_keywords(config)
                 execute_news(config, log_component)
                 session.abort_transaction()
-        client.close()
 
     except pymongo.errors.PyMongoError as e:
         print("Error:", str(e))

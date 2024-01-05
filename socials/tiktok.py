@@ -39,7 +39,6 @@ def save_tiktok_analyze(generate_config, log_component, progress_show):
   
                 execute_tiktok_url(config, log_component)
                 session.abort_transaction()
-        client.close()
 
     except pymongo.errors.PyMongoError as e:
         print("Error:", str(e))

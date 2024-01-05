@@ -23,7 +23,6 @@ def save_analyze(generate_config, log_component, progress_show):
                 convert_data_urls(config)
                 execute_store(config, log_component)
                 session.abort_transaction()
-        client.close()
 
     except pymongo.errors.PyMongoError as e:
         print("Error:", str(e))

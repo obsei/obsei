@@ -39,7 +39,6 @@ def save_youtube_analyze(generate_config, log_component, progress_show):
                 convert_data_urls(generate_config_converted['_id'], generate_config_converted['source_config'])
                 execute_youtube(generate_config_converted['_id'], log_component)
                 session.abort_transaction()
-        client.close()
 
     except pymongo.errors.PyMongoError as e:
         print("Error:", str(e))

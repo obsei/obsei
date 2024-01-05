@@ -32,7 +32,6 @@ def save_reddit_rss_analyze(generate_config, log_component, progress_show):
                 convert_data_urls(generate_config)
                 execute_reddit_rss(generate_config['_id'], log_component)
                 session.abort_transaction()
-        client.close()
 
     except pymongo.errors.PyMongoError as e:
         print("Error:", str(e))

@@ -23,7 +23,6 @@ def save_crawler_analyze(generate_config, log_component, progress_show):
                 save_website_url(config)
                 execute_crawler(config, log_component)
                 session.abort_transaction()
-        client.close()
 
     except pymongo.errors.PyMongoError as e:
         print("Error:", str(e))
