@@ -29,8 +29,16 @@ def save_tiktok_analyze(generate_config, log_component, progress_show):
             with session.start_transaction():
                 config = save_generate_config(generate_config)
                 convert_data_urls(config)
-                save_url_video_by_keywords(filtered_keywords, max_videos, token, str(config['_id']))
-                time.sleep(2)
+
+                while True:
+                    save_url_video_by_keywords(filtered_keywords, max_videos, token, str(config['_id']))
+                    time.sleep(2)
+                    count_urls = database.urls.count({'generated_config_id': ObjectId(config['_id'])});
+                    print(count_urls,'==========')
+                    if count_urls > 0: 
+                        break
+
+  
                 execute_tiktok_url(config, log_component)
                 session.abort_transaction()
         client.close()
@@ -47,9 +55,8 @@ def save_tiktok_analyze(generate_config, log_component, progress_show):
     return progress_show
 
 
-def execute_tiktok_url(generate_config, log_component):
+def execute_tiktok_url(generate_config, log_component):      
     urls_table = get_list_urls(generate_config['_id'])
-    print(database.urls.count({'generated_config_id': ObjectId(generate_config['_id'])}))
     for record in urls_table:
         generate_config['source_config']['video_url'] = record['url']
         execute_workflow(generate_config, log_component, record["_id"], generate_config['user_id'])
