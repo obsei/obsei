@@ -18,6 +18,7 @@ from .api.hashtag import Hashtag
 from .api.comment import Comment
 from .api.trending import Trending
 from .api.search import Search
+from typing import List
 
 from .exceptions import (
     InvalidJSONException,
@@ -142,7 +143,8 @@ class TikTokApi:
         context_options: dict = {},
         sleep_after: int = 1,
         cookies: dict = None,
-        suppress_resource_load_types: list[str] = None,
+        suppress_resource_load_types: List[str] = None,
+
     ):
         """Create a TikTokPlaywrightSession"""
         if ms_token is not None:
@@ -204,14 +206,14 @@ class TikTokApi:
         self,
         num_sessions=5,
         headless=True,
-        ms_tokens: list[str] = None,
-        proxies: list = None,
+        ms_tokens: List[str] = None,
+        proxies: List = None,
         sleep_after=1,
         starting_url="https://www.tiktok.com",
         context_options: dict = {},
-        override_browser_args: list[dict] = None,
-        cookies: list[dict] = None,
-        suppress_resource_load_types: list[str] = None,
+        override_browser_args: List[dict] = None,
+        cookies: List[dict] = None,
+        suppress_resource_load_types: List[str] = None,
     ):
         """
         Create sessions for use within the TikTokApi class.

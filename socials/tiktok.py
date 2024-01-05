@@ -1,6 +1,5 @@
 from database import *
 from utils import save_generate_config, execute_workflow, get_list_urls
-from libs.tiktok.TikTokApi import TikTokApi
 
 import subprocess, datetime, time
 
@@ -33,11 +32,10 @@ def save_tiktok_analyze(generate_config, log_component, progress_show):
                 while True:
                     save_url_video_by_keywords(filtered_keywords, max_videos, token, str(config['_id']))
                     time.sleep(2)
-                    count_urls = database.urls.count({'generated_config_id': ObjectId(config['_id'])});
-                    print(count_urls,'==========')
+                    records = list(database.urls.find({'generated_config_id': ObjectId(config['_id'])}))
+                    count_urls = len(records)
                     if count_urls > 0: 
                         break
-
   
                 execute_tiktok_url(config, log_component)
                 session.abort_transaction()
@@ -82,4 +80,4 @@ def save_url_video_by_keywords(keywords, max_videos, ms_token, generate_config_i
     for keyword in keywords:
         keyword = "_".join(keyword.split())
         command = "xvfb-run -a python3 libs/tiktok/search_tiktok.py " + keyword + ' ' + ms_token + ' ' + max_videos + ' ' + generate_config_id
-        p = subprocess.run(command, shell=True, capture_output=True, text=True)
+        subprocess.run(command, shell=True, capture_output=True, text=True)
