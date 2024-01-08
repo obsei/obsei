@@ -20,17 +20,15 @@ source:
   Tiktok:
     _icon_: "https://cdn4.iconfinder.com/data/icons/social-media-flat-7/64/Social-media_Tiktok-512.png"
     _help_:
-      - '`ms_token` is token from cookie in Application after login Tiktok, `video url` is Tiktok video url.'
+      - '`ms_token` is token from cookie in Application, `video url` is Tiktok video url, `keywords` is Tiktok video url searched by keywords.'
     source:
       _target_: obsei.source.tiktok_scrapper.TiktokScrapperSource
     config:
       _target_: obsei.source.tiktok_scrapper.TiktokScrapperConfig
-      ms_token: 'fOKaVGcLVaHb09QJ15aVjncVQ7iMumi6tEcKvqstrVAIMFAIVsoBiP3Jrmc7Hw10fNztwxtZw_A9jwJ6vUf7QTYI2wey9DCt0FEy_qPSOQ-0MaXtxm6KbzAA3GwL4-vJTzV6Sws3dsgRzdjB'
+      ms_token: ''
       video_url:
-#        - 'https://www.tiktok.com/@gordonramsayofficial/video/7248300636498890011'
         - ''
       keywords:
-        - 'gordon ramsay'
         - 'messi'
       lookup_period: "1Y"
       max_comments: 10
