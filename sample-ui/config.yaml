@@ -29,12 +29,7 @@ source:
       video_url:
         - ''
       keywords:
-<<<<<<< HEAD
         - ''
-        - ''
-=======
-        - 'messi'
->>>>>>> 8f425032172d869ede338ba16baac43d1e88659f
       lookup_period: "1Y"
       max_comments: 10
       max_videos: 10
