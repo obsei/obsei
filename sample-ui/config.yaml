@@ -30,8 +30,8 @@ source:
 #        - 'https://www.tiktok.com/@gordonramsayofficial/video/7248300636498890011'
         - ''
       keywords:
-        - 'gordon ramsay'
-        - 'messi'
+        - ''
+        - ''
       lookup_period: "1Y"
       max_comments: 10
       max_videos: 10

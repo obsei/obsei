@@ -29,13 +29,14 @@ def save_tiktok_analyze(generate_config, log_component, progress_show):
                 config = save_generate_config(generate_config)
                 convert_data_urls(config)
 
-                while True:
-                    save_url_video_by_keywords(filtered_keywords, max_videos, token, str(config['_id']))
-                    time.sleep(2)
-                    records = list(database.urls.find({'generated_config_id': ObjectId(config['_id'])}))
-                    count_urls = len(records)
-                    if count_urls > 0: 
-                        break
+                if len(filtered_keywords) > 0 :
+                    while True:
+                        save_url_video_by_keywords(filtered_keywords, max_videos, token, str(config['_id']))
+                        time.sleep(2)
+                        records = list(database.urls.find({'generated_config_id': ObjectId(config['_id'])}))
+                        count_urls = len(records)
+                        if count_urls > 0:
+                            break
   
                 execute_tiktok_url(config, log_component)
                 session.abort_transaction()
