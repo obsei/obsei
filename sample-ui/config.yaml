@@ -1,4 +1,16 @@
 source:
+  Facebook:
+  _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png"
+  _help_:
+    - '`post_ids` is id of facebook post'
+  source:
+    _target_: obsei.source.facebook_source.FacebookSource
+  config:
+    _target_: obsei.source.facebook_source.FacebookSourceConfig
+    post_ids:
+      - 'pfbid02CwZwCtfvRgUMxS4d29GA4TqUsjUP2D6tKKVM736WtccdqFUUZfXSmbiPQJwDrHW6l'
+    lookup_period: "1Y"
+    max_comments: 10
   #  Reddit:
   #    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
   #    _help_:
@@ -47,25 +59,6 @@ source:
         - 'https://www.reddit.com/r/wallstreetbets/comments/.rss?sort=new'
         - 'https://www.reddit.com/r/me_irl/.rss?sort=new'
       lookup_period: "1h"
-  #  Facebook:
-  #    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png"
-  #    _help_:
-  #      - '`page_id` is id of your facebook page'
-  #      - ''
-  #      - 'Need facebook app_id, app_secret and long_term_token. Get it from https://developers.facebook.com/apps/'
-  #    source:
-  #      _target_: obsei.source.facebook_source.FacebookSource
-  #    config:
-  #      _target_: obsei.source.facebook_source.FacebookSourceConfig
-  #      page_id: "137813076085669"
-  #      post_ids:
-  #        - "122124725738085222"
-  #      lookup_period: "1h"
-  #      cred_info:
-  #        _target_: obsei.source.facebook_source.FacebookCredentials
-  #        app_id: '2090150478011935'
-  #        app_secret: '4eebfada4ac229f829ae8487df8c0e95'
-  #        long_term_token: 'EAAdsZBxTE3h8BO2qE4VNHPBIL8BFsovvkc6fxnhM487i3Xp8c1wZA2j9QCVYvOYZCIU4yrTZCgPNb2IOt3jS3lsZAsLkAO9IajeSnjne5YxsLGEralluJnUA05XDjQH7pNXZAZBkZColYH66RGKi6uOAI1CWhnzOI9WEpRQNaDsmyJ2jB1U3ZBDUC1NGQZBcCfWRaq'
   Website:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/webcrawler.png"
     _help_:

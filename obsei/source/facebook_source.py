@@ -121,11 +121,17 @@ class FacebookSource(BaseSource):
             comment_since_time = state.get("since_timestamp", since_timestamp)
             comment_last_since_time = comment_since_time
 
+
             comments, comment_summary = api.page.get_comments(
                 object_id=post_id,
                 filter_type="stream",
                 order_type="reverse_chronological",
             )
+            print(api.page.get_comments(
+                object_id=post_id,
+                filter_type="stream",
+                order_type="reverse_chronological",
+            ))
             self.log_object("Comments: ", str(comments))
             self.log_object("Comment Summary: ", str(comment_summary))
 
