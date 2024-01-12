@@ -76,6 +76,9 @@ def prepare_data_analysis(responses):
 
         if record['source_name'] == 'TiktokScrapper':
             save_analysis(record, 'meta_cid', bulk_operations)
+            
+        if record['source_name'] == 'FacebookScrapper':
+            save_analysis(record, 'meta_comment_id', bulk_operations)
 
     # Execute bulk operations for non-existing records
     if bulk_operations:

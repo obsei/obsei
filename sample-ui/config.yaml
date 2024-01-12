@@ -1,16 +1,17 @@
 source:
   Facebook:
-  _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png"
-  _help_:
-    - '`post_ids` is id of facebook post'
-  source:
-    _target_: obsei.source.facebook_source.FacebookSource
-  config:
-    _target_: obsei.source.facebook_source.FacebookSourceConfig
-    post_ids:
-      - 'pfbid02CwZwCtfvRgUMxS4d29GA4TqUsjUP2D6tKKVM736WtccdqFUUZfXSmbiPQJwDrHW6l'
-    lookup_period: "1Y"
-    max_comments: 10
+    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png"
+    _help_:
+      - '`urls` are list id of facebook post'
+    source:
+      _target_: obsei.source.facebook_scrapper.FacebookScrapperSource
+    config:
+      _target_: obsei.source.facebook_scrapper.FacebookScrapperConfig
+      urls:
+        - 'https://www.facebook.com/photo/?fbid=719253296969094&set=a.524065426487883'
+        - 'https://www.facebook.com/LaoMo.VN/posts/pfbid02DFNTUPyPRh8EUTehKZ4BKbeeorCkA8Gx4r52XHBmQGXk5JxWEfMwrAANNuojdkYDl'
+      lookup_period: "1Y"
+      max_comments: 100
   #  Reddit:
   #    _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/reddit.png"
   #    _help_:
