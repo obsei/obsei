@@ -22,7 +22,8 @@ class YouTubeCommentExtractor(BaseModel):
     _YT_URL: str = 'https://www.youtube.com'
     _YT_CFG_REGEX: str = r'ytcfg\.set\s*\(\s*({.+?})\s*\)\s*;'
     _YT_INITIAL_DATA_REGEX: str = r'(?:window\s*\[\s*["\']ytInitialData["\']\s*\]|ytInitialData)\s*=\s*({.+?})\s*;\s*(?:var\s+meta|</script|\n)'
-    video_url: str
+    # video_url: str
+    video_url: Optional[Any] = None
     user_agent: str = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
     sort_by: int = 1  # 0 = sort by popular, 1 = sort by recent
     max_comments: Optional[int] = 20
@@ -75,6 +76,10 @@ class YouTubeCommentExtractor(BaseModel):
     def _fetch_comments(self, until_datetime: Optional[datetime] = None) -> Generator[Any, Any, None]:
         session = requests.Session()
         session.headers['User-Agent'] = self.user_agent
+        
+        if isinstance(self.video_url, list):
+            self.video_url = self.video_url[0]
+
         response = session.get(self.video_url)
 
         if response.request and response.request.url and 'uxe=' in response.request.url:

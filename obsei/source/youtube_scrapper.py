@@ -17,7 +17,7 @@ class YoutubeScrapperConfig(BaseSourceConfig):
     TYPE: str = "YoutubeScrapper"
     keywords: Optional[Any] = []
     video_id: Optional[str] = None
-    video_url: Optional[str] = None
+    video_url: Optional[Any] = None
     user_agent: str = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
     sort_by: int = 1  # 0 = sort by popular, 1 = sort by recent
     max_comments: Optional[int] = 20
