@@ -3,7 +3,7 @@ from typing import Optional, List, Any, Dict
 from obsei.misc.utils import DEFAULT_LOOKUP_PERIOD, convert_utc_time, DATETIME_STRING_PATTERN
 from obsei.payload import TextPayload
 from obsei.source.base_source import BaseSource, BaseSourceConfig
-import libs.facebook as fs
+import facebook_scraper as fs
 
 logger = logging.getLogger(__name__)
 
@@ -56,24 +56,26 @@ class FacebookScrapperSource(BaseSource):
             gen = fs.get_posts(
                 post_urls=[config.urls],
                 options={"comments": config.max_comments, "progress": True},
+                cookies="libs/cookies.txt"
             )
 
             post = next(gen)
-            comments = post['comments_full']
             comment_arr = []
+            if 'comments_full' in post: 
+                comments = post['comments_full']
 
-            for comment in comments:
-                comment['commment_parent_id'] = 0;
-                reply_comment_arr = []
-                for reply in comment['replies']:
-                    reply['commment_parent_id'] = comment['comment_id']
-                    del reply['comment_reactors']
-                    reply_comment_arr.append(reply)
-                comment_arr.append(reply_comment_arr)
-                del comment['replies']
-                del comment['comment_reactors']
+                for comment in comments:
+                    comment['commment_parent_id'] = 0;
+                    reply_comment_arr = []
+                    for reply in comment['replies']:
+                        reply['commment_parent_id'] = comment['comment_id']
+                        del reply['comment_reactors']
+                        reply_comment_arr.append(reply)
+                    comment_arr.append(reply_comment_arr)
+                    del comment['replies']
+                    del comment['comment_reactors']
 
-                comment_arr.append(comment)
+                    comment_arr.append(comment)
 
             comments = self.flatten_recursive(comment_arr)
         except RuntimeError as ex:
