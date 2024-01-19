@@ -80,6 +80,9 @@ class YouTubeCommentExtractor(BaseModel):
         if isinstance(self.video_url, list):
             self.video_url = self.video_url[0]
 
+        if self.video_url == '':
+            return
+
         response = session.get(self.video_url)
 
         if response.request and response.request.url and 'uxe=' in response.request.url:

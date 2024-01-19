@@ -1,4 +1,4 @@
-from utils import *
+from views.utils import *
 from socials.youtube import save_youtube_analyze
 from socials.play_app_store import save_analyze
 from socials.google_news import save_google_news_analyze
@@ -12,7 +12,9 @@ current_path = pathlib.Path(__file__).parent.absolute().as_posix()
 configuration = get_obsei_config(current_path, "config.yaml")
 logo_url = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
 
-st.set_page_config(page_title="Social Listener", layout="wide", page_icon=logo_url, initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Social Listener", layout="wide", page_icon=logo_url,
+                   # initial_sidebar_state="collapsed"
+                   )
 st.title("Data Social Listener").markdown(
     get_icon_name("Social Listener", logo_url, 60, 35), unsafe_allow_html=True
 )
@@ -117,8 +119,8 @@ if execute_button:
         progress_show = save_facebook_analyze(generate_config, log_component, progress_show)
 
 
-    else:
-        execute_workflow(generate_config, log_component, None, None, progress_show)
+    # else:
+    #     execute_workflow(generate_config, log_component, None, None, progress_show)
 
     if progress_show:
-        progress_show.code("🎉🎉🎉 Processing Complete!! 🍾🍾🍾")
+        progress_show.code('🎉🎉🎉 Processing, Please wait in Vplanner !!! 🍾🍾🍾')

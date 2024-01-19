@@ -3,6 +3,10 @@ from utils import save_generate_config, execute_workflow, get_list_urls
 from youtube_search import YoutubeSearch
 import json, datetime, re
 
+from rq import Queue
+from redis import Redis
+from queues.social_listening import execute_workflow
+
 ct = datetime.datetime.now()
 url_youtube = 'https://www.youtube.com/watch?v='
 
@@ -14,9 +18,17 @@ def execute_youtube(config_id, log_component):
     generate_config = get_generate_config(config_id)
 
     urls_table = get_list_urls(config_id)
+    records = []
     for record in urls_table:
-        generate_config['source_config']['video_url'] = record['url']
-        execute_workflow(generate_config, log_component, record["_id"], generate_config['user_id'])
+        records.append(record)
+
+    redis_conn = Redis()
+    queue = Queue(connection=redis_conn)
+
+    queue.enqueue(execute_workflow, args=(records, generate_config))
+    # for record in urls_table:
+    #     generate_config['source_config']['video_url'] = record['url']
+    #     execute_workflow(generate_config, log_component, record["_id"], generate_config['user_id'])
 
 
 def save_youtube_analyze(generate_config, log_component, progress_show):
