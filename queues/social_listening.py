@@ -33,16 +33,24 @@ def execute_workflow(urls_table, generate_config):
         for record in urls_table:
             inserted_id = record["_id"]
             user_id = generate_config['user_id']
-            if generate_config['source_config']['_target_'] in ['obsei.source.tiktok_scrapper.TiktokScrapperConfig', 'obsei.source.youtube_scrapper.YoutubeScrapperConfig']:
+            if generate_config['source_config']['_target_'] in ['obsei.source.tiktok_scrapper.TiktokScrapperConfig',
+                                                                'obsei.source.youtube_scrapper.YoutubeScrapperConfig']:
                 generate_config['source_config']['video_url'] = record['url']
-            if generate_config['source_config']['_target_'] in ['obsei.source.website_crawler_source.TrafilaturaCrawlerConfig']:
+            if generate_config['source_config']['_target_'] in [
+                'obsei.source.website_crawler_source.TrafilaturaCrawlerConfig']:
                 generate_config['source_config']['urls'] = [record['url']]
             if generate_config['source_config']['_target_'] in ['obsei.source.google_news_source.GoogleNewsConfig']:
                 generate_config['source_config']['query'] = record['keyword']
-            if generate_config['source_config']['_target_'] in ['obsei.source.playstore_scrapper.PlayStoreScrapperConfig', 'obsei.source.appstore_scrapper.AppStoreScrapperConfig']:
+            if generate_config['source_config']['_target_'] in [
+                'obsei.source.playstore_scrapper.PlayStoreScrapperConfig',
+                'obsei.source.appstore_scrapper.AppStoreScrapperConfig']:
                 generate_config['source_config']['app_url'] = record['url']
             if generate_config['source_config']['_target_'] in ['obsei.source.reddit_scrapper.RedditScrapperConfig']:
                 generate_config['source_config']['url'] = record['url']
+            if generate_config['source_config']['_target_'] in ['obsei.source.facebook_scrapper.FacebookScrapperConfig',
+                                                                'obsei.source.instagram_scrapper.InstagramScrapperConfig',
+                                                                ]:
+                generate_config['source_config']['urls'] = record['url']
 
             obsei_configuration = ObseiConfiguration(configuration=generate_config)
 
@@ -81,10 +89,7 @@ def execute_workflow(urls_table, generate_config):
 
 def prepare_data_analysis(record):
     bulk_operations = []
-    if record['source_name'] == 'YoutubeScrapper':
-        save_analysis(record, 'meta_comment_id', bulk_operations)
-
-    if record['source_name'] == 'AppStoreScrapper' or record['source_name'] == 'RedditScrapper':
+    if record['source_name'] in ['AppStoreScrapper', 'RedditScrapper']:
         save_analysis(record, 'meta_id', bulk_operations)
 
     if record['source_name'] == 'PlayStoreScrapper':
@@ -99,7 +104,7 @@ def prepare_data_analysis(record):
     if record['source_name'] == 'TiktokScrapper':
         save_analysis(record, 'meta_cid', bulk_operations)
 
-    if record['source_name'] == 'FacebookScrapper':
+    if record['source_name'] in ['FacebookScrapper', 'InstagramScrapper', 'YoutubeScrapper']:
         save_analysis(record, 'meta_comment_id', bulk_operations)
 
     # Execute bulk operations for non-existing records

@@ -33,10 +33,23 @@ source:
       lookup_period: "1Y"
       max_comments: 10
       max_search_video: 10
+  Instagram:
+    _icon_: "https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
+    _help_:
+      - '`urls` are list urls of instagram post'
+    source:
+      _target_: obsei.source.instagram_scrapper.InstagramScrapperSource
+    config:
+      _target_: obsei.source.instagram_scrapper.InstagramScrapperConfig
+      urls:
+        - 'https://www.instagram.com/p/C2EFPQkrszS/'
+      lookup_period: "1Y"
+      max_comments: 10
+
   Facebook:
     _icon_: "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/facebook.png"
     _help_:
-      - '`urls` are list id of facebook post'
+      - '`urls` are list urls of facebook post'
     source:
       _target_: obsei.source.facebook_scrapper.FacebookScrapperSource
     config:

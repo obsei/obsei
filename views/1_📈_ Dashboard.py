@@ -1,56 +1,71 @@
-# Copyright 2018-2022 Streamlit Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+import streamlit as st  # web development
+import numpy as np  # np mean, np random
+import pandas as pd  # read csv, df manipulation
+import time  # to simulate a real time data, time loop
+import plotly.express as px  # interactive charts
 
-import streamlit as st
-import inspect
-import textwrap
-import time
-import numpy as np
-from utils import show_code
+# read csv from a github repo
+df = pd.read_csv("https://raw.githubusercontent.com/Lexie88rus/bank-marketing-analysis/master/bank.csv")
 
-
-def plotting_demo():
-    progress_bar = st.sidebar.progress(0)
-    status_text = st.sidebar.empty()
-    last_rows = np.random.randn(1, 1)
-    chart = st.line_chart(last_rows)
-
-    for i in range(1, 101):
-        new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-        status_text.text("%i%% Complete" % i)
-        chart.add_rows(new_rows)
-        progress_bar.progress(i)
-        last_rows = new_rows
-        time.sleep(0.05)
-
-    progress_bar.empty()
-
-    # Streamlit widgets automatically run the script from top to bottom. Since
-    # this button is not connected to any other logic, it just causes a plain
-    # rerun.
-    st.button("Re-run")
-
-
-st.set_page_config(page_title="Plotting Demo", page_icon="📈")
-st.markdown("# Plotting Demo")
-st.sidebar.header("Plotting Demo")
-st.write(
-    """This demo illustrates a combination of plotting and animation with
-Streamlit. We're generating a bunch of random numbers in a loop for around
-5 seconds. Enjoy!"""
+st.set_page_config(
+    page_title='Real-Time Data Science Dashboard',
+    page_icon='✅',
+    layout='wide'
 )
 
-plotting_demo()
+# dashboard title
 
-show_code(plotting_demo)
+st.title("Real-Time / Live Data Science Dashboard")
+
+# top-level filters
+
+job_filter = st.selectbox("Select the Job", pd.unique(df['job']))
+
+# creating a single-element container.
+placeholder = st.empty()
+
+# dataframe filter
+
+df = df[df['job'] == job_filter]
+
+# near real-time / live feed simulation
+
+for seconds in range(200):
+    # while True:
+
+    df['age_new'] = df['age'] * np.random.choice(range(1, 5))
+    df['balance_new'] = df['balance'] * np.random.choice(range(1, 5))
+
+    # creating KPIs
+    avg_age = np.mean(df['age_new'])
+
+    count_married = int(df[(df["marital"] == 'married')]['marital'].count() + np.random.choice(range(1, 30)))
+
+    balance = np.mean(df['balance_new'])
+
+    with placeholder.container():
+        # create three columns
+        kpi1, kpi2, kpi3 = st.columns(3)
+
+        # fill in those three columns with respective metrics or KPIs
+        kpi1.metric(label="Age ⏳", value=round(avg_age), delta=round(avg_age) - 10)
+        kpi2.metric(label="Married Count 💍", value=int(count_married), delta=- 10 + count_married)
+        kpi3.metric(label="A/C Balance ＄", value=f"$ {round(balance, 2)} ",
+                    delta=- round(balance / count_married) * 100)
+
+        # create two columns for charts
+
+        fig_col1, fig_col2 = st.columns(2)
+        with fig_col1:
+            st.markdown("### First Chart")
+            fig = px.density_heatmap(data_frame=df, y='age_new', x='marital')
+            st.write(fig)
+        with fig_col2:
+            st.markdown("### Second Chart")
+            fig2 = px.histogram(data_frame=df, x='age_new')
+            st.write(fig2)
+        st.markdown("### Detailed Data View")
+        st.dataframe(df)
+        time.sleep(1)
+    # placeholder.empty()
+

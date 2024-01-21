@@ -5,7 +5,7 @@ from socials.google_news import save_google_news_analyze
 from socials.crawler import save_crawler_analyze
 from socials.reddit_rss import save_reddit_rss_analyze
 from socials.tiktok import save_tiktok_analyze
-from socials.facebook import save_facebook_analyze
+from socials.insta_facebook import save_facebook_analyze
 import sys
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
@@ -108,7 +108,9 @@ if execute_button:
     if generate_config['source']['_target_'] == 'obsei.source.tiktok_scrapper.TiktokScrapperSource':
         progress_show = save_tiktok_analyze(generate_config, progress_show)
 
-    if generate_config['source']['_target_'] == 'obsei.source.facebook_scrapper.FacebookScrapperSource':
+    if (generate_config['source']['_target_'] in
+            ['obsei.source.facebook_scrapper.FacebookScrapperSource',
+             'obsei.source.instagram_scrapper.InstagramScrapperSource']):
         progress_show = save_facebook_analyze(generate_config, progress_show)
 
     # else:
