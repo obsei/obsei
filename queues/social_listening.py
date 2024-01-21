@@ -35,6 +35,14 @@ def execute_workflow(urls_table, generate_config):
             user_id = generate_config['user_id']
             if generate_config['source_config']['_target_'] in ['obsei.source.tiktok_scrapper.TiktokScrapperConfig', 'obsei.source.youtube_scrapper.YoutubeScrapperConfig']:
                 generate_config['source_config']['video_url'] = record['url']
+            if generate_config['source_config']['_target_'] in ['obsei.source.website_crawler_source.TrafilaturaCrawlerConfig']:
+                generate_config['source_config']['urls'] = [record['url']]
+            if generate_config['source_config']['_target_'] in ['obsei.source.google_news_source.GoogleNewsConfig']:
+                generate_config['source_config']['query'] = record['keyword']
+            if generate_config['source_config']['_target_'] in ['obsei.source.playstore_scrapper.PlayStoreScrapperConfig', 'obsei.source.appstore_scrapper.AppStoreScrapperConfig']:
+                generate_config['source_config']['app_url'] = record['url']
+            if generate_config['source_config']['_target_'] in ['obsei.source.reddit_scrapper.RedditScrapperConfig']:
+                generate_config['source_config']['url'] = record['url']
 
             obsei_configuration = ObseiConfiguration(configuration=generate_config)
 

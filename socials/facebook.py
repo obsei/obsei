@@ -1,10 +1,10 @@
 from database import *
-from utils import save_generate_config, execute_workflow, get_list_urls
+from utils import save_generate_config, execute_listening
 import datetime
 
 ct = datetime.datetime.now()
 
-def save_facebook_analyze(generate_config, log_component, progress_show):
+def save_facebook_analyze(generate_config, progress_show):
     urls = generate_config['source_config']['urls']
     filtered_urls = [value for value in urls if value != '']
 
@@ -21,7 +21,7 @@ def save_facebook_analyze(generate_config, log_component, progress_show):
             with session.start_transaction():
                 config = save_generate_config(generate_config)
                 convert_data_urls(config)
-                execute_facebook_url(config, log_component)
+                execute_listening(config)
                 session.abort_transaction()
 
     except pymongo.errors.PyMongoError as e:
@@ -34,13 +34,6 @@ def save_facebook_analyze(generate_config, log_component, progress_show):
         raise ex
 
     return progress_show
-
-
-def execute_facebook_url(generate_config, log_component):
-    urls_table = get_list_urls(generate_config['_id'])
-    for record in urls_table:
-        generate_config['source_config']['urls'] = record['url']
-        execute_workflow(generate_config, log_component, record["_id"], generate_config['user_id'])
 
 def convert_data_urls(generate_config):
     array_urls = []

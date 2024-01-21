@@ -1,5 +1,5 @@
 from database import *
-from utils import save_generate_config, execute_workflow, get_list_urls
+from utils import save_generate_config, execute_listening
 import datetime
 
 ct = datetime.datetime.now()
@@ -21,7 +21,7 @@ def save_google_news_analyze(generate_config, log_component, progress_show):
             with session.start_transaction():
                 config = save_generate_config(generate_config)
                 save_keywords(config)
-                execute_news(config, log_component)
+                execute_listening(config)
                 session.abort_transaction()
 
     except pymongo.errors.PyMongoError as e:
@@ -34,13 +34,6 @@ def save_google_news_analyze(generate_config, log_component, progress_show):
         raise ex
 
     return progress_show
-
-
-def execute_news(generate_config, log_component):
-    urls_table = get_list_urls(generate_config['_id'])
-    for record in urls_table:
-        generate_config['source_config']['query'] = record['keyword']
-        execute_workflow(generate_config, log_component, record["_id"], generate_config['user_id'])
 
 
 def save_keywords(generate_config):

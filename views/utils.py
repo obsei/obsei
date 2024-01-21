@@ -5,6 +5,9 @@ import base64, logging, pathlib, re, sys, uuid, yaml, inspect, textwrap
 import streamlit as st
 
 from obsei.configuration import ObseiConfiguration
+from rq import Queue
+from redis import Redis
+from queues.social_listening import execute_workflow
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -18,61 +21,6 @@ def save_generate_config(config_generated):
 
     return config_generated
 
-
-def img_to_bytes(img_path):
-    img_bytes = pathlib.Path(img_path).read_bytes()
-    encoded = base64.b64encode(img_bytes).decode()
-    return encoded
-
-
-# Copied from https://github.com/jrieke/traingenerator/blob/main/app/utils.py
-def download_button(
-        object_to_download, download_filename, button_text  # , pickle_it=False
-):
-    try:
-        # some strings <-> bytes conversions necessary here
-        b64 = base64.b64encode(object_to_download.encode()).decode()
-    except AttributeError as e:
-        b64 = base64.b64encode(object_to_download).decode()
-
-    button_uuid = str(uuid.uuid4()).replace("-", "")
-    button_id = re.sub("\d+", "", button_uuid)
-
-    custom_css = f"""
-        <style>
-            #{button_id} {{
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                background-color: rgb(255, 255, 255);
-                color: rgb(38, 39, 48);
-                padding: .25rem .75rem;
-                position: relative;
-                text-decoration: none;
-                border-radius: 4px;
-                border-width: 1px;
-                border-style: solid;
-                border-color: rgb(230, 234, 241);
-                border-image: initial;
-            }}
-            #{button_id}:hover {{
-                border-color: rgb(246, 51, 102);
-                color: rgb(246, 51, 102);
-            }}
-            #{button_id}:active {{
-                box-shadow: none;
-                background-color: rgb(246, 51, 102);
-                color: white;
-                }}
-        </style> """
-
-    dl_link = (
-            custom_css
-            + f'<a download="{download_filename}" id="{button_id}" href="data:file/txt;base64,{b64}">{button_text}</a><br><br>'
-    )
-    # dl_link = f'<a download="{download_filename}" id="{button_id}" href="data:file/txt;base64,{b64}"><input type="button" kind="primary" value="{button_text}"></a><br></br>'
-
-    st.markdown(dl_link, unsafe_allow_html=True)
 
 
 def get_obsei_config(current_path, file_name):
@@ -140,46 +88,20 @@ def render_config(config, component, help_str=None, parent_key=None):
                 help=hint,
             )
 
+def execute_listening(generate_config):
+    urls_table = database.urls.find({'generated_config_id': ObjectId(generate_config['_id'])})
+    records = []
+    for record in urls_table:
+        records.append(record)
 
-def generate_python(generate_config):
-    return f"""
-from obsei.configuration import ObseiConfiguration
+    redis_conn = Redis()
+    queue = Queue(connection=redis_conn)
 
-# This is Obsei workflow path and filename
-config_path = "./"
-config_filename = "workflow.yml"
-
-# Extract config via yaml file using `config_path` and `config_filename`
-obsei_configuration = ObseiConfiguration(config_path=config_path, config_filename=config_filename)
-
-# Initialize objects using configuration
-source_config = obsei_configuration.initialize_instance("source_config")
-source = obsei_configuration.initialize_instance("source")
-analyzer = obsei_configuration.initialize_instance("analyzer")
-analyzer_config = obsei_configuration.initialize_instance("analyzer_config")
-sink_config = obsei_configuration.initialize_instance("sink_config")
-sink = obsei_configuration.initialize_instance("sink")
-
-# This will fetch information from configured source ie twitter, app store etc
-source_response_list = source.lookup(source_config)
-
-# This will execute analyzer (Sentiment, classification etc) on source data with provided analyzer_config
-# Analyzer will it's output to `segmented_data` inside `analyzer_response`
-analyzer_response_list = analyzer.analyze_input(
-    source_response_list=source_response_list,
-    analyzer_config=analyzer_config
-)
-
-# This will send analyzed output to configure sink ie Slack, Zendesk etc
-sink_response_list = sink.send_data(analyzer_response_list, sink_config)
-"""
+    queue.enqueue(execute_workflow, args=(records, generate_config))
 
 
-def generate_yaml(generate_config):
-    return yaml.dump(generate_config)
-
-
-def execute_workflow(generate_config, log_components=None, inserted_id=None, user_id=None, progress_show=None):
+# pending execute realtime
+def execute_workflow1(generate_config, log_components=None, inserted_id=None, user_id=None, progress_show=None):
     try:
         obsei_configuration = ObseiConfiguration(configuration=generate_config)
 
@@ -225,11 +147,6 @@ def check_system(generate_config, params, progress_show):
         print("No 'uid' parameter found in the URL.")
 
     return progress_show
-
-
-def get_list_urls(config_id):
-    results = database.urls.find({'generated_config_id': ObjectId(config_id)})
-    return results
 
 def show_code(demo):
     """Showing the code of the demo."""

@@ -1,5 +1,5 @@
 from database import *
-from utils import save_generate_config, execute_workflow, get_list_urls
+from utils import save_generate_config, execute_listening
 import datetime
 
 ct = datetime.datetime.now()
@@ -21,7 +21,7 @@ def save_crawler_analyze(generate_config, log_component, progress_show):
             with session.start_transaction():
                 config = save_generate_config(generate_config)
                 save_website_url(config)
-                execute_crawler(config, log_component)
+                execute_listening(config)
                 session.abort_transaction()
 
     except pymongo.errors.PyMongoError as e:
@@ -35,12 +35,6 @@ def save_crawler_analyze(generate_config, log_component, progress_show):
 
     return progress_show
 
-
-def execute_crawler(generate_config, log_component):
-    urls_table = get_list_urls(generate_config['_id'])
-    for record in urls_table:
-        generate_config['source_config']['urls'] = [record['url']]
-        execute_workflow(generate_config, log_component, record["_id"], generate_config['user_id'])
 
 
 def save_website_url(generate_config):

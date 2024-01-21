@@ -1,5 +1,5 @@
 from database import *
-from utils import save_generate_config, execute_workflow, get_list_urls
+from utils import save_generate_config, execute_listening
 import datetime
 
 ct = datetime.datetime.now()
@@ -30,7 +30,7 @@ def save_reddit_rss_analyze(generate_config, log_component, progress_show):
             with session.start_transaction():
                 generate_config = save_generate_config(generate_config)
                 convert_data_urls(generate_config)
-                execute_reddit_rss(generate_config['_id'], log_component)
+                execute_listening(generate_config)
                 session.abort_transaction()
 
     except pymongo.errors.PyMongoError as e:

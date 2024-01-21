@@ -13,21 +13,18 @@ configuration = get_obsei_config(current_path, "config.yaml")
 logo_url = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
 
 st.set_page_config(page_title="Social Listener", layout="wide", page_icon=logo_url,
-                   # initial_sidebar_state="collapsed"
+                   initial_sidebar_state="collapsed"
                    )
 st.title("Data Social Listener").markdown(
     get_icon_name("Social Listener", logo_url, 60, 35), unsafe_allow_html=True
 )
 
 columns_ui = [2, 2, 2]
-# columns_ui = [2, 2, 1, 1, 1]
 
 (
     pipeline_col,
     spinner_col,
     execute_col,
-    # download_python_col,
-    # download_yaml_col,
 ) = st.columns(columns_ui)
 
 col_map = dict()
@@ -82,9 +79,6 @@ for node_name, node_value in selected.items():
     log_component[node_name] = log_expander.empty()
     log_component[node_name].write("Run \"🚀 Execute\" first")
 
-python_code = generate_python(generate_config)
-yaml_code = generate_yaml(generate_config)
-
 execute_button = execute_col.button("🚀 Execute")
 if execute_button:
     if spinner_col is None:
@@ -97,12 +91,11 @@ if execute_button:
     progress_show = check_system(generate_config, params, progress_show)
 
     if generate_config['source']['_target_'] == 'obsei.source.youtube_scrapper.YoutubeScrapperSource':
-        progress_show = save_youtube_analyze(generate_config, log_component, progress_show)
-
-    if generate_config['source']['_target_'] == 'obsei.source.appstore_scrapper.AppStoreScrapperSource' or \
-            generate_config['source']['_target_'] == 'obsei.source.playstore_scrapper.PlayStoreScrapperSource':
+        progress_show = save_youtube_analyze(generate_config, progress_show)
+    if (generate_config['source']['_target_'] in
+            ['obsei.source.appstore_scrapper.AppStoreScrapperSource',
+             'obsei.source.playstore_scrapper.PlayStoreScrapperSource']):
         progress_show = save_analyze(generate_config, log_component, progress_show)
-
     if generate_config['source']['_target_'] == 'obsei.source.google_news_source.GoogleNewsSource':
         progress_show = save_google_news_analyze(generate_config, log_component, progress_show)
 
@@ -113,11 +106,10 @@ if execute_button:
         progress_show = save_reddit_rss_analyze(generate_config, log_component, progress_show)
 
     if generate_config['source']['_target_'] == 'obsei.source.tiktok_scrapper.TiktokScrapperSource':
-        progress_show = save_tiktok_analyze(generate_config, log_component, progress_show)
+        progress_show = save_tiktok_analyze(generate_config, progress_show)
 
     if generate_config['source']['_target_'] == 'obsei.source.facebook_scrapper.FacebookScrapperSource':
-        progress_show = save_facebook_analyze(generate_config, log_component, progress_show)
-
+        progress_show = save_facebook_analyze(generate_config, progress_show)
 
     # else:
     #     execute_workflow(generate_config, log_component, None, None, progress_show)
