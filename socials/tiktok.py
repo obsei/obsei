@@ -19,8 +19,7 @@ def save_tiktok_analyze(generate_config, progress_show):
         progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 (`video_url` in config should not "
                            f"be empty or None)")
         progress_show = None
-
-        return progress_show
+        return [progress_show]
 
     try:
         with client.start_session() as session:
@@ -38,9 +37,9 @@ def save_tiktok_analyze(generate_config, progress_show):
                         if count_urls > 0:
                             break
 
-                execute_listening(config)
+                data_informer = execute_listening(config, progress_show)
                 session.abort_transaction()
-
+                return [progress_show, data_informer]
     except pymongo.errors.PyMongoError as e:
         print("Error:", str(e))
 
@@ -49,8 +48,6 @@ def save_tiktok_analyze(generate_config, progress_show):
             progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 ({str(ex)})")
 
         raise ex
-
-    return progress_show
 
 
 def convert_data_urls(generate_config):

@@ -107,7 +107,6 @@ def prepare_data_analysis(record):
     if record['source_name'] in ['FacebookScrapper', 'InstagramScrapper', 'YoutubeScrapper']:
         save_analysis(record, 'meta_comment_id', bulk_operations)
 
-    # Execute bulk operations for non-existing records
     if bulk_operations:
         result = database.data_analyzed.bulk_write(bulk_operations)
         print("Inserted Count:", result.inserted_count)
@@ -119,6 +118,9 @@ def save_analysis(record, key, bulk_operations):
 
     item = record[key]
     existing_record = database.data_analyzed.find_one({key: item})
+    if 'segmented_data_ner_data_score' in record:
+        import numpy as np
+        record['segmented_data_ner_data_score'] = float(np.float32(record['segmented_data_ner_data_score']))
 
     if existing_record is None:
         bulk_operations.append(InsertOne(record))

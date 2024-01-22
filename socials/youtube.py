@@ -15,8 +15,7 @@ def save_youtube_analyze(generate_config, progress_show):
         progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 (`video_url` or `keywords` in config should not "
                            f"be empty or None)")
         progress_show = None
-
-        return progress_show
+        return [progress_show]
 
     try:
         with client.start_session() as session:
@@ -25,8 +24,9 @@ def save_youtube_analyze(generate_config, progress_show):
                 generate_config = save_generate_config(generate_config)
                 generate_config_converted = get_url_video_by_keywords(generate_config)
                 convert_data_urls(generate_config_converted['_id'], generate_config_converted['source_config'])
-                execute_listening(generate_config)
+                data_informer = execute_listening(generate_config, progress_show)
                 session.abort_transaction()
+                return [progress_show, data_informer]
 
     except pymongo.errors.PyMongoError as e:
         print("Error:", str(e))
@@ -37,7 +37,6 @@ def save_youtube_analyze(generate_config, progress_show):
 
         raise ex
 
-    return progress_show
 
 def convert_data_urls(generated_config_id, source_config):
     if 'video_url' in source_config:

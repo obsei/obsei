@@ -5,15 +5,14 @@ import datetime
 ct = datetime.datetime.now()
 
 
-def save_google_news_analyze(generate_config, log_component, progress_show):
+def save_google_news_analyze(generate_config, progress_show):
     filtered_app_url = [value for value in generate_config['source_config']['query'] if value != '']
 
     if progress_show and len(filtered_app_url) == 0:
         progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 (`query` in config should not "
                            f"be empty or None)")
         progress_show = None
-
-        return progress_show
+        return [progress_show]
 
     try:
         with client.start_session() as session:
@@ -21,9 +20,9 @@ def save_google_news_analyze(generate_config, log_component, progress_show):
             with session.start_transaction():
                 config = save_generate_config(generate_config)
                 save_keywords(config)
-                execute_listening(config)
+                data_informer = execute_listening(generate_config, progress_show)
                 session.abort_transaction()
-
+                return [progress_show, data_informer]
     except pymongo.errors.PyMongoError as e:
         print("Error:", str(e))
 
@@ -32,8 +31,6 @@ def save_google_news_analyze(generate_config, log_component, progress_show):
             progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 ({str(ex)})")
 
         raise ex
-
-    return progress_show
 
 
 def save_keywords(generate_config):

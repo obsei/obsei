@@ -5,7 +5,7 @@ from socials.google_news import save_google_news_analyze
 from socials.crawler import save_crawler_analyze
 from socials.reddit_rss import save_reddit_rss_analyze
 from socials.tiktok import save_tiktok_analyze
-from socials.insta_facebook import save_facebook_analyze
+from socials.insta_facebook import save_meta_analyze
 import sys
 
 current_path = pathlib.Path(__file__).parent.absolute().as_posix()
@@ -89,32 +89,34 @@ if execute_button:
 
     params = st.experimental_get_query_params()
     progress_show = check_system(generate_config, params, progress_show)
-
+    data_informer = []
     if generate_config['source']['_target_'] == 'obsei.source.youtube_scrapper.YoutubeScrapperSource':
-        progress_show = save_youtube_analyze(generate_config, progress_show)
+        data_informer = save_youtube_analyze(generate_config, progress_show)
     if (generate_config['source']['_target_'] in
             ['obsei.source.appstore_scrapper.AppStoreScrapperSource',
              'obsei.source.playstore_scrapper.PlayStoreScrapperSource']):
-        progress_show = save_analyze(generate_config, log_component, progress_show)
+        data_informer = save_analyze(generate_config, progress_show)
     if generate_config['source']['_target_'] == 'obsei.source.google_news_source.GoogleNewsSource':
-        progress_show = save_google_news_analyze(generate_config, log_component, progress_show)
+        data_informer = save_google_news_analyze(generate_config, progress_show)
 
     if generate_config['source']['_target_'] == 'obsei.source.website_crawler_source.TrafilaturaCrawlerSource':
-        progress_show = save_crawler_analyze(generate_config, log_component, progress_show)
+        data_informer = save_crawler_analyze(generate_config, progress_show)
 
     if generate_config['source']['_target_'] == 'obsei.source.reddit_scrapper.RedditScrapperSource':
-        progress_show = save_reddit_rss_analyze(generate_config, log_component, progress_show)
+        data_informer = save_reddit_rss_analyze(generate_config, progress_show)
 
     if generate_config['source']['_target_'] == 'obsei.source.tiktok_scrapper.TiktokScrapperSource':
-        progress_show = save_tiktok_analyze(generate_config, progress_show)
+        data_informer = save_tiktok_analyze(generate_config, progress_show)
 
     if (generate_config['source']['_target_'] in
             ['obsei.source.facebook_scrapper.FacebookScrapperSource',
              'obsei.source.instagram_scrapper.InstagramScrapperSource']):
-        progress_show = save_facebook_analyze(generate_config, progress_show)
+        progress_show = save_meta_analyze(generate_config, progress_show)
 
-    # else:
-    #     execute_workflow(generate_config, log_component, None, None, progress_show)
+    if isinstance(data_informer, list):
+        analyzer_response_list = data_informer[1]
+        progress_show = data_informer[0]
+        show_data_table(generate_config, log_component, analyzer_response_list, progress_show)
+        if progress_show:
+            progress_show.code("🎉🎉🎉 Processing Complete!! 🍾🍾🍾")
 
-    if progress_show:
-        progress_show.code('🎉🎉🎉 Processing, Please wait in Vplanner !!! 🍾🍾🍾')

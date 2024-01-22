@@ -7,9 +7,11 @@ import plotly.express as px  # interactive charts
 # read csv from a github repo
 df = pd.read_csv("https://raw.githubusercontent.com/Lexie88rus/bank-marketing-analysis/master/bank.csv")
 
+logo_url = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
+
 st.set_page_config(
     page_title='Real-Time Data Science Dashboard',
-    page_icon='✅',
+    page_icon=logo_url,
     layout='wide'
 )
 

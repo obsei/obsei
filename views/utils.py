@@ -1,6 +1,6 @@
 from database import *
 
-import base64, logging, pathlib, re, sys, uuid, yaml, inspect, textwrap
+import  logging, pathlib, re, sys, uuid, yaml, inspect, textwrap, time
 
 import streamlit as st
 
@@ -20,7 +20,6 @@ def save_generate_config(config_generated):
     print("Config inserted successfully")
 
     return config_generated
-
 
 
 def get_obsei_config(current_path, file_name):
@@ -88,7 +87,8 @@ def render_config(config, component, help_str=None, parent_key=None):
                 help=hint,
             )
 
-def execute_listening(generate_config):
+
+def execute_listening(generate_config, progress_show):
     urls_table = database.urls.find({'generated_config_id': ObjectId(generate_config['_id'])})
     records = []
     for record in urls_table:
@@ -97,32 +97,29 @@ def execute_listening(generate_config):
     redis_conn = Redis()
     queue = Queue(connection=redis_conn)
 
-    queue.enqueue(execute_workflow, args=(records, generate_config))
+    data = queue.enqueue(execute_workflow, args=(records, generate_config))
+
+    while data.result is None:
+        progress_show.code("🏄🏄🏄 Processing 🐢")
+        time.sleep(1)
+        progress_show.code("🏄🏄🏄 Processing 🐢🐢")
+        time.sleep(1)
+        progress_show.code("🏄🏄🏄 Processing 🐢🐢🐢")
+        time.sleep(1)
+
+    return data.result
 
 
-# pending execute realtime
-def execute_workflow1(generate_config, log_components=None, inserted_id=None, user_id=None, progress_show=None):
+def show_data_table(generate_config, log_components=None, analyzer_response_list=None, progress_show=None):
     try:
         obsei_configuration = ObseiConfiguration(configuration=generate_config)
-
-        source_config = obsei_configuration.initialize_instance("source_config")
-        source = obsei_configuration.initialize_instance("source")
-
-        analyzer = obsei_configuration.initialize_instance("analyzer")
-        analyzer_config = obsei_configuration.initialize_instance("analyzer_config")
 
         sink_config = obsei_configuration.initialize_instance("sink_config")
         sink = obsei_configuration.initialize_instance("sink")
 
-        source_response_list = source.lookup(source_config)
-        log_components["source"].write([vars(response) for response in source_response_list])
-
-        analyzer_response_list = analyzer.analyze_input(
-            source_response_list=source_response_list, analyzer_config=analyzer_config
-        )
         log_components["analyzer"].write([vars(response) for response in analyzer_response_list])
 
-        sink_response_list = sink.send_data(analyzer_response_list, sink_config, inserted_id, user_id)
+        sink_response_list = sink.send_data(analyzer_response_list, sink_config)
 
         if sink.TYPE == 'Pandas':
             log_components["sink"].write(sink_response_list)
@@ -148,11 +145,3 @@ def check_system(generate_config, params, progress_show):
 
     return progress_show
 
-def show_code(demo):
-    """Showing the code of the demo."""
-    show_code = st.sidebar.checkbox("Show code", True)
-    if show_code:
-        # Showing the code of the demo.
-        st.markdown("## Code")
-        sourcelines, _ = inspect.getsourcelines(demo)
-        st.code(textwrap.dedent("".join(sourcelines[1:])))

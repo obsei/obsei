@@ -5,34 +5,22 @@ import datetime
 ct = datetime.datetime.now()
 
 
-def execute_reddit_rss(config_id, log_component):
-    generate_config = get_generate_config(config_id)
-    urls_table = get_list_urls(config_id)
-
-    for record in urls_table:
-        generate_config['source_config']['url'] = record['url']
-        execute_workflow(generate_config, log_component, record["_id"], generate_config['user_id'])
-
-
-def save_reddit_rss_analyze(generate_config, log_component, progress_show):
+def save_reddit_rss_analyze(generate_config, progress_show):
     filtered_url = [value for value in generate_config['source_config']['url'] if value != '']
-
     if progress_show and len(filtered_url) == 0:
         progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 (`url` or `keywords` in config should not "
                            f"be empty or None)")
         progress_show = None
-
-        return progress_show
-
+        return [progress_show]
     try:
         with client.start_session() as session:
             # Start a transaction
             with session.start_transaction():
                 generate_config = save_generate_config(generate_config)
                 convert_data_urls(generate_config)
-                execute_listening(generate_config)
+                data_informer = execute_listening(generate_config, progress_show)
                 session.abort_transaction()
-
+                return [progress_show, data_informer]
     except pymongo.errors.PyMongoError as e:
         print("Error:", str(e))
 
@@ -41,8 +29,6 @@ def save_reddit_rss_analyze(generate_config, log_component, progress_show):
             progress_show.code(f"❗❗❗ Processing Failed!! 😞😞😞 \n 👉 ({str(ex)})")
 
         raise ex
-
-    return progress_show
 
 
 def get_generate_config(config_id):
