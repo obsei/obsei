@@ -1,4 +1,4 @@
-from views.utils import *
+from utils import *
 from socials.youtube import save_youtube_analyze
 from socials.play_app_store import save_analyze
 from socials.google_news import save_google_news_analyze
@@ -111,7 +111,7 @@ if execute_button:
     if (generate_config['source']['_target_'] in
             ['obsei.source.facebook_scrapper.FacebookScrapperSource',
              'obsei.source.instagram_scrapper.InstagramScrapperSource']):
-        progress_show = save_meta_analyze(generate_config, progress_show)
+        data_informer = save_meta_analyze(generate_config, progress_show)
 
     if isinstance(data_informer, list):
         analyzer_response_list = data_informer[1]
