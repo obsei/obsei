@@ -1,0 +1,2 @@
+class DataListeningConfigNotFound(Exception):
+    pass

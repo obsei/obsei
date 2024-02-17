@@ -1,0 +1,132 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+dynamic = ["version"]
+requires-python = ">=3.8"
+name = "obsei"
+authors = [{ name = "Lalit Pagaria", email = "lalit.pagaria@oraika.com" }]
+maintainers = [
+    { name = "Lalit Pagaria", email = "lalit.pagaria@oraika.com" },
+    { name = "Girish Patel", email = "girish.patel@oraika.com" }
+]
+description = "Obsei is an automation tool for text analysis need"
+readme = "README.md"
+license = { text = "Apache Version 2.0" }
+
+keywords = [
+    "workflow",
+    "customer-support",
+    "customer-feedback",
+    "low-code",
+    "automation",
+    "cognitive-automation",
+    "social-listening",
+    "customer-feedback-analysis",
+    "customer-experience",
+    "market-research",
+    "nlp",
+    "oraika",
+    "obsei"
+]
+
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Customer Service",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "pytz >= 2022.6",
+    "pydantic >= 1.10.2",
+    "python-dateutil >= 2.8.2",
+    "SQLAlchemy >= 1.4.44",
+    "mmh3 >= 3.0.0",
+    "beautifulsoup4 >= 4.9.3",
+    "dateparser >= 1.1.3",
+    "requests >= 2.26.0",
+]
+
+
+[project.optional-dependencies]
+
+twitter-api = ["searchtweets-v2 >= 1.1.1"]
+google-play-scraper = ["google-play-scraper >= 1.2.2"]
+google-play-api = ["google-api-python-client >= 2.66.0"]
+app-store-scraper = ["app-store-reviews-reader >= 1.2"]
+reddit-scraper = ["reddit-rss-reader >= 1.3.2"]
+reddit-api = ["praw >= 7.6.1"]
+pandas = [
+    "pandas >= 1.5.1; python_version >= '3.8'",
+    "pandas >= 1.3.5; python_version == '3.7'"
+]
+google-news-scraper = ["gnews >= 0.2.7"]
+facebook-api = ["python-facebook-api >= 0.15.0"]
+atlassian-api = ["atlassian-python-api >= 3.31.0"]
+elasticsearch = ["elasticsearch >= 8.5.0"]
+slack-api = ["slack-sdk >= 3.19.4"]
+
+source = [
+    "obsei[twitter-api,google-play-scraper,google-play-api,app-store-scraper]",
+    "obsei[reddit-scraper,reddit-api,pandas,google-news-scraper,facebook-api]",
+]
+
+sink = ["obsei[atlassian-api,elasticsearch,slack-api,pandas]"]
+
+analyzer = [
+    "torch >= 1.13.0",
+    "vaderSentiment >= 3.3.2",
+    "transformers >= 4.24.0",
+    "nltk >= 3.7",
+    "sentencepiece >= 0.1.97",
+    "presidio-analyzer >= 2.2.30",
+    "presidio-anonymizer >= 2.2.30",
+    "spacy >= 3.4.3",
+]
+
+dev = [
+    "pre-commit >= 2.20.0",
+    "black >= 22.10.0",
+    "mypy >= 0.991",
+    "types-requests",
+    "types-python-dateutil",
+    "types-PyYAML",
+    "types-dateparser",
+    "types-protobuf",
+    "types-pytz",
+    "pytest >= 7.2.0",
+    "pip-tools >= 6.10.0",
+    "coverage >= 6.5.0",
+]
+
+all = ["obsei[analyzer,source,sink]"]
+
+## GPL dependencies (these are optional)
+gpl = ["trafilatura"]
+
+[project.urls]
+repository = "https://github.com/obsei/obsei"
+homepage = "https://obsei.com"
+documentation = "https://obsei.com"
+changelog = "https://github.com/obsei/obsei/releases"
+
+[tool.hatch.build.targets.sdist]
+include = ["/obsei"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["obsei"]
+
+[tool.hatch.version]
+path = "obsei/_version.py"

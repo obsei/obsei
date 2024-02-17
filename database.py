@@ -1,6 +1,5 @@
 import pymongo
 import urllib
-from bson import ObjectId
 
 # Replace these with your server details
 MONGO_HOST = "localhost"

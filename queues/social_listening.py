@@ -1,56 +1,46 @@
-from obsei.configuration import ObseiConfiguration
-import pymongo, urllib
+from core.configuration import ObseiConfiguration
 from pymongo import InsertOne
 import datetime
-from typing import Any, Dict, List, Optional
-from obsei.payload import TextPayload
-from obsei.misc.utils import flatten_dict
-
-# from database import *
-MONGO_DB = "obsei"
-MONGO_USER = "root"
-MONGO_PASS = "Aa@123456"
-
-uri_mongo = "mongodb://" + MONGO_USER + ":" + urllib.parse.quote(MONGO_PASS) + "@localhost:27017/" + MONGO_DB
-client = pymongo.MongoClient(uri_mongo)
-database = client.obsei
+from typing import Any, Dict, Optional
+from core.payload import TextPayload
+from core.misc.utils import flatten_dict
+from bson import ObjectId
+from database import *
 
 
-def convert(
-        analyzer_response: TextPayload,
-        base_payload: Optional[Dict[str, Any]] = None,
-        **kwargs: Any,
-) -> Dict[str, Any]:
-    base_payload = base_payload or {}
-    merged_dict = {**base_payload, **analyzer_response.to_dict()}
-    return flatten_dict(merged_dict)
+def execute_workflow(config_id: str, start: False):
+    if start is False:
+        return
 
+    generate_config = database.generate_configs.find_one(ObjectId(config_id))
+    keys_to_rename = ['source', 'source_config', 'analyzer', 'analyzer_config', 'sink', 'sink_config']
+    for key in keys_to_rename:
+        if key in generate_config:
+            generate_config[key]['_target_'] = generate_config[key].pop('target__')
 
-def execute_workflow(urls_table, generate_config):
+    urls = database.urls.find({'generated_config_id': config_id})
     analyzer_response_list = []
 
     try:
-        for record in urls_table:
-            inserted_id = record["_id"]
+        for record in urls:
+            inserted_id = record['_id']
             user_id = generate_config['user_id']
-            if generate_config['source_config']['_target_'] in ['obsei.source.tiktok_scrapper.TiktokScrapperConfig',
-                                                                'obsei.source.youtube_scrapper.YoutubeScrapperConfig']:
-                generate_config['source_config']['video_url'] = record['url']
-            if generate_config['source_config']['_target_'] in [
-                'obsei.source.website_crawler_source.TrafilaturaCrawlerConfig']:
-                generate_config['source_config']['urls'] = [record['url']]
-            if generate_config['source_config']['_target_'] in ['obsei.source.google_news_source.GoogleNewsConfig']:
-                generate_config['source_config']['query'] = record['keyword']
-            if generate_config['source_config']['_target_'] in [
-                'obsei.source.playstore_scrapper.PlayStoreScrapperConfig',
-                'obsei.source.appstore_scrapper.AppStoreScrapperConfig']:
-                generate_config['source_config']['app_url'] = record['url']
-            if generate_config['source_config']['_target_'] in ['obsei.source.reddit_scrapper.RedditScrapperConfig']:
-                generate_config['source_config']['url'] = record['url']
-            if generate_config['source_config']['_target_'] in ['obsei.source.facebook_scrapper.FacebookScrapperConfig',
-                                                                'obsei.source.instagram_scrapper.InstagramScrapperConfig',
-                                                                ]:
-                generate_config['source_config']['urls'] = record['url']
+            target_mappings = {
+                'core.source.tiktok_scrapper.TiktokScrapperConfig': {'video_url': record['url']},
+                'core.source.youtube_scrapper.YoutubeScrapperConfig': {'video_url': record['url']},
+                'core.source.website_crawler_source.TrafilaturaCrawlerConfig': {'urls': [record['url']]},
+                'core.source.playstore_scrapper.PlayStoreScrapperConfig': {'app_url': record['url']},
+                'core.source.appstore_scrapper.AppStoreScrapperConfig': {'app_url': record['url']},
+                'core.source.reddit_scrapper.RedditScrapperConfig': {'url': record['url']},
+                'core.source.facebook_scrapper.FacebookScrapperConfig': {'urls': record['url']},
+                'core.source.instagram_scrapper.InstagramScrapperConfig': {'urls': record['url']}
+            }
+
+            if 'keyword' in record:
+                target_mappings['core.source.google_news_source.GoogleNewsConfig'] = {'query': record['keyword']}
+
+            if generate_config['source_config']['_target_'] in target_mappings:
+                generate_config['source_config'].update(target_mappings[generate_config['source_config']['_target_']])
 
             obsei_configuration = ObseiConfiguration(configuration=generate_config)
 
@@ -89,23 +79,22 @@ def execute_workflow(urls_table, generate_config):
 
 def prepare_data_analysis(record):
     bulk_operations = []
-    if record['source_name'] in ['AppStoreScrapper', 'RedditScrapper']:
-        save_analysis(record, 'meta_id', bulk_operations)
+    source_meta_mapping = {
+        'AppStoreScrapper': 'meta_reviewId',
+        'RedditScrapper': 'meta_id',
+        'PlayStoreScrapper': 'meta_reviewId',
+        'GoogleNews': 'meta_url',
+        'Crawler': 'meta_source',
+        'TiktokScrapper': 'meta_cid',
+        'FacebookScrapper': 'meta_comment_id',
+        'InstagramScrapper': 'meta_comment_id',
+        'YoutubeScrapper': 'meta_comment_id'
+    }
 
-    if record['source_name'] == 'PlayStoreScrapper':
-        save_analysis(record, 'meta_reviewId', bulk_operations)
-
-    if record['source_name'] == 'GoogleNews':
-        save_analysis(record, 'meta_url', bulk_operations)
-
-    if record['source_name'] == 'Crawler':
-        save_analysis(record, 'meta_source', bulk_operations)
-
-    if record['source_name'] == 'TiktokScrapper':
-        save_analysis(record, 'meta_cid', bulk_operations)
-
-    if record['source_name'] in ['FacebookScrapper', 'InstagramScrapper', 'YoutubeScrapper']:
-        save_analysis(record, 'meta_comment_id', bulk_operations)
+    for source_name, meta_key in source_meta_mapping.items():
+        if record['source_name'] == source_name:
+            save_analysis(record, meta_key, bulk_operations)
+            break
 
     if bulk_operations:
         result = database.data_analyzed.bulk_write(bulk_operations)
@@ -127,3 +116,15 @@ def save_analysis(record, key, bulk_operations):
     else:
         database.data_analyzed.update_one({key: item}, {'$set': record})
         print(f"Skipped record: {item} (already exists)")
+
+
+def convert(
+        analyzer_response: TextPayload,
+        base_payload: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
+) -> Dict[str, Any]:
+    base_payload = base_payload or {}
+    merged_dict = {**base_payload, **analyzer_response.to_dict()}
+    return flatten_dict(merged_dict)
+
+

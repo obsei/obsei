@@ -149,6 +149,4 @@ models*
 .venv/
 archive.zip
 
-.streamlit/
-
 /.history

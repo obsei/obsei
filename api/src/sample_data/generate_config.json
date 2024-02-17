@@ -1,0 +1,37 @@
+{
+  "source": {
+    "target__": "core.source.youtube_scrapper.YoutubeScrapperSource"
+  },
+  "source_config": {
+    "target__": "core.source.youtube_scrapper.YoutubeScrapperConfig",
+    "keywords": [
+      "mtp"
+    ],
+    "video_url": [
+      "https://www.youtube.com/watch?v=hJagyo0F2uA"
+    ],
+    "lookup_period": "1Y",
+    "max_comments": 10,
+    "max_search_video": 10
+  },
+  "analyzer": {
+    "target__": "core.analyzer.sentiment_analyzer.TransformersSentimentAnalyzer",
+    "model_name_or_path": "typeform/mobilebert-uncased-mnli",
+    "device": "auto"
+  },
+  "analyzer_config": {
+    "target__": "core.analyzer.sentiment_analyzer.TransformersSentimentAnalyzerConfig",
+    "labels": [
+      "positive",
+      "negative"
+    ],
+    "multi_class_classification": false
+  },
+  "sink": {
+    "target__": "core.sink.pandas_sink.PandasSink"
+  },
+  "sink_config": {
+    "target__": "core.sink.pandas_sink.PandasSinkConfig"
+  },
+  "user_id": "string"
+}
