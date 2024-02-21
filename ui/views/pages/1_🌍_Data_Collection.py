@@ -1,4 +1,4 @@
-from views.utils import *
+from ui.views.utils import *
 from ui.socials.youtube import save_youtube_analyze
 from ui.socials.play_app_store import save_analyze
 from ui.socials.google_news import save_google_news_analyze
@@ -13,7 +13,7 @@ configuration = get_obsei_config(current_path, "config.yaml")
 logo_url = "https://raw.githubusercontent.com/obsei/obsei-resources/master/logos/obsei_200x200.png"
 
 st.set_page_config(page_title="Social Listener", layout="wide", page_icon=logo_url,
-                   initial_sidebar_state="collapsed"
+                   # initial_sidebar_state="collapsed"
                    )
 st.title("Data Social Listener").markdown(
     get_icon_name("Social Listener", logo_url, 60, 35), unsafe_allow_html=True
@@ -90,27 +90,28 @@ if execute_button:
     params = st.experimental_get_query_params()
     progress_show = check_system(generate_config, params, progress_show)
     data_informer = []
-    if generate_config['source']['target__'] == 'obsei.source.youtube_scrapper.YoutubeScrapperSource':
+    print(generate_config)
+    if generate_config['source']['target__'] == 'core.source.youtube_scrapper.YoutubeScrapperSource':
         data_informer = save_youtube_analyze(generate_config, progress_show)
     if (generate_config['source']['target__'] in
-            ['obsei.source.appstore_scrapper.AppStoreScrapperSource',
-             'obsei.source.playstore_scrapper.PlayStoreScrapperSource']):
+            ['core.source.appstore_scrapper.AppStoreScrapperSource',
+             'core.source.playstore_scrapper.PlayStoreScrapperSource']):
         data_informer = save_analyze(generate_config, progress_show)
-    if generate_config['source']['target__'] == 'obsei.source.google_news_source.GoogleNewsSource':
+    if generate_config['source']['target__'] == 'core.source.google_news_source.GoogleNewsSource':
         data_informer = save_google_news_analyze(generate_config, progress_show)
 
-    if generate_config['source']['target__'] == 'obsei.source.website_crawler_source.TrafilaturaCrawlerSource':
+    if generate_config['source']['target__'] == 'core.source.website_crawler_source.TrafilaturaCrawlerSource':
         data_informer = save_crawler_analyze(generate_config, progress_show)
 
-    if generate_config['source']['target__'] == 'obsei.source.reddit_scrapper.RedditScrapperSource':
+    if generate_config['source']['target__'] == 'core.source.reddit_scrapper.RedditScrapperSource':
         data_informer = save_reddit_rss_analyze(generate_config, progress_show)
 
-    if generate_config['source']['target__'] == 'obsei.source.tiktok_scrapper.TiktokScrapperSource':
+    if generate_config['source']['target__'] == 'core.source.tiktok_scrapper.TiktokScrapperSource':
         data_informer = save_tiktok_analyze(generate_config, progress_show)
 
     if (generate_config['source']['target__'] in
-            ['obsei.source.facebook_scrapper.FacebookScrapperSource',
-             'obsei.source.instagram_scrapper.InstagramScrapperSource']):
+            ['core.source.facebook_scrapper.FacebookScrapperSource',
+             'core.source.instagram_scrapper.InstagramScrapperSource']):
         data_informer = save_meta_analyze(generate_config, progress_show)
 
     if isinstance(data_informer, list):
