@@ -18,9 +18,11 @@ def execute_workflow(config_id: str, start: False):
         if key in generate_config:
             generate_config[key]['_target_'] = generate_config[key].pop('target__')
 
-    urls = database.urls.find({'generated_config_id': config_id})
-    analyzer_response_list = []
+    urls = database.urls.find({'generated_config_id': ObjectId(config_id)})
+    if urls is None:
+        urls = database.urls.find({'generated_config_id': config_id})
 
+    analyzer_response_list = []
     try:
         for record in urls:
             inserted_id = record['_id']
@@ -126,5 +128,3 @@ def convert(
     base_payload = base_payload or {}
     merged_dict = {**base_payload, **analyzer_response.to_dict()}
     return flatten_dict(merged_dict)
-
-

@@ -97,8 +97,8 @@ class ConfigService:
     def get_listening_config_by_id(self, config_id: str, db) -> GetListeningConfigOutData:
         return self.get_listening_config_by_id_use_case.handle(config_id, db=db)
 
-    def get_url_video_by_keywords(self, config: GetListeningConfigOutData) -> GetListeningConfigOutData:
-        return self.get_url_by_keywords_use_case.handle(config)
+    def get_url_video_by_keywords(self, config: GetListeningConfigOutData, db) -> GetListeningConfigOutData:
+        return self.get_url_by_keywords_use_case.handle(config, db=db)
 
     def save_url_video_by_keywords(self, config_id: str, source_config: object, db) -> list[dict[str, Any] | dict[
         str, Any]] | list[Any]:

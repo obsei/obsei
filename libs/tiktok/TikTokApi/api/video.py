@@ -271,11 +271,16 @@ class Video:
                 raise InvalidResponseException(
                     resp, "TikTok returned an invalid response."
                 )
+            comments = resp.get("comments", [])
 
-            for video in resp.get("comments", []):
-                yield self.parent.comment(data=video)
-                found += 1
-
+            if comments is not None:
+                for video in resp.get("comments", []):
+                    yield self.parent.comment(data=video)
+                    found += 1
+            else:
+                raise InvalidResponseException(
+                    resp, "No comments found."
+                )
             if not resp.get("has_more", False):
                 return
 

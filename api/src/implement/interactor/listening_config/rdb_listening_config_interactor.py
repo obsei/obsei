@@ -51,7 +51,7 @@ class RDBUpdateListeningConfigInteractor(UpdateListeningConfigUseCase):
 
 
 class RDBDeleteListeningConfigInteractor(DeleteListeningConfigUseCase):
-    def handle(self, config_id: str, db) -> GetListeningConfigOutData:
+    def handle(self, config_id: str, db) -> ResultData:
         result = db.generate_configs.find_one(ObjectId(config_id))
         if result is None:
             raise DataListeningConfigNotFound

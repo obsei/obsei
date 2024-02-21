@@ -10,7 +10,7 @@ from api.src.interfaces.usecase.result_data import (
 
 
 class GetUrlByKeywordsUseCase(metaclass=ABCMeta):
-    def handle(self, config: GetListeningConfigOutData) -> GetListeningConfigOutData:
+    def handle(self, config: GetListeningConfigOutData, db) -> GetListeningConfigOutData:
         raise NotImplementedError
 
 

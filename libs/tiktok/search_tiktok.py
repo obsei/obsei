@@ -1,9 +1,8 @@
 from libs.tiktok.TikTokApi import TikTokApi
-import asyncio
-import os, sys
+import asyncio, os, sys, datetime
+from bson import ObjectId
 from database import *
-
-import datetime
+from pymongo import ReplaceOne
 
 
 async def search_videos(keyword, max, token, config_id):
@@ -15,14 +14,26 @@ async def search_videos(keyword, max, token, config_id):
             headless=False)
         array = []
         async for video_url in api.search.videos(keyword, count=int(max)):
-            array.append({
-                'generated_config_id': ObjectId(config_id), 
-                'url': video_url, 
-                'keyword': keyword, 
-                'created_at': datetime.datetime.now()
-                })
+            if len(array) == max:
+                break
 
-        database.urls.insert_many(array)
+            array.append({
+                'generated_config_id': ObjectId(config_id),
+                'url': video_url,
+                'keyword': keyword,
+                'created_at': datetime.datetime.now()
+            })
+
+        update_operations = [
+            ReplaceOne({'url': doc['url']}, doc, upsert=True)
+            for doc in array
+        ]
+
+        # Perform the upsert operations
+        result = database.urls.bulk_write(update_operations)
+
+        # Print the upsert result
+        print(f"{result.upserted_count} documents were inserted, {result.modified_count} documents were updated.")
 
 
 if __name__ == "__main__":

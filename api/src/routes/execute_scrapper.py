@@ -1,3 +1,4 @@
+import pymongo
 from fastapi import APIRouter, HTTPException, Depends
 from logging import INFO, Formatter, StreamHandler, getLogger
 from api.src.utils.app import check_basic_authentication
@@ -17,7 +18,9 @@ from api.src.implement.interactor.listening_config.rdb_listening_config_interact
     RDBGetListeningConfigByIdInteractor,
 )
 
-import pymongo
+from api.src.domain.exceptions import (
+    MsTokenTiktokExpired,
+)
 
 router = APIRouter(
     prefix="/listening",
@@ -60,7 +63,7 @@ def store(
         database = client.obsei
 
         config = execute_service.get_listening_config_by_id(config_id, database)
-        generated_config = execute_service.get_url_video_by_keywords(config)
+        generated_config = execute_service.get_url_video_by_keywords(config, database)
 
         source_config = generated_config.source_config
 
@@ -70,6 +73,8 @@ def store(
         logger.info('-' * 20 + 'POST  /listening/execute/' + ' Response' + '-' * 20)
 
         return JSONResponse({'status': True, 'message': "Social listening is processing, please wait."})
+    except MsTokenTiktokExpired:
+        raise HTTPException(status_code=404, detail=f"Tiktok's MsToken was expired for config id {config_id}.")
     except pymongo.errors.PyMongoError as e:
         raise HTTPException(status_code=400, detail=f"{str(e)}")
     except Exception as e:
