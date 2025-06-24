@@ -1,4 +1,4 @@
-FROM python:3.10-slim-bullseye
+FROM python:3.12.7-slim-bullseye
 
 WORKDIR /home/user
 
