@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from pandas import DataFrame
+from pandas import DataFrame, concat
 
 from obsei.payload import TextPayload
 from obsei.misc.utils import flatten_dict
@@ -60,6 +60,6 @@ class PandasSink(BaseSink):
             responses.append(response)
 
         if config.dataframe is not None:
-            config.dataframe = config.dataframe.append(responses)
+            config.dataframe = concat([config.dataframe, DataFrame(responses)])
 
         return config.dataframe

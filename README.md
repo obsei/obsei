@@ -129,6 +129,14 @@ following options are available to install minimal dependencies as per need -
  - `pip install obsei[elasticsearch]`: To install dependencies related to elasticsearch informer
  - `pip install obsei[slack-api]`:To install dependencies related to Slack official api based informer
 
+The core install also includes the Xquik Observer. Store its API key in
+`XQUIK_API_KEY`, then run `example/xquik_source_example.py`. The Observer marks
+tweet text as untrusted external content. Keep it isolated from instructions,
+secrets, and executable actions.
+
+Xquik is an independent third-party service. Not affiliated with X Corp.
+"Twitter" and "X" are trademarks of X Corp.
+
 You can also mix multiple dependencies together in single installation command. For example to install dependencies 
 Twitter observer, all analyzer, and Slack informer use following command -
 ```shell
