@@ -20,6 +20,9 @@ from obsei.slackbot import SlackSignatureError, verify
 from obsei.store import Store
 from obsei.themes import ThemesConfig, update_themes
 
+TOKEN = "api-token-0123456789"
+LOCAL = "http://127.0.0.1:8765"
+
 
 @pytest.fixture(scope="module")
 def store() -> Store:
@@ -69,10 +72,10 @@ def test_serve_studio_api(store: Store) -> None:
             ]
         }
     )
-    client = TestClient(create_app(cfg, Context(), store, token="t"))
+    client = TestClient(create_app(cfg, Context(), store, token=TOKEN), base_url=LOCAL)
     assert client.get("/studio/").status_code == 200
     assert client.get("/api/snapshot").status_code == 401
-    auth = {"Authorization": "Bearer t"}
+    auth = {"Authorization": f"Bearer {TOKEN}"}
     snap = client.get("/api/snapshot", headers=auth).json()
     theme = snap["themes"][0]["id"]
     assert snap["evidence"] == {theme_id: [] for theme_id in snap["evidence"]}
@@ -88,6 +91,8 @@ def test_slack_signature() -> None:
         verify(secret, body, "1800000000", sig, now=now + 600)
     with pytest.raises(SlackSignatureError, match="invalid"):
         verify(secret, body + b"x", "1800000000", sig, now=now)
+    with pytest.raises(SlackSignatureError, match="invalid"):
+        verify(secret, body, "1800000000", "v0=ü", now=now)
 
 
 def test_slack_command_answers_in_background(store: Store, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -117,7 +122,7 @@ def test_slack_command_answers_in_background(store: Store, monkeypatch: pytest.M
             ]
         }
     )
-    client = TestClient(create_app(cfg, ctx, store, token="t"))
+    client = TestClient(create_app(cfg, ctx, store, token=TOKEN), base_url=LOCAL)
     body = urlencode(
         {"text": "top issues?", "response_url": "https://hooks.slack.com/commands/1"}
     ).encode()
