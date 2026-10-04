@@ -282,3 +282,40 @@ def test_sql_sink_upserts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
             sa.text("SELECT id, text, author_pseudonym FROM obsei_feedback ORDER BY text")
         ).all()
     assert [(r[1], r[2]) for r in rows] == [("a edited", None), ("b", None)]
+
+
+def test_gong_keeps_only_customer_speech(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("GONG_ACCESS_KEY", "k")
+    monkeypatch.setenv("GONG_ACCESS_SECRET", "s")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/v2/calls/extensive":
+            call = {
+                "metaData": {
+                    "id": "c1",
+                    "started": "2026-09-01T10:00:00Z",
+                    "language": "es",
+                    "title": "Renewal",
+                },
+                "parties": [
+                    {"speakerId": "s1", "affiliation": "External"},
+                    {"speakerId": "s2", "affiliation": "Internal"},
+                ],
+            }
+            return httpx.Response(200, json={"calls": [call], "records": {}})
+        transcript = {
+            "callId": "c1",
+            "transcript": [
+                {"speakerId": "s2", "sentences": [{"text": "Our roadmap is confidential"}]},
+                {
+                    "speakerId": "s1",
+                    "sentences": [{"text": "El precio es muy alto."}, {"text": "Falta SSO."}],
+                },
+            ],
+        }
+        return httpx.Response(200, json={"callTranscripts": [transcript], "records": {}})
+
+    ((record, cursor),) = list(source("gong", {}, handler).fetch(None))
+    assert record.text == "El precio es muy alto. Falta SSO."
+    assert record.lang == "es"
+    assert cursor == {"since": "2026-09-01T10:00:00+00:00"}

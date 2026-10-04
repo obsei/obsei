@@ -8,6 +8,7 @@ from obsei.sources.bluesky import BlueskyConfig, BlueskySource
 from obsei.sources.filedrop import FileDropConfig, FileDropSource
 from obsei.sources.files import CsvConfig, CsvSource, FileConfig, JsonlSource
 from obsei.sources.github import GitHubIssuesConfig, GitHubIssuesSource
+from obsei.sources.gong import GongConfig, GongSource
 from obsei.sources.hackernews import HackerNewsConfig, HackerNewsSource
 from obsei.sources.helpdesk import (
     FreshdeskConfig,
@@ -47,6 +48,7 @@ def register(registry: Registry) -> None:
     registry.add_source("zendesk", factory(ZendeskConfig, ZendeskSource))
     registry.add_source("freshdesk", factory(FreshdeskConfig, FreshdeskSource))
     registry.add_source("intercom", factory(IntercomConfig, IntercomSource))
+    registry.add_source("gong", factory(GongConfig, GongSource))
 
 
 __all__ = ["register"]

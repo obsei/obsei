@@ -43,6 +43,7 @@ def test_registers_all_builtins() -> None:
         "filedrop",
         "freshdesk",
         "github_issues",
+        "gong",
         "hackernews",
         "imap",
         "intercom",
