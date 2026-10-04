@@ -39,6 +39,7 @@ class Overview(BaseModel):
     by_intent: list[Bucket]
     by_lang: list[Bucket]
     by_week: list[Bucket]
+    by_route: list[Bucket] = Field(default_factory=list)
 
 
 class Node(BaseModel):
@@ -88,6 +89,7 @@ def overview(store: Store, *, k: int) -> Overview:
         by_intent=_buckets(store, "intent", k),
         by_lang=_buckets(store, "lang", k),
         by_week=_buckets(store, "week", k)[-26:],
+        by_route=_buckets(store, "route", k),
     )
 
 

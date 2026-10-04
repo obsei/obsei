@@ -14,6 +14,7 @@ export interface Overview {
   by_intent: Bucket[];
   by_lang: Bucket[];
   by_week: Bucket[];
+  by_route?: Bucket[];
 }
 
 export interface Theme {

@@ -7,7 +7,9 @@
 #          the answer is always one of your options, with probabilities. A filter drops spam before
 #          classification. Answers below their cutoff go to a local Ollama chat model; without it
 #          they are stored with review: true. Nothing leaves your network except the sinks.
-# Sinks:   urgent bugs become Jira issues; every other ticket goes to Slack.
+# Routes:  first match wins: tickets still uncertain after the fallback go to a review channel;
+#          urgent bugs become Jira issues and page the on-call channel; billing and refund requests
+#          go to the billing channel; everything else lands in Parquet files for the warehouse.
 #
 # Extras:  none (pip install obsei)
 # Models:  llama serve -hf ggml-org/Julia-1-GGUF          (decision model on port 8080; see the
@@ -18,7 +20,9 @@
 #          ZENDESK_EMAIL, ZENDESK_API_TOKEN     Zendesk agent email and API token
 #          FRESHDESK_API_KEY                    Freshdesk API key
 #          JIRA_EMAIL, JIRA_API_TOKEN           Jira Cloud user and API token
-#          SLACK_WEBHOOK_URL                    Slack incoming webhook
+#          ONCALL_SLACK_WEBHOOK_URL             Slack incoming webhooks, one per channel
+#          BILLING_SLACK_WEBHOOK_URL
+#          REVIEW_SLACK_WEBHOOK_URL
 # Try:     obsei try -c examples/decision-routing.yaml -p sample --enrich --limit 8
 # Run:     obsei run -c examples/decision-routing.yaml -p tickets
 version: 1
@@ -101,27 +105,43 @@ pipelines:
               yes_means: asks for a refund, a chargeback or money back
               no_means: does not ask for money back
     sinks:
-      - type: jira
+      - key: jira
+        type: jira
         config:
           base_url: https://acme.atlassian.net
           project_key: SUP
           issue_type: Bug
           labels: [feedback, urgent]
-          when:
-            classify.intent: [bug]
-            classify.fields.urgency: [today, right now]
+          when: {}                              # the route decides; no extra filter
           max_issues: 20
-      - type: slack                             # bugs that can wait
-        config:
-          when:
-            classify.intent: [bug]
-            classify.fields.urgency: [can wait, this week]
-      - type: slack                             # everything that is not a bug
-        config:
-          when:
-            classify.intent:
-              [billing, account_access, how_to, feature_request, churn_risk, praise, other]
-          max_messages: 50
+      - key: oncall
+        type: slack
+        config: {webhook_url_env: ONCALL_SLACK_WEBHOOK_URL}
+      - key: billing
+        type: slack
+        config: {webhook_url_env: BILLING_SLACK_WEBHOOK_URL, max_messages: 50}
+      - key: review
+        type: slack
+        config: {webhook_url_env: REVIEW_SLACK_WEBHOOK_URL, max_messages: 50}
+      - key: lake
+        type: parquet
+        config: {directory: support-lake}
+    route:                                      # in order; the first matching rule wins
+      - review: [review]                        # labels still uncertain after the fallback
+      - name: urgent-bugs
+        when:
+          classify.intent: {is: bug, min_confidence: 0.8}
+          classify.fields.urgency: {gte: today} # today or right now
+        sinks: [jira, oncall]
+      - name: billing
+        when:
+          classify.intent: [billing]
+        sinks: [billing]
+      - name: refunds
+        when:
+          classify.fields.asks_for_refund: {min_probability: 0.7}
+        sinks: [billing]
+      - default: [lake]
 
   - name: sample
     sources:

@@ -2,7 +2,7 @@
 title: GitHub Action
 description: Run pipelines on a schedule in GitHub Actions.
 sidebar:
-  order: 8
+  order: 9
 ---
 
 ```yaml

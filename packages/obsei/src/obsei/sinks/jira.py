@@ -11,7 +11,8 @@ from pydantic import BaseModel, ConfigDict, Field, JsonValue
 from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
-from obsei.sinks._common import body, env, matches, title
+from obsei.routing import Conditions, When
+from obsei.sinks._common import body, env, intents, title
 
 
 class JiraConfig(BaseModel):
@@ -25,9 +26,7 @@ class JiraConfig(BaseModel):
     token_env: str = "JIRA_API_TOKEN"  # noqa: S105
     api_version: Literal["2", "3"] = "3"
     labels: list[str] = Field(default_factory=lambda: ["feedback"])
-    when: dict[str, list[str]] = Field(
-        default_factory=lambda: {"classify.intent": ["bug", "feature_request"]}
-    )
+    when: Conditions = Field(default_factory=lambda: intents("bug", "feature_request"))
     max_rating: float | None = None
     max_issues: int = Field(default=10, ge=1)
 
@@ -51,6 +50,7 @@ class JiraSink:
     def __init__(self, config: JiraConfig, ctx: Context) -> None:
         ctx.egress.check(config.base_url)
         self.config = config
+        self.when = When.parse(config.when, max_rating=config.max_rating)
         self.ctx = ctx
         self.api = f"{config.base_url.rstrip('/')}/rest/api/{config.api_version}"
         token = env(config.token_env)
@@ -86,7 +86,7 @@ class JiraSink:
         }
 
     def send(self, batch: Sequence[Record]) -> SinkResult:
-        selected = [r for r in batch if matches(r, self.config.when, self.config.max_rating)]
+        selected = [r for r in batch if self.when.matches(r)]
         result = SinkResult(skipped=len(batch) - len(selected))
         for record in selected[: self.config.max_issues]:
             if self._exists(record):

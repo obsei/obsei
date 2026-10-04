@@ -2,7 +2,7 @@
 title: Studio
 description: The read-only web UI with a knowledge-graph explorer.
 sidebar:
-  order: 7
+  order: 8
 ---
 
 [Open the demo](/demo/) (synthetic feedback in eight languages). The demo uses the offline

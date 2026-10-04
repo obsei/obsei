@@ -7,9 +7,9 @@ the file names (``*_env`` fields).
 from __future__ import annotations
 
 import os
-from collections.abc import Collection
+from collections.abc import Collection, Sequence
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Self
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError, model_validator
@@ -18,11 +18,13 @@ from obsei.access import AccessConfig
 from obsei.core.context import Context, LlmEndpoint
 from obsei.core.registry import Registry
 from obsei.enrichers import register as register_enrichers
+from obsei.enrichers.classify import ClassifyPluginConfig
 from obsei.llm.egress import EgressPolicy
 from obsei.pipeline import Pipeline, SourceSpec
 from obsei.privacy.names import NamesConfig, redactor_for
 from obsei.privacy.pseudonym import SALT_ENV_VAR, load_salt
 from obsei.privacy.redact import ALL_REGIONS, Region
+from obsei.routing import UNROUTED, Route, Router, When
 from obsei.sinks import register as register_sinks
 from obsei.sources import register as register_sources
 from obsei.themes import ThemesConfig
@@ -47,6 +49,59 @@ class SourceEntry(PluginSpec):
     key: str = Field(pattern=r"^[\w-]+$")
 
 
+class SinkEntry(PluginSpec):
+    key: str | None = Field(
+        default=None, pattern=r"^[\w-]+$", description="Name routes refer to; default: the type."
+    )
+
+    @property
+    def name(self) -> str:
+        return self.key or self.type
+
+
+CONDITION_SINKS = frozenset({"slack", "jira", "linear", "github_issues"})
+"""Built-in sinks whose ``when`` is checked on load."""
+
+
+class RouteRule(_Strict):
+    """One of: ``when`` with ``sinks``; ``review`` (records still flagged for review); or
+    ``default`` (every record no earlier rule matched), which must come last."""
+
+    name: str | None = Field(default=None, pattern=r"^[\w-]+$")
+    when: dict[str, JsonValue] | None = None
+    sinks: list[str] | None = None
+    review: list[str] | None = None
+    default: list[str] | None = None
+
+    @model_validator(mode="after")
+    def _one_kind(self) -> Self:
+        kinds = [k for k in ("when", "review", "default") if getattr(self, k) is not None]
+        if len(kinds) != 1:
+            raise ValueError("a route needs exactly one of when (with sinks), review or default")
+        if (self.when is None) != (self.sinks is None):
+            raise ValueError("when and sinks go together")
+        return self
+
+    @property
+    def targets(self) -> list[str]:
+        return self.sinks or self.review or self.default or []
+
+    @property
+    def label(self) -> str:
+        if self.name:
+            return self.name
+        if self.review is not None:
+            return "review"
+        if self.default is not None:
+            return "default"
+        return "+".join(self.targets) or "none"
+
+    def conditions(self, levels: dict[str, Sequence[str]] | None = None) -> When:
+        if self.review is not None:
+            return When(review=True)
+        return When.parse(self.when, levels=levels)
+
+
 class PrivacyConfig(_Strict):
     redact: bool = True
     regions: list[Region] = Field(default_factory=lambda: list(ALL_REGIONS))
@@ -62,11 +117,88 @@ class PipelineConfig(_Strict):
     name: str = Field(pattern=r"^[\w-]+$")
     sources: list[SourceEntry] = Field(min_length=1)
     enrichers: list[PluginSpec] = Field(default_factory=list)
-    sinks: list[PluginSpec] = Field(default_factory=list)
+    sinks: list[SinkEntry] = Field(default_factory=list)
+    route: list[RouteRule] | None = Field(
+        default=None,
+        min_length=1,
+        description="Ordered routes; the first match decides which named sinks get a record.",
+    )
     batch_size: int = Field(default=100, ge=1)
     every_minutes: int | None = Field(
         default=None, ge=1, description="How often 'obsei serve' runs this pipeline."
     )
+
+    def answers(self) -> dict[str, list[str] | None]:
+        """Paths the pipeline's classifier answers, with the levels of score fields."""
+        for enricher in self.enrichers:
+            if enricher.type != "classify":
+                continue
+            try:
+                classify = ClassifyPluginConfig.model_validate(enricher.config)
+            except ValidationError:
+                return {}
+            paths: dict[str, list[str] | None] = {
+                "classify.sentiment": None,
+                "classify.intent": None,
+            }
+            for name, spec in classify.fields.items():
+                paths[f"classify.fields.{name}"] = spec.levels if spec.kind == "score" else None
+            return paths
+        return {}
+
+    def _levels(self) -> dict[str, Sequence[str]]:
+        return {path: levels for path, levels in self.answers().items() if levels}
+
+    @model_validator(mode="after")
+    def _sinks_and_routes(self) -> Self:
+        names = [s.name for s in self.sinks]
+        duplicated = {n for n in names if names.count(n) > 1}
+        explicit = {s.key for s in self.sinks if s.key}
+        if duplicated and (self.route is not None or duplicated & explicit):
+            raise ValueError(
+                f"pipeline {self.name!r}: sink keys must be unique; give sinks of the same type "
+                f"a key: {sorted(duplicated)}"
+            )
+        answers = self.answers()
+        for sink in self.sinks:
+            when = sink.config.get("when")
+            if sink.type in CONDITION_SINKS and isinstance(when, dict):
+                try:
+                    When.parse(when).check_levels(answers)
+                except ValueError as exc:
+                    raise ValueError(
+                        f"pipeline {self.name!r}, sink {sink.name!r}: when.{exc}"
+                    ) from None
+        self._check_routes(set(names), answers)
+        return self
+
+    def _check_routes(self, sinks: set[str], answers: dict[str, list[str] | None]) -> None:
+        seen: set[str] = set()
+        for position, rule in enumerate(self.route or [], start=1):
+            where = f"pipeline {self.name!r}, route {position}" + (
+                f" ({rule.name})" if rule.name else ""
+            )
+            if rule.default is not None and position != len(self.route or []):
+                raise ValueError(f"{where}: default must be the last route")
+            unknown = sorted(set(rule.targets) - sinks)
+            if unknown:
+                raise ValueError(f"{where}: no sink with key {unknown}; sinks are {sorted(sinks)}")
+            if rule.name in seen or rule.name == UNROUTED:
+                raise ValueError(f"{where}: route names must be unique and not {UNROUTED!r}")
+            if rule.name:
+                seen.add(rule.name)
+            try:
+                rule.conditions().check_levels(answers)
+            except ValueError as exc:
+                raise ValueError(f"{where}: when.{exc}") from None
+
+    def router(self) -> Router | None:
+        if self.route is None:
+            return None
+        levels = self._levels()
+        return Router(
+            tuple(Route(r.label, tuple(r.targets), r.conditions(levels)) for r in self.route)
+        )
 
 
 class ObseiConfig(_Strict):
@@ -166,6 +298,8 @@ def build_pipeline(
             sinks=[registry.sink(s.type).create(s.config, ctx) for s in spec.sinks]
             if with_sinks
             else [],
+            sink_keys=[s.name for s in spec.sinks] if with_sinks else [],
+            router=spec.router() if with_sinks else None,
             redactor=redactor_for(config.privacy.regions, config.privacy.names, ctx.egress)
             if config.privacy.redact
             else None,
