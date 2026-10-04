@@ -84,5 +84,11 @@ deploys on push to `master` and gives every pull request a preview URL.
 
 Vector logos (full and mark, light and dark) are in `docs/public/brand/`, served at
 https://docs.obsei.com/brand/obsei-logo.svg and similar. Brand colours come from the logo: teal `#238a91` (text `#1b7a80`) and blue `#1a6d9d`; on dark
-backgrounds `#5cc6cc` and `#7fb4e0`. Regenerate the demo with `obsei demo --out docs/public/demo`
-and the Studio bundle with `cd studio && npm ci && npm run build`.
+backgrounds `#5cc6cc` and `#7fb4e0`. Regenerate the demo with `uv run obsei demo --out docs/public/demo`
+(offline `hashing` embedder) and the Studio bundle with `cd studio && npm ci && npm run build`.
+For a demo whose themes span languages, use the multilingual model:
+
+```bash
+uv run --extra embeddings obsei models download
+uv run --extra embeddings obsei demo --embedder local --out docs/public/demo
+```

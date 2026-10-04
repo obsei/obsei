@@ -72,11 +72,13 @@ class _Label(BaseModel):
 
 
 def keyword_label(samples: list[str], top: int = 3, *, fallback: str = "Theme") -> str:
-    """Words shared by several samples; never verbatim text, which may identify one customer."""
+    """Words shared by several samples; never verbatim text, which may identify one customer.
+
+    Ranked by how many samples use them, ties by first appearance, so labels are reproducible."""
     counts = Counter(
         w
         for text in samples
-        for w in {m.casefold() for m in _WORD.findall(_PLACEHOLDER.sub(" ", text))}
+        for w in dict.fromkeys(m.casefold() for m in _WORD.findall(_PLACEHOLDER.sub(" ", text)))
     )
     words = [w for w, n in counts.most_common(top) if n > 1]
     return ", ".join(words) if words else fallback

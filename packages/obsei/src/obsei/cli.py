@@ -29,12 +29,13 @@ from obsei.config import (
     builtin_registry,
     load_config,
 )
+from obsei.core.context import Context
 from obsei.core.record import Record
 from obsei.core.registry import PluginError
-from obsei.demo import demo_records
+from obsei.demo import demo_records, label_demo_themes
 from obsei.llm import EgressPolicy
 from obsei.llm.client import LlmError, LlmUnreachableError
-from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, HashingEmbedder, LocalEmbedder
+from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, LocalEmbedder
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
 from obsei.runner import run_pipelines
 from obsei.store import (
@@ -550,13 +551,25 @@ def studio_export(
 @app.command()
 def demo(
     out: Annotated[Path, typer.Option(help="Directory for the static demo.")] = Path("demo"),
+    embedder: Annotated[
+        str,
+        typer.Option(
+            help="'hashing' (offline), or 'local' / 'local:<model>' to group across languages "
+            "(obsei[embeddings]; run 'obsei models download' first)."
+        ),
+    ] = "hashing",
 ) -> None:
     """Build the static Studio demo from synthetic multilingual feedback."""
-    settings = ThemesConfig(k_anonymity=5)
-    with Store(allow_unencrypted=True) as store:
-        store.upsert(demo_records())
-        update_themes(store, HashingEmbedder(), settings)
-        studio.export(store, out, k=settings.k_anonymity, demo=True)
+    settings = ThemesConfig(embedder=embedder, k_anonymity=5)
+    with Context(egress=EgressPolicy.from_env()) as ctx, Store(allow_unencrypted=True) as store:
+        try:
+            model = ctx.embedder(settings.embedder)
+            store.upsert(demo_records())
+            update_themes(store, model, settings)
+        except (KeyError, OSError, RuntimeError) as exc:
+            raise _fail(exc) from None
+        label_demo_themes(store, k=settings.k_anonymity)
+        studio.export(store, out, k=settings.k_anonymity, demo=True, embedder=model.model)
     typer.echo(f"wrote {out}/index.html; serve it with: python -m http.server -d {out}")
 
 
