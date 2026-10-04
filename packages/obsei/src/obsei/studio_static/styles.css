@@ -71,7 +71,9 @@ h2 { margin: 0 0 12px; font-size: 1rem; }
 .graph .node.kind-theme { cursor: pointer; }
 .graph circle { fill-opacity: 0.85; stroke: var(--panel); stroke-width: 2; }
 .graph .node.selected circle { stroke: var(--text); stroke-width: 3; }
-.graph text { fill: var(--text); font-size: 11px; pointer-events: none; }
+.graph text { fill: var(--text); pointer-events: none; paint-order: stroke; stroke: var(--panel); stroke-width: 3px; stroke-linejoin: round; }
+.error { color: var(--up); margin: 0; }
+.url { overflow-wrap: anywhere; }
 .kind-theme circle, .legend .kind-theme::before { fill: var(--theme); background: var(--theme); }
 .kind-source circle, .legend .kind-source::before { fill: var(--source); background: var(--source); }
 .kind-lang circle, .legend .kind-lang::before { fill: var(--lang); background: var(--lang); }

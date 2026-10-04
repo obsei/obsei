@@ -57,7 +57,11 @@ export interface Evidence {
   labels: Record<string, string>;
 }
 
+export type Role = "viewer" | "analyst" | "admin";
+
 export interface Snapshot {
+  demo?: boolean;
+  role?: Role | null;
   overview: Overview;
   themes: Theme[];
   graph: { nodes: GraphNode[]; edges: GraphEdge[] };

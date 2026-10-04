@@ -1,4 +1,4 @@
-import { DataSource } from "./data";
+import { DataSource, type EvidenceResult, type Mode, type Refusal } from "./data";
 import { clear, el, languageName, number } from "./dom";
 import { KIND_LABELS, renderGraph } from "./graph";
 import type { Bucket, Evidence, Theme } from "./types";
@@ -21,12 +21,18 @@ function bars(title: string, buckets: Bucket[], label: (key: string) => string =
               "li",
               {},
               el("span", { class: "bar-label" }, label(b.key)),
-              el("span", { class: "bar", style: `--w:${(100 * b.count) / max}%` }),
+              bar((100 * b.count) / max),
               el("span", { class: "bar-value" }, number.format(b.count)),
             ),
           ),
         ),
   );
+}
+
+function bar(percent: number): HTMLElement {
+  const node = el("span", { class: "bar" });
+  node.style.setProperty("--w", `${percent}%`);
+  return node;
 }
 
 function trend(theme: Theme): HTMLElement {
@@ -46,6 +52,32 @@ function chips(counts: Record<string, number>, label: (key: string) => string = 
   );
 }
 
+function safeUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? parsed.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function original(url: string): HTMLElement {
+  const href = safeUrl(url);
+  return href
+    ? el("a", { href, rel: "noopener noreferrer", target: "_blank" }, "original")
+    : el("span", { class: "url" }, url);
+}
+
+function evidenceView(result: EvidenceResult): HTMLElement {
+  if ("denied" in result)
+    return el(
+      "p",
+      { class: "muted" },
+      result.denied === "forbidden" ? "Evidence needs the analyst role." : "Invalid token.",
+    );
+  return evidenceList(result.items);
+}
+
 function evidenceList(items: Evidence[]): HTMLElement {
   if (items.length === 0) return el("p", { class: "muted" }, "No evidence available for this theme.");
   return el(
@@ -63,7 +95,7 @@ function evidenceList(items: Evidence[]): HTMLElement {
           item.lang ? el("span", {}, languageName(item.lang)) : null,
           item.rating !== null ? el("span", {}, "★".repeat(Math.round(item.rating))) : null,
           el("span", {}, new Date(item.created_at).toLocaleDateString()),
-          item.url ? el("a", { href: item.url, rel: "noopener noreferrer", target: "_blank" }, "original") : null,
+          item.url ? original(item.url) : null,
           el("code", {}, item.id),
         ),
       ),
@@ -71,7 +103,14 @@ function evidenceList(items: Evidence[]): HTMLElement {
   );
 }
 
-function tokenForm(): void {
+const REFUSALS: Record<Refusal, string> = {
+  unauthorized: "Invalid token",
+  forbidden: "Not allowed: this token has no access to Studio",
+};
+
+const BADGES: Record<Mode, string> = { demo: "Demo data", export: "Snapshot", live: "Live" };
+
+function tokenForm(error: string | null): void {
   clear(app);
   const input = el("input", { type: "password", placeholder: "OBSEI_API_TOKEN", "aria-label": "API token" });
   const form = el(
@@ -79,6 +118,7 @@ function tokenForm(): void {
     { class: "panel token" },
     el("h2", {}, "Connect to obsei"),
     el("p", { class: "muted" }, "Enter the API token of this obsei server. It is kept for this tab only."),
+    error ? el("p", { class: "error", role: "alert" }, error) : null,
     input,
     el("button", { type: "submit" }, "Open Studio"),
   );
@@ -98,7 +138,7 @@ function render(data: DataSource): void {
     "header",
     {},
     el("h1", {}, el("img", { src: "logo.png", alt: "", width: "32", height: "32" }), "obsei ", el("span", {}, "Studio")),
-    el("span", { class: `badge ${data.mode}` }, data.mode === "demo" ? "Demo data" : "Live"),
+    el("span", { class: `badge ${data.mode}` }, BADGES[data.mode]),
     el(
       "span",
       { class: "muted" },
@@ -111,7 +151,7 @@ function render(data: DataSource): void {
     ...[
       ["Feedback", number.format(overview.total)],
       ["Themes", number.format(themes.length)],
-      ["Negative", overview.total ? `${Math.round((100 * negative) / overview.total)}%` : "–"],
+      ["Negative", overview.total && overview.by_sentiment.length ? `${Math.round((100 * negative) / overview.total)}%` : "–"],
       ["Languages", number.format(overview.by_lang.length)],
     ].map(([label, value]) => el("div", { class: "kpi" }, el("span", {}, label!), el("strong", {}, value!))),
   );
@@ -127,9 +167,9 @@ function render(data: DataSource): void {
     evidenceTitle.textContent = theme?.label ? `Evidence: ${theme.label}` : "Evidence";
     clear(evidenceHost);
     evidenceHost.append(el("p", { class: "muted" }, "Loading…"));
-    const items = await data.evidence(id);
+    const result = await data.evidence(id);
     clear(evidenceHost);
-    evidenceHost.append(evidenceList(items));
+    evidenceHost.append(evidenceView(result));
   };
   for (const theme of themes) {
     const item = el(
@@ -159,7 +199,7 @@ function render(data: DataSource): void {
     ...Object.entries(KIND_LABELS).map(([kind, label]) => el("span", { class: `kind-${kind}` }, label)),
   );
   const ask =
-    data.mode === "live"
+    data.mode === "live" && data.canReadEvidence
       ? (() => {
           const input = el("input", { type: "text", placeholder: "Ask about your feedback, in any language" });
           const answer = el("div", { class: "answer" });
@@ -204,8 +244,8 @@ function render(data: DataSource): void {
 async function start(): Promise<void> {
   try {
     const data = await DataSource.open();
-    if (data === "unauthorized") tokenForm();
-    else render(data);
+    if (data instanceof DataSource) render(data);
+    else tokenForm(data.hadToken || data.denied === "forbidden" ? REFUSALS[data.denied] : null);
   } catch (error) {
     clear(app);
     app.append(el("p", { class: "panel" }, `Could not load data: ${String(error)}`));

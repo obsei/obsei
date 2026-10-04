@@ -58,6 +58,12 @@ def test_static_export(store: Store, tmp_path: Path) -> None:
     }
     data = json.loads((tmp_path / "data.json").read_text(encoding="utf-8"))
     assert data["themes"]
+    assert data["demo"] is False
+    assert '<meta name="obsei-data" content="data.json" />' in (tmp_path / "index.html").read_text(
+        encoding="utf-8"
+    )
+    studio.export(store, tmp_path, k=5, demo=True)
+    assert json.loads((tmp_path / "data.json").read_text(encoding="utf-8"))["demo"] is True
     assert "author" not in (tmp_path / "data.json").read_text(encoding="utf-8")
 
 
@@ -70,10 +76,20 @@ def test_serve_studio_api(store: Store) -> None:
         }
     )
     client = TestClient(create_app(cfg, Context(), store, token="t"))
-    assert client.get("/studio/").status_code == 200
-    assert client.get("/api/snapshot").status_code == 401
+    page = client.get("/studio/")
+    assert page.status_code == 200
+    assert '<meta name="obsei-data" content="api" />' in page.text
+    assert "frame-ancestors 'none'" in page.headers["content-security-policy"]
+    assert page.headers["x-content-type-options"] == "nosniff"
+    assert page.headers["x-frame-options"] == "DENY"
+    assert page.headers["referrer-policy"] == "no-referrer"
+    denied = client.get("/api/snapshot")
+    assert denied.status_code == 401
+    assert denied.headers["x-content-type-options"] == "nosniff"
     auth = {"Authorization": "Bearer t"}
     snap = client.get("/api/snapshot", headers=auth).json()
+    assert snap["role"] == "admin"
+    assert snap["demo"] is False
     theme = snap["themes"][0]["id"]
     assert snap["evidence"] == {theme_id: [] for theme_id in snap["evidence"]}
     items = client.get(f"/api/themes/{theme}", headers=auth).json()
