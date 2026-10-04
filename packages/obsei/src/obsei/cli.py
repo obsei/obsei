@@ -4,6 +4,8 @@ import json
 import platform
 import sys
 from datetime import UTC, datetime, timedelta
+from importlib import resources
+from itertools import islice
 from pathlib import Path
 from typing import Annotated
 
@@ -11,9 +13,20 @@ import duckdb
 import typer
 
 from obsei import __version__
+from obsei.config import (
+    DEFAULT_PATH,
+    ConfigError,
+    ObseiConfig,
+    build_context,
+    build_pipeline,
+    builtin_registry,
+    load_config,
+)
 from obsei.core.record import Record
-from obsei.core.registry import Registry
+from obsei.core.registry import PluginError
 from obsei.llm import EgressPolicy
+from obsei.pipeline import PipelineError
+from obsei.pipeline import run as run_pipeline
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
 from obsei.store import DB_KEY_ENV_VAR, Store, StoreError, load_db_key
 
@@ -69,9 +82,9 @@ def doctor() -> None:
     policy = EgressPolicy.from_env()
     allowed = f" (allow: {', '.join(sorted(policy.allowed_hosts))})" if policy.allowed_hosts else ""
     typer.echo(f"egress    {policy.mode}{allowed}")
-    registry = Registry()
+    registry = builtin_registry()
     loaded = registry.load_entry_points()
-    typer.echo(f"plugins   {', '.join(loaded) if loaded else 'none installed'}")
+    typer.echo(f"plugins   {', '.join(loaded) if loaded else 'built-in only'}")
     for kind, names in registry.names().items():
         if names:
             typer.echo(f"  {kind:<9}{', '.join(names)}")
@@ -168,3 +181,110 @@ def export(
     else:
         out.write_text("".join(f"{line}\n" for line in lines), encoding="utf-8")
         typer.echo(f"exported {len(lines)} record(s) to {out}", err=True)
+
+
+ConfigOption = Annotated[
+    Path, typer.Option("--config", "-c", envvar="OBSEI_CONFIG", help="Path to obsei.yaml.")
+]
+PipelineOption = Annotated[
+    list[str] | None, typer.Option("--pipeline", "-p", help="Pipeline(s) to use (default all).")
+]
+
+
+def _fail(message: object) -> typer.Exit:
+    typer.echo(f"error: {message}", err=True)
+    return typer.Exit(2)
+
+
+def _load(config: Path) -> ObseiConfig:
+    try:
+        return load_config(config)
+    except ConfigError as exc:
+        raise _fail(exc) from None
+
+
+@app.command()
+def init(
+    directory: Annotated[Path, typer.Argument(help="Where to create the project.")] = Path(),
+    force: Annotated[bool, typer.Option(help="Overwrite existing files.")] = False,
+) -> None:
+    """Create obsei.yaml and a multilingual sample dataset."""
+    templates = resources.files("obsei") / "templates"
+    directory.mkdir(parents=True, exist_ok=True)
+    for name in ("obsei.yaml", "feedback.csv"):
+        target = directory / name
+        if target.exists() and not force:
+            typer.echo(f"skip   {target} (exists)")
+            continue
+        target.write_text((templates / name).read_text(encoding="utf-8"), encoding="utf-8")
+        typer.echo(f"create {target}")
+    typer.echo(
+        "next: export OBSEI_DB_KEY=... OBSEI_PSEUDONYM_SALT=... then 'obsei try' and 'obsei run'"
+    )
+
+
+@app.command()
+def run(
+    config: ConfigOption = DEFAULT_PATH,
+    pipeline: PipelineOption = None,
+    db: Annotated[Path | None, typer.Option("--db", envvar="OBSEI_DB")] = None,
+) -> None:
+    """Run pipelines: fetch, redact, enrich, deliver and store new or changed feedback."""
+    cfg = _load(config)
+    names = pipeline or [p.name for p in cfg.pipelines]
+    with (
+        build_context(cfg) as ctx,
+        _open_store(db or cfg.store.path, cfg.store.unencrypted) as store,
+    ):
+        for name in names:
+            try:
+                report = run_pipeline(build_pipeline(cfg, name, ctx), store)
+            except (ConfigError, PipelineError, PluginError, OSError, RuntimeError) as exc:
+                raise _fail(exc) from None
+            sent = ", ".join(f"{k}={v}" for k, v in report.sent.items()) or "none"
+            typer.echo(
+                f"{name}: fetched {report.fetched}, stored {report.stored}, "
+                f"enriched {sum(report.enriched.values())}, sent {sent}"
+            )
+
+
+@app.command("try")
+def try_(
+    config: ConfigOption = DEFAULT_PATH,
+    pipeline: PipelineOption = None,
+    limit: Annotated[int, typer.Option(min=1, help="Records per source.")] = 3,
+    enrich: Annotated[bool, typer.Option(help="Also run enrichers.")] = False,
+) -> None:
+    """Preview redacted records from each source. Nothing is stored or sent."""
+    cfg = _load(config)
+    names = pipeline or [p.name for p in cfg.pipelines]
+    with build_context(cfg) as ctx:
+        for name in names:
+            try:
+                built = build_pipeline(cfg, name, ctx, with_sinks=False)
+            except (ConfigError, PluginError, OSError, RuntimeError) as exc:
+                raise _fail(exc) from None
+            for spec in built.sources:
+                records = [r for r, _ in islice(spec.source.fetch(None), limit)]
+                if built.redactor is not None:
+                    records = list(built.redactor.redact(records))
+                for enricher in built.enrichers if enrich else ():
+                    results = enricher.enrich(records)
+                    records = [
+                        r if e is None else r.with_enrichment(enricher.name, e)
+                        for r, e in zip(records, results, strict=True)
+                    ]
+                for record in records:
+                    typer.echo(
+                        record.model_dump_json(
+                            include={
+                                "source",
+                                "text",
+                                "created_at",
+                                "rating",
+                                "lang",
+                                "context",
+                                "enrichments",
+                            }
+                        )
+                    )

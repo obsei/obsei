@@ -1,0 +1,44 @@
+# obsei configuration. Docs: https://obsei.com/docs/config
+# Secrets never go in this file: set the environment variables named by *_env fields.
+#   OBSEI_DB_KEY          encrypts the local database (16+ characters)
+#   OBSEI_PSEUDONYM_SALT  pseudonymises author handles (16+ characters); unset = authors dropped
+version: 1
+
+store:
+  path: obsei.duckdb
+
+privacy:
+  redact: true
+  # PII detectors to apply: global, north_america, uk, eu, latam, apac, india, africa
+  regions: [global, north_america, uk, eu, latam, apac, india, africa]
+
+# Model endpoints (OpenAI-compatible). Local by default; nothing leaves the machine.
+llms:
+  default:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+
+pipelines:
+  - name: feedback
+    sources:
+      - key: sample
+        type: csv
+        config:
+          path: feedback.csv
+          fields: {text: comment, id: id, created_at: date, rating: rating, lang: lang}
+      # - key: ios
+      #   type: appstore
+      #   config: {app_id: "284882215", countries: [us, gb, de, br, jp, in]}
+      # - key: android
+      #   type: playstore
+      #   config: {package_name: com.example.app, credentials_file: play-sa.json}
+      # - key: issues
+      #   type: github_issues
+      #   config: {repo: owner/repo}
+    # Classify sentiment, intent and language with your model (start Ollama first).
+    # enrichers:
+    #   - type: classify
+    #     config: {llm: default}
+    sinks:
+      - type: parquet
+        config: {directory: exports}

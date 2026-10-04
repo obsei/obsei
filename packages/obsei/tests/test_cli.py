@@ -84,3 +84,21 @@ def test_forget_requires_a_filter_and_a_key(db: Path) -> None:
     result = runner.invoke(app, ["forget", "--source", "csv", "--db", str(db)])
     assert result.exit_code == 2
     assert "encryption key is required" in result.output
+
+
+def test_init_then_try(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    created = runner.invoke(app, ["init"])
+    assert created.exit_code == 0
+    assert (tmp_path / "obsei.yaml").exists()
+    assert "skip" in runner.invoke(app, ["init"]).output
+    preview = runner.invoke(app, ["try", "--limit", "2"])
+    assert preview.exit_code == 0, preview.output
+    lines = [json.loads(line) for line in preview.output.splitlines()]
+    assert [line["lang"] for line in lines] == ["en", "es"]
+
+
+def test_run_reports_missing_config(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["run", "--config", str(tmp_path / "nope.yaml")])
+    assert result.exit_code == 2
+    assert "obsei init" in result.output
