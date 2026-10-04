@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -106,3 +108,14 @@ def test_run_reports_missing_config(tmp_path: Path) -> None:
     result = runner.invoke(app, ["run", "--config", str(tmp_path / "nope.yaml")])
     assert result.exit_code == 2
     assert "obsei init" in result.output
+
+
+def test_core_cli_works_without_optional_extras() -> None:
+    code = (
+        "import sys\n"
+        "for name in ('mcp', 'sqlalchemy', 'jwt', 'google'):\n"
+        "    sys.modules[name] = None\n"
+        "from obsei.cli import app\n"
+        "from obsei import ask, config, studio, themes\n"
+    )
+    subprocess.run([sys.executable, "-c", code], check=True)  # noqa: S603

@@ -90,9 +90,17 @@ class OpenAICompatibleClient:
     def model(self) -> str:
         return self._model
 
-    def complete(self, messages: Sequence[ChatMessage], *, schema: JsonSchema) -> str:
+    def post_json(self, path: str, payload: dict[str, JsonValue]) -> bytes:
         if self._budget is not None:
             self._budget.charge()
+        try:
+            response = self._http.post(path, json=payload)
+            response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise LlmError(f"model request failed: {exc}") from None
+        return response.content
+
+    def complete(self, messages: Sequence[ChatMessage], *, schema: JsonSchema) -> str:
         payload: dict[str, JsonValue] = {
             "model": self._model,
             "temperature": 0,
@@ -102,12 +110,7 @@ class OpenAICompatibleClient:
                 "json_schema": {"name": "result", "schema": schema, "strict": True},
             },
         }
-        try:
-            response = self._http.post("/chat/completions", json=payload)
-            response.raise_for_status()
-        except httpx.HTTPError as exc:
-            raise LlmError(f"model request failed: {exc}") from None
-        completion = _Completion.model_validate_json(response.content)
+        completion = _Completion.model_validate_json(self.post_json("/chat/completions", payload))
         content = completion.choices[0].message.content if completion.choices else None
         if not content:
             raise LlmError("model returned no content")

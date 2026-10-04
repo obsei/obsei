@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record
+from obsei.store.themes import ThemeQueries
 
 DB_KEY_ENV_VAR = "OBSEI_DB_KEY"
 MIN_KEY_LENGTH = 16
@@ -57,6 +58,30 @@ MIGRATIONS: tuple[str, ...] = (
         detail JSON NOT NULL
     );
     """,
+    """
+    CREATE TABLE embeddings (
+        record_id VARCHAR PRIMARY KEY,
+        model VARCHAR NOT NULL,
+        content_hash VARCHAR NOT NULL,
+        vector FLOAT[] NOT NULL
+    );
+    CREATE TABLE themes (
+        id VARCHAR PRIMARY KEY,
+        model VARCHAR NOT NULL,
+        label VARCHAR,
+        description VARCHAR,
+        centroid FLOAT[] NOT NULL,
+        size INTEGER NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL
+    );
+    CREATE TABLE record_themes (
+        record_id VARCHAR PRIMARY KEY,
+        theme_id VARCHAR NOT NULL,
+        similarity DOUBLE NOT NULL,
+        duplicate_of VARCHAR
+    );
+    """,
 )
 
 
@@ -92,6 +117,7 @@ class Query(BaseModel):
     sentiment: str | None = None
     intent: str | None = None
     lang: str | None = None
+    theme: str | None = None
 
     def where(self) -> tuple[str, list[SqlParam | float]]:
         clauses, base = _filters(
@@ -117,6 +143,9 @@ class Query(BaseModel):
             if value is not None:
                 clauses.append(f"{_GROUPS[group]} = ?")
                 params.append(value)
+        if self.theme is not None:
+            clauses.append("id IN (SELECT record_id FROM record_themes WHERE theme_id = ?)")
+            params.append(self.theme)
         return (" WHERE " + " AND ".join(clauses)) if clauses else "", params
 
 
@@ -190,7 +219,7 @@ def _filters(
     return clauses, params
 
 
-class Store:
+class Store(ThemeQueries):
     """Without ``encryption_key`` you must pass ``allow_unencrypted=True`` (e.g. encrypted disk)."""
 
     def __init__(
@@ -421,11 +450,32 @@ class Store:
         )
         if not clauses:
             raise StoreError("delete needs at least one filter")
-        row = self._con.execute(
-            "DELETE FROM records WHERE " + " AND ".join(clauses),  # noqa: S608 fixed columns
-            params,
-        ).fetchone()
-        return int(row[0]) if row else 0
+        ids = [
+            str(r[0])
+            for r in self._con.execute(
+                "DELETE FROM records WHERE " + " AND ".join(clauses) + " RETURNING id",  # noqa: S608
+                params,
+            ).fetchall()
+        ]
+        self._forget_derived(ids)
+        return len(ids)
+
+    def _forget_derived(self, ids: list[str]) -> None:
+        if not ids:
+            return
+        self._con.execute("DELETE FROM embeddings WHERE list_contains(?, record_id)", [ids])
+        self._con.execute(
+            "UPDATE themes SET size = size - n FROM (SELECT theme_id, count(*) AS n "
+            "FROM record_themes WHERE list_contains(?, record_id) GROUP BY theme_id) gone "
+            "WHERE themes.id = gone.theme_id",
+            [ids],
+        )
+        self._con.execute("DELETE FROM record_themes WHERE list_contains(?, record_id)", [ids])
+        self._con.execute(
+            "UPDATE record_themes SET duplicate_of = NULL WHERE list_contains(?, duplicate_of)",
+            [ids],
+        )
+        self._con.execute("DELETE FROM themes WHERE size <= 0")
 
     def get_cursor(self, pipeline: str, source: str) -> Cursor | None:
         row = self._con.execute(

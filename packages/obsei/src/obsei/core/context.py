@@ -14,6 +14,7 @@ from obsei._version import __version__
 from obsei.core.record import Author
 from obsei.llm.client import OpenAICompatibleClient, RequestBudget
 from obsei.llm.egress import EgressPolicy
+from obsei.llm.embed import Embedder, HashingEmbedder, RemoteEmbedder
 from obsei.privacy.pseudonym import pseudonymize
 
 USER_AGENT = f"obsei/{__version__} (+https://obsei.com)"
@@ -28,6 +29,7 @@ class LlmEndpoint(BaseModel):
     api_key_header: str = Field(
         default="Authorization", description='"api-key" for Azure OpenAI keys.'
     )
+    embedding_model: str | None = None
     max_requests: int | None = None
     timeout: float = 60.0
 
@@ -66,6 +68,15 @@ class Context:
             timeout=endpoint.timeout,
             transport=self.llm_transport,
         )
+
+    def embedder(self, name: str) -> Embedder:
+        """``hashing`` is the built-in offline embedder; other names refer to ``llms``."""
+        if name == "hashing":
+            return HashingEmbedder()
+        model = self.llms[name].embedding_model if name in self.llms else None
+        if model is None:
+            raise KeyError(f"llm endpoint {name!r} has no embedding_model")
+        return RemoteEmbedder(self.chat(name), model)
 
     def close(self) -> None:
         self.http.close()

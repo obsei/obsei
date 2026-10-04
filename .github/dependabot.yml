@@ -44,3 +44,15 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "docs(deps)"
+
+  - package-ecosystem: "npm"
+    directory: "/studio"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      studio:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(studio)"
