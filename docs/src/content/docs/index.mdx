@@ -1,0 +1,36 @@
+---
+title: obsei
+description: Voice of Customer without violating privacy.
+template: splash
+hero:
+  tagline: Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, models and agents.
+  actions:
+    - text: Quickstart
+      link: /quickstart/
+      icon: right-arrow
+    - text: GitHub
+      link: https://github.com/obsei/obsei
+      variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid>
+  <Card title="Private by design" icon="seti:lock">
+    PII redacted at ingest for the Americas, Europe, Asia-Pacific, India and Africa, in any
+    script. Authors pseudonymised. Encrypted DuckDB. Air-gapped by default.
+  </Card>
+  <Card title="Bring your own" icon="puzzle">
+    App stores, GitHub, Hacker News, Bluesky, YouTube, RSS, any REST API, webhooks and files.
+    Any OpenAI-compatible model: Ollama, vLLM, Azure OpenAI, OpenAI, or Bedrock and Vertex via
+    LiteLLM.
+  </Card>
+  <Card title="AI-native" icon="rocket">
+    A read-only MCP server and a Claude plugin, so agents answer "what are customers saying?"
+    with cited evidence.
+  </Card>
+  <Card title="Multilingual" icon="translate">
+    Feedback is classified in its own language and quoted verbatim, with translations when you
+    ask for them.
+  </Card>
+</CardGrid>

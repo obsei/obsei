@@ -11,12 +11,14 @@ resolution-markers = [
 [manifest]
 members = [
     "obsei",
+    "obsei-reddit",
 ]
 
 [manifest.dependency-groups]
 dev = [
     { name = "mypy", specifier = "==2.4.0" },
     { name = "obsei", extras = ["apple", "google", "mcp"], editable = "packages/obsei" },
+    { name = "obsei-reddit", editable = "plugins/obsei-reddit" },
     { name = "pytest", specifier = "==9.1.1" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "ruff", specifier = "==0.16.10" },
@@ -1052,6 +1054,17 @@ requires-dist = [
     { name = "typer", specifier = ">=0.15,<1" },
 ]
 provides-extras = ["apple", "google", "mcp"]
+
+[[package]]
+name = "obsei-reddit"
+version = "0.1.0"
+source = { editable = "plugins/obsei-reddit" }
+dependencies = [
+    { name = "obsei" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "obsei", editable = "packages/obsei" }]
 
 [[package]]
 name = "opentelemetry-api"

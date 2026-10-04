@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "obsei-reddit"
+version = "0.1.0"
+description = "Reddit posts and comments for obsei, from public RSS feeds (no API key)."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["obsei>=1.0.0a1"]
+
+[project.entry-points."obsei.plugins"]
+reddit = "obsei_reddit:register"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/obsei_reddit"]
