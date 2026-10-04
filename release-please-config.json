@@ -5,7 +5,6 @@
     "packages/obsei": {
       "release-type": "python",
       "package-name": "obsei",
-      "release-as": "1.0.0-alpha.1",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         "src/obsei/_version.py",
