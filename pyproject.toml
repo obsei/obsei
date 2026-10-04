@@ -48,6 +48,10 @@ plugins = ["pydantic.mypy"]
 files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/template/src"]
 mypy_path = "packages/obsei/src:plugins/template/src"
 
+[[tool.mypy.overrides]]
+module = ["fastembed"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["packages/obsei/tests", "plugins"]
 addopts = "-ra --strict-markers"

@@ -14,7 +14,7 @@ from obsei._version import __version__
 from obsei.core.record import Author
 from obsei.llm.client import OpenAICompatibleClient, RequestBudget
 from obsei.llm.egress import EgressPolicy
-from obsei.llm.embed import Embedder, HashingEmbedder, RemoteEmbedder
+from obsei.llm.embed import LOCAL_MODEL, Embedder, HashingEmbedder, LocalEmbedder, RemoteEmbedder
 from obsei.privacy.pseudonym import pseudonymize
 
 USER_AGENT = f"obsei/{__version__} (+https://obsei.com)"
@@ -70,13 +70,17 @@ class Context:
         )
 
     def embedder(self, name: str) -> Embedder:
-        """``hashing`` is the built-in offline embedder; other names refer to ``llms``."""
+        """``hashing`` (built in), ``local`` or ``local:<model>`` (``obsei[embeddings]``, groups
+        by meaning across languages), or an ``llms`` name with ``embedding_model``."""
         if name == "hashing":
             return HashingEmbedder()
-        model = self.llms[name].embedding_model if name in self.llms else None
-        if model is None:
+        if name == "local" or name.startswith("local:"):
+            local = name.partition(":")[2] or LOCAL_MODEL
+            return LocalEmbedder(local, offline=self.egress.mode == "air_gapped")
+        remote = self.llms[name].embedding_model if name in self.llms else None
+        if remote is None:
             raise KeyError(f"llm endpoint {name!r} has no embedding_model")
-        return RemoteEmbedder(self.chat(name), model)
+        return RemoteEmbedder(self.chat(name), remote)
 
     def close(self) -> None:
         self.http.close()

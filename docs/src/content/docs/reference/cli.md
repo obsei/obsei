@@ -12,6 +12,7 @@ description: obsei command reference.
 | `obsei ask QUESTION` | Answer from your feedback with citations |
 | `obsei studio --out DIR` | Export a static Studio snapshot |
 | `obsei demo [--out DIR]` | Build the synthetic multilingual demo |
+| `obsei models download [--dir DIR]` | Fetch the local multilingual embedding model for offline use |
 | `obsei mcp` | MCP server over stdio (read-only) |
 | `obsei serve [--host] [--port]` | Webhook intake, MCP over HTTP, `/healthz` |
 | `obsei export --author HANDLE [--out FILE]` | Export one author's records |

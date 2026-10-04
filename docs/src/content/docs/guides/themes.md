@@ -17,7 +17,7 @@ dashboards, tickets and agents can refer to them over time.
 ```yaml
 themes:
   embedder: hashing        # offline, any script; or an llms name with embedding_model
-  similarity: null         # default 0.3 for hashing, 0.75 for embedding models
+  similarity: null         # default 0.3 hashing, 0.65 local multilingual, 0.75 other models
   duplicate_similarity: 0.9
   labeler: local           # llms name; without it, keyword labels
   label_language: English  # labels in your team's language; feedback stays as written
@@ -25,8 +25,22 @@ themes:
 ```
 
 The built-in `hashing` embedder needs no model and works in every script, but it groups by
-wording, so the same issue in two languages forms two themes. A multilingual embedding model
-(for example `bge-m3` or `multilingual-e5` on Ollama or vLLM) groups by meaning across languages:
+wording, so the same issue in two languages forms two themes. To group by meaning across 50+
+languages, use the local multilingual model (CPU only, about 220 MB, no PyTorch):
+
+```bash
+pip install --pre 'obsei[embeddings]'
+obsei models download --dir /models      # once, with network
+export OBSEI_MODELS_DIR=/models          # air-gapped runs load it from here
+```
+
+```yaml
+themes:
+  embedder: local          # or local:intfloat/multilingual-e5-large for higher quality
+```
+
+Thresholds differ between models; tune `similarity` if themes split or merge too much. A model
+served by Ollama or vLLM (for example `bge-m3`) also works:
 
 ```yaml
 llms:
