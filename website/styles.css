@@ -170,6 +170,30 @@ footer a { color: var(--muted); }
   html { scroll-behavior: auto; }
   .link span { animation: none; }
 }
+.news { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 18px; padding: 4px 12px 4px 4px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 0.85rem; text-decoration: none; }
+.news b { background: var(--grad); color: #fff; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
+.news:hover { border-color: var(--teal); }
+.proof { margin: -48px auto 72px; text-align: center; color: var(--muted); font-size: 0.9rem; }
+.flip > figure { order: -1; }
+.routes { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 22px; box-shadow: var(--shadow); display: grid; gap: 12px; }
+.routes ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: r; }
+.routes li { counter-increment: r; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; }
+.routes li::before { content: counter(r); width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 0.75rem; font-weight: 700; background: var(--tint); color: var(--teal-ink); }
+.routes .cond { display: flex; flex-wrap: wrap; gap: 6px; }
+.routes i { white-space: nowrap; font-style: normal; font-size: 0.78rem; padding: 2px 9px; border-radius: 999px; background: var(--tint); color: var(--teal-ink); font-weight: 600; }
+.routes .to { font-weight: 650; font-size: 0.9rem; white-space: nowrap; }
+.routes .to::before { content: "→ "; color: var(--muted); font-weight: 400; }
+.routes .unsure { border-style: dashed; }
+.routes .unsure i { background: var(--pii); color: var(--pii-ink); }
 .chat-cap { justify-self: end; color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
 .card-note { margin: 10px 0 0 !important; color: var(--muted); font-size: 0.78rem; }
 .card-note code { font-size: 0.95em; }
+@media (max-width: 960px) {
+  .flip > figure { order: 0; }
+}
+@media (max-width: 600px) {
+  .routes li { grid-template-columns: auto minmax(0, 1fr); row-gap: 6px; }
+  .routes .to { grid-column: 2; }
+  .install { font-size: 0.74rem; }
+  .eyebrow { font-size: 0.74rem; letter-spacing: 0.06em; }
+}
