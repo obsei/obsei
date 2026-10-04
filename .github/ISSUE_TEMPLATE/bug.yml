@@ -1,0 +1,37 @@
+name: Bug report
+description: Something in obsei doesn't work as expected.
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please **remove any personal data or secrets** (customer text, emails, API keys) from logs and examples.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: A minimal config or command that reproduces the problem.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `obsei doctor`
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How do you run obsei?
+      options: ["uvx / pip", "Docker", "From source"]
+    validations:
+      required: true

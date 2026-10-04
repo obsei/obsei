@@ -1,38 +1,26 @@
-# This is Docker file to Obsei SDK with dependencies installed
-FROM python:3.10-slim-bullseye
+# syntax=docker/dockerfile:1
+# obsei container image: one rootless image for CLI, server and MCP.
 
-RUN useradd --create-home user
-WORKDIR /home/user
+FROM ghcr.io/astral-sh/uv:0.12.23 AS uv
 
-# env variable
-ENV PIP_DISABLE_PIP_VERSION_CHECK 1
-ENV PIP_NO_CACHE_DIR 1
-ENV WORKFLOW_SCRIPT '/home/user/obsei/process_workflow.py'
-ENV OBSEI_CONFIG_PATH ""
-ENV OBSEI_CONFIG_FILENAME ""
+FROM python:3.12-slim-trixie AS build
+COPY --from=uv /uv /usr/local/bin/uv
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
+WORKDIR /src
+COPY pyproject.toml uv.lock ./
+COPY packages ./packages
+RUN uv build --package obsei --out-dir /dist \
+    && uv venv /opt/obsei \
+    && uv pip install --python /opt/obsei /dist/*.whl
 
-
-# Hack to install jre on debian
-RUN mkdir -p /usr/share/man/man1
-
-# install few required tools
-RUN apt-get update && apt-get install -y --no-install-recommends curl git pkg-config cmake libncurses5 g++ \
-    && apt-get clean autoclean && apt-get autoremove -y \
-    && rm -rf /var/lib/{apt,dpkg,cache,log}/
-
-# install as a package
-COPY pyproject.toml README.md /home/user/
-RUN pip install --upgrade pip
-
-# copy README
-COPY README.md /home/user/
-
-# copy code
-COPY obsei /home/user/obsei
-RUN pip install -e .[all]
-
-
-USER user
-
-# cmd for running the API
-CMD ["sh", "-c", "python ${WORKFLOW_SCRIPT}"]
+FROM python:3.12-slim-trixie
+LABEL org.opencontainers.image.source="https://github.com/obsei/obsei" \
+      org.opencontainers.image.description="Privacy-first, self-hosted Voice of Customer for AI agents" \
+      org.opencontainers.image.licenses="Apache-2.0"
+RUN useradd --create-home --uid 10001 obsei
+COPY --from=build /opt/obsei /opt/obsei
+ENV PATH="/opt/obsei/bin:${PATH}" PYTHONUNBUFFERED=1
+USER 10001
+WORKDIR /home/obsei
+ENTRYPOINT ["obsei"]
+CMD ["--help"]

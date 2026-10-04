@@ -1,103 +1,58 @@
-# 👐 Contributing to Obsei
+# Contributing to obsei
 
-First off, thank you for even considering contributing to this package, every contribution big or small is greatly appreciated.
-Community contributions are what keep projects like this fueled and constantly improving, so a big thanks to you!
+Thanks for helping. obsei is maintained part-time, so clear, small, well-tested pull requests are
+the fastest way to get changes merged.
 
-Below are some sections detailing the guidelines we'd like you to follow to make your contribution as seamless as possible.
+## Where to talk
 
-- [Code of Conduct](#coc)
-- [Asking a Question and Discussions](#question)
-- [Issues, Bugs, and Feature Requests](#issue)
-- [Submission Guidelines](#submit)
-- [Code Style and Formatting](#code)
-- [Contributor License Agreement](#cla)
+- **Questions and ideas:** [GitHub Discussions](https://github.com/obsei/obsei/discussions)
+- **Bugs, features, connector requests:** [issue forms](https://github.com/obsei/obsei/issues/new/choose)
+- **Security issues:** never in public; see [SECURITY.md](SECURITY.md)
 
-## 📜 <a name="coc"></a> Code of Conduct
+## Development setup
 
-The [Code of Conduct](https://github.com/obsei/obsei/blob/master/CODE_OF_CONDUCT.md) applies within all community spaces.
-If you are not familiar with our Code of Conduct policy, take a minute to read the policy before starting with your first contribution.
+You need [uv](https://docs.astral.sh/uv/) 0.12 or newer. uv installs the right Python for you.
 
-## 🗣️ <a name="question"></a> Query or Discussion
+```bash
+git clone https://github.com/obsei/obsei && cd obsei
+uv sync                 # creates .venv with obsei and the dev tools
+uv run pytest           # tests
+uv run ruff check .     # lint
+uv run ruff format .    # format
+uv run mypy             # type-check (strict)
+uv run obsei doctor     # try the CLI
+```
 
-We would like to use [Github discussions](https://github.com/obsei/obsei/discussions) as the central hub for all
-community discussions, questions, and everything else in between. While Github discussions is a new service (as of 2021)
-we believe that it really helps keep this repo as one single source to find all relevant information. Our hope is that
-discussion page functions as a record of all the conversations that help contribute to the project's development.
+The repository is a uv workspace. The installable package lives in `packages/obsei`.
 
-If you are new to [Github discussions](https://github.com/obsei/obsei/discussions) it is a very similar experience
-to Stack Overflow with an added element of general discussion and discourse rather than solely being question and answer based.
+## Pull requests
 
-## 🪲 <a name="issue"></a> Issues, Bugs, and Feature Requests
+- **Title:** use [Conventional Commits](https://www.conventionalcommits.org/), e.g.
+  `feat: add Zendesk source`, `fix: handle empty review text`. PRs are squash-merged and the title
+  drives the changelog and version bump.
+- **Tests:** every change needs tests. Network calls must be mocked or recorded; CI never calls
+  real third-party APIs or downloads large models.
+- **Privacy:** never commit personal data, real customer text, secrets or API keys, including in
+  test fixtures. Use synthetic examples.
+- **Plugins:** reference plugins by name through the registry; configuration must never import
+  arbitrary code.
 
-We are very open to community contributions and appreciate anything that improves **Obsei**. This includes fixings typos, adding missing documentation, fixing bugs or adding new features.
-To avoid unnecessary work on either side, please stick to the following process:
+## Developer Certificate of Origin (DCO)
 
-1. If you feel like your issue is not specific and more of a general question about a design decision, or algorithm implementation maybe start a [discussion](https://github.com/obsei/obsei/discussions) instead, this helps keep the issues less cluttered and encourages more open-ended conversation.
-2. Check if there is already [an related issue](https://github.com/obsei/obsei/issues).
-3. If there is not, open a new one to start a discussion. Some features might be a nice idea, but don't fit in the scope of Obsei and we hate to close finished PRs.
-4. If we came to the conclusion to move forward with your issue, we will be happy to accept a pull request. Make sure you create a pull request in an early draft version and ask for feedback.
-5. Verify that all tests in the CI pass (and add new ones if you implement anything new)
+obsei uses the [DCO](https://developercertificate.org/) instead of a CLA. Sign off every commit to
+certify you have the right to contribute it under the Apache-2.0 license:
 
-See [below](#submit) for some guidelines.
+```bash
+git commit -s -m "feat: add Zendesk source"
+```
 
-## ✉️ <a name="submit"></a> Submission Guidelines
+## Code of conduct
 
-### Submitting an Issue
+This project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Before you submit your issue search the archive, maybe your question was already answered.
+## For maintainers: releases
 
-If your issue appears to be a bug, and hasn't been reported, open a new issue.
-Help us to maximize the effort we can spend fixing issues and adding new
-features, by not reporting duplicate issues. Providing the following information will increase the
-chances of your issue being dealt with quickly:
-
-- **Describe the bug** - A clear and concise description of what the bug is.
-- **To Reproduce**- Steps to reproduce the behavior.
-- **Expected behavior** - A clear and concise description of what you expected to happen.
-- **Environment**
-  - Obsei version
-  - Python version
-  - OS
-- **Suggest a Fix** - if you can't fix the bug yourself, perhaps you can point to what might be
-  causing the problem (line of code or commit)
-
-When you submit a PR you will be presented with a PR template, please fill this in as best you can.
-
-### Submitting a Pull Request
-
-Before you submit your pull request consider the following guidelines:
-
-- Search [GitHub](https://github.com/obsei/obsei/pulls) for an open or closed Pull Request
-  that relates to your submission. You don't want to duplicate effort.
-- Fork the main repo if not already done
-- Rebase fork with `upstream master`
-- Create new branch and add the changes in that branch
-- Add supporting test cases
-- Follow our [Coding Rules](#rules).
-- Avoid checking in files that shouldn't be tracked (e.g `dist`, `build`, `.tmp`, `.idea`).
-  We recommend using a [global](#global-gitignore) gitignore for this.
-- Before you commit please run the test suite and make sure all tests are passing.
-- Format your code appropriately:
-  - This package uses [black](https://black.readthedocs.io/en/stable/) as its formatter.
-    In order to format your code with black run `black . ` from the root of the package.
-- Run `pre-commit run --all-files` if you're adding new hooks to pre-commit config file. By default, pre-commit will run on modified files when commiting changes.
-- Commit your changes using a descriptive commit message.
-- In GitHub, send a pull request to `obsei:master`.
-- If we suggest changes then:
-  - Make the required updates.
-  - Rebase your branch and force push to your GitHub repository (this will update your Pull Request):
-
-That's it! Thank you for your contribution!
-
-## ✅ <a name="rules"></a> Coding Rules
-
-We generally follow the [Google Python style guide](http://google.github.io/styleguide/pyguide.html).
-
-## 📝 <a name="cla"></a> Contributor License Agreement
-
-That we do not have any potential problems later it is sadly necessary to sign a [Contributor License Agreement](CONTRIBUTOR_LICENSE_AGREEMENT.md). That can be done literally with the push of a button.
-
----
-
-_This guide was inspired by the [transformers-interpret](https://github.com/cdpierse/transformers-interpret/blob/master/CONTRIBUTING.md), 
-[Haystack](https://github.com/deepset-ai/haystack/blob/master/CONTRIBUTING.md) and [n8n](https://github.com/n8n-io/n8n/blob/master/CONTRIBUTOR_LICENSE_AGREEMENT.md)_
+Releases are automated. Merging to `master` updates a release PR opened by release-please; merging
+that PR tags the release, publishes to PyPI via Trusted Publishing and pushes a signed image to
+`ghcr.io/obsei/obsei`. After the first 0.1.0 release, remove `"release-as": "0.1.0"` from
+`release-please-config.json`.

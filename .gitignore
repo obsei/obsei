@@ -146,3 +146,10 @@ models*
 
 # VS code configuration
 .vscode/*
+
+# obsei rebuild
+.venv/
+.ruff_cache/
+.mypy_cache/
+*.duckdb
+*.duckdb.wal
