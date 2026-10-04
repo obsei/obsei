@@ -1,0 +1,105 @@
+# Three markets, three local teams: India, Brazil and Japan, each with its own privacy rules,
+# labels and Slack channel, sharing one database and one set of multilingual themes.
+#
+# Sources: App Store per country (in, br, jp), Bluesky in Portuguese and Japanese,
+#          Freshdesk for India support and Intercom (US region) for Brazil chat.
+# Privacy: regional ID detectors (india: Aadhaar, PAN; latam: Brazilian CPF; apac: Japanese My
+#          Number) on top of the global ones (emails, phones, cards, IBANs, IPs), plus
+#          multilingual person-name redaction.
+# Model:   one local multilingual model; feedback is classified in its own language and never
+#          translated. Labels stay in English so dashboards compare across markets.
+# Sinks:   a Slack channel per market.
+#
+# Extras:  pip install "obsei[names,embeddings]"
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          FRESHDESK_API_KEY, INTERCOM_TOKEN
+#          SLACK_WEBHOOK_IN, SLACK_WEBHOOK_BR, SLACK_WEBHOOK_JP   one incoming webhook per channel
+# Run:     obsei try -c examples/regional-india-brazil-japan.yaml -p brazil
+#          obsei run -c examples/regional-india-brazil-japan.yaml
+version: 1
+
+store:
+  path: regional.duckdb
+
+privacy:
+  redact: true
+  regions: [global, india, latam, apac]
+  names:
+    enabled: true                    # downloads urchade/gliner_multi_pii-v1 on first use
+
+egress:
+  mode: private
+  allowed_hosts: [hooks.slack.com]
+
+llms:
+  default:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b                  # multilingual; try gemma3:12b for more Indic coverage
+
+themes:
+  embedder: local                    # one theme for "app trava no login" and "ログインで固まる"
+  labeler: default
+  label_language: English            # or Portuguese / Japanese for a single-market deployment
+  k_anonymity: 5
+
+pipelines:
+  - name: india
+    sources:
+      - key: ios-in
+        type: appstore
+        config: {app_id: "284882215", countries: [in]}
+      - key: support-in
+        type: freshdesk
+        config: {domain: acme-india}
+    enrichers:
+      - type: classify
+        config:
+          intents: [bug, payment_failure, kyc_issue, feature_request, praise, churn_risk, other]
+          fields:
+            payment_method:
+              description: Payment method mentioned, if any
+              choices: [upi, card, netbanking, wallet, none]
+    sinks:
+      - type: slack
+        config:
+          webhook_url_env: SLACK_WEBHOOK_IN
+          when: {classify.intent: [bug, payment_failure, churn_risk]}
+
+  - name: brazil
+    sources:
+      - key: ios-br
+        type: appstore
+        config: {app_id: "284882215", countries: [br]}
+      - key: bluesky-pt
+        type: bluesky
+        config: {query: "acme app", lang: pt}
+      - key: chat-br
+        type: intercom
+        config: {region: us, workspace: acme-brasil}
+    enrichers:
+      - type: classify
+        config:
+          intents: [bug, pix_payment, delivery, feature_request, praise, churn_risk, other]
+    sinks:
+      - type: slack
+        config:
+          webhook_url_env: SLACK_WEBHOOK_BR
+          when: {classify.sentiment: [negative]}
+
+  - name: japan
+    sources:
+      - key: ios-jp
+        type: appstore
+        config: {app_id: "284882215", countries: [jp]}
+      - key: bluesky-ja
+        type: bluesky
+        config: {query: "acme アプリ", lang: ja}
+    enrichers:
+      - type: classify
+        config:
+          intents: [bug, ui_text, performance, feature_request, praise, churn_risk, other]
+    sinks:
+      - type: slack
+        config:
+          webhook_url_env: SLACK_WEBHOOK_JP
+          when: {classify.sentiment: [negative, mixed]}
