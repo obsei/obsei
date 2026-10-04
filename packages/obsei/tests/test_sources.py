@@ -43,6 +43,7 @@ def test_registers_all_builtins() -> None:
         "playstore",
         "rest",
         "rss",
+        "webhook",
     ]
 
 

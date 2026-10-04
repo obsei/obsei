@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
 import platform
 import sys
+import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from importlib import resources
 from itertools import islice
@@ -110,6 +114,8 @@ def schema() -> None:
 DbOption = Annotated[
     Path, typer.Option("--db", envvar="OBSEI_DB", help="Path to the obsei DuckDB file.")
 ]
+API_TOKEN_ENV_VAR = "OBSEI_API_TOKEN"  # noqa: S105
+
 UnencryptedOption = Annotated[
     bool,
     typer.Option("--unencrypted", help="Open without an encryption key (encrypted disks only)."),
@@ -228,8 +234,19 @@ def run(
     config: ConfigOption = DEFAULT_PATH,
     pipeline: PipelineOption = None,
     db: Annotated[Path | None, typer.Option("--db", envvar="OBSEI_DB")] = None,
+    every: Annotated[
+        int | None, typer.Option(min=1, help="Repeat every N minutes until stopped.")
+    ] = None,
 ) -> None:
     """Run pipelines: fetch, redact, enrich, deliver and store new or changed feedback."""
+    while True:
+        _run_once(config, pipeline, db)
+        if every is None:
+            return
+        time.sleep(every * 60)
+
+
+def _run_once(config: Path, pipeline: list[str] | None, db: Path | None) -> None:
     cfg = _load(config)
     names = pipeline or [p.name for p in cfg.pipelines]
     with (
@@ -288,3 +305,55 @@ def try_(
                             }
                         )
                     )
+
+
+def _store_settings(config: Path, db: Path | None) -> tuple[Path, bool]:
+    if config.exists():
+        cfg = _load(config)
+        return db or cfg.store.path, cfg.store.unencrypted
+    return db or Path("obsei.duckdb"), False
+
+
+@app.command()
+def mcp(
+    config: ConfigOption = DEFAULT_PATH,
+    db: Annotated[Path | None, typer.Option("--db", envvar="OBSEI_DB")] = None,
+) -> None:
+    """Serve read-only MCP tools over stdio (Claude, ChatGPT, Cursor, your agents)."""
+    try:
+        from obsei.mcp_server import create_server  # noqa: PLC0415
+    except ImportError:
+        raise _fail("MCP support needs: pip install 'obsei[mcp]'") from None
+    path, unencrypted = _store_settings(config, db)
+
+    @contextmanager
+    def read_only() -> Iterator[Store]:
+        with _open_store(path, unencrypted, read_only=True) as store:
+            yield store
+
+    create_server(read_only).run("stdio")
+
+
+@app.command()
+def serve(
+    config: ConfigOption = DEFAULT_PATH,
+    host: Annotated[str, typer.Option(help="Bind address.")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="Port.")] = 8765,
+) -> None:
+    """Serve webhook intake (/ingest), MCP over HTTP (/mcp) and /healthz."""
+    try:
+        import uvicorn  # noqa: PLC0415
+
+        from obsei.serve import create_app  # noqa: PLC0415
+    except ImportError:
+        raise _fail("serve needs: pip install 'obsei[mcp]'") from None
+    token = os.environ.get(API_TOKEN_ENV_VAR) or None
+    if token is None and host not in ("127.0.0.1", "::1", "localhost"):
+        raise _fail(f"set {API_TOKEN_ENV_VAR} before binding to {host}")
+    cfg = _load(config)
+    with build_context(cfg) as ctx, _open_store(cfg.store.path, cfg.store.unencrypted) as store:
+        try:
+            web = create_app(cfg, ctx, store, token=token, host=host)
+        except (ConfigError, PluginError, OSError, RuntimeError) as exc:
+            raise _fail(exc) from None
+        uvicorn.run(web, host=host, port=port, log_level="info")

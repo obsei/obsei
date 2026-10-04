@@ -8,6 +8,7 @@ from obsei.sources.github import GitHubIssuesConfig, GitHubIssuesSource
 from obsei.sources.playstore import PlayStoreConfig, PlayStoreSource
 from obsei.sources.rest import RestConfig, RestSource
 from obsei.sources.rss import RssConfig, RssSource
+from obsei.sources.webhook import WebhookSource, WebhookSourceConfig
 
 
 def register(registry: Registry) -> None:
@@ -18,6 +19,7 @@ def register(registry: Registry) -> None:
     registry.add_source("playstore", factory(PlayStoreConfig, PlayStoreSource))
     registry.add_source("github_issues", factory(GitHubIssuesConfig, GitHubIssuesSource))
     registry.add_source("rss", factory(RssConfig, RssSource))
+    registry.add_source("webhook", factory(WebhookSourceConfig, WebhookSource))
 
 
 __all__ = ["register"]
