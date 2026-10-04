@@ -8,12 +8,15 @@ import re
 from collections.abc import Iterator, Mapping
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
+from typing import Literal, TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import Context
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
+
+TextFormat: TypeAlias = Literal["plain", "html"]
 
 _TAG = re.compile(r"<[^>]+>")
 _BLOCK = re.compile(r"<\s*(br|/p|/div|/li|/h[1-6])\b[^>]*>", re.IGNORECASE)
@@ -98,10 +101,13 @@ def map_item(
     ctx: Context,
     fallback_id: str | None = None,
     default_time: datetime,
+    text_format: TextFormat = "plain",
 ) -> Record | None:
     """Build a record from a row; returns None when the row has no text."""
     paths = [fields.text] if isinstance(fields.text, str) else fields.text
     parts = [t for t in (as_text(lookup(item, p)) for p in paths) if t]
+    if text_format == "html":
+        parts = [t for t in map(html_to_text, parts) if t]
     if not parts:
         return None
     text = "\n\n".join(parts)

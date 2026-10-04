@@ -1,0 +1,90 @@
+# Support tickets from three helpdesks, triaged by a small model with a larger one for hard cases.
+#
+# Sources: Zendesk (incremental export), Freshdesk, Intercom (EU data region).
+# Model:   a small local model labels everything; results below 0.7 confidence are re-labelled
+#          by a larger model on your own GPU server (vLLM). Nothing goes to a public model.
+# Sinks:   Jira issues for bugs, Linear issues for feature requests, Parquet files for BI.
+#
+# Extras:  none (pip install obsei)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          ZENDESK_EMAIL, ZENDESK_API_TOKEN     Zendesk agent email and API token
+#          FRESHDESK_API_KEY                    Freshdesk API key
+#          INTERCOM_TOKEN                       Intercom access token
+#          JIRA_EMAIL, JIRA_API_TOKEN           Jira Cloud user and API token
+#          LINEAR_API_KEY                       Linear personal API key
+# Run:     obsei try -c examples/support-tickets.yaml --enrich
+#          obsei run -c examples/support-tickets.yaml
+version: 1
+
+store:
+  path: support.duckdb
+
+privacy:
+  redact: true
+  regions: [global, north_america, uk, eu]
+
+# Both models run inside your network; the issue trackers are the only outside hosts.
+egress:
+  mode: private
+  allowed_hosts: [acme.atlassian.net, api.linear.app]
+
+llms:
+  small:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+  large:
+    base_url: http://gpu-01.internal:8000/v1      # vLLM: vllm serve Qwen/Qwen3-32B
+    model: Qwen/Qwen3-32B
+    max_requests: 500                             # caps how many tickets escalate per run
+
+ask_llm: large
+
+pipelines:
+  - name: tickets
+    batch_size: 50
+    sources:
+      - key: zendesk
+        type: zendesk
+        config:
+          subdomain: acme                  # acme.zendesk.com
+          start_time: "2026-01-01T00:00:00Z"
+      - key: freshdesk
+        type: freshdesk
+        config:
+          domain: acme                     # acme.freshdesk.com
+          since: "2026-01-01T00:00:00Z"
+      - key: intercom
+        type: intercom
+        config:
+          region: eu
+          workspace: acme-eu
+    enrichers:
+      - type: classify
+        config:
+          llm: small
+          fallback_llm: large
+          threshold: 0.7
+          intents: [bug, feature_request, billing, how_to, account_access, churn_risk, praise, other]
+          fields:
+            product_area:
+              description: The part of the product the ticket is about
+              choices: [mobile_app, web_app, api, billing, onboarding, other]
+            severity:
+              description: How badly the customer is blocked
+              choices: [blocked, degraded, minor]
+    sinks:
+      - type: jira
+        config:
+          base_url: https://acme.atlassian.net
+          project_key: SUP
+          issue_type: Bug
+          labels: [feedback, from-support]
+          when: {classify.intent: [bug]}
+          max_issues: 20
+      - type: linear
+        config:
+          team_id: 9cfb482a-81e3-4154-b5b9-2c805e70a02d   # Linear team UUID
+          when: {classify.intent: [feature_request]}
+      - type: parquet
+        config:
+          directory: exports/support          # one Parquet file per batch; authors excluded

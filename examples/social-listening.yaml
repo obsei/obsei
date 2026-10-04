@@ -1,0 +1,84 @@
+# Social listening: what people say about your product in public, pushed to your own service.
+#
+# Sources: Bluesky search (English and Portuguese), Hacker News stories and comments, YouTube
+#          comments on your channel, an RSS feed (Discourse forum), and a Mastodon hashtag via
+#          the generic REST source (HTML converted to text with text_format: html).
+# Model:   a local Ollama model.
+# Sinks:   a webhook in your network, each POST signed with HMAC-SHA256
+#          (X-Obsei-Signature-256: sha256=<hex digest of the body>).
+#
+# Extras:  none (pip install obsei)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          YOUTUBE_API_KEY               YouTube Data API v3 key
+#          FEEDBACK_HUB_SECRET           shared secret your webhook uses to verify signatures
+#          BLUESKY_HANDLE, BLUESKY_APP_PASSWORD   optional: if anonymous search is refused, add
+#            handle_env: BLUESKY_HANDLE and app_password_env: BLUESKY_APP_PASSWORD to both sources
+# Run:     obsei try -c examples/social-listening.yaml
+#          obsei run -c examples/social-listening.yaml --every 60
+version: 1
+
+store:
+  path: social.duckdb
+
+privacy:
+  redact: true
+  regions: [global, north_america, uk, eu, latam]
+
+# The webhook is on an internal host (*.internal), so the default air-gapped policy allows it.
+llms:
+  default:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+
+pipelines:
+  - name: social
+    sources:
+      - key: bluesky-en
+        type: bluesky
+        config: {query: "acme app", lang: en, max_pages: 5}
+      - key: bluesky-pt
+        type: bluesky
+        config: {query: "acme app", lang: pt, max_pages: 5}
+      - key: hn
+        type: hackernews
+        config: {query: acme, kinds: [story, comment]}
+      - key: youtube
+        type: youtube
+        config:
+          channel_id: UC_x5XG1OV2P6uZZ5FSM9Ttw     # or video_ids: [dQw4w9WgXcQ]
+          max_pages: 5
+      - key: forum
+        type: rss
+        config:
+          url: https://forum.acme.example/latest.rss
+          instance: forum
+      - key: mastodon
+        type: rest
+        config:
+          # Public hashtag timeline: no token needed on most servers. Newest first; the Link
+          # header points to older posts, so max_pages bounds how far back the first run goes.
+          url: https://mastodon.social/api/v1/timelines/tag/acmeapp
+          instance: mastodon.social
+          params: {limit: 40}
+          pagination: link
+          max_pages: 5
+          text_format: html                   # statuses are HTML; store them as plain text
+          fields:
+            text: [spoiler_text, content]     # content warning first, when present
+            id: id
+            created_at: created_at
+            author: account.acct              # pseudonymised before storage
+            lang: language
+            url: url
+            context: [account.bot]
+    enrichers:
+      - type: classify
+        config:
+          llm: default
+          intents: [bug, feature_request, praise, complaint, comparison, question, other]
+    sinks:
+      - type: webhook
+        config:
+          url: https://feedback-hub.internal/obsei
+          secret_env: FEEDBACK_HUB_SECRET
+          exclude: [author]                   # never forward pseudonyms

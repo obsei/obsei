@@ -1,0 +1,103 @@
+# CRM and ITSM tickets through the generic REST source: HubSpot tickets and ServiceNow incidents.
+#
+# Sources: HubSpot CRM v3 tickets (cursor paging on paging.next.after) and the ServiceNow
+#          Table API for incidents (offset paging with sysparm_offset / sysparm_limit).
+# Model:   a local Ollama model, with custom fields for product area and severity.
+# Sinks:   Jira Data Center (bearer token, REST API v2) for bugs; Parquet for reporting.
+#
+# Extras:  none (pip install obsei)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          HUBSPOT_TOKEN          HubSpot private app token (scope: tickets)
+#          SERVICENOW_AUTH        full Authorization header value for ServiceNow, e.g.
+#                                 "Basic <base64 of user:password>" or "Bearer <OAuth token>"
+#          JIRA_API_TOKEN         Jira Data Center personal access token
+# Run:     obsei try -c examples/crm-and-itsm-rest.yaml
+#          obsei run -c examples/crm-and-itsm-rest.yaml
+version: 1
+
+store:
+  path: crm-itsm.duckdb
+
+privacy:
+  redact: true
+  regions: [global, north_america, uk, eu, india]
+
+# jira.corp.example.com is a public name, so allow it explicitly.
+egress:
+  mode: private
+  allowed_hosts: [jira.corp.example.com]
+
+llms:
+  default:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+
+pipelines:
+  - name: crm-itsm
+    sources:
+      - key: hubspot
+        type: rest
+        config:
+          url: https://api.hubapi.com/crm/v3/objects/tickets
+          instance: hubspot
+          bearer_token_env: HUBSPOT_TOKEN
+          params:
+            properties: subject,content,hs_pipeline_stage,hs_ticket_priority,hs_ticket_category
+          items_path: results
+          pagination: cursor
+          next_path: paging.next.after
+          cursor_param: after
+          page_size_param: limit
+          page_size: 100
+          max_pages: 50
+          fields:
+            text: [properties.subject, properties.content]
+            id: id
+            created_at: createdAt
+            context:
+              - properties.hs_pipeline_stage
+              - properties.hs_ticket_priority
+              - properties.hs_ticket_category
+      - key: servicenow
+        type: rest
+        config:
+          url: https://acme.service-now.com/api/now/table/incident
+          instance: servicenow
+          secret_headers: {Authorization: SERVICENOW_AUTH}
+          headers: {Accept: application/json}
+          params:
+            sysparm_query: "sys_created_on>=javascript:gs.daysAgoStart(30)^ORDERBYsys_created_on"
+            sysparm_fields: sys_id,number,short_description,description,sys_created_on,priority,category,state
+            sysparm_exclude_reference_link: "true"
+          items_path: result
+          pagination: offset
+          page_param: sysparm_offset
+          page_size_param: sysparm_limit
+          page_size: 100
+          max_pages: 50
+          fields:
+            text: [short_description, description]
+            id: sys_id
+            created_at: sys_created_on            # UTC "YYYY-MM-DD HH:MM:SS"
+            context: [number, priority, category, state]
+    enrichers:
+      - type: classify
+        config:
+          llm: default
+          intents: [bug, outage, feature_request, how_to, access_request, billing, other]
+          fields:
+            product_area:
+              description: The product or service the ticket is about
+              choices: [web_app, mobile_app, api, sso, billing, other]
+    sinks:
+      - type: jira
+        config:
+          base_url: https://jira.corp.example.com
+          project_key: OPS
+          auth: bearer
+          api_version: "2"
+          issue_type: Bug
+          when: {classify.intent: [bug, outage]}
+      - type: parquet
+        config:
+          directory: exports/crm-itsm

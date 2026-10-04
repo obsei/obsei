@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, JsonValue
 from obsei.core.context import Context, origin
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record
-from obsei.sources._common import FieldMap, as_text, lookup, map_item
+from obsei.sources._common import FieldMap, TextFormat, as_text, lookup, map_item
 
 Pagination = Literal["none", "page", "offset", "link", "next_url", "cursor"]
 
@@ -33,6 +33,9 @@ class RestConfig(BaseModel):
     bearer_token_env: str | None = None
     items_path: str | None = None
     fields: FieldMap = Field(default_factory=FieldMap)
+    text_format: TextFormat = Field(
+        default="plain", description="'html' converts mapped text from HTML (Mastodon, forums)."
+    )
     pagination: Pagination = "none"
     page_param: str = "page"
     page_start: int = 1
@@ -146,6 +149,7 @@ class RestSource:
                     instance=self.config.instance,
                     ctx=self.ctx,
                     default_time=now,
+                    text_format=self.config.text_format,
                 )
                 if record is None:
                     continue
