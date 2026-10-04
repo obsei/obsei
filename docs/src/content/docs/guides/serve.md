@@ -17,7 +17,7 @@ obsei serve --host 0.0.0.0 --port 8765
 | `/mcp` | bearer token | MCP over streamable HTTP |
 | `GET /api/runs` | bearer token | last run of each scheduled pipeline |
 
-Binding to a non-loopback address requires `OBSEI_API_TOKEN`. Pipelines with `every_minutes` run on
+Binding to a non-loopback address requires `OBSEI_API_TOKEN` (at least 16 characters). Pipelines with `every_minutes` run on
 their schedule inside the server (see [Configuration](/configuration/#scheduling)).
 
 ## Sending feedback
@@ -60,5 +60,17 @@ access:
     default_role: viewer
 ```
 
-Requests without the proxy secret are refused, so the proxy cannot be bypassed. Every evidence,
+Requests without the proxy secret are refused, so the proxy cannot be bypassed.
+
+## Allowed hosts
+
+Against DNS rebinding, every route answers only to `localhost`, `127.0.0.1`, `[::1]`, the
+`--host` address and the names in `access.allowed_hosts`; other `Host` or `Origin` headers get
+421. When bound to `0.0.0.0` without `allowed_hosts`, any host is accepted (a token or SSO proxy
+is required then), so list your public names there:
+
+```yaml
+access:
+  allowed_hosts: [voc.example.com, "*.corp.example"]
+``` Every evidence,
 Ask and MCP request is written to the audit log (`obsei audit`) with the user and path.

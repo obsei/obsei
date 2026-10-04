@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from obsei import Record, SourceRef
+from obsei import Author, Record, SourceRef
 from obsei.privacy import redact as r
 from obsei.privacy.redact import RegexRedactor, ascii_digits, patterns_for, redact_text
 
@@ -89,3 +89,27 @@ def test_record_redactor_covers_text_and_context() -> None:
     assert redacted.text == "reach me at <EMAIL>"
     assert redacted.context == {"subject": "refund for <CARD>"}
     assert redacted.id == record.id
+
+
+def test_record_redactor_covers_url_native_id_and_locale() -> None:
+    record = Record(
+        source=SourceRef(
+            type="helpdesk",
+            native_id="paul@example.fr",
+            url="https://support.example.com/t?from=paul@example.fr&phone=+44 20 7946 0958",
+        ),
+        text="hi",
+        created_at=datetime(2026, 1, 1, tzinfo=UTC),
+        author=Author(pseudonym="psn_" + "0" * 32, locale="fr call 4111 1111 1111 1111"),
+    )
+    (redacted,) = RegexRedactor().redact([record])
+    assert redacted.source.native_id == "<EMAIL>"
+    assert redacted.source.url == "https://support.example.com/t?from=%3CEMAIL%3E&phone=%3CPHONE%3E"
+    assert redacted.author is not None
+    assert redacted.author.locale == "fr call <CARD>"
+    assert redacted.id == record.id
+    plain = record.model_copy(
+        update={"source": SourceRef(type="csv", native_id="42", url="https://e.com/r/42")}
+    )
+    (kept,) = RegexRedactor().redact([plain])
+    assert kept.source == plain.source

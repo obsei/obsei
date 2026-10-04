@@ -18,6 +18,7 @@ VIEWER, ANALYST, ADMIN, PROXY = (
     "admin-token-0123456789",
     "proxy-secret-0123456789",
 )
+LOCAL = "http://127.0.0.1:8765"
 
 
 def config() -> ObseiConfig:
@@ -53,7 +54,7 @@ def store() -> Store:
 def client(monkeypatch: pytest.MonkeyPatch, store: Store) -> TestClient:
     for env, value in (("T_VIEWER", VIEWER), ("T_ANALYST", ANALYST), ("T_PROXY", PROXY)):
         monkeypatch.setenv(env, value)
-    return TestClient(create_app(config(), Context(), store, token=ADMIN))
+    return TestClient(create_app(config(), Context(), store, token=ADMIN), base_url=LOCAL)
 
 
 def bearer(token: str) -> dict[str, str]:
@@ -99,3 +100,19 @@ def test_tokens_must_be_set_and_long(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(AccessError, match="T_VIEWER"):
         Authenticator(config().access, None)
     assert not Authenticator(AccessConfig(), None).enabled
+
+
+def test_non_ascii_credentials_are_unauthorized_not_errors(client: TestClient) -> None:
+    for header in (
+        {"Authorization": "Bearer tökén-0123456789"},
+        {"x-obsei-proxy-secret": "sécret-0123456789", "x-forwarded-email": "a@b.co"},
+    ):
+        encoded = {k: v.encode("latin-1") for k, v in header.items()}
+        response = client.get("/api/snapshot", headers=encoded)  # type: ignore[arg-type]
+        assert response.status_code == 401
+
+
+def test_admin_token_must_be_long() -> None:
+    with pytest.raises(AccessError, match="OBSEI_API_TOKEN"):
+        Authenticator(AccessConfig(), "short")
+    assert Authenticator(AccessConfig(), "a" * 16).enabled

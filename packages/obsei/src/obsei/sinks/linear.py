@@ -7,7 +7,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
-from obsei.core.context import Context
+from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.sinks._common import body, env, marker, matches, title
@@ -47,7 +47,10 @@ class LinearSink:
 
     def _graphql(self, query: str, variables: dict[str, JsonValue]) -> JsonValue:
         response = self.ctx.http.post(
-            API_URL, json={"query": query, "variables": variables}, headers=self.headers
+            API_URL,
+            json={"query": query, "variables": variables},
+            headers=self.headers,
+            extensions=EGRESS,
         )
         response.raise_for_status()
         payload: JsonValue = response.json()
