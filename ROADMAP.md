@@ -29,6 +29,16 @@ not listed below ships only when a contributor builds and maintains it.
 | Release candidate | In progress | `1.0.0rc1` published. Before 1.0: weekly live-connector checks green, one design partner in production, listed in the MCP Registry and Claude plugin directory |
 | 1.0 | Planned | Stable API and schema; write tools behind an approval queue; ChatGPT connector; fuller knowledge graph; Show HN launch |
 
+## Next
+
+Open for contributors; not started.
+
+- **Decision-model quality:** a labelled test set from the demo data with accuracy per question,
+  and a comparison of Julia-1 with Clef-Flash.
+- **Cloudflare Workers AI** for chat and embeddings (decision models already work through its URL).
+- **Theme alerts:** notify a sink when a theme grows faster than usual.
+- **`obsei reprocess`:** relabel stored records with a new model or new questions.
+
 ## Releases
 
 Everything above ships as PyPI pre-releases (`1.0.0a1`, then `1.0.0rc1`, `1.0.0rc2`, ...), which `pip install obsei`
