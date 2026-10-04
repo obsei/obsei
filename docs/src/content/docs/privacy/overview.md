@@ -28,8 +28,8 @@ retention and transfers.
 In `obsei.yaml`, `privacy.regions` takes the keys `global`, `north_america`, `uk`, `eu`, `latam`,
 `apac`, `india` and `africa` (all by default).
 
-- **Names (optional).** Regexes cannot find person names. `pip install "obsei[names]>=1.0.0rc1"`
-  adds a local multilingual GLiNER model that replaces names with `<PERSON>` after the regex pass:
+- **Names (optional).** Regexes cannot find person names. The `names` extra
+  ([how to add an extra](/quickstart/#optional-extras)) adds a local multilingual GLiNER model that replaces names with `<PERSON>` after the regex pass:
 
   ```yaml
   privacy:

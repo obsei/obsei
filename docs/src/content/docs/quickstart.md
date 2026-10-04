@@ -38,6 +38,30 @@ Then `obsei doctor` reports `encryption: ready`. From 1.0.0rc3, `obsei init` ins
 For machines without network access, see [At rest and in use](/privacy/overview/#at-rest-and-in-use).
 :::
 
+## Optional extras
+
+Some features need extra packages. Add them to the same install:
+
+| Extra | Adds |
+| --- | --- |
+| `mcp` | `obsei serve`, `obsei mcp` and Studio over HTTP |
+| `embeddings` | the local multilingual model, so themes group across languages |
+| `names` | local name redaction (GLiNER) |
+| `sql` | the SQL source and sink |
+| `google` | the Google Play source |
+| `apple` | the App Store Connect source |
+
+```bash
+# uv tool: --force replaces the install, so list every extra you want to keep
+uv tool install --force "obsei[mcp,embeddings]>=1.0.0rc1"
+# pip, in the environment where obsei is installed
+pip install "obsei[mcp,embeddings]>=1.0.0rc1"
+```
+
+`uv run --extra ...` only works inside a project checkout; outside one it ignores the extra.
+Plugins install the same way: `uv tool install --force "obsei[mcp]>=1.0.0rc1" --with obsei-teams`
+(see [Plugins](/reference/plugins/)).
+
 ## Add a model
 
 Start [Ollama](https://ollama.com) with a model such as `qwen3:8b`, then uncomment the
