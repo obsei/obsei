@@ -21,9 +21,10 @@ your machines; data only leaves it for endpoints you configure and allow.
    national IDs for [seven regions](/privacy/overview/) are replaced with tokens such as
    `<EMAIL>`, optionally names too. Authors become salted pseudonyms.
 
-3. **Classify.** Your own [model](/guides/models/) labels sentiment, intent, language and custom
-   fields. It only sees redacted text, and the egress policy blocks public endpoints unless you
-   allow them.
+3. **Classify.** A fast local [decision model](/guides/models/#decision-models) or your own chat
+   model labels sentiment, intent, urgency and custom fields, each with a probability. Unsure
+   answers go to a stronger model or to a human, and spam can be dropped here. Models only see
+   redacted text, and the egress policy blocks public endpoints unless you allow them.
 
 4. **Theme.** Records are embedded and grouped into stable [themes](/guides/themes/) with trends
    and near-duplicate detection. Groups smaller than k (default 5) are hidden.
