@@ -1,5 +1,3 @@
-"""The ``obsei`` command line."""
-
 from __future__ import annotations
 
 import json
@@ -12,7 +10,7 @@ import typer
 
 from obsei import __version__
 from obsei.core.record import Record
-from obsei.core.registry import PLUGIN_KINDS, Registry
+from obsei.core.registry import Registry
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt
 from obsei.store import DB_KEY_ENV_VAR, StoreError, load_db_key
 
@@ -39,7 +37,7 @@ def main(
         ),
     ] = False,
 ) -> None:
-    """obsei command line."""
+    pass
 
 
 @app.command()
@@ -68,8 +66,7 @@ def doctor() -> None:
     registry = Registry()
     loaded = registry.load_entry_points()
     typer.echo(f"plugins   {', '.join(loaded) if loaded else 'none installed'}")
-    for kind in PLUGIN_KINDS:
-        names = registry.names(kind)
+    for kind, names in registry.names().items():
         if names:
             typer.echo(f"  {kind:<9}{', '.join(names)}")
 

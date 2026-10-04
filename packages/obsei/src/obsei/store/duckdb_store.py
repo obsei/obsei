@@ -1,12 +1,4 @@
-"""DuckDB-backed feedback store: one file per deployment, encrypted at rest by default.
-
-Records are kept as their full JSON plus a few extracted columns for filtering, so the
-stored form always round-trips to the ``Record`` model. Re-ingesting an item is
-idempotent: ``upsert`` inserts new records, updates changed ones and skips the rest.
-
-DuckDB allows a single writer process. Run ingestion from one process (``obsei serve``
-or a single ``obsei run``) and open the store read-only everywhere else.
-"""
+"""Single-file DuckDB store, encrypted at rest by default. DuckDB allows one writer process."""
 
 from __future__ import annotations
 
@@ -17,7 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Self
+from typing import Self, TypeAlias
 
 import duckdb
 
@@ -28,7 +20,12 @@ DB_KEY_ENV_VAR = "OBSEI_DB_KEY"
 MIN_KEY_LENGTH = 16
 _ALIAS = "obsei"
 
-#: Ordered schema migrations. Never edit a released entry; append a new one instead.
+RecordRow: TypeAlias = tuple[str, str, str, datetime, str, str | None, str, str]
+InsertRow: TypeAlias = tuple[str, str, str, datetime, str, str | None, str, str, datetime, datetime]
+UpdateRow: TypeAlias = tuple[str, str, datetime, str, str | None, str, str, datetime, str]
+SqlParam: TypeAlias = str | int | datetime
+
+# Append-only: never edit a released migration.
 MIGRATIONS: tuple[str, ...] = (
     """
     CREATE TABLE records (
@@ -56,11 +53,11 @@ MIGRATIONS: tuple[str, ...] = (
 
 
 class StoreError(Exception):
-    """The store could not be opened or used."""
+    pass
 
 
 class EncryptionUnavailableError(StoreError):
-    """DuckDB cannot write encrypted files because its OpenSSL-backed extension is missing."""
+    pass
 
 
 @dataclass(frozen=True)
@@ -71,7 +68,6 @@ class UpsertResult:
 
 
 def load_db_key(env_var: str = DB_KEY_ENV_VAR) -> str | None:
-    """Read the database encryption key from the environment, if set."""
     key = os.environ.get(env_var) or None
     if key is not None and len(key) < MIN_KEY_LENGTH:
         raise StoreError(f"{env_var} must be at least {MIN_KEY_LENGTH} characters")
@@ -84,17 +80,12 @@ def _sql_literal(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
 
 
-def _comparable(record: Record) -> dict[str, Any]:
-    # fetched_at changes on every fetch, so it doesn't count as a content change.
-    return record.model_dump(mode="json", exclude={"fetched_at"})
+def _comparable(record: Record) -> str:
+    return record.model_dump_json(exclude={"fetched_at"})
 
 
 class Store:
-    """A feedback store backed by a single DuckDB file (or memory for tests).
-
-    Pass ``encryption_key`` to encrypt at rest. Without a key you must set
-    ``allow_unencrypted=True``, e.g. when the disk itself is encrypted.
-    """
+    """Without ``encryption_key`` you must pass ``allow_unencrypted=True`` (e.g. encrypted disk)."""
 
     def __init__(
         self,
@@ -134,8 +125,6 @@ class Store:
         except BaseException:
             self._con.close()
             raise
-
-    # -- lifecycle -----------------------------------------------------------------
 
     def close(self) -> None:
         self._con.close()
@@ -206,10 +195,8 @@ class Store:
         ).fetchone()
         return int(row[0]) if row else 0
 
-    # -- records -------------------------------------------------------------------
-
     def upsert(self, records: Iterable[Record]) -> UpsertResult:
-        """Insert new records, update changed ones, skip identical ones. Idempotent by id."""
+        """Idempotent by id; a refetch that only changes ``fetched_at`` counts as unchanged."""
         batch: dict[str, Record] = {r.id: r for r in records}
         if not batch:
             return UpsertResult()
@@ -220,15 +207,15 @@ class Store:
             ).fetchall()
         }
         now = datetime.now(UTC)
-        inserts: list[list[Any]] = []
-        updates: list[list[Any]] = []
+        inserts: list[InsertRow] = []
+        updates: list[UpdateRow] = []
         unchanged = 0
         for record in batch.values():
             previous = existing.get(record.id)
             if previous is None:
-                inserts.append([*self._row(record), now, now])
+                inserts.append((*self._row(record), now, now))
             elif _comparable(previous) != _comparable(record):
-                updates.append([*self._row(record)[1:], now, record.id])
+                updates.append((*self._row(record)[1:], now, record.id))
             else:
                 unchanged += 1
         self._con.execute("BEGIN TRANSACTION")
@@ -251,8 +238,8 @@ class Store:
         return UpsertResult(inserted=len(inserts), updated=len(updates), unchanged=unchanged)
 
     @staticmethod
-    def _row(record: Record) -> list[Any]:
-        return [
+    def _row(record: Record) -> RecordRow:
+        return (
             record.id,
             record.source.type,
             record.source.instance,
@@ -261,7 +248,7 @@ class Store:
             record.author.pseudonym if record.author else None,
             record.purpose,
             record.model_dump_json(),
-        ]
+        )
 
     def get(self, record_id: str) -> Record | None:
         row = self._con.execute("SELECT data FROM records WHERE id = ?", [record_id]).fetchone()
@@ -284,9 +271,8 @@ class Store:
         limit: int | None = None,
         batch_size: int = 500,
     ) -> Iterator[Record]:
-        """Yield records ordered by creation time, optionally filtered."""
         clauses: list[str] = []
-        params: list[Any] = []
+        params: list[SqlParam] = []
         if source_type is not None:
             clauses.append("source_type = ?")
             params.append(source_type)
@@ -306,8 +292,6 @@ class Store:
         while rows := result.fetchmany(batch_size):
             for (data,) in rows:
                 yield Record.model_validate_json(data)
-
-    # -- cursors -------------------------------------------------------------------
 
     def get_cursor(self, pipeline: str, source: str) -> Cursor | None:
         row = self._con.execute(
