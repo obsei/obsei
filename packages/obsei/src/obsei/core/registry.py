@@ -10,12 +10,13 @@ from collections.abc import Callable, Collection, Iterable
 from importlib.metadata import EntryPoint, entry_points
 from typing import Literal, TypeAlias, TypeVar
 
+from obsei.core.plugin import Factory
 from obsei.core.protocols import Enricher, Sink, Source
 
 PluginKind: TypeAlias = Literal["source", "enricher", "sink"]
 ENTRY_POINT_GROUP = "obsei.plugins"
 
-_P = TypeVar("_P", type[Source], type[Enricher], type[Sink])
+_P = TypeVar("_P", Factory[Source], Factory[Enricher], Factory[Sink])
 RegisterHook: TypeAlias = Callable[["Registry"], None]
 Discover: TypeAlias = Callable[[str], Iterable[EntryPoint]]
 
@@ -49,27 +50,27 @@ def _get(table: dict[str, _P], kind: PluginKind, name: str) -> _P:
 
 class Registry:
     def __init__(self) -> None:
-        self._sources: dict[str, type[Source]] = {}
-        self._enrichers: dict[str, type[Enricher]] = {}
-        self._sinks: dict[str, type[Sink]] = {}
+        self._sources: dict[str, Factory[Source]] = {}
+        self._enrichers: dict[str, Factory[Enricher]] = {}
+        self._sinks: dict[str, Factory[Sink]] = {}
         self.loaded_entry_points: list[str] = []
 
-    def add_source(self, name: str, plugin: type[Source], *, replace: bool = False) -> None:
+    def add_source(self, name: str, plugin: Factory[Source], *, replace: bool = False) -> None:
         _add(self._sources, "source", name, plugin, replace)
 
-    def add_enricher(self, name: str, plugin: type[Enricher], *, replace: bool = False) -> None:
+    def add_enricher(self, name: str, plugin: Factory[Enricher], *, replace: bool = False) -> None:
         _add(self._enrichers, "enricher", name, plugin, replace)
 
-    def add_sink(self, name: str, plugin: type[Sink], *, replace: bool = False) -> None:
+    def add_sink(self, name: str, plugin: Factory[Sink], *, replace: bool = False) -> None:
         _add(self._sinks, "sink", name, plugin, replace)
 
-    def source(self, name: str) -> type[Source]:
+    def source(self, name: str) -> Factory[Source]:
         return _get(self._sources, "source", name)
 
-    def enricher(self, name: str) -> type[Enricher]:
+    def enricher(self, name: str) -> Factory[Enricher]:
         return _get(self._enrichers, "enricher", name)
 
-    def sink(self, name: str) -> type[Sink]:
+    def sink(self, name: str) -> Factory[Sink]:
         return _get(self._sinks, "sink", name)
 
     def names(self) -> dict[PluginKind, list[str]]:

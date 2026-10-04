@@ -40,11 +40,16 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    "defusedxml>=0.7.1,<1",
     "duckdb>=1.5.6,<2",
     "httpx>=0.28,<1",
     "pydantic>=2.9,<3",
+    "pyyaml>=6.0.2,<7",
     "typer>=0.15,<1",
 ]
+
+[project.optional-dependencies]
+google = ["google-auth[requests]>=2.30,<3"]
 
 [project.urls]
 Homepage = "https://obsei.com"
