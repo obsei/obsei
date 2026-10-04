@@ -50,3 +50,12 @@
   --sl-card-border: var(--sl-color-accent);
   --sl-card-bg: var(--sl-color-accent-low);
 }
+
+.site-title img {
+  height: 2.1rem;
+  width: auto;
+}
+
+.hero img {
+  max-width: 18rem;
+}

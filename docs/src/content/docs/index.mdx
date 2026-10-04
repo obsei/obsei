@@ -4,9 +4,10 @@ description: Open-source, self-hosted, AI-native Voice of Customer that never le
 template: splash
 hero:
   title: Voice of Customer without violating privacy
-  tagline: Collect feedback from every channel and language, remove personal data before it is stored, and let your AI agents answer questions with cited evidence. All inside your own infrastructure.
+  tagline: Understand feedback from every channel and language. Personal data is gone before anything is stored.
   image:
-    file: ../../assets/logo.png
+    light: ../../assets/logo-light.svg
+    dark: ../../assets/logo-dark.svg
     alt: obsei logo
   actions:
     - text: Quickstart
@@ -22,27 +23,29 @@ hero:
 ---
 
 import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import Pipeline from "../../components/Pipeline.astro";
+
+## How it works
+
+<Pipeline />
+
+Everything inside the dashed box runs on your machines. Read [how obsei works](/how-it-works/) for
+what each step does and who can see what.
 
 ## Why obsei
 
 <CardGrid>
   <Card title="Private by design" icon="approve-check">
-    Checksum-validated PII redaction for the Americas, Europe, Asia-Pacific, India and Africa in
-    any script, optional name redaction, pseudonymous authors, an encrypted database and
-    air-gapped egress by default.
+    Redaction at ingest, pseudonymous authors, an encrypted database, air-gapped by default.
   </Card>
   <Card title="Bring your own" icon="puzzle">
-    App stores, helpdesks, calls, SQL warehouses, webhooks, communities and any REST or MCP
-    source. Any OpenAI-compatible model, from Ollama to Azure OpenAI, or Bedrock and Vertex via
-    LiteLLM.
+    Your sources, your keys and any OpenAI-compatible model, from Ollama to Azure OpenAI.
   </Card>
   <Card title="AI-native" icon="rocket">
-    A read-only MCP server and a Claude plugin, so agents answer "what are customers saying?"
-    with quotes and record ids, never author identities.
+    A read-only MCP server: agents answer with quotes and record ids, never identities.
   </Card>
   <Card title="Every language" icon="translate">
-    Feedback is classified and quoted in its own language; a local multilingual model groups the
-    same issue across 50+ languages.
+    Classified and quoted in its own language, grouped across languages into themes.
   </Card>
 </CardGrid>
 
@@ -50,9 +53,9 @@ import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <CardGrid>
   <LinkCard title="Quickstart" description="Install, run the ten-language sample and ask your first question." href="/quickstart/" />
-  <LinkCard title="Configuration" description="Pipelines, scheduling, privacy and models in obsei.yaml." href="/configuration/" />
+  <LinkCard title="How it works" description="The pipeline, the trust boundary and who sees what." href="/how-it-works/" />
   <LinkCard title="Sources and sinks" description="Every built-in connector and how to map your own data." href="/guides/sources/" />
-  <LinkCard title="Privacy controls" description="Redaction by region, pseudonyms, erasure, retention and the audit log." href="/privacy/overview/" />
+  <LinkCard title="Privacy controls" description="Redaction by region, pseudonyms, erasure, retention and audit." href="/privacy/overview/" />
   <LinkCard title="MCP and agents" description="Connect Claude, ChatGPT, Cursor and your own agents." href="/guides/mcp/" />
-  <LinkCard title="Server and access" description="Webhooks, scheduling, Studio, SSO and roles with obsei serve." href="/guides/serve/" />
+  <LinkCard title="Server and access" description="Webhooks, scheduling, Studio, SSO and roles." href="/guides/serve/" />
 </CardGrid>
