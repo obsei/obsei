@@ -70,17 +70,22 @@ quickstart (lines marked `x-release-please-version`).
 
 ## For maintainers: websites
 
-obsei.com (`website/`, static, no build) and docs.obsei.com (`docs/`, Astro Starlight, which also
-serves the Studio demo at `/demo/`) are Cloudflare Pages projects connected to this repository. Each
-deploys on push to `master` and gives every pull request a preview URL.
+obsei.com (`website/`, static, no build), docs.obsei.com (`docs/`, Astro Starlight, which also
+serves the Studio demo at `/demo/`) and blog.obsei.com (`blog/`, Astro with MDX) are Cloudflare
+Pages projects connected to this repository. Each deploys on push to `master` and gives every pull
+request a preview URL.
 
-| Setting | `obsei-docs` | `obsei-site` |
-| --- | --- | --- |
-| Root directory | `docs` | `website` |
-| Build command | `npm ci && npm run build` | `exit 0` |
-| Output directory | `dist` | `.` |
-| Variables | `NODE_VERSION=22` | |
-| Custom domains | `docs.obsei.com` | `obsei.com`, `www.obsei.com` |
+| Setting | `obsei-docs` | `obsei-site` | `obsei-blog` |
+| --- | --- | --- | --- |
+| Root directory | `docs` | `website` | `blog` |
+| Build command | `npm ci && npm run build` | `exit 0` | `npm ci && npm run build` |
+| Output directory | `dist` | `.` | `dist` |
+| Variables | `NODE_VERSION=22` | | `NODE_VERSION=22` |
+| Custom domains | `docs.obsei.com` | `obsei.com`, `www.obsei.com` | `blog.obsei.com` |
+
+Each site sets its security headers in `_headers` (`website/_headers`, `docs/public/_headers`,
+`blog/public/_headers`). The website and blog ship no JavaScript, so their Content-Security-Policy
+allows no scripts; JSON-LD blocks are data and are not affected.
 
 Vector logos (full and mark, light and dark) are in `docs/public/brand/`, served at
 https://docs.obsei.com/brand/obsei-logo.svg and similar. Brand colours come from the logo: teal `#238a91` (text `#1b7a80`) and blue `#1a6d9d`; on dark
@@ -92,3 +97,40 @@ For a demo whose themes span languages, use the multilingual model:
 uv run --extra embeddings obsei models download
 uv run --extra embeddings obsei demo --embedder local --out docs/public/demo
 ```
+
+The social images `website/og.png` and `docs/public/og.png` are rendered from the `og.svg` next to
+them (1200x630); the blog renders its own at build time.
+
+### Writing a blog post
+
+We aim for one post a week: practical guides, analyses of how themes shift across companies and
+domains, and experiments with new models. Preview with `cd blog && npm ci && npm run dev`.
+
+1. Add `blog/src/content/posts/<slug>.mdx`. The file name is the URL: `blog.obsei.com/<slug>/`.
+2. Start with frontmatter:
+
+   ```yaml
+   ---
+   title: "Short, specific title"          # up to 100 characters
+   description: "One or two sentences."   # meta description, cards and RSS; up to 300 characters
+   pubDate: 2026-10-12
+   updatedDate: 2026-10-20                # optional, for meaningful edits
+   author: Lalit Pagaria                  # authors with a profile link live in blog/src/consts.ts
+   tags: [guide, privacy]                 # lowercase, hyphenated; each gets a /tags/<tag>/ page
+   cover: ./<slug>/cover.svg              # 1200x630, SVG preferred (PNG/JPEG/WebP also work)
+   coverAlt: "What the cover shows"
+   draft: false                           # true hides the post from production builds
+   ---
+   ```
+
+3. Put the cover and any images in `blog/src/content/posts/<slug>/`. Copy an existing `cover.svg`
+   and change the text: the build renders it to `/og/<slug>.png` for social cards with the Inter
+   subset in `blog/og-fonts/`, so keep cover text to Latin characters.
+4. Figures are Astro components in `blog/src/components/figures/`. Import them in the MDX with a
+   relative path (`import Timeline from "../../components/figures/Timeline.astro";`) and use them
+   as `<Timeline />`. Use HTML and CSS or inline SVG with the brand tokens from
+   `blog/src/styles/global.css`, no inline `style` attributes and no scripts (the CSP blocks
+   both), wrap the drawing in `role="img"` with a full `aria-label`, add a `<figcaption>`, and
+   check it at 390px wide in light and dark.
+5. Code blocks are highlighted with Prism at build time (classes only, CSP-safe).
+6. Run `npm run build` and open a pull request; Cloudflare posts a preview link.

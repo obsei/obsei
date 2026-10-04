@@ -17,6 +17,9 @@ keywords = [
     "customer-feedback",
     "feedback-analytics",
     "privacy",
+    "pii-redaction",
+    "sentiment-analysis",
+    "multilingual",
     "self-hosted",
     "mcp",
     "ai-agents",
@@ -27,6 +30,8 @@ keywords = [
 ]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Customer Service",
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
     "Operating System :: OS Independent",
@@ -36,7 +41,9 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Topic :: Office/Business",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
     "Typing :: Typed",
 ]
 dependencies = [
@@ -65,6 +72,7 @@ embeddings = ["fastembed>=0.8,<1"]
 [project.urls]
 Homepage = "https://obsei.com"
 Documentation = "https://docs.obsei.com"
+Blog = "https://blog.obsei.com"
 Repository = "https://github.com/obsei/obsei"
 Issues = "https://github.com/obsei/obsei/issues"
 Changelog = "https://github.com/obsei/obsei/blob/master/packages/obsei/CHANGELOG.md"
