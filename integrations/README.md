@@ -3,7 +3,7 @@
 | Integration | Path | How to use |
 | --- | --- | --- |
 | Claude Code plugin (MCP server and `voice-of-customer` skill) | [`claude/obsei`](claude/obsei), listed in [`../.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json) | `/plugin marketplace add obsei/obsei`, then `/plugin install obsei@obsei` |
-| Any MCP client over stdio (Claude Desktop, ChatGPT, Cursor, VS Code, your agents) | `obsei mcp` | command: `uvx --from 'obsei[mcp]>=1.0.0a1' obsei mcp` (config below) |
+| Any MCP client over stdio (Claude Desktop, ChatGPT, Cursor, VS Code, your agents) | `obsei mcp` | command: `uvx --from 'obsei[mcp]>=1.0.0rc1' obsei mcp` (config below) |
 | Remote MCP over HTTP | `obsei serve` | `https://your-host:8765/mcp` with `Authorization: Bearer <token>` (analyst role), or behind your SSO proxy |
 | GitHub Action | [`../action.yml`](../action.yml) | `uses: obsei/obsei@<tag or SHA>`; daily recipe in [`../examples/github-actions`](../examples/github-actions) |
 | Slack `/obsei` command | `obsei serve` | slash command URL `https://your-host/slack/commands`, `SLACK_SIGNING_SECRET` set, `hooks.slack.com` allowed by the egress policy |
@@ -21,7 +21,7 @@ Claude Desktop (`claude_desktop_config.json`):
   "mcpServers": {
     "obsei": {
       "command": "uvx",
-      "args": ["--from", "obsei[mcp]>=1.0.0a1", "obsei", "mcp"],
+      "args": ["--from", "obsei[mcp]>=1.0.0rc1", "obsei", "mcp"],
       "env": { "OBSEI_DB": "/path/to/obsei.duckdb", "OBSEI_DB_KEY": "..." }
     }
   }

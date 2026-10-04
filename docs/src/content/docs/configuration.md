@@ -107,7 +107,8 @@ unsupported answers, so use a 4B or larger decision model (Kev-4B, lev, Clef-Fla
 1. Each source resumes from its saved cursor and yields records.
 2. Records are redacted, then compared with the stored copy; unchanged records stop here.
 3. Enrichers label new or changed records; a `filter` with `action: drop` removes records here.
-4. Every sink receives the batch. Only then is the batch stored and the cursor advanced, so a
+4. Records go to sinks: with a [`route:`](/guides/routing/), each sink a route names gets only the
+   records routed to it, and every other sink gets the batch through its own `when`. Only then is the batch stored and the cursor advanced, so a
    failed run retries the same batch (at-least-once; sinks are idempotent by record id).
 
 A failing pipeline is reported and the others still run; `obsei run` then exits with status 1.

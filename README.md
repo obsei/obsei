@@ -30,8 +30,9 @@ send that text to another SaaS or a public LLM. obsei runs entirely inside your 
 
 - **Private by design.** PII is redacted (and optionally names) and authors are pseudonymised at
   ingest. Encrypted database, air-gapped by default, no telemetry, erasure and an audit log built in.
-- **Bring your own.** Your sources, your keys and your model: Ollama, vLLM, Azure OpenAI, OpenAI, or
-  Bedrock and Vertex through LiteLLM.
+- **Bring your own.** Your sources, your keys and your model: Ollama, vLLM, Azure OpenAI, OpenAI,
+  Bedrock and Vertex through LiteLLM, or a small local decision model such as Julia-1 for fast labels
+  with probabilities.
 - **AI-native.** A read-only MCP server and a Claude plugin, so agents answer questions about
   customers with cited, privacy-filtered evidence.
 - **Every language.** Feedback is classified and quoted in its own language. With
@@ -42,13 +43,13 @@ obsei provides controls that *support* compliance with laws such as the GDPR, In
 Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain the data controller.
 
 > [!NOTE]
-> 1.0 is a new codebase, not compatible with 0.0.x, and is in pre-release: install it with the `>=1.0.0a1` specifier.
+> 1.0 is a new codebase, not compatible with 0.0.x, and is in pre-release: install it with the `>=1.0.0rc1` specifier.
 > A plain `pip install obsei` still gives 0.0.15, whose code lives on the `legacy/0.0.x` branch.
 
 ## Quickstart
 
 ```bash
-uv tool install "obsei[mcp]>=1.0.0a1"   # or: pip install "obsei[mcp]>=1.0.0a1"
+uv tool install "obsei[mcp]>=1.0.0rc1"   # or: pip install "obsei[mcp]>=1.0.0rc1"
 mkdir voc && cd voc
 obsei init                             # obsei.yaml plus a 10-language sample dataset
 export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
@@ -60,15 +61,16 @@ obsei doctor                           # environment, encryption, egress mode, p
 
 Uncomment the `classify` enricher in `obsei.yaml` to label sentiment, intent and language with a
 local model (Ollama by default). Any OpenAI-compatible endpoint works: vLLM, llama.cpp, Azure
-OpenAI, OpenAI, Mistral, or a LiteLLM proxy for Bedrock and Vertex. Public endpoints are refused
+OpenAI, OpenAI, Mistral, or a LiteLLM proxy for Bedrock and Vertex; a [decision
+model](https://docs.obsei.com/guides/models/#decision-models) on llama.cpp labels on a CPU. Public endpoints are refused
 until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`) or `hybrid`.
 
 | | Built in |
 | --- | --- |
 | Sources | CSV, JSON Lines, declarative REST, webhooks, App Store (any country), App Store Connect, Google Play (official API), GitHub issues, Hacker News, Bluesky, YouTube, RSS/Atom, SQL databases and warehouses, file drops, IMAP mailboxes, any MCP server, Zendesk, Freshdesk, Intercom, Gong; Reddit as an unpublished community plugin (install from Git) |
-| Enrichers | LLM classification (sentiment, intent, language, custom fields), cascade to a stronger model on low confidence |
-| Sinks | Webhook (HMAC-signed), Slack, GitHub issues, Jira, Linear, Parquet, SQL databases and warehouses |
-| Analysis | Stable themes (offline, or multilingual with `obsei[embeddings]`) with near-duplicate detection, k-anonymous views, `obsei ask` with cited answers, read-only Studio with a knowledge-graph explorer ([demo](https://docs.obsei.com/demo/)), Slack `/obsei` command |
+| Enrichers | Classification with a decision model (Julia-1, Clef) or an LLM: sentiment, intent, language and custom choice, score and yes/no fields with confidence; low-confidence answers go to a stronger model or human review; `filter` drops or tags spam and off-topic records |
+| Sinks | Webhook (HMAC-signed), Slack, GitHub issues, Jira, Linear, Parquet, SQL databases and warehouses; ordered routes on labels, confidence and scores ([routing](https://docs.obsei.com/guides/routing/)) |
+| Analysis | Stable themes (offline, or multilingual with `obsei[embeddings]`) with near-duplicate detection, k-anonymous views, `obsei ask` with cited answers and an optional grounding judge, read-only Studio with a knowledge-graph explorer and privacy, decisions, trends and routes panels ([demo](https://docs.obsei.com/demo/)), Slack `/obsei` command |
 | Privacy | Checksum-validated PII redaction for the Americas, Europe, UK, Asia-Pacific, India and Africa in any script; optional name redaction (`obsei[names]`); salted author pseudonyms; encrypted DuckDB; `obsei forget`, `obsei export` and `obsei audit` |
 | Server | `obsei serve`: scheduled pipelines, signed webhook intake, MCP over HTTP, Studio, role-based access and SSO-proxy support |
 
@@ -76,7 +78,8 @@ Agents: `obsei mcp` serves read-only MCP tools; the Claude Code plugin is
 `/plugin marketplace add obsei/obsei`. See the [docs](https://docs.obsei.com/) and
 [integrations](integrations/README.md).
 
-Examples: ready-to-run configs for app reviews in many countries, helpdesks, social listening,
+Examples: ready-to-run configs for app reviews in many countries, helpdesks, support-ticket triage
+with a decision model and routes, social listening,
 REST APIs (Trustpilot, HubSpot, ServiceNow, Mastodon), warehouses, mailboxes and air-gapped
 enterprise setups are in the [examples gallery](https://docs.obsei.com/examples/).
 
@@ -91,9 +94,9 @@ docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
 
 ## Roadmap
 
-Phases 0.1 to 0.4 (private core, MCP and Claude plugin, enterprise bring-your-own, themes and
-Studio) are in the 1.0 pre-releases. Next: live-connector validation, a release candidate, then the
-1.0.0 launch. See [ROADMAP.md](ROADMAP.md).
+Phases 0.1 to 0.5 (private core, MCP and Claude plugin, enterprise bring-your-own, themes and
+Studio, decision models and routing) are in the first release candidate, `1.0.0rc1`. Next:
+live-connector validation, further release candidates as needed, then the 1.0.0 launch. See [ROADMAP.md](ROADMAP.md).
 
 ## Contributing
 

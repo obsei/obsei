@@ -86,7 +86,7 @@ More complete setups are on the [Examples](/examples/) page.
 ```bash
 pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 # or, with uv tool:
-uv tool install "obsei[mcp]>=1.0.0a1" \
+uv tool install "obsei[mcp]>=1.0.0rc1" \
   --with "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 ```
 

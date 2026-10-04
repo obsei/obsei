@@ -9,7 +9,7 @@ sidebar:
 
 | Tool | Use |
 | --- | --- |
-| `feedback_stats` | Counts and average rating grouped by source, instance, sentiment, intent, language, rating, route, day, week or month |
+| `feedback_stats` | Counts and average rating grouped by source, instance, sentiment, intent, lang (language), rating, route, day, week or month |
 | `search_feedback` | Matching feedback, newest first, as citable evidence |
 | `get_feedback` | One record by id, to verify a citation |
 | `list_themes` | Stable themes with trends, sources, languages and intents (k-anonymous) |
@@ -33,7 +33,7 @@ The plugin adds the MCP server and a `voice-of-customer` skill.
   "mcpServers": {
     "obsei": {
       "command": "uvx",
-      "args": ["--from", "obsei[mcp]>=1.0.0a1", "obsei", "mcp"],
+      "args": ["--from", "obsei[mcp]>=1.0.0rc1", "obsei", "mcp"],
       "env": { "OBSEI_DB": "/path/to/obsei.duckdb", "OBSEI_DB_KEY": "..." }
     }
   }

@@ -51,7 +51,7 @@ A plugin exposes a `register(registry)` hook through the `obsei.plugins` entry p
 ```toml
 [project]
 name = "obsei-example"
-dependencies = ["obsei>=1.0.0a1,<2"]
+dependencies = ["obsei>=1.0.0rc1,<2"]
 
 [project.entry-points."obsei.plugins"]
 example = "obsei_example:register"

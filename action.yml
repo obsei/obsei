@@ -13,7 +13,7 @@ inputs:
     default: ""
   version:
     description: obsei version to install (a PEP 440 specifier).
-    default: ">=1.0.0a1"
+    default: ">=1.0.0rc1"
   extras:
     description: Optional extras, e.g. "google,apple".
     default: ""
@@ -31,7 +31,7 @@ runs:
         OBSEI_SPEC: ${{ inputs.version }}
         OBSEI_EXTRAS: ${{ inputs.extras }}
       run: |
-        package="obsei${OBSEI_EXTRAS:+[$OBSEI_EXTRAS]}${OBSEI_SPEC:->=1.0.0a1}"
+        package="obsei${OBSEI_EXTRAS:+[$OBSEI_EXTRAS]}${OBSEI_SPEC:->=1.0.0rc1}"
         export OBSEI_DUCKDB_EXTENSIONS="$RUNNER_TEMP/duckdb-extensions"
         uvx --from "$package" python -c \
           "import duckdb, os; duckdb.connect(config={'extension_directory': os.environ['OBSEI_DUCKDB_EXTENSIONS']}).execute('INSTALL httpfs')"
