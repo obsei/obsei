@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from obsei import Author, Record, SourceRef
+from obsei import Author, Record, SourceRef, studio
 from obsei.ask import ask
 from obsei.llm.client import ChatMessage, JsonSchema
 from obsei.llm.embed import HashingEmbedder
@@ -97,7 +97,7 @@ def test_erasure_cascades_to_embeddings_and_themes(store: Store) -> None:
     store.delete(author_pseudonym=f"psn_{10:032x}")
     assert store.pending_embeddings(HashingEmbedder().model, 100) == []
     assert sum(t.size for t in store.theme_summaries()) == len(TEXTS) - 1
-    graph = store.graph(min_size=5)
+    graph = store.graph(min_size=2)
     kinds = {n.kind for n in graph.nodes}
     assert {"theme", "source"} <= kinds
     assert all(e.weight > 0 for e in graph.edges)
@@ -143,3 +143,74 @@ def test_erasure_removes_the_record_from_the_theme_centroid() -> None:
     (remaining,) = embedder.embed([texts[1]])
     assert size == 1
     assert centroid == pytest.approx(remaining, abs=1e-6)
+
+
+def test_keyword_label_never_falls_back_to_verbatim_text() -> None:
+    samples = ["Paul Smith from Leeds hates checkout", "Terrible payment flow overall"]
+    assert keyword_label(samples, fallback="Theme abc123") == "Theme abc123"
+    store = Store(allow_unencrypted=True)
+    store.upsert(
+        [
+            Record(
+                source=SourceRef(type="csv", native_id=str(i)),
+                text=text,
+                created_at=NOW,
+            )
+            for i, text in enumerate(["Margaret Thatcher Road delivery", "Rodrigo Alvarez parcel"])
+        ]
+    )
+    update_themes(store, HashingEmbedder(), ThemesConfig(k_anonymity=2, similarity=0.01))
+    (theme,) = store.theme_summaries(min_size=2)
+    assert theme.label == f"Theme {theme.id.removeprefix('thm_')[:6]}"
+
+
+def test_k_anonymity_counts_people_not_records() -> None:
+    store = Store(allow_unencrypted=True)
+    one_person = Author(pseudonym="psn_" + "1" * 32)
+    store.upsert(
+        [
+            Record(
+                source=SourceRef(type="csv", native_id=f"same-{i}"),
+                text="I cannot log in to the app",
+                created_at=NOW,
+                author=one_person,
+                rating=1,
+            )
+            for i in range(6)
+        ]
+    )
+    config = ThemesConfig(k_anonymity=5)
+    update_themes(store, HashingEmbedder(), config)
+    assert store.theme_summaries(min_size=1)[0].size == 6
+    assert store.theme_summaries(min_size=5) == []
+    assert store.unlabeled_themes(5) == []
+    assert store.graph(min_size=5).nodes == []
+    assert studio.overview(store, k=5).by_source == []
+    assert [b.key for b in studio.overview(store, k=1).by_source] == ["csv"]
+
+
+def test_facets_and_ratings_from_fewer_than_k_people_are_suppressed() -> None:
+    store = Store(allow_unencrypted=True)
+    store.upsert(
+        [
+            Record(
+                source=SourceRef(type="appstore" if i < 5 else "zendesk", native_id=str(i)),
+                text="I cannot log in to the app",
+                created_at=NOW,
+                author=Author(pseudonym=f"psn_{i:032x}"),
+                lang="en" if i < 5 else "is",
+                rating=1 if i < 3 else None,
+            )
+            for i in range(6)
+        ]
+    )
+    update_themes(store, HashingEmbedder(), ThemesConfig(k_anonymity=5))
+    (theme,) = store.theme_summaries(min_size=5)
+    assert theme.sources == {"appstore": 5}
+    assert theme.languages == {"en": 5}
+    assert theme.avg_rating is None
+    targets = {e.target for e in store.graph(min_size=5).edges}
+    assert targets == {"source:appstore", "lang:en"}
+    (everything,) = store.theme_summaries(min_size=1)
+    assert everything.sources == {"appstore": 5, "zendesk": 1}
+    assert everything.avg_rating == 1

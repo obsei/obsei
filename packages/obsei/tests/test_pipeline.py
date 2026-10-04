@@ -247,3 +247,14 @@ def test_store_lock_is_free_while_fetching_enriching_and_delivering(store: Store
     probe = pipeline(ProbeSource(["a", "b"]), sinks=[ProbeSink()], enrichers=[ProbeEnricher()])
     assert run(probe, store, lock=lock).stored == 2
     assert observed == [True, True, True, True]
+
+
+def test_erased_records_are_not_refetched_enriched_or_delivered(store: Store) -> None:
+    source = ListSource(["a", "b"], honour_cursor=False)
+    run(pipeline(source), store)
+    assert store.delete(source_type="list") == 2
+    sink, enricher = MemorySink(), LengthEnricher()
+    report = run(pipeline(source, sinks=[sink], enrichers=[enricher]), store)
+    assert report.fetched == 2
+    assert (report.stored, enricher.calls, sink.received) == (0, 0, [])
+    assert store.count() == 0

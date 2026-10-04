@@ -26,6 +26,7 @@ RULES: tuple[tuple[str, Role], ...] = (
 )
 AUDITED: frozenset[Role] = frozenset({"analyst", "admin"})
 MIN_SECRET = 16
+ADMIN_TOKEN_ENV_VAR = "OBSEI_API_TOKEN"  # noqa: S105
 
 
 class UserToken(BaseModel):
@@ -58,6 +59,11 @@ class AccessConfig(BaseModel):
 
     users: list[UserToken] = Field(default_factory=list)
     trusted_proxy: TrustedProxy | None = None
+    allowed_hosts: list[str] = Field(
+        default_factory=list,
+        description="Extra Host names 'obsei serve' answers to, besides localhost and the bind "
+        "address (DNS-rebinding protection); '*.example.com' matches subdomains.",
+    )
 
 
 class AccessError(RuntimeError):
@@ -70,11 +76,47 @@ class Principal:
     role: Role
 
 
+LOCAL_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
+WILDCARD_BINDS = frozenset({"0.0.0.0", "::", ""})  # noqa: S104
+
+
+def host_name(header: str) -> str:
+    """The name in a Host or Origin authority: no port, no IPv6 brackets, lower case."""
+    authority = header.rpartition("://")[2].strip().lower()
+    if authority.startswith("["):
+        return authority[1:].partition("]")[0]
+    if authority.count(":") > 1:
+        return authority
+    return authority.partition(":")[0].rstrip(".")
+
+
+class HostAllowlist:
+    """Host header validation against DNS rebinding. When bound to all interfaces without
+    ``allowed_hosts`` any Host is accepted (a token or SSO proxy is then required anyway)."""
+
+    def __init__(self, bind: str, extra: list[str]) -> None:
+        self.enabled = bind not in WILDCARD_BINDS or bool(extra)
+        self.hosts = {*LOCAL_HOSTS, host_name(bind), *(h.lower() for h in extra)}
+
+    def allows(self, header: str) -> bool:
+        if not self.enabled:
+            return True
+        name = host_name(header)
+        return bool(name) and any(
+            name == h or (h.startswith("*.") and name.endswith(h[1:])) for h in self.hosts
+        )
+
+
 def required_role(path: str) -> Role | None:
     """None for public paths (they authenticate themselves) and unknown paths."""
     if path.startswith(PUBLIC_PATHS):
         return None
     return next((role for prefix, role in RULES if path.startswith(prefix)), "admin")
+
+
+def same_secret(given: str, expected: str) -> bool:
+    """Constant-time comparison that is also safe for non-ASCII input."""
+    return hmac.compare_digest(given.encode(), expected.encode())
 
 
 def _secret(env: str) -> str:
@@ -90,6 +132,10 @@ class Authenticator:
             (_secret(u.token_env), Principal(u.name, u.role)) for u in config.users
         ]
         if admin_token:
+            if len(admin_token) < MIN_SECRET:
+                raise AccessError(
+                    f"{ADMIN_TOKEN_ENV_VAR} must be a secret of at least {MIN_SECRET} characters"
+                )
             self.tokens.append((admin_token, Principal("admin", "admin")))
         self.proxy = config.trusted_proxy
         self.proxy_secret = _secret(self.proxy.secret_env) if self.proxy else ""
@@ -105,7 +151,7 @@ class Authenticator:
         headers = {k.lower(): v for k, v in headers.items()}
         given = headers.get(proxy.secret_header.lower(), "")
         user = headers.get(proxy.user_header.lower(), "").strip()
-        if not given or not hmac.compare_digest(given, self.proxy_secret) or not user:
+        if not given or not same_secret(given, self.proxy_secret) or not user:
             return None
         groups = {g.strip() for g in headers.get(proxy.groups_header.lower(), "").split(",")}
         granted = [role for role, names in proxy.roles.items() if groups & set(names)]
@@ -118,7 +164,7 @@ class Authenticator:
         if header.startswith("Bearer "):
             token = header.removeprefix("Bearer ")
             for secret, principal in self.tokens:
-                if hmac.compare_digest(token, secret):
+                if same_secret(token, secret):
                     return principal
             return None
         return self._from_proxy(headers)

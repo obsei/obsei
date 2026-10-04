@@ -32,7 +32,7 @@ def verify(
         raise SlackSignatureError("stale request")
     base = b"v0:" + timestamp.encode() + b":" + body
     expected = "v0=" + hmac.new(secret, base, hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(expected, signature):
+    if not hmac.compare_digest(expected.encode(), signature.encode()):
         raise SlackSignatureError("invalid signature")
 
 

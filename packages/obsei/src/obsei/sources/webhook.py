@@ -82,7 +82,7 @@ class WebhookSource:
             return
         expected = "sha256=" + hmac.new(self.secret, body, hashlib.sha256).hexdigest()
         given = next((headers[h] for h in SIGNATURE_HEADERS if h in headers), "")
-        if not hmac.compare_digest(expected, given):
+        if not hmac.compare_digest(expected.encode(), given.encode()):
             raise SignatureError("invalid or missing signature")
 
     def parse(self, payload: JsonValue) -> Delivery:

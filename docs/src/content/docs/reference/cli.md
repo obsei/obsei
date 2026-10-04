@@ -16,7 +16,7 @@ description: obsei command reference.
 | `obsei mcp` | MCP server over stdio (read-only) |
 | `obsei serve [--host] [--port] [--db]` | Webhook intake, MCP over HTTP, `/healthz` |
 | `obsei export --author HANDLE [--out FILE]` | Export one author's records |
-| `obsei forget --author / --source / --older-than-days` | Erase records |
+| `obsei forget --author / --source / --older-than-days [-c CONFIG]` | Erase records (store from config; tombstoned) |
 | `obsei audit` | Show the erasure and export log |
 | `obsei doctor` | Check environment, encryption, egress mode and plugins |
 | `obsei schema` | Print the Feedback Record JSON Schema |
@@ -28,6 +28,7 @@ description: obsei command reference.
 | `OBSEI_CONFIG` | Path to `obsei.yaml` |
 | `OBSEI_DB` | Database path override |
 | `OBSEI_DB_KEY` | Database encryption key (16+ characters) |
+| `OBSEI_DUCKDB_EXTENSIONS` | Directory with pre-installed DuckDB extensions (`httpfs`) |
 | `OBSEI_PSEUDONYM_SALT` | Author pseudonym salt (16+ characters) |
 | `OBSEI_EGRESS_MODE`, `OBSEI_EGRESS_ALLOW` | Egress policy |
 | `OBSEI_API_TOKEN` | Bearer token for `obsei serve` |

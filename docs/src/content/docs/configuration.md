@@ -13,6 +13,7 @@ version: 1
 store:
   path: obsei.duckdb        # OBSEI_DB overrides
   unencrypted: false        # true only on an encrypted disk
+                            # air-gapped: pre-install httpfs, set OBSEI_DUCKDB_EXTENSIONS
 
 privacy:
   redact: true

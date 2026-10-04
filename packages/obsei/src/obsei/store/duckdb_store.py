@@ -16,9 +16,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record
-from obsei.store.themes import ThemeQueries
+from obsei.store.themes import PEOPLE, ThemeQueries
 
 DB_KEY_ENV_VAR = "OBSEI_DB_KEY"
+EXTENSIONS_ENV_VAR = "OBSEI_DUCKDB_EXTENSIONS"
 MIN_KEY_LENGTH = 16
 _ALIAS = "obsei"
 
@@ -83,6 +84,14 @@ MIGRATIONS: tuple[str, ...] = (
     );
     """,
     """
+    CREATE TABLE tombstones (
+        kind VARCHAR NOT NULL,
+        key VARCHAR NOT NULL,
+        erased_at TIMESTAMPTZ NOT NULL,
+        PRIMARY KEY (kind, key)
+    );
+    """,
+    """
     CREATE TABLE enrichment_retries (
         pipeline VARCHAR NOT NULL,
         source VARCHAR NOT NULL,
@@ -91,6 +100,7 @@ MIGRATIONS: tuple[str, ...] = (
     );
     """,
 )
+TombstoneKind: TypeAlias = Literal["record", "author"]
 
 
 GroupBy: TypeAlias = Literal[
@@ -162,6 +172,7 @@ class StatRow:
     key: str | None
     count: int
     avg_rating: float | None
+    people: int = 0
 
 
 class StoreError(Exception):
@@ -177,6 +188,7 @@ class UpsertResult:
     inserted: int = 0
     updated: int = 0
     unchanged: int = 0
+    erased: int = 0
 
 
 def load_db_key(env_var: str = DB_KEY_ENV_VAR) -> str | None:
@@ -184,6 +196,31 @@ def load_db_key(env_var: str = DB_KEY_ENV_VAR) -> str | None:
     if key is not None and len(key) < MIN_KEY_LENGTH:
         raise StoreError(f"{env_var} must be at least {MIN_KEY_LENGTH} characters")
     return key
+
+
+def connect() -> duckdb.DuckDBPyConnection:
+    """In-memory DuckDB that loads extensions from ``OBSEI_DUCKDB_EXTENSIONS`` when set."""
+    directory = os.environ.get(EXTENSIONS_ENV_VAR)
+    return duckdb.connect(config={"extension_directory": directory} if directory else {})
+
+
+def httpfs_installed() -> bool:
+    con = connect()
+    try:
+        row = con.execute(
+            "SELECT installed FROM duckdb_extensions() WHERE extension_name = 'httpfs'"
+        ).fetchone()
+    finally:
+        con.close()
+    return bool(row and row[0])
+
+
+PREINSTALL_HINT = (
+    "pre-install it once on a machine with network access: "
+    "python -c \"import duckdb; c = duckdb.connect(config={'extension_directory': "
+    "'/opt/duckdb/extensions'}); c.execute('INSTALL httpfs')\", then copy that directory to "
+    f"this machine (same DuckDB version and platform) and set {EXTENSIONS_ENV_VAR} to it"
+)
 
 
 def _sql_literal(value: str) -> str:
@@ -239,6 +276,7 @@ class Store(ThemeQueries):
         read_only: bool = False,
         install_extensions: bool = True,
     ) -> None:
+        """``install_extensions=False`` (air-gapped) never downloads DuckDB extensions."""
         if encryption_key is None and not allow_unencrypted:
             raise StoreError(
                 f"an encryption key is required: set {DB_KEY_ENV_VAR} or pass "
@@ -249,7 +287,7 @@ class Store(ThemeQueries):
         self.path = str(path)
         self.read_only = read_only
         self.encrypted = encryption_key is not None
-        self._con = duckdb.connect()
+        self._con = connect()
         try:
             if encryption_key is not None and not read_only:
                 self._load_crypto(install_extensions)
@@ -287,14 +325,21 @@ class Store(ThemeQueries):
         try:
             if install:
                 self._con.execute("INSTALL httpfs")
+            else:
+                self._con.execute("SET autoinstall_known_extensions = false")
             self._con.execute("LOAD httpfs")
         except duckdb.Error as exc:
+            if not install:
+                raise EncryptionUnavailableError(
+                    "writing an encrypted store needs DuckDB's httpfs extension (OpenSSL), which "
+                    f"is not installed, and air-gapped mode never downloads it ({exc}). To fix, "
+                    f"{PREINSTALL_HINT}; or use the obsei container image, or rely on disk "
+                    "encryption with store.unencrypted: true."
+                ) from None
             raise EncryptionUnavailableError(
                 "writing an encrypted store needs DuckDB's httpfs extension (OpenSSL), which "
-                f"could not be loaded: {exc}. Install it once with network access "
-                "(python -c \"import duckdb; duckdb.connect().execute('INSTALL httpfs')\"), "
-                "use the obsei container image, or rely on disk encryption with "
-                "allow_unencrypted=True."
+                f"could not be loaded: {exc}. To fix, {PREINSTALL_HINT}; or use the obsei "
+                "container image, or rely on disk encryption with allow_unencrypted=True."
             ) from None
 
     def _migrate(self) -> None:
@@ -346,19 +391,40 @@ class Store(ThemeQueries):
             ).fetchall()
         }
 
+    def _erased(self, batch: dict[str, Record]) -> set[str]:
+        """Ids in ``batch`` that were erased, by record or by author."""
+        authors = {r.author.pseudonym: r.id for r in batch.values() if r.author}
+        rows = self._con.execute(
+            "SELECT kind, key FROM tombstones WHERE (kind = 'record' AND list_contains(?, key)) "
+            "OR (kind = 'author' AND list_contains(?, key))",
+            [list(batch), list(authors)],
+        ).fetchall()
+        erased_authors = {str(key) for kind, key in rows if kind == "author"}
+        return {str(key) for kind, key in rows if kind == "record"} | {
+            r.id for r in batch.values() if r.author and r.author.pseudonym in erased_authors
+        }
+
     def changed(self, records: Iterable[Record]) -> list[Record]:
-        """New records, or records whose content differs from the stored copy."""
+        """New records, or records whose content differs from the stored copy. Erased records
+        and records by erased authors are never new again."""
         batch: dict[str, Record] = {r.id: r for r in records}
         stored = self._stored(list(batch))
+        erased = self._erased(batch)
         return [
-            r for r in batch.values() if r.id not in stored or _content(stored[r.id]) != _content(r)
+            r
+            for r in batch.values()
+            if r.id not in erased and (r.id not in stored or _content(stored[r.id]) != _content(r))
         ]
 
     def upsert(self, records: Iterable[Record]) -> UpsertResult:
-        """Idempotent by id; a refetch that only changes ``fetched_at`` counts as unchanged."""
+        """Idempotent by id; a refetch that only changes ``fetched_at`` counts as unchanged.
+
+        Erased records and records by erased authors are skipped and counted as ``erased``."""
         batch: dict[str, Record] = {r.id: r for r in records}
         if not batch:
             return UpsertResult()
+        erased = self._erased(batch)
+        batch = {rid: r for rid, r in batch.items() if rid not in erased}
         existing = self._stored(list(batch))
         now = datetime.now(UTC)
         inserts: list[InsertRow] = []
@@ -389,7 +455,9 @@ class Store(ThemeQueries):
         except BaseException:
             self._con.execute("ROLLBACK")
             raise
-        return UpsertResult(inserted=len(inserts), updated=len(updates), unchanged=unchanged)
+        return UpsertResult(
+            inserted=len(inserts), updated=len(updates), unchanged=unchanged, erased=len(erased)
+        )
 
     @staticmethod
     def _row(record: Record) -> RecordRow:
@@ -449,7 +517,9 @@ class Store(ThemeQueries):
         author_pseudonym: str | None = None,
         before: datetime | None = None,
     ) -> int:
-        """Delete matching records; at least one filter is required. Returns the count."""
+        """Erase matching records and their derived data in one transaction; at least one filter
+        is required. Tombstones (record ids, and the author pseudonym when erasing an author) keep
+        a later fetch from storing them again. Returns the count."""
         clauses, params = _filters(
             source_type=source_type,
             source_instance=source_instance,
@@ -458,15 +528,37 @@ class Store(ThemeQueries):
         )
         if not clauses:
             raise StoreError("delete needs at least one filter")
-        ids = [
-            str(r[0])
-            for r in self._con.execute(
-                "DELETE FROM records WHERE " + " AND ".join(clauses) + " RETURNING id",  # noqa: S608
-                params,
-            ).fetchall()
-        ]
-        self._forget_derived(ids)
+        self._con.execute("BEGIN TRANSACTION")
+        try:
+            ids = [
+                str(r[0])
+                for r in self._con.execute(
+                    "DELETE FROM records WHERE " + " AND ".join(clauses) + " RETURNING id",  # noqa: S608
+                    params,
+                ).fetchall()
+            ]
+            self._forget_derived(ids)
+            tombstones: list[tuple[TombstoneKind, str]] = [("record", rid) for rid in ids]
+            if author_pseudonym is not None:
+                tombstones.append(("author", author_pseudonym))
+            self._tombstone(tombstones)
+            self._con.execute("COMMIT")
+        except BaseException:
+            self._con.execute("ROLLBACK")
+            raise
         return len(ids)
+
+    def _tombstone(self, keys: list[tuple[TombstoneKind, str]]) -> None:
+        if keys:
+            now = datetime.now(UTC)
+            self._con.executemany(
+                "INSERT INTO tombstones VALUES (?, ?, ?) ON CONFLICT DO NOTHING",
+                [(kind, key, now) for kind, key in keys],
+            )
+
+    def tombstones(self) -> int:
+        row = self._con.execute("SELECT count(*) FROM tombstones").fetchone()
+        return int(row[0]) if row else 0
 
     def _forget_derived(self, ids: list[str]) -> None:
         """Erasure reaches derived data: theme membership, theme centroids and embeddings."""
@@ -489,7 +581,8 @@ class Store(ThemeQueries):
     def track_retries(
         self, pipeline: str, source: str, *, done: Iterable[str], failed: Iterable[str]
     ) -> None:
-        """Forget ``done`` records and queue ``failed`` ones for the next run."""
+        """Forget ``done`` records and queue ``failed`` ones for the next run. Only stored,
+        non-erased records are queued, so an erasure mid-run is never retried."""
         cleared = list(done)
         if cleared:
             self._con.execute(
@@ -499,9 +592,11 @@ class Store(ThemeQueries):
             )
         queued = list(failed)
         if queued:
-            self._con.executemany(
-                "INSERT INTO enrichment_retries VALUES (?, ?, ?) ON CONFLICT DO NOTHING",
-                [(pipeline, source, rid) for rid in queued],
+            self._con.execute(
+                "INSERT INTO enrichment_retries SELECT ?, ?, id FROM records "
+                "WHERE list_contains(?, id) AND id NOT IN "
+                "(SELECT key FROM tombstones WHERE kind = 'record') ON CONFLICT DO NOTHING",
+                [pipeline, source, queued],
             )
 
     def get_cursor(self, pipeline: str, source: str) -> Cursor | None:
@@ -535,11 +630,12 @@ class Store(ThemeQueries):
         ordering = "key" if group_by in ("day", "week", "month", "rating") else "n DESC, key"
         rows = self._con.execute(
             f"SELECT CAST({key} AS VARCHAR) AS key, count(*) AS n, "  # noqa: S608 whitelisted
-            f"avg(CAST(json_extract_string(data, '$.rating') AS DOUBLE)) FROM records{where} "
+            f"avg(CAST(json_extract_string(data, '$.rating') AS DOUBLE)), {PEOPLE.format(p='')} "
+            f"FROM records{where} "
             f"GROUP BY key ORDER BY {ordering} LIMIT ?",
             [*params, limit],
         ).fetchall()
-        return [StatRow(key=r[0], count=int(r[1]), avg_rating=r[2]) for r in rows]
+        return [StatRow(key=r[0], count=int(r[1]), avg_rating=r[2], people=int(r[3])) for r in rows]
 
     def audit(self, action: str, detail: dict[str, str | int | None]) -> None:
         """Append to the accountability log. Never pass raw personal data in ``detail``."""

@@ -10,7 +10,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from obsei.core.context import Context
+from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.sinks._common import env
@@ -47,7 +47,9 @@ class WebhookSink:
         if self.secret:
             digest = hmac.new(self.secret, body, hashlib.sha256).hexdigest()
             headers[SIGNATURE_HEADER] = f"sha256={digest}"
-        response = self.ctx.http.post(self.config.url, content=body, headers=headers)
+        response = self.ctx.http.post(
+            self.config.url, content=body, headers=headers, extensions=EGRESS
+        )
         if response.is_error:
             return SinkResult(errors=[f"webhook returned {response.status_code}"])
         return SinkResult(sent=len(batch))

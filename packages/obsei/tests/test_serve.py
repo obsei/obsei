@@ -5,11 +5,14 @@ import json
 import pytest
 from starlette.testclient import TestClient
 
+from obsei.access import HostAllowlist
 from obsei.config import ObseiConfig, build_context
 from obsei.serve import create_app
 from obsei.store import Store
 
 SECRET = "hook-secret-0123456789"
+API_TOKEN = "api-token-0123456789"
+LOCAL = "http://127.0.0.1:8765"
 
 
 def config() -> ObseiConfig:
@@ -49,8 +52,8 @@ def store() -> Store:
 def client(monkeypatch: pytest.MonkeyPatch, store: Store) -> TestClient:
     monkeypatch.setenv("HOOK_SECRET", SECRET)
     cfg = config()
-    app = create_app(cfg, build_context(cfg), store, token="api-token")
-    return TestClient(app)
+    app = create_app(cfg, build_context(cfg), store, token=API_TOKEN)
+    return TestClient(app, base_url=LOCAL)
 
 
 def signed(body: bytes) -> dict[str, str]:
@@ -86,6 +89,8 @@ def test_ingest_verifies_signature_and_redacts(client: TestClient, store: Store)
     assert (
         client.post("/ingest/support/nope", content=body, headers=signed(body)).status_code == 404
     )
+    bad = {"X-Obsei-Signature-256": "sha256=ü".encode("latin-1")}
+    assert client.post("/ingest/support/tickets", content=body, headers=bad).status_code == 401  # type: ignore[arg-type]
 
 
 def test_mcp_requires_bearer_token(client: TestClient) -> None:
@@ -103,3 +108,40 @@ def test_ingest_is_atomic_per_request(client: TestClient, store: Store) -> None:
     accepted = client.post("/ingest/support/tickets", content=good, headers=signed(good))
     assert accepted.json() == {"received": 2, "skipped": 1, "stored": 1}
     assert [r.source.native_id for r in store.iter_records()] == ["t2"]
+
+
+def test_every_route_rejects_unknown_hosts(store: Store, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HOOK_SECRET", SECRET)
+    cfg = config()
+    local = TestClient(create_app(cfg, build_context(cfg), store, token=None), base_url=LOCAL)
+    assert local.get("/api/snapshot").status_code == 200
+    assert local.get("/healthz", headers={"Host": "localhost:8765"}).status_code == 200
+    assert local.get("/healthz", headers={"Host": "[::1]:8765"}).status_code == 200
+    for path in ("/api/snapshot", "/healthz", "/studio/", "/mcp"):
+        rebound = local.get(path, headers={"Host": "attacker.example:8765"})
+        assert rebound.status_code == 421, path
+    cross_site = local.post(
+        "/api/ask", json={"question": "x"}, headers={"Origin": "https://attacker.example"}
+    )
+    assert cross_site.status_code == 421
+    assert local.get("/healthz", headers={"Origin": "null"}).status_code == 421
+
+    cfg.access.allowed_hosts = ["voc.example.com", "*.corp.example"]
+    named = TestClient(create_app(cfg, build_context(cfg), store, token=None), base_url=LOCAL)
+    for host in ("voc.example.com", "obsei.corp.example:443"):
+        assert named.get("/healthz", headers={"Host": host}).status_code == 200
+    assert named.get("/healthz", headers={"Host": "corp.example.evil"}).status_code == 421
+
+
+def test_bind_address_is_an_allowed_host(store: Store, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HOOK_SECRET", SECRET)
+    cfg = config()
+    app = create_app(cfg, build_context(cfg), store, token=API_TOKEN, host="10.1.2.3")
+    client = TestClient(app, base_url="http://10.1.2.3:8765")
+    assert client.get("/healthz").status_code == 200
+    assert client.get("/healthz", headers={"Host": "rebound.example"}).status_code == 421
+    everywhere = TestClient(
+        create_app(cfg, build_context(cfg), store, token=API_TOKEN, host="0.0.0.0")  # noqa: S104
+    )
+    assert everywhere.get("/healthz").status_code == 200
+    assert HostAllowlist("fd00::1", []).allows("[fd00::1]:8765")

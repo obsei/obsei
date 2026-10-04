@@ -6,15 +6,18 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "obsei",
-      logo: { src: "./src/assets/logo.png" },
+      logo: { light: "./src/assets/mark.svg", dark: "./src/assets/mark-dark.svg" },
       customCss: ["./src/styles/brand.css"],
-      favicon: "/logo.png",
+      favicon: "/favicon.svg",
       description: "Privacy-first, self-hosted, AI-native Voice of Customer.",
-      head: [{ tag: "meta", attrs: { name: "theme-color", content: "#238a91" } }],
+      head: [
+        { tag: "meta", attrs: { name: "theme-color", content: "#238a91" } },
+        { tag: "link", attrs: { rel: "icon", href: "/logo.png", type: "image/png" } },
+      ],
       social: [{ icon: "github", label: "GitHub", href: "https://github.com/obsei/obsei" }],
       editLink: { baseUrl: "https://github.com/obsei/obsei/edit/master/docs/" },
       sidebar: [
-        { label: "Start", items: ["quickstart", "configuration"] },
+        { label: "Start", items: ["quickstart", "how-it-works", "configuration"] },
         { label: "Guides", items: [{ autogenerate: { directory: "guides" } }] },
         { label: "Privacy", items: [{ autogenerate: { directory: "privacy" } }] },
         { label: "Reference", items: [{ autogenerate: { directory: "reference" } }] },
