@@ -13,7 +13,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from obsei._version import __version__
-from obsei.mcp_server import Evidence, ThemeInfo, evidence
+from obsei.evidence import Evidence, ThemeInfo, evidence
 from obsei.store import GroupBy, Query, Store
 
 STATIC_FILES = ("index.html", "app.js", "styles.css")
