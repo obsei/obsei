@@ -192,3 +192,38 @@ def test_cascade_escalates_only_uncertain_results() -> None:
     results = cascade.enrich([rec("a"), rec("b", "2")])
     assert [e.model if isinstance(e, Enrichment) else None for e in results] == ["small", "large"]
     assert len(fallback_client.prompts) == 1
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://134744072/v1",
+        "http://0x08080808/v1",
+        "http://0x8.0x8.0x8.0x8/v1",
+        "http://8.8.2056/v1",
+        "http://[2001:4860:4860::8888]/v1",
+        "http://[::ffff:808:808]/v1",
+        "http://[::ffff:8.8.8.8]/v1",
+        "http://999.1.1.1/v1",
+    ],
+)
+def test_air_gapped_blocks_numeric_and_ipv6_public_addresses(url: str) -> None:
+    with pytest.raises(EgressError):
+        EgressPolicy().check(url)
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://2130706433/v1",
+        "http://0x7f000001/v1",
+        "http://127.1/v1",
+        "http://[::1]:8000/v1",
+        "http://[::ffff:10.0.0.5]/v1",
+        "http://[fd00::5]/v1",
+        "http://gpu.localhost/v1",
+        "http://localhost./v1",
+    ],
+)
+def test_air_gapped_normalises_internal_addresses(url: str) -> None:
+    EgressPolicy().check(url)
