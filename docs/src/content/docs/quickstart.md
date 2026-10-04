@@ -24,6 +24,20 @@ obsei run      # fetch, redact, enrich, deliver, store
 Keep both secrets in your secret manager: without the key the database cannot be read, and a new
 salt produces new pseudonyms.
 
+:::caution[If `obsei run` says "writing an encrypted store needs DuckDB's httpfs extension"]
+Encryption uses DuckDB's `httpfs` extension, and the default air-gapped mode never downloads it.
+Up to 1.0.0rc2, install it once yourself; this fetches DuckDB's own extension and sends none of
+your data:
+
+```bash
+"$(uv tool dir)/obsei/bin/python" -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"
+# installed with pip: run python -c "..." with the same command, in the environment that has obsei
+```
+
+Then `obsei doctor` reports `encryption: ready`. From 1.0.0rc3, `obsei init` installs it for you.
+For machines without network access, see [At rest and in use](/privacy/overview/#at-rest-and-in-use).
+:::
+
 ## Add a model
 
 Start [Ollama](https://ollama.com) with a model such as `qwen3:8b`, then uncomment the

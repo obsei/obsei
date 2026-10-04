@@ -54,7 +54,9 @@ In `obsei.yaml`, `privacy.regions` takes the keys `global`, `north_america`, `uk
   `INSTALL httpfs` once with network access into a directory, copy that directory over (same
   DuckDB version and platform) and point `OBSEI_DUCKDB_EXTENSIONS` at it. The container image
   ships with it pre-installed.
-  `obsei doctor` reports whether it is ready.
+  `obsei doctor` reports whether it is ready. On a machine with network access, the one-time
+  install is `"$(uv tool dir)/obsei/bin/python" -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"`
+  (or the same `python -c` in the environment where you installed obsei with pip).
 - Egress is air-gapped by default; public model and sink endpoints must be allowed explicitly.
   Every redirect hop of a sink request is checked as well, and a redirect to another origin
   drops credentials and custom headers. The REST source sends its credentials only to the origin
