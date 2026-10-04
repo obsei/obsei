@@ -15,6 +15,7 @@ const posts = defineCollection({
       cover: image(),
       coverAlt: z.string(),
       draft: z.boolean().default(false),
+      aiAssisted: z.boolean().default(false),
     }),
 });
 

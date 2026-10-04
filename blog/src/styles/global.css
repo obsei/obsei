@@ -87,7 +87,7 @@ footer.site a { color: var(--muted); }
 .card h2 a:hover { color: var(--teal-ink); }
 .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
 .card .tags { position: relative; z-index: 1; }
-.card.featured { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); align-items: stretch; background: #0f1a1d; }
+.card.featured { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: stretch; background: #0f1a1d; }
 .card.featured img { height: 100%; aspect-ratio: auto; object-fit: cover; border-bottom: 0; }
 .card.featured .body { background: var(--surface); border-left: 1px solid var(--line); height: 100%; }
 .card.featured .body { padding: 24px 28px; align-content: center; gap: 12px; }
@@ -108,8 +108,8 @@ footer.site a { color: var(--muted); }
 .byline { display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: center; justify-content: space-between; padding-bottom: 24px; }
 .byline .meta a { color: var(--ink); font-weight: 600; text-decoration: none; }
 .byline .meta a:hover { text-decoration: underline; }
-.cover { max-width: 1040px; margin: 0 auto 40px; padding: 0 16px; }
-.cover img { display: block; width: 100%; height: auto; border-radius: 18px; border: 1px solid var(--line); box-shadow: var(--shadow); }
+.cover { max-width: calc(var(--measure) + 32px); margin: 0 auto 36px; padding: 0 16px; }
+.cover img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); box-shadow: var(--shadow); }
 
 .prose { display: grid; grid-template-columns: minmax(16px, 1fr) min(var(--measure), calc(100% - 32px)) minmax(16px, 1fr); font-size: 1.06rem; line-height: 1.72; }
 .prose > * { grid-column: 2; }
@@ -191,3 +191,4 @@ footer.site a { color: var(--muted); }
 .tag-cloud a { font-size: 0.95rem; padding: 6px 14px; }
 .tag-cloud .count { opacity: 0.7; font-weight: 500; margin-left: 4px; }
 .eyebrow a.eyebrow, a.eyebrow { text-decoration: none; color: var(--teal-ink); }
+.ai-note { margin: 0 0 18px; padding: 10px 14px; border-left: 3px solid var(--teal); background: var(--surface); color: var(--muted); font-size: 0.9rem; border-radius: 0 8px 8px 0; }

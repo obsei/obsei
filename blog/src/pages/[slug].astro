@@ -23,7 +23,7 @@ interface Props {
 
 const { post, prev, next } = Astro.props;
 const { Content } = await render(post);
-const { title, description, pubDate, updatedDate, author, tags, cover, coverAlt } = post.data;
+const { title, description, pubDate, updatedDate, author, tags, cover, coverAlt, aiAssisted } = post.data;
 const site = Astro.site!;
 const url = new URL(postUrl(post), site).href;
 const image = new URL(ogUrl(post), site).href;
@@ -114,6 +114,14 @@ const schema = [
       <Content components={{ a: Link }} />
     </div>
     <footer class="post-foot wrap">
+      {
+        aiAssisted && (
+          <p class="ai-note">
+            Written with help from AI, with a human in the loop: {author} reviewed, edited and fact-checked
+            every line.
+          </p>
+        )
+      }
       <nav class="share" aria-label="Share this post">
         <span>Share</span>
         {share.map(({ label, href }) => <a href={href} rel="noopener">{label}</a>)}
