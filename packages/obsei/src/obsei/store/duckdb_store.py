@@ -84,6 +84,10 @@ def _comparable(record: Record) -> str:
     return record.model_dump_json(exclude={"fetched_at"})
 
 
+def _content(record: Record) -> str:
+    return record.model_dump_json(exclude={"fetched_at", "enrichments"})
+
+
 class Store:
     """Without ``encryption_key`` you must pass ``allow_unencrypted=True`` (e.g. encrypted disk)."""
 
@@ -195,17 +199,28 @@ class Store:
         ).fetchone()
         return int(row[0]) if row else 0
 
+    def _stored(self, ids: list[str]) -> dict[str, Record]:
+        return {
+            row[0]: Record.model_validate_json(row[1])
+            for row in self._con.execute(
+                "SELECT id, data FROM records WHERE list_contains(?, id)", [ids]
+            ).fetchall()
+        }
+
+    def changed(self, records: Iterable[Record]) -> list[Record]:
+        """New records, or records whose content differs from the stored copy."""
+        batch: dict[str, Record] = {r.id: r for r in records}
+        stored = self._stored(list(batch))
+        return [
+            r for r in batch.values() if r.id not in stored or _content(stored[r.id]) != _content(r)
+        ]
+
     def upsert(self, records: Iterable[Record]) -> UpsertResult:
         """Idempotent by id; a refetch that only changes ``fetched_at`` counts as unchanged."""
         batch: dict[str, Record] = {r.id: r for r in records}
         if not batch:
             return UpsertResult()
-        existing = {
-            row[0]: Record.model_validate_json(row[1])
-            for row in self._con.execute(
-                "SELECT id, data FROM records WHERE list_contains(?, id)", [list(batch)]
-            ).fetchall()
-        }
+        existing = self._stored(list(batch))
         now = datetime.now(UTC)
         inserts: list[InsertRow] = []
         updates: list[UpdateRow] = []
