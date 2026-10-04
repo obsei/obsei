@@ -18,7 +18,7 @@ sidebar:
 | `bluesky` | Posts matching a query, optionally by language | none or app password |
 | `youtube` | Comments on videos or a whole channel | `YOUTUBE_API_KEY` |
 | `rss` | RSS 2.0 and Atom: forums, status pages, review sites | none |
-| `reddit` (plugin) | Subreddit posts, comments and searches via RSS | none |
+| `reddit` (community plugin, [not on PyPI](#reddit-plugin)) | Subreddit posts, comments and searches via RSS | none |
 | `sql` | Any SQLAlchemy database or warehouse, incremental by a cursor column | URL in env, `obsei[sql]` |
 | `filedrop` | New or changed CSV, JSON Lines and JSON files in a folder (SFTP drop, mounted bucket) | none |
 | `imap` | Feedback mailboxes | username and password in env |
@@ -42,6 +42,18 @@ fields:
   lang: locale
   url: link
   context: [plan, region]     # kept as string metadata
+```
+
+## Reddit plugin
+
+`reddit` is an unpublished community plugin. Install it from the repository, then allow it in
+`obsei.yaml` with `plugins: [reddit]`:
+
+```bash
+pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
+# or, with uv tool:
+uv tool install "obsei[mcp]>=1.0.0a1" \
+  --with "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 ```
 
 ## Global coverage

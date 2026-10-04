@@ -32,7 +32,7 @@ llms:
     api_key_env: AZURE_OPENAI_API_KEY
     max_requests: 2000
 
-plugins: [reddit]           # installed community plugins allowed to load
+plugins: [reddit]           # installed plugins allowed to load (reddit: see Sources)
 
 pipelines:
   - name: reviews

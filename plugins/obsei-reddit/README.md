@@ -1,6 +1,12 @@
 # obsei-reddit
 
-Community plugin: subreddit posts, comments and searches through Reddit's public RSS feeds. No API
+Community plugin, not published to PyPI. Install it from Git:
+
+```bash
+pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
+```
+
+Subreddit posts, comments and searches through Reddit's public RSS feeds. No API
 key, low volume; for higher volume or full threads use the official Reddit API with the `rest`
 source and your own OAuth token. Respect Reddit's terms and rate limits.
 
