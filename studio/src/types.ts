@@ -15,6 +15,7 @@ export interface Overview {
   by_lang: Bucket[];
   by_week: Bucket[];
   decisions?: Decisions | null;
+  by_route?: Bucket[];
 }
 
 export interface LabelCount {

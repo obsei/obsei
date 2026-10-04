@@ -231,6 +231,9 @@ def assert_studio_renders(page: Page, badge: str) -> None:
     assert page.locator(".themes .spark").count() == page.locator(".themes li").count()
     assert page.locator(".columns li.peak").count() == 1
     expect(page.locator(".decisions")).to_contain_text("Julia-1")
+    expect(
+        page.locator("section.panel", has=page.get_by_role("heading", name="Routes"))
+    ).to_contain_text("urgent-bugs")
     assert page.locator(".decisions h3").all_text_contents() == ["angry", "team", "urgency"]
     assert page.locator(".evidence .labels").count() == page.locator(".evidence li").count()
     assert page.locator(".kpi").count() == 4

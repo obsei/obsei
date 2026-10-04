@@ -166,6 +166,19 @@ def test_demo_save_labels_needs_a_decision_model(tmp_path: Path) -> None:
     assert not (tmp_path / "l.json").exists()
 
 
+def test_demo_records_are_routed_by_the_example_routes(store: Store) -> None:
+    rules = {r.source.native_id: r.enrichments["route"].value for r in demo_records()}
+    assert {v["rule"] for v in rules.values() if isinstance(v, dict)} == {
+        "review",
+        "urgent-bugs",
+        "billing",
+        "default",
+    }
+    routes = {b.key: b.count for b in studio.snapshot(store, k=5).overview.by_route}
+    assert set(routes) == {"review", "urgent-bugs", "billing", "default"}
+    assert sum(routes.values()) == len(rules)
+
+
 def test_theme_weekly_counts_match_trends(store: Store) -> None:
     for theme in studio.snapshot(store, k=5).themes:
         assert len(theme.weekly) == 8

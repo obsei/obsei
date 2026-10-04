@@ -49,6 +49,7 @@ def test_example_is_valid(path: Path) -> None:
             _check_llm(config, getattr(model, "fallback_llm", None), where)
         for sink in pipeline.sinks:
             _validated(registry.sink(sink.type), sink)
+        pipeline.router()
 
     themes = config.themes
     _check_llm(config, themes.labeler, "themes.labeler")

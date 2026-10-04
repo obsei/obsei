@@ -105,7 +105,7 @@ TombstoneKind: TypeAlias = Literal["record", "author"]
 
 
 GroupBy: TypeAlias = Literal[
-    "source", "instance", "sentiment", "intent", "lang", "rating", "day", "week", "month"
+    "source", "instance", "sentiment", "intent", "lang", "rating", "route", "day", "week", "month"
 ]
 _CLASSIFY = "$.enrichments.classify.value"
 _LABEL = "json_extract_string(data, '$.enrichments.classify.value.{}')"
@@ -132,6 +132,7 @@ _GROUPS: dict[GroupBy, str] = {
     "intent": _LABEL.format("intent"),
     "lang": f"coalesce(json_extract_string(data, '$.lang'), {_LABEL.format('language')})",
     "rating": "CAST(json_extract_string(data, '$.rating') AS DOUBLE)",
+    "route": "json_extract_string(data, '$.enrichments.route.value.rule')",
     "day": "strftime(date_trunc('day', created_at), '%Y-%m-%d')",
     "week": "strftime(date_trunc('week', created_at), '%Y-%m-%d')",
     "month": "strftime(date_trunc('month', created_at), '%Y-%m')",

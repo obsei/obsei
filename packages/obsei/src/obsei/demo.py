@@ -12,6 +12,7 @@ from importlib import resources
 from pathlib import Path
 
 from obsei import studio
+from obsei.config import RouteRule
 from obsei.core.record import Author, Enrichment, Record, SourceRef
 from obsei.enrichers.classify import (
     ClassifierConfig,
@@ -22,6 +23,7 @@ from obsei.llm.client import LlmError
 from obsei.llm.decision import DecisionClient
 from obsei.privacy.pseudonym import pseudonymize
 from obsei.privacy.redact import RegexRedactor
+from obsei.routing import Route, Router
 from obsei.store import Store
 from obsei.studio import AskExample, RedactionExample, Showcase, Snapshot
 
@@ -77,6 +79,23 @@ DECISION_CONFIG = ClassifierConfig(
         ),
     },
 )
+DEMO_ROUTES = (
+    RouteRule(review=["review"]),
+    RouteRule(
+        name="urgent-bugs",
+        when={
+            "classify.intent": {"is": "bug", "min_confidence": 0.8},
+            "classify.fields.urgency": {"gte": "today"},
+        },
+        sinks=["jira", "oncall"],
+    ),
+    RouteRule(name="billing", when={"classify.fields.team": ["payments"]}, sinks=["billing"]),
+    RouteRule(default=["lake"]),
+)
+"""The routes of examples/decision-routing.yaml, with billing chosen by the demo's team field."""
+URGENCY_LEVELS: dict[str, Sequence[str]] = {
+    "classify.fields.urgency": ["can wait", "this week", "today", "right now"]
+}
 RATED_SOURCES = frozenset({"appstore", "playstore", "survey"})
 ANONYMOUS_SOURCES = frozenset({"survey"})
 
@@ -497,8 +516,11 @@ def demo_records(
     missing = [r.source.native_id for r in redacted if r.source.native_id not in found]
     if missing:
         raise KeyError(f"no demo labels for {missing[:3]}; rebuild them with --decision-url-env")
+    router = Router(
+        tuple(Route(r.label, tuple(r.targets), r.conditions(URGENCY_LEVELS)) for r in DEMO_ROUTES)
+    )
     return [
-        r.model_copy(update={"enrichments": {"classify": found[r.source.native_id]}})
+        router.apply(r.model_copy(update={"enrichments": {"classify": found[r.source.native_id]}}))
         for r in redacted
     ]
 

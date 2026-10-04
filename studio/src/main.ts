@@ -354,6 +354,7 @@ function render(data: DataSource): void {
       privacyRow,
       overview.decisions && Object.keys(overview.decisions.fields).length ? decisionsPanel(overview.decisions) : null,
       weekColumns(overview.by_week),
+      overview.by_route?.length ? bars("Routes", overview.by_route) : null,
       el(
         "div",
         { class: "grid three" },

@@ -4,7 +4,8 @@ A batch is stored and its cursor advanced only after every sink accepted it, so 
 run is retried from the same position (at-least-once; sinks are idempotent by record id).
 Only new or changed records are enriched and delivered. Records an enricher could not label
 are stored, reported and enriched again on the next run. Records a filtering enricher drops are
-counted and neither delivered nor stored.
+counted and neither delivered nor stored. With routes, each record is given a ``route``
+enrichment before delivery and is stored with it.
 
 Store calls run under the optional ``lock``; fetching, enrichers and sinks run outside it, so a
 slow source or model does not block other users of a shared store.
@@ -21,6 +22,7 @@ from typing import Protocol, TypeAlias, runtime_checkable
 
 from obsei.core.protocols import Cursor, Drops, Enricher, ReportsErrors, Sink, Source
 from obsei.core.record import Record
+from obsei.routing import Router, routed_to
 from obsei.store import Store
 
 RETRY_LIMIT = 500
@@ -44,7 +46,9 @@ class SourceSpec:
 
 @dataclass(frozen=True)
 class Pipeline:
-    """Without ``redactor`` you must pass ``allow_unredacted=True``."""
+    """Without ``redactor`` you must pass ``allow_unredacted=True``. ``sink_keys`` name the sinks
+    (default: each sink's name); with a ``router``, sinks it names receive only the records routed
+    to them and the others receive every record."""
 
     name: str
     sources: Sequence[SourceSpec]
@@ -53,6 +57,8 @@ class Pipeline:
     redactor: Redactor | None = None
     allow_unredacted: bool = False
     batch_size: int = 100
+    sink_keys: Sequence[str] = ()
+    router: Router | None = None
 
     def __post_init__(self) -> None:
         if self.redactor is None and not self.allow_unredacted:
@@ -62,6 +68,19 @@ class Pipeline:
         keys = [spec.key for spec in self.sources]
         if len(keys) != len(set(keys)):
             raise PipelineError("source keys must be unique within a pipeline")
+        if self.sink_keys and len(self.sink_keys) != len(self.sinks):
+            raise PipelineError("sink_keys must name every sink")
+        if self.router is not None:
+            names = self.keys
+            if len(names) != len(set(names)):
+                raise PipelineError("sink keys must be unique within a routed pipeline")
+            unknown = self.router.targets - set(names)
+            if unknown:
+                raise PipelineError(f"routes name unknown sinks: {sorted(unknown)}")
+
+    @property
+    def keys(self) -> list[str]:
+        return list(self.sink_keys) if self.sink_keys else [s.name for s in self.sinks]
 
 
 @dataclass
@@ -135,12 +154,14 @@ def _enrich(
     return records, dropped
 
 
-def _deliver(sinks: Sequence[Sink], records: list[Record], report: RunReport) -> None:
-    for sink in sinks:
-        result = sink.send(records)
+def _deliver(pipeline: Pipeline, records: list[Record], report: RunReport) -> None:
+    targets = pipeline.router.targets if pipeline.router else frozenset()
+    for key, sink in zip(pipeline.keys, pipeline.sinks, strict=True):
+        batch = [r for r in records if key in routed_to(r)] if key in targets else records
+        result = sink.send(batch)
         if result.errors:
-            raise PipelineError(f"sink {sink.name!r} failed: {'; '.join(result.errors)}")
-        report.sent[sink.name] = report.sent.get(sink.name, 0) + result.sent
+            raise PipelineError(f"sink {key!r} failed: {'; '.join(result.errors)}")
+        report.sent[key] = report.sent.get(key, 0) + result.sent
 
 
 def _process(
@@ -154,7 +175,9 @@ def _process(
     cursor: Cursor | None = None,
 ) -> int:
     records, dropped = _enrich(pipeline.enrichers, records, report)
-    _deliver(pipeline.sinks, records, report)
+    if pipeline.router is not None:
+        records = [pipeline.router.apply(r) for r in records]
+    _deliver(pipeline, records, report)
     names = [e.name for e in pipeline.enrichers]
     failed = {r.id for r in records if any(n not in r.enrichments for n in names)}
     with guard:

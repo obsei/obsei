@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Mapping
+
+from pydantic import JsonValue
 
 from obsei.core.record import Record
+from obsei.routing import When, text
 
 
 class SinkConfigError(RuntimeError):
@@ -26,15 +30,17 @@ def label(record: Record, name: str) -> str | None:
     value = enrichment.value
     for key in path.split(".") if path else ():
         value = value.get(key) if isinstance(value, dict) else None
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    return value if isinstance(value, str) else None
+    return text(value)
 
 
-def matches(record: Record, when: dict[str, list[str]], max_rating: float | None) -> bool:
-    if max_rating is not None and (record.rating is None or record.rating > max_rating):
-        return False
-    return all(label(record, name) in allowed for name, allowed in when.items())
+def matches(record: Record, when: Mapping[str, object], max_rating: float | None) -> bool:
+    """Whether ``record`` passes a sink's ``when`` filter; see :mod:`obsei.routing`."""
+    return When.parse(when, max_rating=max_rating).matches(record)
+
+
+def intents(*names: str) -> dict[str, JsonValue]:
+    """A ``when`` filter that keeps the given classify intents."""
+    return {"classify.intent": list(names)}
 
 
 TITLE_LENGTH = 80

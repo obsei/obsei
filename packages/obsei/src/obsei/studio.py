@@ -61,6 +61,7 @@ class Overview(BaseModel):
     by_lang: list[Bucket]
     by_week: list[Bucket]
     decisions: Decisions | None = None
+    by_route: list[Bucket] = Field(default_factory=list)
 
 
 class Node(BaseModel):
@@ -146,6 +147,7 @@ def overview(store: Store, *, k: int) -> Overview:
         by_lang=_buckets(store, "lang", k),
         by_week=_buckets(store, "week", k)[-26:],
         decisions=decisions(store, k=k),
+        by_route=_buckets(store, "route", k),
     )
 
 

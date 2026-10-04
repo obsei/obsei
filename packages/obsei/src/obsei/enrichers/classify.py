@@ -6,7 +6,7 @@ import json
 from collections.abc import Mapping, Sequence
 from typing import ClassVar, Literal, Self, TypeAlias
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError, model_validator
 
 from obsei.core.context import Context
 from obsei.core.protocols import Enricher, ReportsErrors
@@ -162,6 +162,18 @@ def _field_schema(spec: FieldSpec) -> JsonSchema:
     return {"anyOf": [value, {"type": "null"}]}
 
 
+def score_levels(config: ClassifierConfig) -> dict[str, list[str]]:
+    """Levels of each score field, lowest first; stored with results so routes can order them."""
+    return {n: spec.levels for n, spec in config.fields.items() if spec.levels}
+
+
+def _stored(result: _Labels, levels: dict[str, list[str]]) -> dict[str, JsonValue]:
+    value: dict[str, JsonValue] = result.model_dump(mode="json")
+    if levels:
+        value["levels"] = {n: list[JsonValue](v) for n, v in levels.items()}
+    return value
+
+
 def build_schema(config: ClassifierConfig) -> JsonSchema:
     field_props: JsonSchema = {name: _field_schema(spec) for name, spec in config.fields.items()}
     return {
@@ -191,6 +203,7 @@ class LlmClassifier:
         self.client = client
         self.config = config or ClassifierConfig()
         self.schema = build_schema(self.config)
+        self.levels = score_levels(self.config)
         self.failures = 0
         self.last_error: str | None = None
 
@@ -229,7 +242,7 @@ class LlmClassifier:
                 None
                 if result is None
                 else Enrichment(
-                    value=result.model_dump(mode="json"),
+                    value=_stored(result, self.levels),
                     confidence=result.confidence,
                     model=self.client.model,
                 )
@@ -304,6 +317,7 @@ class DecisionClassifier:
         self.client = client
         self.config = config or ClassifierConfig()
         self.questions = decision_questions(self.config)
+        self.levels = score_levels(self.config)
         self.yes_no = {n for n, spec in self.config.fields.items() if spec.kind == "yesno"}
         self.threshold = threshold
         self.min_confidence = dict(min_confidence or {})
@@ -364,7 +378,7 @@ class DecisionClassifier:
                 None
                 if result is None
                 else Enrichment(
-                    value=result.model_dump(mode="json"),
+                    value=_stored(result, self.levels),
                     confidence=result.confidence,
                     model=self.client.model,
                 )

@@ -53,11 +53,13 @@ and everything is exported to Parquet.
 Zendesk and Freshdesk tickets in any language, labelled on a CPU by Julia-1, a 144M decision model
 served by llama.cpp: spam is filtered out first, then one request per ticket answers sentiment,
 intent (with descriptions), an urgency score and a yes/no refund question. Answers below their
-cutoff go to a local Ollama chat model. Urgent bugs become Jira issues and everything else goes to
-Slack. A CSV of eight sample tickets in seven languages lets you try it locally:
+cutoff go to a local Ollama chat model. Ordered [routes](/guides/routing/) then pick one destination
+per ticket: uncertain tickets go to a review channel, confident urgent bugs open a Jira issue and
+page on-call, billing and refund requests go to the billing channel, and the rest lands in Parquet.
+A CSV of eight sample tickets in seven languages lets you try it locally:
 `obsei try -c examples/decision-routing.yaml -p sample --enrich --limit 8`.
 
-<Pipeline compact sources={["Zendesk", "Freshdesk"]} steps={["Redact", "Classify", "Store"]} outputs={["Jira", "Slack"]} />
+<Pipeline compact sources={["Zendesk", "Freshdesk"]} steps={["Redact", "Classify", "Store"]} outputs={["Jira", "Slack ×3", "Parquet"]} />
 
 <LinkCard
   title="decision-routing.yaml"

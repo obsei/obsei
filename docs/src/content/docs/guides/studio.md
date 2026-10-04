@@ -2,7 +2,7 @@
 title: Studio
 description: The read-only web UI with a knowledge-graph explorer.
 sidebar:
-  order: 7
+  order: 8
 ---
 
 [Open the demo](/demo/): eight weeks of synthetic feedback in eleven languages from app stores,
@@ -33,6 +33,7 @@ When `classify` stores fields (for example from a [decision model](/guides/model
 with `team`, `urgency` or yes/no fields), Studio shows a **Decisions** panel: k-anonymous counts per
 answer (score levels in order) and the share of records marked for review because an answer was
 below its confidence cutoff. Evidence lists each record's labels with the model's confidence.
+Pipelines with [routes](/guides/routing/) also get a **Routes** chart: records per route rule.
 
 ## How the demo is built
 
@@ -40,7 +41,9 @@ below its confidence cutoff. Evidence lists each record's labels with the model'
 as ingest would, labels them, groups themes, and exports a snapshot marked `demo`. Only the demo
 shows a short guided intro, before-and-after redaction cards (the raw text exists only because the
 data is synthetic; Studio never has raw text otherwise) and a few **Ask your data** answers recorded
-from the dataset, citing record ids shown in its evidence. In your deployment Ask uses your own
+from the dataset, citing record ids shown in its evidence. Demo records are routed with the routes
+of `examples/decision-routing.yaml` (billing chosen by the demo's `team` field), using the same
+routing code as a pipeline. In your deployment Ask uses your own
 model, and agents get the same answers over MCP.
 
 The demo's labels (sentiment, intent, team, urgency and an angry yes/no) come from Julia-1, a
