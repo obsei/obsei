@@ -372,9 +372,10 @@ def serve(
     except ImportError:
         raise _fail("serve needs: pip install 'obsei[mcp]'") from None
     token = os.environ.get(API_TOKEN_ENV_VAR) or None
-    if token is None and host not in ("127.0.0.1", "::1", "localhost"):
-        raise _fail(f"set {API_TOKEN_ENV_VAR} before binding to {host}")
     cfg = _load(config)
+    has_access = token or cfg.access.users or cfg.access.trusted_proxy
+    if not has_access and host not in ("127.0.0.1", "::1", "localhost"):
+        raise _fail(f"set {API_TOKEN_ENV_VAR} or configure access before binding to {host}")
     with build_context(cfg) as ctx, _open_store(cfg.store.path, cfg.store.unencrypted) as store:
         try:
             web = create_app(cfg, ctx, store, token=token, host=host)

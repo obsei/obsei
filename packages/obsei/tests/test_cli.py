@@ -114,7 +114,7 @@ def test_run_reports_missing_config(tmp_path: Path) -> None:
 def test_core_cli_works_without_optional_extras() -> None:
     code = (
         "import sys\n"
-        "for name in ('mcp', 'sqlalchemy', 'jwt', 'google'):\n"
+        "for name in ('mcp', 'starlette', 'uvicorn', 'sqlalchemy', 'jwt', 'google'):\n"
         "    sys.modules[name] = None\n"
         "from obsei.cli import app\n"
         "from obsei import ask, config, studio, themes\n"

@@ -14,6 +14,7 @@ from typing import Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError, model_validator
 
+from obsei.access import AccessConfig
 from obsei.core.context import Context, LlmEndpoint
 from obsei.core.registry import Registry
 from obsei.enrichers import register as register_enrichers
@@ -75,6 +76,7 @@ class ObseiConfig(_Strict):
     egress: EgressPolicy | None = None
     llms: dict[str, LlmEndpoint] = Field(default_factory=dict)
     themes: ThemesConfig = Field(default_factory=ThemesConfig)
+    access: AccessConfig = Field(default_factory=AccessConfig)
     ask_llm: str = Field(default="default", description="llms name used by ask and the Slack bot.")
     plugins: list[str] = Field(
         default_factory=list, description="Installed plugin entry points allowed to load."
