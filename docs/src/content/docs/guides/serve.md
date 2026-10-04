@@ -15,6 +15,7 @@ obsei serve --host 0.0.0.0 --port 8765
 | `GET /healthz` | none | liveness: `{"status": "ok"}`, or `503 {"status": "degraded"}` if the scheduler stopped |
 | `POST /ingest/{pipeline}/{source}` | HMAC-SHA256 signature | push feedback into a `webhook` source (1 MB max) |
 | `POST /slack/commands` | Slack request signature | the `/obsei` slash command (404 without `SLACK_SIGNING_SECRET`) |
+| `GET /` | none | redirects to `/studio/` |
 | `GET /studio/` | none (static files) | [Studio](/guides/studio/); its data comes from `/api/*` with the caller's token |
 | `GET /api/snapshot` | viewer | k-anonymous overview, themes and knowledge graph, without quotes |
 | `GET /api/themes/{id}` | analyst | redacted evidence for one theme (empty below `k_anonymity`) |

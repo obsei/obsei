@@ -109,7 +109,7 @@ class HostAllowlist:
 
 def required_role(path: str) -> Role | None:
     """None for public paths (they authenticate themselves) and unknown paths."""
-    if path.startswith(PUBLIC_PATHS):
+    if path == "/" or path.startswith(PUBLIC_PATHS):
         return None
     return next((role for prefix, role in RULES if path.startswith(prefix)), "admin")
 

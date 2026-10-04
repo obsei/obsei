@@ -50,10 +50,12 @@ from obsei.runner import run_pipelines
 from obsei.store import (
     DB_KEY_ENV_VAR,
     EXTENSIONS_ENV_VAR,
+    INSTALL_HINT,
     PREINSTALL_HINT,
     Store,
     StoreError,
     httpfs_installed,
+    install_httpfs,
     load_db_key,
 )
 from obsei.themes import ThemesConfig, update_themes
@@ -124,8 +126,9 @@ def _crypto_status(policy: EgressPolicy) -> str:
     if httpfs_installed():
         return f"ready, httpfs{where}"
     if policy.mode == "air_gapped":
-        return f"httpfs extension not installed{where}; air-gapped mode never downloads it: " + (
-            PREINSTALL_HINT
+        return (
+            f"httpfs extension not installed{where}; air-gapped mode never downloads it: "
+            f"{INSTALL_HINT}; offline, {PREINSTALL_HINT}"
         )
     return "httpfs extension not installed; it is installed on first encrypted write"
 
@@ -317,8 +320,11 @@ PipelineOption = Annotated[
 def init(
     directory: Annotated[Path, typer.Argument(help="Where to create the project.")] = Path(),
     force: Annotated[bool, typer.Option(help="Overwrite existing files.")] = False,
+    offline: Annotated[
+        bool, typer.Option(help="Skip downloading DuckDB's httpfs extension (for encryption).")
+    ] = False,
 ) -> None:
-    """Create obsei.yaml and a multilingual sample dataset."""
+    """Create obsei.yaml and a sample dataset, and install DuckDB's encryption extension."""
     templates = resources.files("obsei") / "templates"
     directory.mkdir(parents=True, exist_ok=True)
     for name in ("obsei.yaml", "feedback.csv"):
@@ -328,9 +334,28 @@ def init(
             continue
         target.write_text((templates / name).read_text(encoding="utf-8"), encoding="utf-8")
         typer.echo(f"create {target}")
+    if not offline:
+        _install_encryption()
     typer.echo(
         "next: export OBSEI_DB_KEY=... OBSEI_PSEUDONYM_SALT=... then 'obsei try' and 'obsei run'"
     )
+
+
+def _install_encryption() -> None:
+    """Fetch DuckDB's own httpfs extension once; a failure only warns."""
+    if httpfs_installed():
+        typer.echo("ready  encryption (DuckDB httpfs extension)")
+        return
+    try:
+        install_httpfs()
+    except duckdb.Error as exc:
+        typer.echo(
+            f"warn   could not install DuckDB's httpfs extension, needed for encryption ({exc}); "
+            f"{PREINSTALL_HINT}",
+            err=True,
+        )
+        return
+    typer.echo("install encryption: DuckDB's httpfs extension (none of your data is sent)")
 
 
 @app.command()
@@ -470,6 +495,8 @@ def serve(
         scheduler.start()
         for name, minutes in scheduler.scheduled().items():
             typer.echo(f"scheduled {name} every {minutes} min")
+        shown = "localhost" if host in ("127.0.0.1", "::1", "0.0.0.0") else host  # noqa: S104
+        typer.echo(f"studio    http://{shown}:{port}/studio/")
         try:
             uvicorn.run(web, host=host, port=port, log_level="info")
         finally:

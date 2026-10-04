@@ -117,6 +117,12 @@ def test_ingest_refuses_replays_and_untimestamped_signatures(client: TestClient)
     )
 
 
+def test_root_redirects_to_studio_without_a_token(client: TestClient) -> None:
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code == 307
+    assert response.headers["location"] == "/studio/"
+
+
 def test_mcp_requires_bearer_token(client: TestClient) -> None:
     assert client.post("/mcp", json={}).status_code == 401
 

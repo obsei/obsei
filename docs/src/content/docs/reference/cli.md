@@ -5,7 +5,7 @@ description: obsei command reference.
 
 | Command | Purpose |
 | --- | --- |
-| `obsei init [DIR] [--force]` | Create `obsei.yaml` and a sample dataset |
+| `obsei init [DIR] [--force] [--offline]` | Create `obsei.yaml` and a sample dataset, and install DuckDB's `httpfs` extension for encryption (`--offline` skips it; existing files are kept, so rerun it to install the extension) |
 | `obsei try [-c FILE] [-p NAME] [--limit N] [--enrich]` | Preview redacted records; nothing stored or sent |
 | `obsei run [-c FILE] [-p NAME] [--db PATH] [--every MINUTES]` | Run pipelines |
 | `obsei themes [-c FILE] [--db PATH]` | Embed new feedback and update stable themes |

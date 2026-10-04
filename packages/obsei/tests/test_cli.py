@@ -5,11 +5,12 @@ from datetime import UTC, datetime, timedelta
 from importlib import metadata
 from pathlib import Path
 
+import duckdb
 import pytest
 from packaging.version import Version
 from typer.testing import CliRunner
 
-from obsei import Author, Record, SourceRef, __version__
+from obsei import Author, Record, SourceRef, __version__, cli
 from obsei._version import RELEASE_VERSION, pep440
 from obsei.cli import app
 from obsei.core.context import USER_AGENT
@@ -98,14 +99,59 @@ def test_forget_requires_a_filter_and_a_key(db: Path) -> None:
 
 def test_init_then_try(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
-    created = runner.invoke(app, ["init"])
+    created = runner.invoke(app, ["init", "--offline"])
     assert created.exit_code == 0
     assert (tmp_path / "obsei.yaml").exists()
-    assert "skip" in runner.invoke(app, ["init"]).output
+    assert "skip" in runner.invoke(app, ["init", "--offline"]).output
     preview = runner.invoke(app, ["try", "--limit", "2"])
     assert preview.exit_code == 0, preview.output
     lines = [json.loads(line) for line in preview.output.splitlines()]
     assert [line["lang"] for line in lines] == ["en", "es"]
+
+
+def test_init_installs_the_encryption_extension_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[str] = []
+    monkeypatch.setattr(cli, "httpfs_installed", lambda: bool(calls))
+    monkeypatch.setattr(cli, "install_httpfs", lambda: calls.append("install"))
+    first = runner.invoke(app, ["init", str(tmp_path)])
+    assert first.exit_code == 0
+    assert "install encryption" in first.output
+    again = runner.invoke(app, ["init", str(tmp_path)])
+    assert "ready  encryption" in again.output
+    assert calls == ["install"]
+    runner.invoke(app, ["init", str(tmp_path / "offline"), "--offline"])
+    assert calls == ["install"]
+
+
+def test_init_warns_when_the_extension_cannot_be_installed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def offline() -> None:
+        raise duckdb.IOException("no network")
+
+    monkeypatch.setattr(cli, "httpfs_installed", lambda: False)
+    monkeypatch.setattr(cli, "install_httpfs", offline)
+    result = runner.invoke(app, ["init", str(tmp_path)])
+    assert result.exit_code == 0
+    assert "could not install DuckDB's httpfs extension" in result.output
+    assert (tmp_path / "obsei.yaml").exists()
+
+
+def test_quickstart_with_an_encrypted_store(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("OBSEI_DB_KEY", "k" * 32)
+    monkeypatch.setenv("OBSEI_PSEUDONYM_SALT", "s" * 32)
+    created = runner.invoke(app, ["init"])
+    assert created.exit_code == 0
+    if "could not install" in created.output:
+        pytest.skip("no network to download DuckDB's httpfs extension")
+    result = runner.invoke(app, ["run"])
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "obsei.duckdb").exists()
 
 
 def test_run_reports_missing_config(tmp_path: Path) -> None:
