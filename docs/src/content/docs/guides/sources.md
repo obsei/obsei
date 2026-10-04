@@ -24,6 +24,7 @@ description: Built-in sources and their configuration.
 | `zendesk` | Tickets, incremental export | email and API token |
 | `freshdesk` | Tickets updated since the last run | API key |
 | `intercom` | Conversations, in the US, EU or AU data region | access token |
+| `gong` | Call transcripts, customer speech only | access key and secret |
 
 ## Field mapping
 
