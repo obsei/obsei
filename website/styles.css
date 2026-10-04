@@ -170,3 +170,6 @@ footer a { color: var(--muted); }
   html { scroll-behavior: auto; }
   .link span { animation: none; }
 }
+.chat-cap { justify-self: end; color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.card-note { margin: 10px 0 0 !important; color: var(--muted); font-size: 0.78rem; }
+.card-note code { font-size: 0.95em; }
