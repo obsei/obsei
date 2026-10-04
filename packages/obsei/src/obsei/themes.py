@@ -45,6 +45,7 @@ class ThemesConfig(BaseModel):
     labeler: str | None = Field(default=None, description="llms name used to label themes.")
     label_language: str = "English"
     k_anonymity: int = Field(default=5, ge=1)
+    auto: bool = Field(default=False, description="Update themes after each scheduled run.")
     batch_size: int = Field(default=64, ge=1)
     max_records: int = Field(default=10_000, ge=1)
 

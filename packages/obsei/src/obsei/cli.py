@@ -32,9 +32,8 @@ from obsei.core.registry import PluginError
 from obsei.demo import demo_records
 from obsei.llm import EgressPolicy
 from obsei.llm.embed import HashingEmbedder
-from obsei.pipeline import PipelineError
-from obsei.pipeline import run as run_pipeline
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
+from obsei.runner import run_pipelines
 from obsei.store import DB_KEY_ENV_VAR, Store, StoreError, load_db_key
 from obsei.themes import ThemesConfig, update_themes
 
@@ -267,29 +266,26 @@ def run(
 ) -> None:
     """Run pipelines: fetch, redact, enrich, deliver and store new or changed feedback."""
     while True:
-        _run_once(config, pipeline, db)
+        failed = _run_once(config, pipeline, db)
         if every is None:
+            if failed:
+                raise typer.Exit(1)
             return
         time.sleep(every * 60)
 
 
-def _run_once(config: Path, pipeline: list[str] | None, db: Path | None) -> None:
+def _run_once(config: Path, pipeline: list[str] | None, db: Path | None) -> bool:
+    """Run every pipeline even when one fails; return whether any failed."""
     cfg = _load(config)
     names = pipeline or [p.name for p in cfg.pipelines]
     with (
         build_context(cfg) as ctx,
         _open_store(db or cfg.store.path, cfg.store.unencrypted) as store,
     ):
-        for name in names:
-            try:
-                report = run_pipeline(build_pipeline(cfg, name, ctx), store)
-            except (ConfigError, PipelineError, PluginError, OSError, RuntimeError) as exc:
-                raise _fail(exc) from None
-            sent = ", ".join(f"{k}={v}" for k, v in report.sent.items()) or "none"
-            typer.echo(
-                f"{name}: fetched {report.fetched}, stored {report.stored}, "
-                f"enriched {sum(report.enriched.values())}, sent {sent}"
-            )
+        outcomes = run_pipelines(cfg, ctx, store, names)
+    for outcome in outcomes:
+        typer.echo(outcome.summary(), err=not outcome.ok)
+    return not all(o.ok for o in outcomes)
 
 
 @app.command("try")
@@ -383,7 +379,14 @@ def serve(
             web = create_app(cfg, ctx, store, token=token, host=host)
         except (ConfigError, PluginError, OSError, RuntimeError) as exc:
             raise _fail(exc) from None
-        uvicorn.run(web, host=host, port=port, log_level="info")
+        scheduler = web.state.scheduler
+        scheduler.start()
+        for name, minutes in scheduler.scheduled().items():
+            typer.echo(f"scheduled {name} every {minutes} min")
+        try:
+            uvicorn.run(web, host=host, port=port, log_level="info")
+        finally:
+            scheduler.stop()
 
 
 def _themes_context(config: Path, db: Path | None) -> tuple[ObseiConfig, Path]:

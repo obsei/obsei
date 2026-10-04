@@ -61,6 +61,9 @@ class PipelineConfig(_Strict):
     enrichers: list[PluginSpec] = Field(default_factory=list)
     sinks: list[PluginSpec] = Field(default_factory=list)
     batch_size: int = Field(default=100, ge=1)
+    every_minutes: int | None = Field(
+        default=None, ge=1, description="How often 'obsei serve' runs this pipeline."
+    )
 
 
 class ObseiConfig(_Strict):

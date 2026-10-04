@@ -41,17 +41,18 @@ does not make compliance claims; the deploying organisation remains the data con
 
 ## Try the preview
 
-The 0.1 development line is not on PyPI yet (installing `obsei` from PyPI today still gives the
-old 0.0.15). Run it from source:
+1.0 pre-releases are on PyPI and need `--pre` (a plain `pip install obsei` still gives the old
+0.0.15):
 
 ```bash
-git clone https://github.com/obsei/obsei && cd obsei && uv sync
-mkdir demo && cd demo
-uv run obsei init                      # obsei.yaml plus a 10-language sample dataset
+uv tool install --prerelease allow "obsei[mcp]"   # or: pip install --pre "obsei[mcp]"
+mkdir voc && cd voc
+obsei init                             # obsei.yaml plus a 10-language sample dataset
 export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
-uv run obsei try                       # preview redacted records; nothing stored or sent
-uv run obsei run                       # fetch, redact, enrich, deliver, store
-uv run obsei doctor                    # environment, encryption, egress mode, plugins
+obsei try                              # preview redacted records; nothing stored or sent
+obsei run                              # fetch, redact, enrich, deliver, store
+obsei serve                            # scheduled pipelines, webhooks, MCP and Studio
+obsei doctor                           # environment, encryption, egress mode, plugins
 ```
 
 Uncomment the `classify` enricher in `obsei.yaml` to label sentiment, intent and language with a

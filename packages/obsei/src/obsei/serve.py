@@ -1,5 +1,5 @@
-"""``obsei serve``: webhook intake, MCP over streamable HTTP, the read-only Studio and its API, an
-optional Slack command, and a health check, in one process.
+"""``obsei serve``: webhook intake, scheduled pipelines, MCP over streamable HTTP, the read-only
+Studio and its API, an optional Slack command, and a health check, in one process.
 
 The store is opened once read-write and shared under a lock (DuckDB allows one writer).
 """
@@ -30,6 +30,7 @@ from obsei.core.context import Context
 from obsei.llm.client import LlmError
 from obsei.mcp_server import create_server
 from obsei.pipeline import Pipeline, PipelineError, SourceSpec, run
+from obsei.runner import Scheduler
 from obsei.sources.webhook import SignatureError, WebhookSource
 from obsei.store import Store
 
@@ -91,6 +92,7 @@ class Handlers:
         self.lock = threading.Lock()
         self.intake = Intake(config, ctx, store, self.lock)
         self.k = config.themes.k_anonymity
+        self.scheduler = Scheduler(config, ctx, self.shared_store)
 
     @contextmanager
     def shared_store(self) -> Iterator[Store]:
@@ -149,6 +151,17 @@ class Handlers:
         body = await anyio.to_thread.run_sync(self._theme, request.path_params["theme"])
         return Response(body, media_type="application/json")
 
+    async def api_runs(self, request: Request) -> Response:
+        runs = {
+            name: {
+                "started_at": o.started_at.isoformat(),
+                "ok": o.ok,
+                "summary": o.summary(),
+            }
+            for name, o in self.scheduler.last.items()
+        }
+        return JSONResponse({"scheduled": self.scheduler.scheduled(), "last": runs})
+
     async def api_ask(self, request: Request) -> Response:
         question = str((await request.json()).get("question", "")).strip()
         if not question:
@@ -206,10 +219,12 @@ def create_app(
             Route("/api/snapshot", h.api_snapshot, methods=["GET"]),
             Route("/api/themes/{theme}", h.api_theme, methods=["GET"]),
             Route("/api/ask", h.api_ask, methods=["POST"]),
+            Route("/api/runs", h.api_runs, methods=["GET"]),
             Route("/slack/commands", h.slack, methods=["POST"]),
             Mount("/studio", StaticFiles(directory=studio.static_dir(), html=True), name="studio"),
         ]
     )
     if token:
         app.add_middleware(BearerAuth, token=token)
+    app.state.scheduler = h.scheduler
     return app

@@ -118,3 +118,28 @@ def test_ask_cites_only_retrieved_records(store: Store) -> None:
     payload = json.loads(chat.messages[0][1]["content"])
     assert payload["themes"]
     assert all("psn_" not in json.dumps(e) for e in payload["evidence"])
+
+
+def test_erasure_removes_the_record_from_the_theme_centroid() -> None:
+    store = Store(allow_unencrypted=True)
+    texts = ["Please refund my double charge", "I was charged twice, refund please"]
+    store.upsert(
+        [
+            Record(
+                source=SourceRef(type="csv", native_id=str(i)),
+                text=text,
+                created_at=NOW,
+                author=Author(pseudonym=f"psn_{i:032x}"),
+            )
+            for i, text in enumerate(texts)
+        ]
+    )
+    embedder = HashingEmbedder()
+    update_themes(store, embedder, ThemesConfig(k_anonymity=1, similarity=0.2))
+    (theme,) = store.theme_summaries()
+    assert theme.size == 2
+    store.delete(author_pseudonym=f"psn_{0:032x}")
+    centroid, size = store.theme_centroid(theme.id)
+    (remaining,) = embedder.embed([texts[1]])
+    assert size == 1
+    assert centroid == pytest.approx(remaining, abs=1e-6)

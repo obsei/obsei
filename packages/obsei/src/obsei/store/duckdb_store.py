@@ -461,21 +461,10 @@ class Store(ThemeQueries):
         return len(ids)
 
     def _forget_derived(self, ids: list[str]) -> None:
-        if not ids:
-            return
-        self._con.execute("DELETE FROM embeddings WHERE list_contains(?, record_id)", [ids])
-        self._con.execute(
-            "UPDATE themes SET size = size - n FROM (SELECT theme_id, count(*) AS n "
-            "FROM record_themes WHERE list_contains(?, record_id) GROUP BY theme_id) gone "
-            "WHERE themes.id = gone.theme_id",
-            [ids],
-        )
-        self._con.execute("DELETE FROM record_themes WHERE list_contains(?, record_id)", [ids])
-        self._con.execute(
-            "UPDATE record_themes SET duplicate_of = NULL WHERE list_contains(?, duplicate_of)",
-            [ids],
-        )
-        self._con.execute("DELETE FROM themes WHERE size <= 0")
+        """Erasure reaches derived data: theme membership, theme centroids and embeddings."""
+        if ids:
+            self._unassign(ids)
+            self._con.execute("DELETE FROM embeddings WHERE list_contains(?, record_id)", [ids])
 
     def get_cursor(self, pipeline: str, source: str) -> Cursor | None:
         row = self._con.execute(
