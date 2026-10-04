@@ -2,7 +2,7 @@
 
 import re
 
-RELEASE_VERSION = "1.0.0-alpha.1"  # x-release-please-version
+RELEASE_VERSION = "1.0.0-rc.1"  # x-release-please-version
 
 _PRERELEASE = {"alpha": "a", "beta": "b", "rc": "rc"}
 _SEMVER = re.compile(r"(?P<release>\d+\.\d+\.\d+)(?:-(?P<kind>alpha|beta|rc)(?:\.(?P<num>\d+))?)?")
