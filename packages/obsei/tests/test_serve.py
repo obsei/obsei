@@ -1,13 +1,18 @@
 import hashlib
 import hmac
 import json
+from typing import Any
 
 import pytest
+from pydantic import JsonValue
 from starlette.testclient import TestClient
 
 from obsei.access import HostAllowlist
 from obsei.config import ObseiConfig, build_context
+from obsei.core.record import Record
 from obsei.serve import create_app
+from obsei.sources import webhook
+from obsei.sources._common import map_item
 from obsei.store import Store
 
 SECRET = "hook-secret-0123456789"
@@ -97,10 +102,17 @@ def test_mcp_requires_bearer_token(client: TestClient) -> None:
     assert client.post("/mcp", json={}).status_code == 401
 
 
-def test_ingest_is_atomic_per_request(client: TestClient, store: Store) -> None:
-    bad = json.dumps(
-        {"tickets": [{"id": "ok", "body": "fine"}, {"id": "x", "body": "late", "at": 1e20}]}
-    ).encode()
+def test_ingest_is_atomic_per_request(
+    client: TestClient, store: Store, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def failing_map_item(row: JsonValue, *args: Any, **kwargs: Any) -> Record | None:
+        if isinstance(row, dict) and row.get("id") == "x":
+            raise ValueError("unmappable")
+        return map_item(row, *args, **kwargs)
+
+    monkeypatch.setattr(webhook, "map_item", failing_map_item)
+    items = [{"id": "ok", "body": "fine"}, {"id": "x", "body": "late"}]
+    bad = json.dumps({"tickets": items}).encode()
     rejected = client.post("/ingest/support/tickets", content=bad, headers=signed(bad))
     assert rejected.status_code == 400
     assert "item 1" in rejected.json()["error"]
