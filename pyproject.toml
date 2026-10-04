@@ -5,14 +5,16 @@
 required-version = ">=0.12"
 
 [tool.uv.workspace]
-members = ["packages/*"]
+members = ["packages/*", "plugins/obsei-*"]
 
 [tool.uv.sources]
 obsei = { workspace = true }
+obsei-reddit = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "obsei[google]",
+    "obsei[apple,google,mcp]",
+    "obsei-reddit",
     "mypy==2.4.0",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
@@ -24,7 +26,7 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-src = ["packages/obsei/src", "packages/obsei/tests"]
+src = ["packages/obsei/src", "packages/obsei/tests", "plugins/*/src"]
 
 [tool.ruff.format]
 exclude = ["*.md"]
@@ -34,19 +36,20 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF", "S", "PT", "C4", "PL"]
 ignore = ["PLR0913"]
 
 [tool.ruff.lint.per-file-ignores]
-"packages/*/tests/**" = ["S101", "PLR2004", "RUF001"]
+"{packages,plugins}/*/tests/**" = ["S101", "S105", "S106", "PLR2004", "RUF001"]
 "packages/obsei/src/obsei/privacy/redact.py" = ["RUF001"]
 "packages/obsei/src/obsei/cli.py" = ["PLR0917"]
+"packages/obsei/src/obsei/mcp_server.py" = ["PLR0917"]
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
 plugins = ["pydantic.mypy"]
-files = ["packages/obsei/src", "packages/obsei/tests"]
-mypy_path = "packages/obsei/src"
+files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/template/src"]
+mypy_path = "packages/obsei/src:plugins/template/src"
 
 [tool.pytest.ini_options]
-testpaths = ["packages/obsei/tests"]
+testpaths = ["packages/obsei/tests", "plugins"]
 addopts = "-ra --strict-markers"
 
 [tool.coverage.run]

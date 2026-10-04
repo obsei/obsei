@@ -3,6 +3,9 @@
 from obsei.store.duckdb_store import (
     DB_KEY_ENV_VAR,
     EncryptionUnavailableError,
+    GroupBy,
+    Query,
+    StatRow,
     Store,
     StoreError,
     UpsertResult,
@@ -12,6 +15,9 @@ from obsei.store.duckdb_store import (
 __all__ = [
     "DB_KEY_ENV_VAR",
     "EncryptionUnavailableError",
+    "GroupBy",
+    "Query",
+    "StatRow",
     "Store",
     "StoreError",
     "UpsertResult",

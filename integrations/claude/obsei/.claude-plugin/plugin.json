@@ -1,0 +1,10 @@
+{
+  "name": "obsei",
+  "description": "Query your self-hosted customer feedback (reviews, tickets, surveys, communities) with cited, privacy-filtered evidence.",
+  "version": "1.0.0-alpha.2",
+  "author": { "name": "obsei", "url": "https://obsei.com" },
+  "homepage": "https://obsei.com",
+  "repository": "https://github.com/obsei/obsei",
+  "license": "Apache-2.0",
+  "keywords": ["voice-of-customer", "feedback", "privacy", "mcp", "self-hosted"]
+}

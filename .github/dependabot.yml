@@ -32,3 +32,15 @@ updates:
       default-days: 7
     commit-message:
       prefix: "chore(docker)"
+
+  - package-ecosystem: "npm"
+    directory: "/docs"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      docs:
+        patterns: ["*"]
+    commit-message:
+      prefix: "docs(deps)"

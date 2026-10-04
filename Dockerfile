@@ -9,9 +9,10 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
 WORKDIR /src
 COPY pyproject.toml uv.lock ./
 COPY packages ./packages
+COPY plugins ./plugins
 RUN uv build --package obsei --out-dir /dist \
     && uv venv /opt/obsei \
-    && uv pip install --python /opt/obsei /dist/*.whl
+    && uv pip install --python /opt/obsei "$(ls /dist/*.whl)[apple,google,mcp]"
 
 FROM python:3.12-slim-trixie
 LABEL org.opencontainers.image.source="https://github.com/obsei/obsei" \
@@ -24,5 +25,6 @@ USER 10001
 WORKDIR /home/obsei
 # Pre-install DuckDB's OpenSSL-backed extension so encrypted stores work offline.
 RUN python -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"
+EXPOSE 8765
 ENTRYPOINT ["obsei"]
 CMD ["--help"]

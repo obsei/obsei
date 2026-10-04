@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "obsei": {
+      "command": "uvx",
+      "args": [
+        "--prerelease",
+        "allow",
+        "--from",
+        "obsei[mcp]",
+        "obsei",
+        "mcp"
+      ]
+    }
+  }
+}

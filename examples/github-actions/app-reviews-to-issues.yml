@@ -1,0 +1,41 @@
+# Daily: App Store and Google Play reviews -> classify with your model -> GitHub issues + Slack.
+# The encrypted database is kept between runs with the Actions cache.
+name: Customer feedback
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: obsei
+  cancel-in-progress: false
+
+jobs:
+  feedback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: obsei.duckdb
+          key: obsei-db-${{ github.run_id }}
+          restore-keys: obsei-db-
+      - uses: obsei/obsei@master # pin to a release tag or commit SHA
+        with:
+          config: .github/obsei.yaml
+          extras: google
+        env:
+          OBSEI_DB_KEY: ${{ secrets.OBSEI_DB_KEY }}
+          OBSEI_PSEUDONYM_SALT: ${{ secrets.OBSEI_PSEUDONYM_SALT }}
+          OBSEI_EGRESS_MODE: private
+          OBSEI_EGRESS_ALLOW: api.github.com,hooks.slack.com,api.openai.com
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PLAY_TOKEN: ${{ secrets.PLAY_TOKEN }}

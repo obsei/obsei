@@ -61,10 +61,14 @@ until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`) or `hyb
 
 | | Built in |
 | --- | --- |
-| Sources | CSV, JSON Lines, declarative REST, App Store (any country), Google Play (official API), GitHub issues, RSS/Atom |
+| Sources | CSV, JSON Lines, declarative REST, webhooks, App Store (any country), App Store Connect, Google Play (official API), GitHub issues, Hacker News, Bluesky, YouTube, RSS/Atom; Reddit as a community plugin |
 | Enrichers | LLM classification (sentiment, intent, language, custom fields), cascade to a stronger model on low confidence |
 | Sinks | Webhook (HMAC-signed), Slack, GitHub issues, Parquet |
 | Privacy | Checksum-validated PII redaction for the Americas, Europe, UK, Asia-Pacific, India and Africa in any script; salted author pseudonyms; encrypted DuckDB; `obsei forget` and `obsei export` |
+
+Agents: `uv run obsei mcp` serves read-only MCP tools; the Claude Code plugin is
+`/plugin marketplace add obsei/obsei`. `obsei serve` adds webhook intake and MCP over HTTP. See
+[integrations](integrations/README.md) and the [docs](docs/src/content/docs).
 
 Pre-releases of 1.0 will be published as they land: `uvx --prerelease allow obsei doctor`, or
 `pip install --pre obsei`. The first stable public release is 1.0.0.

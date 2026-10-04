@@ -1,0 +1,30 @@
+version: 1
+store:
+  path: obsei.duckdb
+llms:
+  default:
+    base_url: https://api.openai.com/v1
+    model: gpt-5-mini
+    api_key_env: OPENAI_API_KEY
+    max_requests: 500
+pipelines:
+  - name: reviews
+    sources:
+      - key: ios
+        type: appstore
+        config: {app_id: "284882215", countries: [us, gb, de, fr, br, mx, jp, kr, in, id, ng, za]}
+      - key: android
+        type: playstore
+        config: {package_name: com.example.app, access_token_env: PLAY_TOKEN}
+    enrichers:
+      - type: classify
+        config: {llm: default}
+    sinks:
+      - type: github_issues
+        config:
+          repo: owner/repo
+          when: {classify.intent: [bug]}
+          max_rating: 2
+      - type: slack
+        config:
+          when: {classify.intent: [bug, churn_risk]}

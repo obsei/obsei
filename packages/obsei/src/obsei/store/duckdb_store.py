@@ -9,9 +9,10 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
-from typing import Self, TypeAlias
+from typing import Literal, Self, TypeAlias
 
 import duckdb
+from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record
@@ -50,6 +51,73 @@ MIGRATIONS: tuple[str, ...] = (
     );
     """,
 )
+
+
+GroupBy: TypeAlias = Literal[
+    "source", "instance", "sentiment", "intent", "lang", "rating", "day", "week", "month"
+]
+_LABEL = "json_extract_string(data, '$.enrichments.classify.value.{}')"
+_GROUPS: dict[GroupBy, str] = {
+    "source": "source_type",
+    "instance": "source_type || '/' || source_instance",
+    "sentiment": _LABEL.format("sentiment"),
+    "intent": _LABEL.format("intent"),
+    "lang": f"coalesce(json_extract_string(data, '$.lang'), {_LABEL.format('language')})",
+    "rating": "CAST(json_extract_string(data, '$.rating') AS DOUBLE)",
+    "day": "strftime(date_trunc('day', created_at), '%Y-%m-%d')",
+    "week": "strftime(date_trunc('week', created_at), '%Y-%m-%d')",
+    "month": "strftime(date_trunc('month', created_at), '%Y-%m')",
+}
+
+
+class Query(BaseModel):
+    """Filters for search and stats. Every filter is optional."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    text: str | None = Field(default=None, description="Case-insensitive substring.")
+    source: str | None = None
+    instance: str | None = None
+    since: datetime | None = None
+    until: datetime | None = None
+    min_rating: float | None = None
+    max_rating: float | None = None
+    sentiment: str | None = None
+    intent: str | None = None
+    lang: str | None = None
+
+    def where(self) -> tuple[str, list[SqlParam | float]]:
+        clauses, base = _filters(
+            source_type=self.source,
+            source_instance=self.instance,
+            since=self.since,
+            before=self.until,
+        )
+        params: list[SqlParam | float] = list(base)
+        if self.text:
+            clauses.append("contains(lower(json_extract_string(data, '$.text')), lower(?))")
+            params.append(self.text)
+        for op, rating in ((">=", self.min_rating), ("<=", self.max_rating)):
+            if rating is not None:
+                clauses.append(f"CAST(json_extract_string(data, '$.rating') AS DOUBLE) {op} ?")
+                params.append(rating)
+        labels: tuple[tuple[GroupBy, str | None], ...] = (
+            ("sentiment", self.sentiment),
+            ("intent", self.intent),
+            ("lang", self.lang),
+        )
+        for group, value in labels:
+            if value is not None:
+                clauses.append(f"{_GROUPS[group]} = ?")
+                params.append(value)
+        return (" WHERE " + " AND ".join(clauses)) if clauses else "", params
+
+
+@dataclass(frozen=True)
+class StatRow:
+    key: str | None
+    count: int
+    avg_rating: float | None
 
 
 class StoreError(Exception):
@@ -367,3 +435,24 @@ class Store:
             "DO UPDATE SET cursor = excluded.cursor, updated_at = excluded.updated_at",
             [pipeline, source, json.dumps(cursor), datetime.now(UTC)],
         )
+
+    def search(self, query: Query, *, limit: int = 20, newest_first: bool = True) -> list[Record]:
+        where, params = query.where()
+        order = "DESC" if newest_first else "ASC"
+        rows = self._con.execute(
+            f"SELECT data FROM records{where} ORDER BY created_at {order}, id LIMIT ?",  # noqa: S608
+            [*params, limit],
+        ).fetchall()
+        return [Record.model_validate_json(data) for (data,) in rows]
+
+    def stats(self, query: Query, group_by: GroupBy, *, limit: int = 50) -> list[StatRow]:
+        where, params = query.where()
+        key = _GROUPS[group_by]
+        ordering = "key" if group_by in ("day", "week", "month", "rating") else "n DESC, key"
+        rows = self._con.execute(
+            f"SELECT CAST({key} AS VARCHAR) AS key, count(*) AS n, "  # noqa: S608 whitelisted
+            f"avg(CAST(json_extract_string(data, '$.rating') AS DOUBLE)) FROM records{where} "
+            f"GROUP BY key ORDER BY {ordering} LIMIT ?",
+            [*params, limit],
+        ).fetchall()
+        return [StatRow(key=r[0], count=int(r[1]), avg_rating=r[2]) for r in rows]
