@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>obsei: Voice of Customer without violating privacy</title>
-    <meta name="description" content="Open-source, self-hosted, AI-native Voice of Customer. Collect feedback from every channel and language, redact personal data before anything is stored, and let your agents ask questions with cited evidence." />
+    <meta name="description" content="Open-source, self-hosted Voice of Customer. Feedback from every channel and language, personal data removed before it is stored, and AI agents that answer with cited evidence." />
     <meta name="theme-color" content="#238a91" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://obsei.com/" />
@@ -13,13 +13,15 @@
     <meta property="og:description" content="Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, models and agents." />
     <meta property="og:image" content="https://obsei.com/studio-light.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="/logo.png" />
+    <link rel="icon" href="/mark.svg" type="image/svg+xml" />
+    <link rel="icon" href="/logo.png" type="image/png" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <header class="nav wrap">
-      <a class="brand" href="/"><img src="/logo.png" alt="" width="36" height="36" /><span>obsei</span></a>
+      <a class="brand" href="/"><picture><source srcset="/mark-dark.svg" media="(prefers-color-scheme: dark)" /><img src="/mark.svg" alt="" width="38" height="38" /></picture><span>obsei</span></a>
       <nav aria-label="Main">
+        <a href="#how">How it works</a>
         <a href="https://docs.obsei.com/">Docs</a>
         <a href="https://docs.obsei.com/demo/">Demo</a>
         <a href="https://github.com/obsei/obsei" class="pill">GitHub</a>
@@ -31,86 +33,121 @@
         <div class="hero-text">
           <p class="eyebrow">Open source · Self-hosted · Apache-2.0</p>
           <h1>Voice of Customer <span>without violating privacy</span></h1>
-          <p class="lead">
-            Collect feedback from app stores, tickets, calls, surveys and communities, in every
-            language. obsei removes personal data before anything is stored, finds the themes that
-            matter, and lets your AI agents answer questions with cited evidence. All inside your
-            own infrastructure.
-          </p>
+          <p class="lead">Understand feedback from every channel and language. Personal data is gone before anything is stored, and nothing leaves your infrastructure.</p>
           <div class="actions">
             <a class="button" href="https://docs.obsei.com/quickstart/">Get started</a>
-            <a class="button ghost" href="https://docs.obsei.com/demo/">Explore the live demo</a>
+            <a class="button ghost" href="https://docs.obsei.com/demo/">Live demo</a>
           </div>
-          <pre class="install" aria-label="Install"><code><span class="prompt">$</span> uv tool install --prerelease allow "obsei[mcp]"
-<span class="prompt">$</span> obsei init &amp;&amp; obsei run</code></pre>
+          <pre class="install" aria-label="Install"><code><span class="prompt">$</span> uv tool install "obsei[mcp]>=1.0.0a1"
+<span class="prompt">$</span> obsei init &amp;&amp; obsei try</code></pre>
         </div>
-        <figure class="shot">
-          <picture>
-            <source srcset="/studio-dark.png" media="(prefers-color-scheme: dark)" />
-            <img src="/studio-light.png" width="1280" height="860" alt="obsei Studio showing themes, a knowledge graph of sources, languages and intents, and feedback in eight languages" />
-          </picture>
-          <figcaption>Studio with synthetic feedback in eight languages.</figcaption>
+
+        <figure class="redact" aria-label="Example: a review before and after obsei">
+          <div class="card raw">
+            <p class="card-head"><span class="tag">Arrives</span><span>App Store · ★★ · en</span></p>
+            <p>Hi, I'm <mark>Priya Sharma</mark>. Charged twice for order 4471. Call me on <mark>+91 98765 43210</mark> or <mark>priya@mail.com</mark></p>
+          </div>
+          <div class="arrow" aria-hidden="true"><span></span></div>
+          <div class="card clean">
+            <p class="card-head"><span class="tag ok">Stored</span><span>author usr_7f3a</span></p>
+            <p>Hi, I'm <b>&lt;NAME&gt;</b>. Charged twice for order 4471. Call me on <b>&lt;PHONE&gt;</b> or <b>&lt;EMAIL&gt;</b></p>
+            <ul class="chips">
+              <li>negative</li>
+              <li>billing</li>
+              <li>theme: Double charge</li>
+            </ul>
+          </div>
         </figure>
       </section>
 
-      <section class="flow wrap" aria-labelledby="how">
-        <h2 id="how">How it works</h2>
-        <ol>
-          <li><strong>Collect</strong><span>App Store, Google Play, Zendesk, Intercom, Gong, GitHub, Bluesky, SQL, webhooks, files, any REST or MCP source.</span></li>
-          <li><strong>Protect</strong><span>Emails, phones, cards, national IDs and optionally names are redacted at ingest; authors become pseudonyms.</span></li>
-          <li><strong>Understand</strong><span>Your model classifies sentiment and intent; stable themes and near-duplicates emerge across languages.</span></li>
-          <li><strong>Act</strong><span>Send to Slack, Jira, Linear, GitHub, webhooks or your warehouse. Only new or changed feedback.</span></li>
-          <li><strong>Ask</strong><span>Agents query through MCP, people use Studio or Slack, and every answer cites its records.</span></li>
-        </ol>
+      <ul class="stats wrap" aria-label="At a glance">
+        <li><strong>20+</strong><span>sources</span></li>
+        <li><strong>50+</strong><span>languages</span></li>
+        <li><strong>0</strong><span>telemetry</span></li>
+        <li><strong>Air-gapped</strong><span>by default</span></li>
+      </ul>
+
+      <section class="how wrap" aria-labelledby="how">
+        <h2 id="how">One pipeline, inside your walls</h2>
+        <div class="diagram">
+          <div class="lane">
+            <p class="lane-title">Collect</p>
+            <ul class="pills">
+              <li>App Store</li><li>Google Play</li><li>Zendesk</li><li>Intercom</li><li>Gong</li>
+              <li>GitHub</li><li>Bluesky</li><li>SQL</li><li>Webhooks</li><li>+ any REST or MCP</li>
+            </ul>
+          </div>
+          <div class="link" aria-hidden="true"><span></span></div>
+          <div class="boundary">
+            <p class="boundary-title">Your infrastructure</p>
+            <ol class="steps">
+              <li><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg><strong>Redact</strong><span>PII and names</span></li>
+              <li><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="15" r="3"/></svg><strong>Classify</strong><span>your own model</span></li>
+              <li><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="11" cy="17" r="2.5"/><path d="M8.4 7.3 14.6 6M7.3 9.2l2.6 5.6M16 8.3l-3.7 6.6"/></svg><strong>Theme</strong><span>across languages</span></li>
+              <li><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><strong>Store</strong><span>encrypted</span></li>
+            </ol>
+          </div>
+          <div class="link" aria-hidden="true"><span></span></div>
+          <div class="lane">
+            <p class="lane-title">Act</p>
+            <ul class="pills out">
+              <li>Studio</li><li>AI agents via MCP</li><li>Slack</li><li>Jira</li><li>Linear</li><li>Warehouse</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="ask wrap" aria-labelledby="ask">
+        <div>
+          <h2 id="ask">Your agents answer, <span>with receipts</span></h2>
+          <p class="sub">A read-only MCP server for Claude, ChatGPT, Cursor and VS Code. Every answer cites the records behind it, never the people.</p>
+          <a class="more" href="https://docs.obsei.com/guides/mcp/">Connect an agent →</a>
+        </div>
+        <figure class="chat" aria-label="Illustrative agent conversation">
+          <p class="q">Why are Japanese users unhappy this week?</p>
+          <div class="a">
+            <p>Mostly <b>login failing after the 2.3 update</b>: 14 reviews, up from 2. Double charges are second.</p>
+            <ul class="chips">
+              <li>rec_3f9a</li><li>rec_b210</li><li>rec_77c4</li>
+            </ul>
+          </div>
+        </figure>
+      </section>
+
+      <section class="studio wrap" aria-labelledby="studio">
+        <h2 id="studio">Every theme, every language, one view</h2>
+        <figure class="shot">
+          <picture>
+            <source srcset="/studio-dark.png" media="(prefers-color-scheme: dark)" />
+            <img src="/studio-light.png" width="1280" height="860" loading="lazy" alt="obsei Studio showing themes, a knowledge graph of sources, languages and intents, and feedback in eight languages" />
+          </picture>
+          <figcaption><a href="https://docs.obsei.com/demo/">Open the live demo</a> · synthetic feedback in eight languages</figcaption>
+        </figure>
       </section>
 
       <section class="features wrap" aria-labelledby="why">
-        <h2 id="why">Built for teams that cannot send customer data to someone else's cloud</h2>
+        <h2 id="why">Built for teams that can't ship customer data to someone else's cloud</h2>
         <div class="grid">
-          <article>
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
-            <h3>Private by design</h3>
-            <p>Checksum-validated PII redaction for the Americas, Europe, Asia-Pacific, India and Africa in any script. Encrypted database. Air-gapped by default.</p>
-          </article>
-          <article>
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="2"/></svg>
-            <h3>Bring your own</h3>
-            <p>Your sources, your keys, your model: Ollama, vLLM, Azure OpenAI, OpenAI, or Bedrock and Vertex through LiteLLM. Nothing leaves without your say-so.</p>
-          </article>
-          <article>
-            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="9" cy="18" r="2.5"/><path d="m8.2 7.2 7.6.6M7 8.4l1.4 7.2M16.6 10l-5.8 6.3"/></svg>
-            <h3>AI-native</h3>
-            <p>A read-only MCP server and a Claude plugin: agents answer "what are customers saying?" with quotes, record ids and no author identities.</p>
-          </article>
-          <article>
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0Z"/><path d="M3 12h18M12 3c2.5 2.7 3.7 5.7 3.7 9s-1.2 6.3-3.7 9c-2.5-2.7-3.7-5.7-3.7-9S9.5 5.7 12 3Z"/></svg>
-            <h3>Every language</h3>
-            <p>Feedback is classified and quoted in its own language. A local multilingual model groups the same issue across 50+ languages.</p>
-          </article>
-          <article>
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>
-            <h3>Themes you can trust</h3>
-            <p>Stable theme ids with trends, near-duplicate detection and k-anonymous views, so small groups never point at one customer.</p>
-          </article>
-          <article>
-            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-            <h3>Enterprise ready</h3>
-            <p>Role-based access, SSO-proxy support, an audit log for erasure, export and evidence access, scheduled pipelines and a signed container image.</p>
-          </article>
+          <article><h3>Bring your own model</h3><p>Ollama, vLLM, Azure OpenAI, OpenAI, Bedrock or Vertex.</p></article>
+          <article><h3>Privacy by region</h3><p>Checksum-validated national IDs for 7 regions, any script.</p></article>
+          <article><h3>k-anonymous views</h3><p>Small groups never point at one customer.</p></article>
+          <article><h3>Erasure and audit</h3><p>Forget, export and an audit log, built in.</p></article>
+          <article><h3>Enterprise access</h3><p>Roles, SSO proxy, signed webhooks and image.</p></article>
+          <article><h3>Plugins</h3><p>Add a source or sink in one small package.</p></article>
         </div>
       </section>
 
       <section class="laws wrap" aria-labelledby="laws">
         <h2 id="laws">Controls that support privacy law</h2>
-        <p>Access and erasure requests, retention, purpose tags and pseudonymisation map to rights in the
-        GDPR and UK GDPR, India's DPDP Act, Brazil's LGPD, California's CCPA, Japan's APPI, South
-        Africa's POPIA, China's PIPL and Singapore's PDPA. obsei makes no compliance claims: you remain
-        the data controller.</p>
+        <ul class="badges">
+          <li>GDPR</li><li>UK GDPR</li><li>DPDP</li><li>LGPD</li><li>CCPA</li><li>APPI</li><li>POPIA</li><li>PIPL</li><li>PDPA</li>
+        </ul>
+        <p class="fine">obsei makes no compliance claims; you remain the data controller.</p>
       </section>
 
       <section class="cta wrap">
         <h2>Try it in five minutes</h2>
-        <p>Ten languages of sample feedback, no API keys, nothing leaves your machine.</p>
+        <p>Sample feedback in ten languages. No API keys.</p>
         <div class="actions">
           <a class="button light" href="https://docs.obsei.com/quickstart/">Read the quickstart</a>
           <a class="button outline" href="https://github.com/obsei/obsei">Star on GitHub</a>
