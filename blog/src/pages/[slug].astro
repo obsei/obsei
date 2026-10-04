@@ -1,0 +1,154 @@
+---
+import { render } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Link from "../components/Link.astro";
+import { AUTHORS, SITE } from "../consts";
+import { publisher, person } from "../schema";
+import { formatDate, getPosts, ogUrl, postUrl, readingMinutes, tagLabel, tagUrl, type Post } from "../utils";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    // Posts are newest first: the previous (older) post is the next one in the list.
+    props: { post, prev: posts[i + 1], next: posts[i - 1] },
+  }));
+}
+
+interface Props {
+  post: Post;
+  prev?: Post;
+  next?: Post;
+}
+
+const { post, prev, next } = Astro.props;
+const { Content } = await render(post);
+const { title, description, pubDate, updatedDate, author, tags, cover, coverAlt } = post.data;
+const site = Astro.site!;
+const url = new URL(postUrl(post), site).href;
+const image = new URL(ogUrl(post), site).href;
+const minutes = readingMinutes(post.body);
+const authorUrl = AUTHORS[author]?.url;
+const editUrl = `${SITE.editBase}${post.filePath}`;
+const enc = encodeURIComponent;
+const share = [
+  { label: "X", href: `https://x.com/intent/post?text=${enc(title)}&url=${enc(url)}` },
+  { label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}` },
+  { label: "Bluesky", href: `https://bsky.app/intent/compose?text=${enc(`${title} ${url}`)}` },
+  { label: "Hacker News", href: `https://news.ycombinator.com/submitlink?u=${enc(url)}&t=${enc(title)}` },
+  { label: "Reddit", href: `https://www.reddit.com/submit?url=${enc(url)}&title=${enc(title)}` },
+  { label: "Email", href: `mailto:?subject=${enc(title)}&body=${enc(`${description}\n\n${url}`)}` },
+];
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${url}#post`,
+    headline: title,
+    description,
+    image: { "@type": "ImageObject", url: image, width: 1200, height: 630 },
+    datePublished: pubDate.toISOString(),
+    dateModified: (updatedDate ?? pubDate).toISOString(),
+    author: person(author),
+    publisher,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url,
+    keywords: tags.join(", "),
+    wordCount: (post.body ?? "").split(/\s+/).filter(Boolean).length,
+    timeRequired: `PT${minutes}M`,
+    inLanguage: "en",
+    isPartOf: { "@type": "Blog", "@id": `${SITE.url}/#blog`, name: SITE.name, url: `${SITE.url}/` },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Blog", item: `${SITE.url}/` },
+      { "@type": "ListItem", position: 2, name: title, item: url },
+    ],
+  },
+];
+---
+
+<Base
+  title={title}
+  description={description}
+  image={ogUrl(post)}
+  imageAlt={coverAlt}
+  article={{ published: pubDate, modified: updatedDate, author, tags }}
+  schema={schema}
+>
+  <article>
+    <header class="post-head wrap">
+      {tags[0] && <p class="eyebrow"><a href={tagUrl(tags[0])} class="eyebrow">{tagLabel(tags[0])}</a></p>}
+      <h1>{title}</h1>
+      <p class="lede">{description}</p>
+      <div class="byline">
+        <p class="meta">
+          <span>By {authorUrl ? <a href={authorUrl} rel="author">{author}</a> : author}</span>
+          <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+          {
+            updatedDate && (
+              <span>
+                Updated <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time>
+              </span>
+            )
+          }
+          <span>{minutes} min read</span>
+        </p>
+        <ul class="tags" aria-label="Tags">
+          {
+            tags.map((tag) => (
+              <li>
+                <a href={tagUrl(tag)}>{tagLabel(tag)}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </header>
+    <figure class="cover">
+      <img src={cover.src} width={cover.width} height={cover.height} alt={coverAlt} fetchpriority="high" />
+    </figure>
+    <div class="prose">
+      <Content components={{ a: Link }} />
+    </div>
+    <footer class="post-foot wrap">
+      <nav class="share" aria-label="Share this post">
+        <span>Share</span>
+        {share.map(({ label, href }) => <a href={href} rel="noopener">{label}</a>)}
+      </nav>
+      <p class="edit">
+        Spotted a mistake? <a href={editUrl}>Edit this post on GitHub</a>{" or "}<a href={`${SITE.repo}/discussions`}
+          >start a discussion</a
+        >.
+      </p>
+      <aside class="cta" aria-label="Try obsei">
+        <h2>Try obsei in five minutes</h2>
+        <p>Sample feedback in ten languages, redacted at ingest. No API keys.</p>
+        <div class="actions">
+          <a class="button light" href="https://docs.obsei.com/quickstart/">Read the quickstart</a>
+          <a class="button outline" href="https://docs.obsei.com/demo/">Live demo</a>
+        </div>
+      </aside>
+      {
+        (prev || next) && (
+          <nav class="pager" aria-label="More posts">
+            {prev && (
+              <a href={postUrl(prev)} rel="prev">
+                <small>← Previous</small>
+                {prev.data.title}
+              </a>
+            )}
+            {next && (
+              <a href={postUrl(next)} rel="next" class="next">
+                <small>Next →</small>
+                {next.data.title}
+              </a>
+            )}
+          </nav>
+        )
+      }
+    </footer>
+  </article>
+</Base>

@@ -1,0 +1,93 @@
+---
+// obsei from first release to the 1.0 alpha. Horizontal on wide screens, vertical on phones.
+const events = [
+  { date: "2020", iso: "2020", text: "Contributing to Haystack and Hugging Face" },
+  { date: "Dec 2020", iso: "2020-12", text: "obsei 0.0.2, first release on PyPI" },
+  { date: "2021", iso: "2021", text: "Oraika Technologies founded around obsei" },
+  {
+    date: "Jun 2022",
+    iso: "2022-06",
+    text: "Joint runner-up, RBI HARBINGER 2021",
+    note: "social media analysis for payment fraud",
+  },
+  { date: "Dec 2023", iso: "2023-12", text: "0.0.15, last legacy release", kind: "pause" },
+  { date: "2024–2026", iso: "2024/2026", text: "dormant", kind: "muted" },
+  { date: "Oct 2026", iso: "2026-10", text: "obsei 1.0 alpha", note: "private VoC for the agent era", kind: "now" },
+];
+const label =
+  "Timeline of obsei. " +
+  events.map((e) => `${e.date}: ${e.text}${e.note ? ` (${e.note})` : ""}.`).join(" ");
+---
+
+<figure class="fig wide">
+  <div class="tl" role="img" aria-label={label}>
+    <ol>
+      {
+        events.map((e) => (
+          <li class:list={["ev", e.kind]}>
+            <time datetime={e.iso.includes("/") ? undefined : e.iso}>{e.date}</time>
+            <span class="dot" />
+            <p>
+              <strong>{e.text}</strong>
+              {e.note && <span>{e.note}</span>}
+            </p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+  <figcaption>From open-source contributions to a privacy-first VoC platform: obsei, 2020 to 2026.</figcaption>
+</figure>
+
+<style>
+  .fig { margin: 1.4em 0 2em; }
+  .tl {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px 22px 22px;
+    box-shadow: var(--shadow);
+  }
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0 10px;
+  }
+  .ev { position: relative; display: grid; align-content: start; grid-template-rows: 20px 22px auto; justify-items: center; text-align: center; gap: 10px; margin: 0; }
+  .ev::before {
+    content: "";
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    width: calc(100% + 10px);
+    border-top: 2px solid var(--teal);
+  }
+  .ev:last-child::before { display: none; }
+  .ev.pause::before, .ev.muted::before { border-top-style: dashed; border-color: var(--line); border-top-width: 2px; }
+  time { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal-ink); line-height: 20px; height: 20px; white-space: nowrap; }
+  .dot { position: relative; z-index: 1; width: 16px; height: 16px; margin-top: 3px; border-radius: 50%; background: var(--surface); border: 3px solid var(--teal); }
+  p { margin: 0; display: grid; gap: 4px; font-size: 0.9rem; line-height: 1.35; }
+  p strong { font-weight: 650; color: var(--ink); }
+  p span { color: var(--muted); font-size: 0.82rem; }
+  .muted time, .muted strong { color: var(--muted); font-weight: 500; font-style: italic; }
+  .muted .dot { border-color: var(--line); border-style: dashed; }
+  .now .dot { width: 22px; height: 22px; margin-top: 0; border: 0; background: var(--grad); box-shadow: 0 0 0 5px var(--tint); }
+  .now p { background: var(--tint); border: 1px solid var(--teal); border-radius: 12px; padding: 8px 10px; }
+  .now strong { color: var(--teal-ink); }
+  figcaption { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 12px; }
+
+  @media (max-width: 760px) {
+    .tl { padding: 20px 18px 6px; }
+    ol { grid-template-columns: minmax(0, 1fr); }
+    .ev { grid-template-columns: 22px minmax(0, 1fr); grid-template-rows: auto auto; justify-items: start; text-align: left; gap: 2px 14px; padding-bottom: 18px; }
+    .ev::before { top: 14px; left: 10px; width: 0; height: 100%; border-top: 0; border-left: 2px solid var(--teal); }
+    .ev.pause::before, .ev.muted::before { border-top: 0; border-left: 2px dashed var(--line); }
+    .dot { grid-column: 1; grid-row: 1; margin-top: 2px; justify-self: center; }
+    .now .dot { margin-top: -1px; }
+    time { grid-column: 2; grid-row: 1; height: auto; }
+    p { grid-column: 2; grid-row: 2; }
+  }
+</style>

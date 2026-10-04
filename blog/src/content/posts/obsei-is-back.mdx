@@ -1,0 +1,177 @@
+---
+title: "Obsei is back: private Voice of Customer for the agent era"
+description: "Why we are reviving obsei after years of dormancy, what changed since our RBI HARBINGER recognition, and why customer feedback analytics now has to be private, open and agent-ready."
+pubDate: 2026-10-05
+author: Lalit Pagaria
+tags: [announcement, voice-of-customer, privacy, open-source]
+cover: ./obsei-is-back/cover.svg
+coverAlt: "obsei logo with the words: obsei is back, private Voice of Customer for the agent era"
+---
+
+import Timeline from "../../components/figures/Timeline.astro";
+import ThenNow from "../../components/figures/ThenNow.astro";
+import Principles from "../../components/figures/Principles.astro";
+
+Obsei went quiet for almost three years. Today it is back, rebuilt from scratch, and it will stay
+fully open source.
+
+This post is the story of how we got here, why I think Voice of Customer matters even more in the
+age of AI agents, and where obsei is going next.
+
+## Where obsei started
+
+Obsei began in December 2020 as a small open-source Python library ([first release on PyPI](https://pypi.org/project/obsei/0.0.2/)). The idea was simple: pull
+customer feedback from wherever it lives (app stores, Twitter, Reddit, support desks), run it
+through AI models for sentiment and classification, and send the result wherever a team works.
+That was before ChatGPT, when "AI" for most teams still meant training your own classifier.
+
+Obsei is also how I learned AI. I started by contributing to other open-source projects, above all
+[Haystack](https://github.com/deepset-ai/haystack), and sending a few patches to [Hugging Face](https://huggingface.co)
+libraries such as [Transformers](https://github.com/huggingface/transformers). Obsei grew out of that: transformers for sentiment and zero-shot classification, then
+small models I trained myself for the RBI hackathon, then early retrieval-augmented generation,
+all before most people had heard of a chatbot.
+
+Girish Patel and I founded [Oraika Technologies](https://oraika.com) to build a company around it. In 2022 obsei was named a joint
+runner-up in the [Reserve Bank of India](https://www.rbi.org.in)'s first global hackathon, HARBINGER 2021, under the problem
+statement *"Social media analysis and monitoring tool for detection of digital payment fraud and
+disruption"*. The jury picked 24 finalists from 363 proposals from India and 22 other countries.
+RBI described obsei as an AI-powered, real-time social media analytics tool that understands
+customer feedback in their native languages.
+
+<Timeline />
+
+## Why we stopped
+
+Recognition did not turn into a business. We tried open source, enterprise pilots, the
+entertainment industry and a lot of cold outreach. None of it stuck. Looking back, obsei taught me
+far more than AI: it was a full course in how to fail at sales, how to fail at marketing and how to
+fail at fundraising. Every one of those lessons shaped how obsei 1.0 is built and run.
+
+We closed Oraika and moved on:
+I now lead technology at [Bluepencil](https://bluepencil.com) and am building [Tashi](https://tashi.in), an end-to-end SaaS
+for the social sector.
+
+## Why now
+
+Even while nobody was working on it, obsei kept being used. The repository has more than
+[1,400 stars and 170 forks](https://github.com/obsei/obsei), and the old 0.0.x package is still
+downloaded from [PyPI](https://pypi.org/project/obsei/) every month. People still need this, and an
+unmaintained library that copies raw customer text around is not what they should be running in
+2026.
+
+The problem never went away. If anything, it got bigger:
+
+- **Customers talk everywhere.** Reviews, tickets, calls, communities and surveys, in dozens of
+  languages. No team reads it all.
+- **Feedback is personal data.** Names, emails, phone numbers, order ids and national IDs sit inside
+  almost every message. Copying all of it into yet another SaaS, or pasting it into a public
+  chatbot, is a privacy risk most teams can no longer accept.
+- **Agents need ground truth.** AI agents now write code, triage tickets and plan roadmaps. They
+  should answer "what are customers saying?" from real, cited evidence, not from a guess.
+- **Models finally fit on your own machines.** Small open models, and now *decision models* that
+  answer in milliseconds on a CPU, make private analysis practical for any team.
+
+So obsei 1.0 is not a polish of the old library. It is a new product built around one rule:
+**understand customers without moving their personal data anywhere it shouldn't go.**
+
+<ThenNow />
+
+## What obsei 1.0 is
+
+- **Private by design.** Personal data is redacted at ingest (checksum-validated IDs for seven
+  regions, optional names), authors become pseudonyms, the database is encrypted, and nothing
+  leaves your network unless you allow it ([privacy controls](https://docs.obsei.com/privacy/overview/)). Air-gapped is the default.
+- **Bring your own sources and models.** 20+ sources, from App Store to Zendesk to SQL, plus
+  plugins. Any OpenAI-compatible model, from Ollama to Azure, and [decision models](https://docs.obsei.com/guides/models/#decision-models) such as Julia-1
+  for fast labels with real probabilities.
+- **Themes across languages.** The same issue raised in English, Japanese and Portuguese becomes
+  one theme, with trends, near-duplicate detection and k-anonymous views so small groups never
+  point at one customer.
+- **Built for agents.** A read-only [MCP](https://modelcontextprotocol.io) server lets Claude, ChatGPT, Cursor and your own agents
+  query feedback with quotes and record ids, never identities.
+- **Act on it.** Route urgent bugs to Jira, billing to Slack and unsure cases to a human, based on
+  model confidence ([routing](https://docs.obsei.com/guides/routing/)).
+
+## Why you might use it
+
+A few situations where obsei earns its place. Each one links to a complete, tested example
+configuration.
+
+**You ship an app and a release goes wrong.** Reviews start piling up in six App Store countries
+and Google Play, in five languages. Obsei groups "can't log in after the update" in English,
+Spanish and Japanese into one rising theme, and posts it to Slack before the support queue
+explodes. ([app reviews example](https://github.com/obsei/obsei/blob/master/examples/app-reviews-multi-country.yaml))
+
+**You run support and every ticket lands in one queue.** A small decision model on a CPU reads each
+Zendesk or Freshdesk ticket once and answers typed questions: which team, how urgent, is the
+customer angry, do they want a refund. Urgent bugs go to Jira and on-call, billing goes to the
+billing channel, and anything the model is unsure about goes to a human.
+([routing example](https://github.com/obsei/obsei/blob/master/examples/decision-routing.yaml))
+
+```yaml
+route:
+  - review: [review]                     # the model is unsure: a person decides
+  - when: {classify.intent: {is: bug, min_confidence: 0.8}, classify.fields.urgency: {gte: today}}
+    sinks: [jira, oncall]
+  - default: [lake]                      # everything else: your warehouse
+```
+
+**You work in a regulated industry.** Banks, insurers, health and public services cannot send
+customer text to a third-party SaaS. Obsei redacts Aadhaar, PAN, CPF, IBANs, card numbers and more
+at ingest, encrypts the store, and runs air-gapped with your own model. This is the setting obsei
+grew up in: spotting payment-fraud chatter on social media for the RBI hackathon.
+([air-gapped example](https://github.com/obsei/obsei/blob/master/examples/enterprise-air-gapped.yaml))
+
+**You serve several markets.** One pipeline per region, each with its own intents, channel and
+privacy rules, while themes still show the issues they share.
+([India, Brazil and Japan example](https://github.com/obsei/obsei/blob/master/examples/regional-india-brazil-japan.yaml))
+
+**You build or use AI agents.** Point Claude, Cursor or your own agent at obsei's MCP server and ask
+"Why are Japanese users unhappy this week?". The answer comes back with quotes and record ids you
+can check, and never with a customer's identity. ([MCP guide](https://docs.obsei.com/guides/mcp/))
+
+```bash
+claude mcp add obsei -- obsei mcp
+```
+
+**You run a nonprofit or social program.** Surveys, field reports and helpline messages are
+feedback too, often from vulnerable people. Obsei lets a small team see what beneficiaries are
+saying, in their own language, without exposing who said it.
+([surveys example](https://github.com/obsei/obsei/blob/master/examples/surveys-typeform.yaml))
+
+**You maintain an open-source project.** Watch GitHub issues, Hacker News, Reddit and Bluesky for
+what users actually struggle with, and turn recurring themes into issues.
+([social listening example](https://github.com/obsei/obsei/blob/master/examples/social-listening.yaml))
+
+All examples are on the [Examples page](https://docs.obsei.com/examples/).
+
+You can try the [live demo](https://docs.obsei.com/demo/) or run it locally in five minutes with
+the [quickstart](https://docs.obsei.com/quickstart/).
+
+## Open source, for real
+
+Obsei is [Apache-2.0](https://github.com/obsei/obsei/blob/master/LICENSE) and will stay that way. There is no company behind it, no hosted upsell and no
+open-core split. I will work on it in my free time, in the open.
+
+<Principles />
+
+The goal is for obsei to outgrow me. I want it to become a project worth donating to a neutral
+foundation such as [LF AI & Data](https://lfaidata.foundation) or the
+[Apache Software Foundation](https://incubator.apache.org) (through its Incubator), so that the community, not a
+single vendor, decides its future. That needs contributors, users and honest feedback, and the groundwork is already in place: an
+[OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/obsei/obsei), signed releases, a
+[security policy](https://github.com/obsei/obsei/blob/master/SECURITY.md) and a
+[contributing guide](https://github.com/obsei/obsei/blob/master/CONTRIBUTING.md) with DCO sign-off. Ironic for
+a feedback tool, I know.
+
+## What's next
+
+- A release candidate after real-world connector checks, then 1.0 (see the
+  [roadmap](https://github.com/obsei/obsei/blob/master/ROADMAP.md)).
+- A new post here every week: practical guides, analyses of how themes shift across companies and
+  domains, and experiments with new models.
+
+If customer feedback matters to your team, and privacy matters too, give obsei a try, [open an
+issue](https://github.com/obsei/obsei/issues/new/choose), or [start a discussion](https://github.com/obsei/obsei/discussions). Obsei is back, and this time it is built to last.
+
+*Lalit Pagaria*

@@ -1,0 +1,11 @@
+---
+// Links in posts: external ones get rel="noopener" and open in the same tab.
+import { SITE } from "../consts";
+
+const { href, rel, ...attrs } = Astro.props;
+const url = typeof href === "string" && /^https?:\/\//i.test(href) ? new URL(href) : undefined;
+const external = url !== undefined && url.origin !== SITE.url;
+const relValue = external ? [...new Set([...(rel ? String(rel).split(/\s+/) : []), "noopener"])].join(" ") : rel;
+---
+
+<a href={href} rel={relValue} {...attrs}><slot /></a>
