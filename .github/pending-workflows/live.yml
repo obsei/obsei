@@ -1,0 +1,46 @@
+# Manual and weekly checks against real services. Move to .github/workflows/ to enable.
+name: Live checks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 5 * * 1"
+
+permissions:
+  contents: read
+
+env:
+  UV_VERSION: "0.12.23"
+
+jobs:
+  connectors:
+    name: Free connectors against live endpoints
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: false
+      - run: uv sync --locked
+      - run: uv run pytest packages/obsei/tests/live -v -rs
+        env:
+          OBSEI_LIVE: "1"
+
+  names:
+    name: Name redaction model (GLiNER)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: false
+      - run: uv sync --locked --all-extras
+      - run: uv run pytest packages/obsei/tests/test_names.py -v -rs
+        env:
+          OBSEI_LIVE: "1"
