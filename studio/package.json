@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit && esbuild src/main.ts --bundle --minify --format=esm --target=es2022 --outfile=../packages/obsei/src/obsei/studio_static/app.js && cp public/index.html public/styles.css ../packages/obsei/src/obsei/studio_static/"
+    "build": "tsc --noEmit && esbuild src/main.ts --bundle --minify --format=esm --target=es2022 --outfile=../packages/obsei/src/obsei/studio_static/app.js && cp public/index.html public/styles.css public/logo.png ../packages/obsei/src/obsei/studio_static/"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

@@ -1,4 +1,4 @@
-# obsei configuration. Docs: https://obsei.com/docs/config
+# obsei configuration. Docs: https://docs.obsei.com/configuration/
 # Secrets never go in this file: set the environment variables named by *_env fields.
 #   OBSEI_DB_KEY          encrypts the local database (16+ characters)
 #   OBSEI_PSEUDONYM_SALT  pseudonymises author handles (16+ characters); unset = authors dropped

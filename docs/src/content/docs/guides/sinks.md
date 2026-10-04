@@ -1,6 +1,8 @@
 ---
 title: Sinks
 description: Where obsei delivers feedback.
+sidebar:
+  order: 2
 ---
 
 Sinks receive only new or changed records, after redaction and enrichment. Outbound sinks are

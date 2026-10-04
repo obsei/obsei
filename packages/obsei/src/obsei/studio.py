@@ -16,7 +16,7 @@ from obsei._version import __version__
 from obsei.evidence import Evidence, ThemeInfo, evidence
 from obsei.store import GroupBy, Query, Store
 
-STATIC_FILES = ("index.html", "app.js", "styles.css")
+STATIC_FILES = ("index.html", "app.js", "styles.css", "logo.png")
 TIME_GROUPS: tuple[GroupBy, ...] = ("day", "week", "month")
 
 

@@ -62,3 +62,21 @@ ignores unless `--pre` is passed. In `release-please-config.json`:
 - after `1.0.0-alpha.1` is released, remove `release-as`; later releases bump the alpha number;
 - to start betas or release candidates, set `release-as` to `1.0.0-beta.1` or `1.0.0-rc.1`;
 - for the launch, set `release-as` to `1.0.0` and remove the `prerelease` settings.
+
+## For maintainers: websites
+
+obsei.com (`website/`, static, no build) and docs.obsei.com (`docs/`, Astro Starlight, which also
+serves the Studio demo at `/demo/`) are Cloudflare Pages projects connected to this repository. Each
+deploys on push to `master` and gives every pull request a preview URL.
+
+| Setting | `obsei-docs` | `obsei-site` |
+| --- | --- | --- |
+| Root directory | `docs` | `website` |
+| Build command | `npm ci && npm run build` | `exit 0` |
+| Output directory | `dist` | `.` |
+| Variables | `NODE_VERSION=22` | |
+| Custom domains | `docs.obsei.com` | `obsei.com`, `www.obsei.com` |
+
+Brand colours come from the logo: teal `#238a91` (text `#1b7a80`) and blue `#1a6d9d`; on dark
+backgrounds `#5cc6cc` and `#7fb4e0`. Regenerate the demo with `obsei demo --out docs/public/demo`
+and the Studio bundle with `cd studio && npm ci && npm run build`.

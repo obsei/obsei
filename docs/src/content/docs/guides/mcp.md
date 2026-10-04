@@ -1,6 +1,8 @@
 ---
 title: MCP and agents
 description: Let Claude, ChatGPT, Cursor and your own agents query feedback.
+sidebar:
+  order: 5
 ---
 
 `obsei mcp` (install `obsei[mcp]`) serves three read-only tools over stdio:

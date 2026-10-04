@@ -53,6 +53,7 @@ def test_static_export(store: Store, tmp_path: Path) -> None:
         "index.html",
         "app.js",
         "styles.css",
+        "logo.png",
         "data.json",
     }
     data = json.loads((tmp_path / "data.json").read_text(encoding="utf-8"))

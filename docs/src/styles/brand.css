@@ -1,0 +1,52 @@
+/* obsei brand: teal and blue from the logo. Dark is Starlight's default; light overrides below. */
+:root {
+  --sl-color-accent-low: #10363a;
+  --sl-color-accent: #3fa9b0;
+  --sl-color-accent-high: #a9e3e6;
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #e6f0f1;
+  --sl-color-gray-2: #c3d3d5;
+  --sl-color-gray-3: #9fb3b6;
+  --sl-color-gray-4: #5f7579;
+  --sl-color-gray-5: #34494d;
+  --sl-color-gray-6: #1c2f33;
+  --sl-color-black: #0f1a1d;
+  --obsei-grad: linear-gradient(120deg, #5cc6cc, #7fb4e0);
+}
+
+:root[data-theme="light"] {
+  --sl-color-accent-low: #d6eef0;
+  --sl-color-accent: #1b7a80;
+  --sl-color-accent-high: #0f4a4f;
+  --sl-color-white: #0f2a2e;
+  --sl-color-gray-1: #1c3337;
+  --sl-color-gray-2: #34494d;
+  --sl-color-gray-3: #4f6468;
+  --sl-color-gray-4: #7d9195;
+  --sl-color-gray-5: #c3d3d5;
+  --sl-color-gray-6: #e8f4f5;
+  --sl-color-gray-7: #f4f9f9;
+  --sl-color-black: #ffffff;
+  --obsei-grad: linear-gradient(120deg, #1b7a80, #1a6d9d);
+}
+
+.hero h1 {
+  background: var(--obsei-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.site-title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.card {
+  border-radius: 0.75rem;
+}
+
+:root .card-grid > .card:nth-child(n) {
+  --sl-card-border: var(--sl-color-accent);
+  --sl-card-bg: var(--sl-color-accent-low);
+}

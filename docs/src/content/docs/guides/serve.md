@@ -1,6 +1,8 @@
 ---
 title: Server and webhooks
 description: Run obsei as a service with webhook intake and remote MCP.
+sidebar:
+  order: 6
 ---
 
 ```bash
