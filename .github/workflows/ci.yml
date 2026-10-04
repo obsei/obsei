@@ -111,3 +111,18 @@ jobs:
           tags: obsei:ci
       - run: docker run --rm obsei:ci --version
       - run: docker run --rm obsei:ci doctor
+      - name: Quickstart in the image, offline with an encrypted store
+        run: |
+          mkdir voc && cd voc
+          OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
+          export OBSEI_DB_KEY OBSEI_PSEUDONYM_SALT
+          obsei() {
+            docker run --rm --network none -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
+              -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT obsei:ci "$@"
+          }
+          obsei init
+          obsei try
+          obsei run
+          obsei studio --out studio
+          test -s obsei.duckdb && test -s studio/index.html
+          if grep -q "Synchronisierung" obsei.duckdb; then echo "::error::store is not encrypted"; exit 1; fi
