@@ -73,3 +73,4 @@ class ThemeInfo(BaseModel):
     sources: dict[str, int]
     languages: dict[str, int]
     intents: dict[str, int]
+    weekly: list[int] = []

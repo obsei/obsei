@@ -32,7 +32,7 @@ from obsei.config import (
 from obsei.core.context import Context
 from obsei.core.record import Record
 from obsei.core.registry import PluginError
-from obsei.demo import demo_records, label_demo_themes
+from obsei.demo import demo_records, demo_snapshot, raw_demo_records
 from obsei.llm import EgressPolicy
 from obsei.llm.client import LlmError, LlmUnreachableError
 from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, LocalEmbedder
@@ -564,12 +564,13 @@ def demo(
     with Context(egress=EgressPolicy.from_env()) as ctx, Store(allow_unencrypted=True) as store:
         try:
             model = ctx.embedder(settings.embedder)
-            store.upsert(demo_records())
+            raw = raw_demo_records()
+            store.upsert(demo_records(raw))
             update_themes(store, model, settings)
         except (KeyError, OSError, RuntimeError) as exc:
             raise _fail(exc) from None
-        label_demo_themes(store, k=settings.k_anonymity)
-        studio.export(store, out, k=settings.k_anonymity, demo=True, embedder=model.model)
+        snap = demo_snapshot(store, raw, k=settings.k_anonymity, embedder=model.model)
+        studio.write(out, snap)
     typer.echo(f"wrote {out}/index.html; serve it with: python -m http.server -d {out}")
 
 

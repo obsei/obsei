@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -638,6 +638,29 @@ class Store(ThemeQueries):
             [*params, limit],
         ).fetchall()
         return [StatRow(key=r[0], count=int(r[1]), avg_rating=r[2], people=int(r[3])) for r in rows]
+
+    def placeholders(self, labels: Sequence[str]) -> tuple[dict[str, int], int]:
+        """How often each ``<LABEL>`` redaction placeholder occurs in stored text, and how many
+        records hold at least one. Aggregates only."""
+        found = (
+            "SELECT id, unnest(regexp_extract_all(json_extract_string(data, '$.text'), "
+            "'<([A-Z][A-Z0-9_]*)>', 1)) AS label FROM records"
+        )
+        rows = self._con.execute(
+            f"SELECT label, count(*) FROM ({found}) WHERE list_contains(?, label) "  # noqa: S608
+            "GROUP BY label ORDER BY 2 DESC, label",
+            [list(labels)],
+        ).fetchall()
+        records = self._con.execute(
+            f"SELECT count(DISTINCT id) FROM ({found}) WHERE list_contains(?, label)",  # noqa: S608
+            [list(labels)],
+        ).fetchone()
+        return {str(r[0]): int(r[1]) for r in rows}, int(records[0]) if records else 0
+
+    def author_count(self) -> int:
+        """Distinct author pseudonyms; raw handles are never stored."""
+        row = self._con.execute("SELECT count(DISTINCT author_pseudonym) FROM records").fetchone()
+        return int(row[0]) if row else 0
 
     def audit(self, action: str, detail: dict[str, str | int | None]) -> None:
         """Append to the accountability log. Never pass raw personal data in ``detail``."""

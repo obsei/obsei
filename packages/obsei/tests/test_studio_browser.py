@@ -217,9 +217,19 @@ def shoot(page: Page, name: str) -> None:
         page.screenshot(path=str(Path(folder) / f"{name}.png"), full_page=True)
 
 
+DEMO_ONLY = (".intro", ".before-after", ".ask-examples")
+
+
 def assert_studio_renders(page: Page, badge: str) -> None:
     page.wait_for_selector(".evidence li")
     assert page.text_content(".badge") == badge
+    brand = page.get_by_role("link", name="obsei website")
+    assert brand.get_attribute("href") == "https://obsei.com"
+    assert "noopener" in (brand.get_attribute("rel") or "")
+    expect(page.locator(".privacy")).to_be_visible()
+    assert page.locator(".privacy .stat").count() >= 3
+    assert page.locator(".themes .spark").count() == page.locator(".themes li").count()
+    assert page.locator(".columns li.peak").count() == 1
     assert page.locator(".kpi").count() == 4
     assert page.locator(".themes li").count() >= 3
     assert page.locator(".graph .node").count() >= 5
@@ -236,9 +246,30 @@ def test_demo_export_renders_and_is_interactive(
     page.goto(f"{static_site}/demo/")
     assert_studio_renders(page, "Demo data")
     assert page.locator("form.ask").count() == 0
-    assert page.locator(".graph .node.kind-source").count() == 5
-    expect(page.locator(".themes li").first.locator("strong")).to_have_text("Can't log in (en)")
-    expect(page.locator(".themes li").first.locator(".trend")).to_have_class(re.compile(r"\bup\b"))
+    assert page.locator(".graph .node.kind-source").count() == 6
+    for selector in DEMO_ONLY:
+        expect(page.locator(selector)).to_be_visible()
+    rising = page.locator(".themes li.rising")
+    assert rising.count() >= 1
+    expect(rising.first.locator("strong")).to_have_text(re.compile(r"^Can't log in"))
+    expect(rising.first.locator(".trend")).to_have_class(re.compile(r"\bup\b"))
+    expect(page.locator(".privacy mark.pii", has_text="<EMAIL>")).to_be_visible()
+    assert page.locator(".before-after li").count() == 3
+    expect(page.locator(".before-after blockquote.raw").first).to_contain_text("@example.com")
+
+    hints = page.locator(".intro .hints button")
+    assert hints.count() == 3
+    hints.nth(0).click()
+    expect(page.locator(".evidence-panel h2")).to_have_text(re.compile(r"^Evidence: Can't log in"))
+    hints.nth(1).click()
+    expect(page.locator(".graph .node.kind-lang.pinned")).to_have_count(1)
+    hints.nth(2).click()
+    expect(page.locator(".evidence li.cited mark.pii")).not_to_have_count(0)
+
+    citation = page.locator(".ask-examples button.cite").first
+    cited = citation.text_content()
+    citation.click()
+    expect(page.locator(f'.evidence li.cited[data-id="{cited}"]')).to_be_visible()
 
     second = page.locator(".themes li").nth(1)
     second.click()
@@ -262,6 +293,8 @@ def test_static_export_of_real_data_is_not_labelled_demo(
     w = open_page()
     w.page.goto(f"{static_site}/export/")
     assert_studio_renders(w.page, "Snapshot")
+    for selector in DEMO_ONLY:
+        assert w.page.locator(selector).count() == 0
     assert w.errors == []
 
 
@@ -303,6 +336,9 @@ def test_live_analyst_sees_evidence_with_safe_links(
     assert headers["x-frame-options"] == "DENY"
     assert_studio_renders(page, "Live")
     assert page.locator("form.ask").count() == 1
+    for selector in DEMO_ONLY:
+        assert page.locator(selector).count() == 0
+    expect(page.locator(".privacy")).to_contain_text("air-gapped")
 
     links = page.locator(".evidence a")
     assert links.count() > 0
@@ -326,6 +362,10 @@ def test_live_viewer_is_told_evidence_needs_analyst(
     page.goto(f"{live}/studio/")
     page.wait_for_selector("text=Evidence needs the analyst role.")
     assert page.text_content(".badge") == "Live"
+    expect(page.locator(".privacy")).to_be_visible()
+    assert page.get_by_role("link", name="obsei website").get_attribute("href") == (
+        "https://obsei.com"
+    )
     assert page.locator("form.ask").count() == 0
     assert page.locator(".evidence").count() == 0
     shoot(page, "live-viewer")

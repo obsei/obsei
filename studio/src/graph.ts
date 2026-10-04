@@ -165,12 +165,19 @@ function placeLabels(labels: Label[], scale: number): void {
   }
 }
 
+export interface GraphControl {
+  /** Marks the selected theme. */
+  select: (themeId: string | null) => void;
+  /** Keeps a node and its links highlighted until it is pinned again or another node is. */
+  pin: (nodeId: string) => void;
+}
+
 export function renderGraph(
   host: Element,
   nodes: GraphNode[],
   edges: GraphEdge[],
   onSelect: (themeId: string) => void,
-): (themeId: string | null) => void {
+): GraphControl {
   clear(host);
   const root = svg("svg", { viewBox: `0 0 ${WIDTH} ${HEIGHT}`, role: "img" });
   root.setAttribute("aria-label", "Knowledge graph of themes, sources, languages and intents");
@@ -203,29 +210,43 @@ export function renderGraph(
   }
   const nodeEls = new Map<string, SVGGElement>();
   const labels: Label[] = [];
+  let pinned: string | null = null;
+  const focus = (id: string | null) => {
+    const near = id ? (neighbours.get(id) ?? new Set<string>()) : new Set<string>();
+    root.classList.toggle("focused", id !== null);
+    for (const [other, g] of nodeEls) {
+      g.classList.toggle("near", id !== null && (other === id || near.has(other)));
+      g.classList.toggle("pinned", other === pinned);
+    }
+    for (const { el, edge } of edgeEls) el.classList.toggle("near", id !== null && (edge.source === id || edge.target === id));
+  };
+  const pin = (id: string) => {
+    pinned = pinned === id ? null : id;
+    focus(pinned);
+  };
   for (const p of points.values()) {
-    const group = svg("g", { class: `node kind-${p.node.kind}`, tabindex: 0 });
+    const group = svg("g", {
+      class: `node kind-${p.node.kind}`,
+      tabindex: 0,
+      role: "button",
+      "aria-label": `${KIND_LABELS[p.node.kind]}: ${p.node.label}, ${p.node.weight} records`,
+    });
     group.append(svg("circle", { cx: p.x, cy: p.y, r: p.r }));
     const text = svg("text", { "text-anchor": "middle" });
     labels.push({ point: p, text });
     const title = svg("title");
     title.textContent = `${KIND_LABELS[p.node.kind]}: ${p.node.label} (${p.node.weight})`;
     group.append(text, title);
-    const focus = (on: boolean) => {
-      const near = neighbours.get(p.node.id) ?? new Set<string>();
-      root.classList.toggle("focused", on);
-      for (const [id, g] of nodeEls) g.classList.toggle("near", on && (id === p.node.id || near.has(id)));
-      for (const { el, edge } of edgeEls)
-        el.classList.toggle("near", on && (edge.source === p.node.id || edge.target === p.node.id));
-    };
-    group.addEventListener("mouseenter", () => focus(true));
-    group.addEventListener("mouseleave", () => focus(false));
-    if (p.node.kind === "theme") {
-      group.addEventListener("click", () => onSelect(p.node.id));
-      group.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") onSelect(p.node.id);
-      });
-    }
+    group.addEventListener("mouseenter", () => focus(p.node.id));
+    group.addEventListener("mouseleave", () => focus(pinned));
+    const activate = () => (p.node.kind === "theme" ? onSelect(p.node.id) : pin(p.node.id));
+    group.addEventListener("click", activate);
+    group.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        activate();
+      }
+    });
     nodeLayer.append(group);
     nodeEls.set(p.node.id, group);
   }
@@ -242,7 +263,10 @@ export function renderGraph(
   };
   relabel();
   new ResizeObserver(relabel).observe(root);
-  return (themeId) => {
-    for (const [id, g] of nodeEls) g.classList.toggle("selected", id === themeId);
+  return {
+    select: (themeId) => {
+      for (const [id, g] of nodeEls) g.classList.toggle("selected", id === themeId);
+    },
+    pin,
   };
 }

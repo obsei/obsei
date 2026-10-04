@@ -15,12 +15,17 @@ from pydantic import BaseModel, Field
 from obsei._version import __version__
 from obsei.access import Role
 from obsei.evidence import Evidence, ThemeInfo, evidence
+from obsei.llm.egress import EgressMode
+from obsei.privacy import names
+from obsei.privacy.redact import PATTERNS
 from obsei.store import GroupBy, Query, Store
 
 STATIC_FILES = ("app.js", "styles.css", "logo.png")
 LIVE_DATA = '<meta name="obsei-data" content="api" />'
 EXPORT_DATA = '<meta name="obsei-data" content="data.json" />'
 TIME_GROUPS: tuple[GroupBy, ...] = ("day", "week", "month")
+FACET_GROUPS: tuple[GroupBy, ...] = ("source", "sentiment", "intent", "lang")
+PLACEHOLDERS: tuple[str, ...] = (*dict.fromkeys(p.label for p in PATTERNS), names.LABEL)
 
 
 class Bucket(BaseModel):
@@ -59,14 +64,48 @@ class GraphView(BaseModel):
     edges: list[Edge]
 
 
+class Privacy(BaseModel):
+    """What privacy protection did to this data, as aggregates only."""
+
+    k_anonymity: int
+    hidden_themes: int
+    hidden_groups: int
+    placeholders: dict[str, int]
+    redacted_records: int
+    pseudonymised_authors: int
+    egress: EgressMode | None = None
+
+
+class RedactionExample(BaseModel):
+    source: str
+    lang: str
+    raw: str
+    stored: str
+
+
+class AskExample(BaseModel):
+    question: str
+    answer: str
+    citations: list[str]
+
+
+class Showcase(BaseModel):
+    """Demo-only panels. Raw text exists only because the demo data is synthetic."""
+
+    redactions: list[RedactionExample]
+    answers: list[AskExample]
+
+
 class Snapshot(BaseModel):
     demo: bool = False
     embedder: str | None = None
     role: Role | None = None
     overview: Overview
+    privacy: Privacy
     themes: list[ThemeInfo]
     graph: GraphView
     evidence: dict[str, list[Evidence]] = Field(default_factory=dict)
+    showcase: Showcase | None = None
 
 
 def _buckets(store: Store, group_by: GroupBy, k: int) -> list[Bucket]:
@@ -88,6 +127,25 @@ def overview(store: Store, *, k: int) -> Overview:
         by_intent=_buckets(store, "intent", k),
         by_lang=_buckets(store, "lang", k),
         by_week=_buckets(store, "week", k)[-26:],
+    )
+
+
+def privacy(store: Store, *, k: int, egress: EgressMode | None = None) -> Privacy:
+    hidden_groups = sum(
+        1
+        for group_by in FACET_GROUPS
+        for r in store.stats(Query(), group_by, limit=200)
+        if r.key is not None and r.people < k
+    )
+    placeholders, redacted = store.placeholders(PLACEHOLDERS)
+    return Privacy(
+        k_anonymity=k,
+        hidden_themes=store.hidden_themes(k),
+        hidden_groups=hidden_groups,
+        placeholders=placeholders,
+        redacted_records=redacted,
+        pseudonymised_authors=store.author_count(),
+        egress=egress,
     )
 
 
@@ -117,10 +175,13 @@ def theme_evidence(store: Store, theme_id: str, *, k: int, limit: int = 20) -> l
     return [evidence(r) for r in records if r is not None]
 
 
-def snapshot(store: Store, *, k: int, evidence_per_theme: int = 6) -> Snapshot:
+def snapshot(
+    store: Store, *, k: int, evidence_per_theme: int = 6, egress: EgressMode | None = None
+) -> Snapshot:
     theme_list = themes(store, k=k)
     return Snapshot(
         overview=overview(store, k=k),
+        privacy=privacy(store, k=k, egress=egress),
         themes=theme_list,
         graph=graph(store, k=k),
         evidence={
@@ -133,14 +194,14 @@ def static_dir() -> Path:
     return Path(str(resources.files("obsei") / "studio_static"))
 
 
-def export(
-    store: Store, out: Path, *, k: int, demo: bool = False, embedder: str | None = None
-) -> None:
-    """Write a self-contained static Studio (HTML, JS, CSS and data.json) to ``out``.
+def export(store: Store, out: Path, *, k: int) -> None:
+    """Write a self-contained static Studio (HTML, JS, CSS and data.json) to ``out``."""
+    write(out, snapshot(store, k=k))
 
-    ``demo`` marks the snapshot as synthetic; only ``obsei demo`` sets it, along with the
-    ``embedder`` model that grouped the themes.
-    """
+
+def write(out: Path, data: Snapshot) -> None:
+    """Write the Studio files and ``data`` to ``out``. Only ``obsei demo`` writes a snapshot
+    marked ``demo``, with its embedder and showcase."""
     out.mkdir(parents=True, exist_ok=True)
     for name in STATIC_FILES:
         shutil.copyfile(static_dir() / name, out / name)
@@ -148,5 +209,4 @@ def export(
     if LIVE_DATA not in page:
         raise RuntimeError("studio_static/index.html has no data source marker")
     (out / "index.html").write_text(page.replace(LIVE_DATA, EXPORT_DATA), encoding="utf-8")
-    data = snapshot(store, k=k).model_copy(update={"demo": demo, "embedder": embedder})
     (out / "data.json").write_text(data.model_dump_json(), encoding="utf-8")

@@ -209,7 +209,7 @@ class Handlers:
 
     def _snapshot(self, role: Role | None) -> str:
         with self.shared_store() as s:
-            snap = studio.snapshot(s, k=self.k, evidence_per_theme=0)
+            snap = studio.snapshot(s, k=self.k, evidence_per_theme=0, egress=self.ctx.egress.mode)
         return snap.model_copy(update={"role": role}).model_dump_json()
 
     async def api_snapshot(self, request: Request) -> Response:

@@ -18,7 +18,8 @@ from obsei import studio
 from obsei.cli import app as cli
 from obsei.config import ObseiConfig
 from obsei.core.context import Context, LlmEndpoint
-from obsei.demo import ISSUES, demo_records, label_demo_themes
+from obsei.demo import ISSUES, demo_records, label_demo_themes, raw_demo_records
+from obsei.evidence import ThemeInfo
 from obsei.llm import EgressPolicy
 from obsei.llm.embed import LOCAL_MODEL, HashingEmbedder
 from obsei.serve import create_app
@@ -28,6 +29,22 @@ from obsei.themes import ThemesConfig, update_themes
 
 TOKEN = "api-token-0123456789"
 LOCAL = "http://127.0.0.1:8765"
+RAW_PII = (
+    "sam.rivera@example.com",
+    "090-1234-5678",
+    "4111 1111 1111 1111",
+    "482.915.736-46",
+    "DE89 3704",
+    "7181 9093 7865",
+    "٠٥٠١٢٣٤٥٦٧",
+    "+49 151",
+)
+DEMO_PLACEHOLDERS = {"EMAIL", "PHONE", "CARD", "IBAN", "IN_AADHAAR", "BR_CPF"}
+
+
+def rising(theme: ThemeInfo) -> bool:
+    """Studio's rule (charts.ts isRising)."""
+    return theme.last_7_days >= 3 and theme.last_7_days >= 2 * max(1, theme.previous_7_days)
 
 
 @pytest.fixture(scope="module")
@@ -39,14 +56,41 @@ def store() -> Store:
 
 
 def test_demo_is_redacted_and_multilingual(store: Store) -> None:
-    snap = studio.snapshot(store, k=5)
-    assert len({b.key for b in snap.overview.by_lang}) >= 8
+    snap = studio.snapshot(store, k=5, evidence_per_theme=50)
+    assert {b.key for b in snap.overview.by_lang} == {
+        "en", "es", "ja", "ko", "ar", "pt", "de", "hi", "it", "fr", "id"
+    }  # fmt: skip
     assert all(t.size >= 5 for t in snap.themes)
     texts = [e.text for items in snap.evidence.values() for e in items]
     assert any("<PHONE>" in t for t in texts)
-    assert not any("sam@example.com" in t or "090-1234" in t for t in texts)
+    dumped = snap.model_dump_json()
+    assert not any(pii in dumped for pii in RAW_PII)
+    assert all(any(pii in r.text for r in raw_demo_records()) for pii in RAW_PII)
     kept = {n.id for n in snap.graph.nodes}
     assert all(e.source in kept and e.target in kept for e in snap.graph.edges)
+
+
+def test_privacy_panel_aggregates(store: Store) -> None:
+    privacy = studio.snapshot(store, k=5).privacy
+    assert set(privacy.placeholders) == DEMO_PLACEHOLDERS
+    assert privacy.placeholders["PHONE"] == 3
+    assert privacy.redacted_records == 8
+    records = demo_records()
+    assert privacy.pseudonymised_authors == len({r.author.pseudonym for r in records if r.author})
+    assert 0 < privacy.pseudonymised_authors < len(records)
+    assert privacy.k_anonymity == 5
+    assert privacy.egress is None
+    strict = studio.snapshot(store, k=30)
+    assert strict.privacy.hidden_themes == len(studio.snapshot(store, k=1).themes)
+    assert strict.privacy.hidden_groups > 0
+
+
+def test_theme_weekly_counts_match_trends(store: Store) -> None:
+    for theme in studio.snapshot(store, k=5).themes:
+        assert len(theme.weekly) == 8
+        assert theme.weekly[-1] == theme.last_7_days
+        assert theme.weekly[-2] == theme.previous_7_days
+        assert sum(theme.weekly) <= theme.size
 
 
 def test_demo_labels_are_curated_and_sources_survive_k(store: Store) -> None:
@@ -65,11 +109,12 @@ def test_demo_labels_are_curated_and_sources_survive_k(store: Store) -> None:
         "zendesk",
         "survey",
         "bluesky",
+        "github",
     }
     login = [t for t in snap.themes if t.label and t.label.startswith("Can't log in")]
-    assert len(login) == 3
-    assert all(t.last_7_days > t.previous_7_days for t in login)
-    assert all(t.last_7_days <= t.previous_7_days for t in snap.themes if t not in login)
+    assert login
+    assert all(rising(t) for t in login)
+    assert not any(rising(t) for t in snap.themes if t not in login)
 
 
 class _Vector(list[float]):
@@ -115,9 +160,23 @@ def test_demo_with_local_embedder_merges_languages(tmp_path: Path) -> None:
     themes = {t["label"]: t for t in data["themes"]}
     assert set(themes) == {issue.label for issue in ISSUES.values()}
     login = themes["Can't log in"]
-    assert login["sources"] == {"appstore": 11, "playstore": 5}
-    assert set(login["languages"]) == {"en", "es", "ja"}
-    assert login["last_7_days"] > login["previous_7_days"]
+    assert login["sources"] == {"appstore": 12, "playstore": 11, "zendesk": 6}
+    assert set(login["languages"]) == {"en", "es", "ja", "ko", "ar"}
+    assert rising(ThemeInfo.model_validate(login))
+    assert not any(rising(ThemeInfo.model_validate(t)) for t in data["themes"] if t is not login)
+    assert data["demo"] is True
+    assert set(data["privacy"]["placeholders"]) == DEMO_PLACEHOLDERS
+    showcase = data["showcase"]
+    for example in showcase["redactions"]:
+        assert example["raw"] != example["stored"]
+        assert "<" in example["stored"]
+        assert not any(pii in example["stored"] for pii in RAW_PII)
+    shown = {e["id"] for items in data["evidence"].values() for e in items}
+    assert len(showcase["answers"]) == 3
+    for answer in showcase["answers"]:
+        assert answer["citations"]
+        assert set(answer["citations"]) <= shown
+    assert f"{login['last_7_days']} reports in the last 7 days" in showcase["answers"][0]["answer"]
 
 
 def test_demo_rejects_unknown_embedder(tmp_path: Path) -> None:
@@ -136,9 +195,9 @@ def test_demo_records_hashing_embedder(tmp_path: Path) -> None:
 
 
 def test_k_anonymity_hides_small_groups(store: Store) -> None:
-    snap = studio.snapshot(store, k=7)
+    snap = studio.snapshot(store, k=30)
     assert snap.themes == []
-    assert all(b.count >= 7 for b in snap.overview.by_lang)
+    assert all(b.count >= 30 for b in snap.overview.by_lang)
     assert studio.theme_evidence(store, "thm_unknown", k=1) == []
 
 
@@ -157,9 +216,11 @@ def test_static_export(store: Store, tmp_path: Path) -> None:
     assert '<meta name="obsei-data" content="data.json" />' in (tmp_path / "index.html").read_text(
         encoding="utf-8"
     )
-    studio.export(store, tmp_path, k=5, demo=True)
-    assert json.loads((tmp_path / "data.json").read_text(encoding="utf-8"))["demo"] is True
-    assert "author" not in (tmp_path / "data.json").read_text(encoding="utf-8")
+    assert data["showcase"] is None
+    assert data["privacy"]["egress"] is None
+    text = (tmp_path / "data.json").read_text(encoding="utf-8")
+    assert "psn_" not in text
+    assert not any(pii in text for pii in RAW_PII)
 
 
 def test_serve_studio_api(store: Store) -> None:
@@ -193,10 +254,13 @@ def test_serve_studio_api(store: Store) -> None:
     snap = client.get("/api/snapshot", headers=auth).json()
     assert snap["role"] == "admin"
     assert snap["demo"] is False
+    assert snap["showcase"] is None
+    assert snap["privacy"]["egress"] == "air_gapped"
+    assert set(snap["privacy"]["placeholders"]) == DEMO_PLACEHOLDERS
     theme = snap["themes"][0]["id"]
     assert snap["evidence"] == {theme_id: [] for theme_id in snap["evidence"]}
     items = client.get(f"/api/themes/{theme}", headers=auth).json()
-    assert len(items) == snap["themes"][0]["size"]
+    assert len(items) == snap["themes"][0]["size"] - snap["themes"][0]["duplicates"]
 
 
 def test_slack_signature() -> None:
