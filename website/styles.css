@@ -65,6 +65,7 @@ h1 { font-size: clamp(2.3rem, 4.6vw, 3.5rem); line-height: 1.04; letter-spacing:
 .prompt { color: var(--teal-ink); user-select: none; }
 
 .redact { margin: 0; display: grid; gap: 0; justify-items: stretch; }
+.redact-cap { color: var(--muted); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; margin-bottom: 14px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; box-shadow: var(--shadow); }
 .card p { margin: 0; }
 .card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 0.8rem; color: var(--muted); margin-bottom: 10px !important; }
@@ -147,6 +148,7 @@ footer a { color: var(--muted); }
 
 @media (max-width: 960px) {
   .hero, .ask { grid-template-columns: minmax(0, 1fr); gap: 36px; padding-top: 24px; }
+  .redact { width: 100%; max-width: 560px; justify-self: center; padding-top: 28px; border-top: 1px solid var(--line); }
   .diagram { grid-template-columns: minmax(0, 1fr); justify-items: stretch; }
   .link { width: 2px; height: 36px; justify-self: center; }
   .link span { animation-name: flow-down; }
