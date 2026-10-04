@@ -45,7 +45,7 @@ ignore = ["PLR0913"]
 python_version = "3.11"
 strict = true
 plugins = ["pydantic.mypy"]
-files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/template/src"]
+files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/template/src", "plugins/template/tests"]
 mypy_path = "packages/obsei/src:plugins/template/src"
 
 [[tool.mypy.overrides]]
@@ -54,6 +54,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["packages/obsei/tests", "plugins"]
+pythonpath = ["plugins/template/src"]
 addopts = "-ra --strict-markers"
 
 [tool.coverage.run]
