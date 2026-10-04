@@ -1,7 +1,8 @@
 """Stable themes: embed new feedback, mark near-duplicates, and assign each record to the nearest
 theme or start a new one. Theme ids never change; centroids drift slowly as records arrive.
 
-Only themes with at least ``k_anonymity`` records are labelled or shown.
+Only themes from at least ``k_anonymity`` people (distinct authors; records without an author
+count individually) are labelled or shown.
 """
 
 from __future__ import annotations
@@ -67,17 +68,19 @@ class _Label(BaseModel):
     description: str = Field(max_length=300)
 
 
-def keyword_label(samples: list[str], top: int = 3) -> str:
+def keyword_label(samples: list[str], top: int = 3, *, fallback: str = "Theme") -> str:
+    """Words shared by several samples; never verbatim text, which may identify one customer."""
     counts = Counter(
         w
         for text in samples
         for w in {m.casefold() for m in _WORD.findall(_PLACEHOLDER.sub(" ", text))}
     )
     words = [w for w, n in counts.most_common(top) if n > 1]
-    if words:
-        return ", ".join(words)
-    first = samples[0].strip().splitlines()[0] if samples and samples[0].strip() else "theme"
-    return first[:60]
+    return ", ".join(words) if words else fallback
+
+
+def fallback_label(theme_id: str) -> str:
+    return f"Theme {theme_id.removeprefix('thm_')[:6]}"
 
 
 def _llm_label(client: ChatClient, samples: list[str], language: str) -> _Label | None:
@@ -152,7 +155,9 @@ def update_themes(
         samples = store.theme_samples(theme_id)
         label = _llm_label(labeler, samples, config.label_language) if labeler else None
         if label is None:
-            store.label_theme(theme_id, keyword_label(samples), None)
+            store.label_theme(
+                theme_id, keyword_label(samples, fallback=fallback_label(theme_id)), None
+            )
         else:
             store.label_theme(theme_id, label.label, label.description)
         report.labeled += 1

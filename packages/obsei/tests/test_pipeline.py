@@ -179,3 +179,14 @@ def test_failure_in_later_batch_keeps_earlier_batches(store: Store) -> None:
 def test_enricher_must_return_one_result_per_record(store: Store) -> None:
     with pytest.raises(PipelineError, match="returned 0 results"):
         run(pipeline(ListSource(["a"]), enrichers=[BrokenEnricher()]), store)
+
+
+def test_erased_records_are_not_refetched_enriched_or_delivered(store: Store) -> None:
+    source = ListSource(["a", "b"], honour_cursor=False)
+    run(pipeline(source), store)
+    assert store.delete(source_type="list") == 2
+    sink, enricher = MemorySink(), LengthEnricher()
+    report = run(pipeline(source, sinks=[sink], enrichers=[enricher]), store)
+    assert report.fetched == 2
+    assert (report.stored, enricher.calls, sink.received) == (0, 0, [])
+    assert store.count() == 0

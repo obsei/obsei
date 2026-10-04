@@ -8,7 +8,7 @@ from typing import ClassVar, Literal
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
-from obsei.core.context import Context
+from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.sinks._common import body, env, matches, title
@@ -69,6 +69,7 @@ class JiraSink:
             params={"jql": jql, "maxResults": 1, "fields": "key"},
             headers=self.headers,
             auth=self.auth or httpx.USE_CLIENT_DEFAULT,
+            extensions=EGRESS,
         )
         response.raise_for_status()
         issues = response.json().get("issues", [])
@@ -96,6 +97,7 @@ class JiraSink:
                 json={"fields": self._fields(record)},
                 headers=self.headers,
                 auth=self.auth or httpx.USE_CLIENT_DEFAULT,
+                extensions=EGRESS,
             )
             if response.is_error:
                 result.errors.append(f"Jira returned {response.status_code}")

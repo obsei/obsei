@@ -20,6 +20,9 @@ from obsei.slackbot import SlackSignatureError, verify
 from obsei.store import Store
 from obsei.themes import ThemesConfig, update_themes
 
+TOKEN = "api-token-0123456789"
+LOCAL = "http://127.0.0.1:8765"
+
 
 @pytest.fixture(scope="module")
 def store() -> Store:
@@ -75,7 +78,7 @@ def test_serve_studio_api(store: Store) -> None:
             ]
         }
     )
-    client = TestClient(create_app(cfg, Context(), store, token="t"))
+    client = TestClient(create_app(cfg, Context(), store, token=TOKEN), base_url=LOCAL)
     page = client.get("/studio/")
     assert page.status_code == 200
     assert '<meta name="obsei-data" content="api" />' in page.text
@@ -86,7 +89,15 @@ def test_serve_studio_api(store: Store) -> None:
     denied = client.get("/api/snapshot")
     assert denied.status_code == 401
     assert denied.headers["x-content-type-options"] == "nosniff"
-    auth = {"Authorization": "Bearer t"}
+    # HostGuard sits inside SecurityHeaders, so its 421s are hardened too.
+    misdirected = client.get("/studio/", headers={"Host": "evil.example"})
+    assert misdirected.status_code == 421
+    assert misdirected.headers["x-frame-options"] == "DENY"
+    assert "frame-ancestors 'none'" in misdirected.headers["content-security-policy"]
+    cross = client.get("/studio/", headers={"Origin": "http://evil.example"})
+    assert cross.status_code == 421
+    assert cross.headers["x-content-type-options"] == "nosniff"
+    auth = {"Authorization": f"Bearer {TOKEN}"}
     snap = client.get("/api/snapshot", headers=auth).json()
     assert snap["role"] == "admin"
     assert snap["demo"] is False
@@ -104,6 +115,8 @@ def test_slack_signature() -> None:
         verify(secret, body, "1800000000", sig, now=now + 600)
     with pytest.raises(SlackSignatureError, match="invalid"):
         verify(secret, body + b"x", "1800000000", sig, now=now)
+    with pytest.raises(SlackSignatureError, match="invalid"):
+        verify(secret, body, "1800000000", "v0=ü", now=now)
 
 
 def test_slack_command_answers_in_background(store: Store, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -133,7 +146,7 @@ def test_slack_command_answers_in_background(store: Store, monkeypatch: pytest.M
             ]
         }
     )
-    client = TestClient(create_app(cfg, ctx, store, token="t"))
+    client = TestClient(create_app(cfg, ctx, store, token=TOKEN), base_url=LOCAL)
     body = urlencode(
         {"text": "top issues?", "response_url": "https://hooks.slack.com/commands/1"}
     ).encode()

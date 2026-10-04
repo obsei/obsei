@@ -269,3 +269,46 @@ def test_rss_rejects_entity_expansion() -> None:
     )
     with pytest.raises(Exception, match="Entit"):
         drain(source.fetch(None))
+
+
+def test_rest_pagination_sends_credentials_only_to_the_configured_origin() -> None:
+    seen: list[httpx.Request] = []
+    pages = {
+        "feedback.example.com": ("https://feedback.example.com:443/api/items?page=2", "a"),
+        "evil.example.net": (None, "c"),
+    }
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        if request.url.params.get("page") == "2":
+            return httpx.Response(
+                200, json={"data": [{"text": "b"}], "next": "https://evil.example.net/steal"}
+            )
+        nxt, text = pages[request.url.host]
+        return httpx.Response(200, json={"data": [{"text": text}], "next": nxt})
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("API_TOKEN", "s3cret")
+        mp.setenv("API_KEY", "k3y")
+        source = build(
+            "rest",
+            {
+                "url": "https://feedback.example.com/api/items",
+                "bearer_token_env": "API_TOKEN",
+                "secret_headers": {"X-Api-Key": "API_KEY"},
+                "headers": {"Accept": "application/json"},
+                "items_path": "data",
+                "pagination": "next_url",
+            },
+            ctx(handler),
+        )
+        records, _ = drain(source.fetch(None))
+    assert [r.text for r in records] == ["a", "b", "c"]
+    for request in seen[:2]:
+        assert request.headers["Authorization"] == "Bearer s3cret"
+        assert request.headers["X-Api-Key"] == "k3y"
+    leaked = seen[2]
+    assert leaked.url.host == "evil.example.net"
+    assert "Authorization" not in leaked.headers
+    assert "X-Api-Key" not in leaked.headers
+    assert leaked.headers["Accept"] == "application/json"

@@ -7,6 +7,7 @@ import sys
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from importlib import resources
 from itertools import islice
@@ -22,6 +23,7 @@ from obsei.config import (
     DEFAULT_PATH,
     ConfigError,
     ObseiConfig,
+    StoreConfig,
     build_context,
     build_pipeline,
     builtin_registry,
@@ -35,7 +37,15 @@ from obsei.llm.client import LlmError
 from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, HashingEmbedder, LocalEmbedder
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
 from obsei.runner import run_pipelines
-from obsei.store import DB_KEY_ENV_VAR, Store, StoreError, load_db_key
+from obsei.store import (
+    DB_KEY_ENV_VAR,
+    EXTENSIONS_ENV_VAR,
+    PREINSTALL_HINT,
+    Store,
+    StoreError,
+    httpfs_installed,
+    load_db_key,
+)
 from obsei.themes import ThemesConfig, update_themes
 
 app = typer.Typer(
@@ -86,8 +96,8 @@ def doctor() -> None:
     except StoreError as exc:
         key_status = f"invalid ({exc})"
     typer.echo(f"db key    {key_status}")
-    typer.echo(f"duckdb    {duckdb.__version__} (encryption: {_crypto_status()})")
     policy = EgressPolicy.from_env()
+    typer.echo(f"duckdb    {duckdb.__version__} (encryption: {_crypto_status(policy)})")
     allowed = f" (allow: {', '.join(sorted(policy.allowed_hosts))})" if policy.allowed_hosts else ""
     typer.echo(f"egress    {policy.mode}{allowed}")
     registry = builtin_registry()
@@ -98,14 +108,15 @@ def doctor() -> None:
             typer.echo(f"  {kind:<9}{', '.join(names)}")
 
 
-def _crypto_status() -> str:
-    row = (
-        duckdb.connect()
-        .execute("SELECT installed FROM duckdb_extensions() WHERE extension_name = 'httpfs'")
-        .fetchone()
-    )
-    if row and row[0]:
-        return "ready"
+def _crypto_status(policy: EgressPolicy) -> str:
+    directory = os.environ.get(EXTENSIONS_ENV_VAR)
+    where = f" in {directory}" if directory else ""
+    if httpfs_installed():
+        return f"ready, httpfs{where}"
+    if policy.mode == "air_gapped":
+        return f"httpfs extension not installed{where}; air-gapped mode never downloads it: " + (
+            PREINSTALL_HINT
+        )
     return "httpfs extension not installed; it is installed on first encrypted write"
 
 
@@ -116,7 +127,11 @@ def schema() -> None:
 
 
 DbOption = Annotated[
-    Path, typer.Option("--db", envvar="OBSEI_DB", help="Path to the obsei DuckDB file.")
+    Path | None,
+    typer.Option("--db", envvar="OBSEI_DB", help="DuckDB file (default: store.path in config)."),
+]
+ConfigOption = Annotated[
+    Path, typer.Option("--config", "-c", envvar="OBSEI_CONFIG", help="Path to obsei.yaml.")
 ]
 API_TOKEN_ENV_VAR = "OBSEI_API_TOKEN"  # noqa: S105
 
@@ -126,14 +141,74 @@ UnencryptedOption = Annotated[
 ]
 
 
-def _open_store(db: Path, unencrypted: bool, *, read_only: bool = False) -> Store:
+def _fail(message: object) -> typer.Exit:
+    typer.echo(f"error: {message}", err=True)
+    return typer.Exit(2)
+
+
+def _load(config: Path) -> ObseiConfig:
+    try:
+        return load_config(config)
+    except ConfigError as exc:
+        raise _fail(exc) from None
+
+
+def _open_store(
+    db: Path,
+    unencrypted: bool,
+    *,
+    read_only: bool = False,
+    egress: EgressPolicy | None = None,
+    must_exist: bool = False,
+) -> Store:
+    """Air-gapped egress never downloads DuckDB extensions."""
+    if must_exist and not db.exists():
+        raise _fail(f"no obsei store at {db}; pass --config or --db")
+    mode = (egress or EgressPolicy.from_env()).mode
     try:
         return Store(
-            db, encryption_key=load_db_key(), allow_unencrypted=unencrypted, read_only=read_only
+            db,
+            encryption_key=load_db_key(),
+            allow_unencrypted=unencrypted,
+            read_only=read_only,
+            install_extensions=mode != "air_gapped",
         )
     except StoreError as exc:
-        typer.echo(f"error: {exc}", err=True)
-        raise typer.Exit(2) from None
+        raise _fail(exc) from None
+
+
+@dataclass(frozen=True)
+class StoreSettings:
+    path: Path
+    unencrypted: bool
+    egress: EgressPolicy
+    k_anonymity: int
+
+
+def _store_settings(config: Path, db: Path | None, unencrypted: bool = False) -> StoreSettings:
+    """From the config when it exists (an explicit missing ``--config`` is an error); ``--db``
+    overrides ``store.path``."""
+    if config.exists() or config != DEFAULT_PATH:
+        cfg = _load(config)
+        return StoreSettings(
+            db or cfg.store.path,
+            unencrypted or cfg.store.unencrypted,
+            cfg.egress or EgressPolicy.from_env(),
+            cfg.themes.k_anonymity,
+        )
+    return StoreSettings(
+        db or StoreConfig().path, unencrypted, EgressPolicy.from_env(), ThemesConfig().k_anonymity
+    )
+
+
+def _open_existing(settings: StoreSettings, *, read_only: bool = False) -> Store:
+    return _open_store(
+        settings.path,
+        settings.unencrypted,
+        read_only=read_only,
+        egress=settings.egress,
+        must_exist=True,
+    )
 
 
 def _author_pseudonym(handle: str) -> str:
@@ -146,7 +221,8 @@ def _author_pseudonym(handle: str) -> str:
 
 @app.command()
 def forget(
-    db: DbOption = Path("obsei.duckdb"),
+    config: ConfigOption = DEFAULT_PATH,
+    db: DbOption = None,
     author: Annotated[str | None, typer.Option(help="Author handle to erase.")] = None,
     source: Annotated[str | None, typer.Option(help="Source type to erase.")] = None,
     instance: Annotated[str | None, typer.Option(help="Source instance (with --source).")] = None,
@@ -155,14 +231,18 @@ def forget(
     ] = None,
     unencrypted: UnencryptedOption = False,
 ) -> None:
-    """Erase records by author, source or age (erasure requests and retention)."""
+    """Erase records by author, source or age (erasure requests and retention).
+
+    Erased records and authors are remembered (by record id and pseudonym) and never stored
+    again."""
     if author is None and source is None and older_than_days is None:
         typer.echo("error: pass --author, --source or --older-than-days", err=True)
         raise typer.Exit(2)
     before = None
     if older_than_days is not None:
         before = datetime.now(UTC) - timedelta(days=older_than_days)
-    with _open_store(db, unencrypted) as store:
+    settings = _store_settings(config, db, unencrypted)
+    with _open_existing(settings) as store:
         deleted = store.delete(
             author_pseudonym=_author_pseudonym(author) if author else None,
             source_type=source,
@@ -184,12 +264,13 @@ def forget(
 
 @app.command()
 def audit(
-    db: DbOption = Path("obsei.duckdb"),
+    config: ConfigOption = DEFAULT_PATH,
+    db: DbOption = None,
     limit: Annotated[int, typer.Option(min=1)] = 50,
     unencrypted: UnencryptedOption = False,
 ) -> None:
     """Show the erasure and export log (newest first)."""
-    with _open_store(db, unencrypted, read_only=True) as store:
+    with _open_existing(_store_settings(config, db, unencrypted), read_only=True) as store:
         for at, action, detail in store.audit_log(limit=limit):
             typer.echo(f"{at.isoformat()}  {action:<7} {detail}")
 
@@ -197,7 +278,8 @@ def audit(
 @app.command()
 def export(
     author: Annotated[str, typer.Option(help="Author handle whose records to export.")],
-    db: DbOption = Path("obsei.duckdb"),
+    config: ConfigOption = DEFAULT_PATH,
+    db: DbOption = None,
     out: Annotated[
         Path | None, typer.Option(help="Write JSON Lines here (default stdout).")
     ] = None,
@@ -205,7 +287,7 @@ def export(
 ) -> None:
     """Export one author's records as JSON Lines (access requests)."""
     pseudonym = _author_pseudonym(author)
-    with _open_store(db, unencrypted) as store:
+    with _open_existing(_store_settings(config, db, unencrypted)) as store:
         lines = [r.model_dump_json() for r in store.iter_records(author_pseudonym=pseudonym)]
         store.audit("export", {"author_pseudonym": pseudonym, "records": len(lines)})
     if out is None:
@@ -216,24 +298,9 @@ def export(
         typer.echo(f"exported {len(lines)} record(s) to {out}", err=True)
 
 
-ConfigOption = Annotated[
-    Path, typer.Option("--config", "-c", envvar="OBSEI_CONFIG", help="Path to obsei.yaml.")
-]
 PipelineOption = Annotated[
     list[str] | None, typer.Option("--pipeline", "-p", help="Pipeline(s) to use (default all).")
 ]
-
-
-def _fail(message: object) -> typer.Exit:
-    typer.echo(f"error: {message}", err=True)
-    return typer.Exit(2)
-
-
-def _load(config: Path) -> ObseiConfig:
-    try:
-        return load_config(config)
-    except ConfigError as exc:
-        raise _fail(exc) from None
 
 
 @app.command()
@@ -281,7 +348,7 @@ def _run_once(config: Path, pipeline: list[str] | None, db: Path | None) -> bool
     names = pipeline or [p.name for p in cfg.pipelines]
     with (
         build_context(cfg) as ctx,
-        _open_store(db or cfg.store.path, cfg.store.unencrypted) as store,
+        _open_store(db or cfg.store.path, cfg.store.unencrypted, egress=ctx.egress) as store,
     ):
         outcomes = run_pipelines(cfg, ctx, store, names)
     for outcome in outcomes:
@@ -331,13 +398,6 @@ def try_(
                     )
 
 
-def _store_settings(config: Path, db: Path | None) -> tuple[Path, bool]:
-    if config.exists():
-        cfg = _load(config)
-        return db or cfg.store.path, cfg.store.unencrypted
-    return db or Path("obsei.duckdb"), False
-
-
 @app.command()
 def mcp(
     config: ConfigOption = DEFAULT_PATH,
@@ -348,14 +408,14 @@ def mcp(
         from obsei.mcp_server import create_server  # noqa: PLC0415
     except ImportError:
         raise _fail("MCP support needs: pip install 'obsei[mcp]'") from None
-    path, unencrypted = _store_settings(config, db)
+    settings = _store_settings(config, db)
 
     @contextmanager
     def read_only() -> Iterator[Store]:
-        with _open_store(path, unencrypted, read_only=True) as store:
+        with _open_store(settings.path, settings.unencrypted, read_only=True) as store:
             yield store
 
-    create_server(read_only).run("stdio")
+    create_server(read_only, k_anonymity=settings.k_anonymity).run("stdio")
 
 
 @app.command()
@@ -376,7 +436,10 @@ def serve(
     has_access = token or cfg.access.users or cfg.access.trusted_proxy
     if not has_access and host not in ("127.0.0.1", "::1", "localhost"):
         raise _fail(f"set {API_TOKEN_ENV_VAR} or configure access before binding to {host}")
-    with build_context(cfg) as ctx, _open_store(cfg.store.path, cfg.store.unencrypted) as store:
+    with (
+        build_context(cfg) as ctx,
+        _open_store(cfg.store.path, cfg.store.unencrypted, egress=ctx.egress) as store,
+    ):
         try:
             web = create_app(cfg, ctx, store, token=token, host=host)
         except (ConfigError, PluginError, OSError, RuntimeError) as exc:
@@ -404,7 +467,10 @@ def themes(
     """Embed new feedback, update stable themes and list them (k-anonymous)."""
     cfg, path = _themes_context(config, db)
     settings = cfg.themes
-    with build_context(cfg) as ctx, _open_store(path, cfg.store.unencrypted) as store:
+    with (
+        build_context(cfg) as ctx,
+        _open_store(path, cfg.store.unencrypted, egress=ctx.egress) as store,
+    ):
         try:
             labeler = ctx.chat(settings.labeler) if settings.labeler else None
             report = update_themes(store, ctx.embedder(settings.embedder), settings, labeler)

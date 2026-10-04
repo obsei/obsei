@@ -33,11 +33,17 @@ def record(native_id: str, text: str, intent: str = "bug", rating: float = 1) ->
 
 
 def build(
-    name: str, config: dict[str, object], handler: Handler, policy: EgressPolicy = HYBRID
+    name: str,
+    config: dict[str, object],
+    handler: Handler,
+    policy: EgressPolicy = HYBRID,
+    *,
+    follow_redirects: bool = False,
 ) -> Sink:
     registry = Registry()
     register(registry)
-    context = Context(http=httpx.Client(transport=httpx.MockTransport(handler)), egress=policy)
+    http = httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=follow_redirects)
+    context = Context(http=http, egress=policy)
     return registry.sink(name).create(json.loads(json.dumps(config)), context)
 
 
@@ -125,3 +131,55 @@ def test_parquet_overwrites_retried_batch(tmp_path: Path) -> None:
     assert len(files) == 1
     rows = duckdb.read_parquet(str(files[0])).select("text, author_pseudonym").fetchall()
     assert sorted(rows) == [("Lento", None), ("遅い", None)]
+
+
+def test_egress_applies_to_every_redirect_hop(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HOOK_SECRET", "topsecret")
+    hosts: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        hosts.append(request.url.host)
+        if request.url.host == "hooks.internal":
+            return httpx.Response(307, headers={"Location": "https://collector.example.com/x"})
+        return httpx.Response(204)
+
+    sink = build(
+        "webhook",
+        {"url": "http://hooks.internal/obsei", "secret_env": "HOOK_SECRET"},
+        handler,
+        EgressPolicy(),
+        follow_redirects=True,
+    )
+    with pytest.raises(EgressError, match=r"collector\.example\.com"):
+        sink.send([record("1", "Crash")])
+    assert hosts == ["hooks.internal"]
+
+
+def test_cross_origin_redirects_drop_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HOOK_SECRET", "topsecret")
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        if request.url.host == "hooks.internal":
+            return httpx.Response(307, headers={"Location": "http://other.internal/x"})
+        return httpx.Response(204)
+
+    sink = build(
+        "webhook",
+        {
+            "url": "http://hooks.internal/obsei",
+            "secret_env": "HOOK_SECRET",
+            "headers": {"X-Api-Key": "k", "Authorization": "Bearer k"},
+        },
+        handler,
+        follow_redirects=True,
+    )
+    assert sink.send([record("1", "Crash")]).sent == 1
+    first, hop = seen
+    assert first.headers["X-Api-Key"] == "k"
+    assert "X-Obsei-Signature-256" in first.headers
+    assert hop.url.host == "other.internal"
+    assert hop.content == first.content
+    for name in ("X-Api-Key", "Authorization", "X-Obsei-Signature-256"):
+        assert name not in hop.headers

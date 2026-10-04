@@ -125,3 +125,98 @@ def test_core_cli_works_without_optional_extras() -> None:
 def test_version_is_a_release_version() -> None:
     """release-please rewrites only the semver part, so a suffix like .dev0 would ship."""
     assert not Version(__version__).is_devrelease
+
+
+def _project(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, k: int = 5) -> Path:
+    """A project whose obsei.yaml keeps the store at data/voc.duckdb."""
+    monkeypatch.setenv("OBSEI_PSEUDONYM_SALT", SALT)
+    monkeypatch.delenv("OBSEI_DB_KEY", raising=False)
+    monkeypatch.delenv("OBSEI_DB", raising=False)
+    monkeypatch.delenv("OBSEI_CONFIG", raising=False)
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "data").mkdir()
+    (tmp_path / "feedback.csv").write_text("id,text\n1,slow app\n2,crash\n", encoding="utf-8")
+    config = tmp_path / "obsei.yaml"
+    config.write_text(
+        "store: {path: data/voc.duckdb, unencrypted: true}\n"
+        f"themes: {{k_anonymity: {k}}}\n"
+        "pipelines:\n"
+        "  - name: p\n"
+        "    sources:\n"
+        "      - {key: s, type: csv, config: {path: feedback.csv}}\n",
+        encoding="utf-8",
+    )
+    return config
+
+
+def test_forget_export_and_audit_use_the_configured_store(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    config = _project(tmp_path, monkeypatch)
+    assert runner.invoke(app, ["run", "-c", str(config)]).exit_code == 0
+    result = runner.invoke(app, ["forget", "--source", "csv"])
+    assert result.exit_code == 0, result.output
+    assert "deleted 2 record(s)" in result.output
+    assert runner.invoke(app, ["export", "--author", "@x", "-c", str(config)]).exit_code == 0
+    assert "forget" in runner.invoke(app, ["audit", "--config", str(config)]).output
+    assert not (tmp_path / "obsei.duckdb").exists()
+
+    assert runner.invoke(app, ["run", "-c", str(config)]).exit_code == 0
+    with Store(tmp_path / "data" / "voc.duckdb", allow_unencrypted=True) as store:
+        assert store.count() == 0
+
+
+def test_forget_export_and_audit_never_create_a_store(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("OBSEI_PSEUDONYM_SALT", SALT)
+    monkeypatch.chdir(tmp_path)
+    missing = tmp_path / "missing.duckdb"
+    for args in (
+        ["forget", "--source", "csv"],
+        ["export", "--author", "@x"],
+        ["audit"],
+        ["forget", "--source", "csv", "--db", str(missing)],
+    ):
+        result = runner.invoke(app, [*args, "--unencrypted"])
+        assert result.exit_code == 2, args
+        assert "no obsei store" in result.output
+    assert not (tmp_path / "obsei.duckdb").exists()
+    assert not missing.exists()
+    missing_config = runner.invoke(app, ["audit", "-c", str(tmp_path / "nope.yaml")])
+    assert missing_config.exit_code == 2
+    assert "not found" in missing_config.output
+
+
+def test_mcp_uses_the_configured_k_anonymity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    pytest.importorskip("mcp")
+    from obsei import mcp_server  # noqa: PLC0415
+
+    config = _project(tmp_path, monkeypatch, k=3)
+    captured: dict[str, object] = {}
+
+    class FakeServer:
+        def run(self, transport: str) -> None:
+            captured["transport"] = transport
+
+    def fake_create_server(opener: object, *, k_anonymity: int = 5) -> FakeServer:
+        captured["k"] = k_anonymity
+        return FakeServer()
+
+    monkeypatch.setattr(mcp_server, "create_server", fake_create_server)
+    result = runner.invoke(app, ["mcp", "-c", str(config)])
+    assert result.exit_code == 0, result.output
+    assert captured == {"k": 3, "transport": "stdio"}
+
+
+def test_doctor_explains_air_gapped_extension_preinstall(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("OBSEI_DUCKDB_EXTENSIONS", str(tmp_path))
+    monkeypatch.setenv("OBSEI_EGRESS_MODE", "air_gapped")
+    result = runner.invoke(app, ["doctor"])
+    assert result.exit_code == 0
+    assert f"httpfs extension not installed in {tmp_path}" in result.output
+    assert "never downloads" in result.output
