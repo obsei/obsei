@@ -67,6 +67,7 @@ class OpenAICompatibleClient:
         model: str,
         policy: EgressPolicy,
         api_key_env: str | None = None,
+        api_key_header: str = "Authorization",
         budget: RequestBudget | None = None,
         timeout: float = 60.0,
         transport: httpx.BaseTransport | None = None,
@@ -77,7 +78,8 @@ class OpenAICompatibleClient:
             key = os.environ.get(api_key_env)
             if not key:
                 raise LlmError(f"{api_key_env} is not set")
-            headers["Authorization"] = f"Bearer {key}"
+            bearer = api_key_header.lower() == "authorization"
+            headers[api_key_header] = f"Bearer {key}" if bearer else key
         self._model = model
         self._budget = budget
         self._http = httpx.Client(

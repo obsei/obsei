@@ -165,7 +165,29 @@ def forget(
             source_instance=instance,
             before=before,
         )
+        store.audit(
+            "forget",
+            {
+                "author_pseudonym": _author_pseudonym(author) if author else None,
+                "source": source,
+                "instance": instance,
+                "older_than_days": older_than_days,
+                "deleted": deleted,
+            },
+        )
     typer.echo(f"deleted {deleted} record(s)")
+
+
+@app.command()
+def audit(
+    db: DbOption = Path("obsei.duckdb"),
+    limit: Annotated[int, typer.Option(min=1)] = 50,
+    unencrypted: UnencryptedOption = False,
+) -> None:
+    """Show the erasure and export log (newest first)."""
+    with _open_store(db, unencrypted, read_only=True) as store:
+        for at, action, detail in store.audit_log(limit=limit):
+            typer.echo(f"{at.isoformat()}  {action:<7} {detail}")
 
 
 @app.command()
@@ -179,8 +201,9 @@ def export(
 ) -> None:
     """Export one author's records as JSON Lines (access requests)."""
     pseudonym = _author_pseudonym(author)
-    with _open_store(db, unencrypted, read_only=True) as store:
+    with _open_store(db, unencrypted) as store:
         lines = [r.model_dump_json() for r in store.iter_records(author_pseudonym=pseudonym)]
+        store.audit("export", {"author_pseudonym": pseudonym, "records": len(lines)})
     if out is None:
         for line in lines:
             typer.echo(line)

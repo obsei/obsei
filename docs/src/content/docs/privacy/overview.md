@@ -41,7 +41,11 @@ obsei export --author "ana@example.com" --out ana.jsonl   # access / portability
 obsei forget --author "ana@example.com"                   # erasure
 obsei forget --older-than-days 365                        # retention
 obsei forget --source appstore --instance 284882215       # remove a source
+obsei audit                                               # log of erasures and exports
 ```
+
+Every `forget` and `export` is written to an append-only audit log inside the encrypted store,
+with the filters and counts but never the raw handle.
 
 These map to rights found in the GDPR and UK GDPR, India's DPDP Act, Brazil's LGPD, California's
 CCPA/CPRA, Japan's APPI, South Africa's POPIA, China's PIPL, Singapore's PDPA and others. Check

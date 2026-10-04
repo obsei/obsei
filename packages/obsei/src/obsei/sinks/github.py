@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from obsei.core.context import Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
-from obsei.sinks._common import env, label, matches
+from obsei.sinks._common import body, env, marker, matches, title
 
 
 class GitHubIssueSinkConfig(BaseModel):
@@ -25,30 +25,6 @@ class GitHubIssueSinkConfig(BaseModel):
     )
     max_rating: float | None = None
     max_issues: int = Field(default=10, ge=1)
-
-
-TITLE_LENGTH = 80
-
-
-def marker(record: Record) -> str:
-    return f"obsei:{record.id}"
-
-
-def title(record: Record) -> str:
-    first = record.text.strip().splitlines()[0] if record.text.strip() else record.id
-    intent = label(record, "classify.intent")
-    prefix = f"[{intent}] " if intent else ""
-    return prefix + (first[:TITLE_LENGTH] + "…" if len(first) > TITLE_LENGTH else first)
-
-
-def body(record: Record) -> str:
-    lines = [f"> {line}" for line in record.text.splitlines()]
-    meta = [f"source: `{record.source.type}/{record.source.instance}`"]
-    if record.rating is not None:
-        meta.append(f"rating: {record.rating:g}")
-    if record.source.url:
-        meta.append(f"[original]({record.source.url})")
-    return "\n".join([*lines, "", " · ".join(meta), "", f"<!-- {marker(record)} -->"])
 
 
 class GitHubIssueSink:

@@ -12,6 +12,7 @@ description: obsei command reference.
 | `obsei serve [--host] [--port]` | Webhook intake, MCP over HTTP, `/healthz` |
 | `obsei export --author HANDLE [--out FILE]` | Export one author's records |
 | `obsei forget --author / --source / --older-than-days` | Erase records |
+| `obsei audit` | Show the erasure and export log |
 | `obsei doctor` | Check environment, encryption, egress mode and plugins |
 | `obsei schema` | Print the Feedback Record JSON Schema |
 

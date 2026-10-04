@@ -61,9 +61,9 @@ until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`) or `hyb
 
 | | Built in |
 | --- | --- |
-| Sources | CSV, JSON Lines, declarative REST, webhooks, App Store (any country), App Store Connect, Google Play (official API), GitHub issues, Hacker News, Bluesky, YouTube, RSS/Atom; Reddit as a community plugin |
+| Sources | CSV, JSON Lines, declarative REST, webhooks, App Store (any country), App Store Connect, Google Play (official API), GitHub issues, Hacker News, Bluesky, YouTube, RSS/Atom, SQL databases and warehouses, file drops, IMAP mailboxes, any MCP server, Zendesk, Freshdesk, Intercom; Reddit as a community plugin |
 | Enrichers | LLM classification (sentiment, intent, language, custom fields), cascade to a stronger model on low confidence |
-| Sinks | Webhook (HMAC-signed), Slack, GitHub issues, Parquet |
+| Sinks | Webhook (HMAC-signed), Slack, GitHub issues, Jira, Linear, Parquet, SQL databases and warehouses |
 | Privacy | Checksum-validated PII redaction for the Americas, Europe, UK, Asia-Pacific, India and Africa in any script; salted author pseudonyms; encrypted DuckDB; `obsei forget` and `obsei export` |
 
 Agents: `uv run obsei mcp` serves read-only MCP tools; the Claude Code plugin is

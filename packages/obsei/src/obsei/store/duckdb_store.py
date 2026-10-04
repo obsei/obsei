@@ -50,6 +50,13 @@ MIGRATIONS: tuple[str, ...] = (
         PRIMARY KEY (pipeline, source)
     );
     """,
+    """
+    CREATE TABLE audit_log (
+        logged_at TIMESTAMPTZ NOT NULL,
+        action VARCHAR NOT NULL,
+        detail JSON NOT NULL
+    );
+    """,
 )
 
 
@@ -456,3 +463,18 @@ class Store:
             [*params, limit],
         ).fetchall()
         return [StatRow(key=r[0], count=int(r[1]), avg_rating=r[2]) for r in rows]
+
+    def audit(self, action: str, detail: dict[str, str | int | None]) -> None:
+        """Append to the accountability log. Never pass raw personal data in ``detail``."""
+        self._con.execute(
+            "INSERT INTO audit_log VALUES (?, ?, ?)",
+            [datetime.now(UTC), action, json.dumps(detail, sort_keys=True)],
+        )
+
+    def audit_log(self, *, limit: int = 100) -> list[tuple[datetime, str, str]]:
+        rows = self._con.execute(
+            "SELECT epoch_us(logged_at), action, detail FROM audit_log "
+            "ORDER BY logged_at DESC LIMIT ?",
+            [limit],
+        ).fetchall()
+        return [(datetime.fromtimestamp(r[0] / 1e6, UTC), str(r[1]), str(r[2])) for r in rows]

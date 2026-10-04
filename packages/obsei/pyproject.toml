@@ -52,6 +52,7 @@ dependencies = [
 google = ["google-auth[requests]>=2.30,<3"]
 mcp = ["mcp>=2.3,<3"]
 apple = ["pyjwt[crypto]>=2.10,<3"]
+sql = ["sqlalchemy>=2.0.36,<3"]
 
 [project.urls]
 Homepage = "https://obsei.com"

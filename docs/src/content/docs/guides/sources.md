@@ -17,6 +17,13 @@ description: Built-in sources and their configuration.
 | `youtube` | Comments on videos or a whole channel | `YOUTUBE_API_KEY` |
 | `rss` | RSS 2.0 and Atom: forums, status pages, review sites | none |
 | `reddit` (plugin) | Subreddit posts, comments and searches via RSS | none |
+| `sql` | Any SQLAlchemy database or warehouse, incremental by a cursor column | URL in env, `obsei[sql]` |
+| `filedrop` | New or changed CSV, JSON Lines and JSON files in a folder (SFTP drop, mounted bucket) | none |
+| `imap` | Feedback mailboxes | username and password in env |
+| `mcp` | A tool on any MCP server (stdio command or HTTP URL) | `obsei[mcp]` |
+| `zendesk` | Tickets, incremental export | email and API token |
+| `freshdesk` | Tickets updated since the last run | API key |
+| `intercom` | Conversations, in the US, EU or AU data region | access token |
 
 ## Field mapping
 

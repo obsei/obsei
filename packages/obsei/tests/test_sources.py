@@ -40,14 +40,21 @@ def test_registers_all_builtins() -> None:
         "appstoreconnect",
         "bluesky",
         "csv",
+        "filedrop",
+        "freshdesk",
         "github_issues",
         "hackernews",
+        "imap",
+        "intercom",
         "jsonl",
+        "mcp",
         "playstore",
         "rest",
         "rss",
+        "sql",
         "webhook",
         "youtube",
+        "zendesk",
     ]
 
 
