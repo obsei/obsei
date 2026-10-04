@@ -10,11 +10,15 @@ members = ["packages/*", "plugins/obsei-*"]
 [tool.uv.sources]
 obsei = { workspace = true }
 obsei-reddit = { workspace = true }
+obsei-teams = { workspace = true }
+obsei-typeform = { workspace = true }
 
 [dependency-groups]
 dev = [
     "obsei[apple,google,mcp,sql]",
     "obsei-reddit",
+    "obsei-teams",
+    "obsei-typeform",
     "mypy==2.4.0",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
@@ -46,7 +50,7 @@ ignore = ["PLR0913"]
 python_version = "3.11"
 strict = true
 plugins = ["pydantic.mypy"]
-files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/template/src", "plugins/template/tests"]
+files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/obsei-teams/src", "plugins/obsei-teams/tests", "plugins/obsei-typeform/src", "plugins/obsei-typeform/tests", "plugins/template/src", "plugins/template/tests"]
 mypy_path = "packages/obsei/src:plugins/template/src"
 
 [[tool.mypy.overrides]]
