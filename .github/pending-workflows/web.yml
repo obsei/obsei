@@ -1,0 +1,45 @@
+# Builds the docs site and the Studio bundle. Move to .github/workflows/ to enable.
+name: Web
+
+on:
+  pull_request:
+    paths: ["docs/**", "studio/**", "website/**", ".github/workflows/web.yml"]
+  push:
+    branches: [master]
+    paths: ["docs/**", "studio/**", "website/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    name: Docs site builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 22
+      - run: npm ci
+        working-directory: docs
+      - run: npm run build
+        working-directory: docs
+
+  studio:
+    name: Studio bundle is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 22
+      - run: npm ci
+        working-directory: studio
+      - run: npm run build
+        working-directory: studio
+      - name: Committed bundle matches the TypeScript sources
+        run: git diff --exit-code -- packages/obsei/src/obsei/studio_static
