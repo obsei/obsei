@@ -6,8 +6,9 @@ import json
 from collections.abc import Sequence
 from typing import ClassVar
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from obsei.core.context import Context
 from obsei.core.protocols import Enricher
 from obsei.core.record import Enrichment, Record
 from obsei.llm.client import ChatClient, ChatMessage, JsonSchema, LlmError
@@ -151,3 +152,19 @@ class Cascade:
                 if e is not None:
                     results[i] = e
         return results
+
+
+class ClassifyPluginConfig(ClassifierConfig):
+    model_config = ConfigDict(extra="forbid")
+
+    llm: str = "default"
+    fallback_llm: str | None = None
+    threshold: float = Field(default=0.7, ge=0.0, le=1.0)
+
+
+def build_classifier(config: ClassifyPluginConfig, ctx: Context) -> Enricher:
+    primary = LlmClassifier(ctx.chat(config.llm), config)
+    if config.fallback_llm is None:
+        return primary
+    fallback = LlmClassifier(ctx.chat(config.fallback_llm), config)
+    return Cascade(primary, fallback, threshold=config.threshold)
