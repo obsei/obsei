@@ -8,7 +8,12 @@
       "release-as": "1.0.0-alpha.1",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
-        "src/obsei/_version.py"
+        "src/obsei/_version.py",
+        {
+          "type": "json",
+          "path": "/integrations/claude/obsei/.claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        }
       ]
     }
   },

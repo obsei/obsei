@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
+from packaging.version import Version
 from typer.testing import CliRunner
 
 from obsei import Author, Record, SourceRef, __version__
@@ -119,3 +120,8 @@ def test_core_cli_works_without_optional_extras() -> None:
         "from obsei import ask, config, studio, themes\n"
     )
     subprocess.run([sys.executable, "-c", code], check=True)  # noqa: S603
+
+
+def test_version_is_a_release_version() -> None:
+    """release-please rewrites only the semver part, so a suffix like .dev0 would ship."""
+    assert not Version(__version__).is_devrelease
