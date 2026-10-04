@@ -177,8 +177,7 @@ signed with cosign, a
 
 ## What's next
 
-obsei 1.0 is coming. The first release candidate,
-[1.0.0rc1](https://github.com/obsei/obsei/releases/tag/v1.0.0-rc.1), is out today:
+obsei 1.0 is coming, and its [release candidates](https://github.com/obsei/obsei/releases) are out:
 
 ```bash
 uv tool install "obsei[mcp]>=1.0.0rc1"
@@ -186,12 +185,14 @@ uv tool install "obsei[mcp]>=1.0.0rc1"
 
 Or run it with Docker, in an empty folder:
 
+{/* x-release-please-start-version */}
 ```bash
 export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
 alias obsei='docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
   -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT ghcr.io/obsei/obsei:1.0.0-rc.1'
 obsei init && obsei run      # sample feedback in ten languages, redacted and stored encrypted
 ```
+{/* x-release-please-end */}
 
 1.0 follows once real-world connector checks pass (see the
 [roadmap](https://github.com/obsei/obsei/blob/master/ROADMAP.md)).

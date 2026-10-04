@@ -95,7 +95,7 @@ docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
 ## Roadmap
 
 Phases 0.1 to 0.5 (private core, MCP and Claude plugin, enterprise bring-your-own, themes and
-Studio, decision models and routing) are in the first release candidate, `1.0.0rc1`. Next:
+Studio, decision models and routing) are in the 1.0 release candidates. Next:
 live-connector validation, further release candidates as needed, then the 1.0.0 launch. See [ROADMAP.md](ROADMAP.md).
 
 ## Contributing
