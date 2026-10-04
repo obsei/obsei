@@ -1,4 +1,7 @@
 import json
+import os
+import subprocess
+import sys
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 
@@ -105,6 +108,30 @@ def test_erasure_cascades_to_embeddings_and_themes(store: Store) -> None:
 
 def test_keyword_label_ignores_placeholders() -> None:
     assert keyword_label(["refund <EMAIL> refund", "refund please <EMAIL>"]) == "refund"
+
+
+def test_keyword_label_breaks_ties_by_first_appearance() -> None:
+    samples = ["zebra apple mango kiwi", "kiwi mango apple zebra", "mango zebra"]
+    assert keyword_label(samples) == "zebra, mango, apple"
+    assert keyword_label(samples, top=5) == "zebra, mango, apple, kiwi"
+
+
+def test_keyword_label_is_stable_across_hash_seeds() -> None:
+    code = (
+        "from obsei.themes import keyword_label; "
+        "print(keyword_label(['dark mode please now', 'please dark mode now', 'now mode dark']))"
+    )
+    labels = {
+        subprocess.run(  # noqa: S603
+            [sys.executable, "-c", code],
+            env={**os.environ, "PYTHONHASHSEED": seed},
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+        for seed in ("1", "2", "3", "4")
+    }
+    assert labels == {"dark, mode, please"}
 
 
 def test_ask_cites_only_retrieved_records(store: Store) -> None:
