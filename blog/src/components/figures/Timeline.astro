@@ -1,18 +1,18 @@
 ---
-// obsei from first release to the 1.0 alpha. Horizontal on wide screens, vertical on phones.
+// obsei from first release to the upcoming 1.0. Horizontal on wide screens, vertical on phones.
 const events = [
   { date: "2020", iso: "2020", text: "Contributing to Haystack and Hugging Face" },
   { date: "Dec 2020", iso: "2020-12", text: "obsei 0.0.2, first release on PyPI" },
-  { date: "2021", iso: "2021", text: "Oraika Technologies founded around obsei" },
   {
     date: "Jun 2022",
     iso: "2022-06",
     text: "Joint runner-up, RBI HARBINGER 2021",
     note: "social media analysis for payment fraud",
   },
+  { date: "2022", iso: "2022", text: "Oraika Technologies founded", note: "meetings with banks and NPCI" },
   { date: "Dec 2023", iso: "2023-12", text: "0.0.15, last legacy release", kind: "pause" },
   { date: "2024–2026", iso: "2024/2026", text: "dormant", kind: "muted" },
-  { date: "Oct 2026", iso: "2026-10", text: "obsei 1.0 alpha", note: "private VoC for the agent era", kind: "now" },
+  { date: "Oct 2026", iso: "2026-10", text: "obsei 1.0, coming soon", note: "private VoC for the agent era", kind: "now" },
 ];
 const label =
   "Timeline of obsei. " +
@@ -53,7 +53,7 @@ const label =
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: 0 10px;
   }
   .ev { position: relative; display: grid; align-content: start; grid-template-rows: 20px 22px auto; justify-items: center; text-align: center; gap: 10px; margin: 0; }

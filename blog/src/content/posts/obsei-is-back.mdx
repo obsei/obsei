@@ -31,19 +31,24 @@ libraries such as [Transformers](https://github.com/huggingface/transformers). O
 small models I trained myself for the RBI hackathon, then early retrieval-augmented generation,
 all before most people had heard of a chatbot.
 
-Girish Patel and I founded [Oraika Technologies](https://oraika.com) to build a company around it. In 2022 obsei was named a joint
-runner-up in the [Reserve Bank of India](https://www.rbi.org.in)'s first global hackathon, HARBINGER 2021, under the problem
-statement *"Social media analysis and monitoring tool for detection of digital payment fraud and
-disruption"*. The jury picked 24 finalists from 363 proposals from India and 22 other countries.
-RBI described obsei as an AI-powered, real-time social media analytics tool that understands
-customer feedback in their native languages.
+In June 2022 obsei was named a joint runner-up in the [Reserve Bank of India](https://www.rbi.org.in)'s first global
+hackathon, HARBINGER 2021, under the problem statement *"Social media analysis and monitoring tool
+for detection of digital payment fraud and disruption"*. The jury picked 24 finalists from 363
+proposals from India and 22 other countries. RBI described obsei as an AI-powered, real-time social
+media analytics tool that understands customer feedback in their native languages.
+
+That was the validation we had been looking for. Later in 2022, Girish Patel and I founded
+[Oraika Technologies](https://oraika.com) to turn obsei into a company.
 
 <Timeline />
 
 ## Why we stopped
 
-Recognition did not turn into a business. We tried open source, enterprise pilots, the
-entertainment industry and a lot of cold outreach. None of it stuck. Looking back, obsei taught me
+Recognition did not turn into a business. After the award we met several leading Indian banks and
+the [NPCI](https://www.npci.org.in) team. The conversations were encouraging, but we could not close a deal: we were
+engineers with no experience of enterprise sales, procurement or long security reviews. It turns
+out tech people find selling hard :). We also tried the entertainment industry and a lot of cold
+outreach. None of it stuck. Looking back, obsei taught me
 far more than AI: it was a full course in how to fail at sales, how to fail at marketing and how to
 fail at fundraising. Every one of those lessons shaped how obsei 1.0 is built and run.
 
@@ -87,7 +92,7 @@ So obsei 1.0 is not a polish of the old library. It is a new product built aroun
 - **Themes across languages.** The same issue raised in English, Japanese and Portuguese becomes
   one theme, with trends, near-duplicate detection and k-anonymous views: groups from fewer than k
   people are hidden.
-- **Built for agents.** A read-only [MCP](https://modelcontextprotocol.io) server lets Claude, ChatGPT, Cursor and your own agents
+- **Built for agents.** A read-only [MCP](https://modelcontextprotocol.io) server lets Claude, Cursor, VS Code and your own agents
   query feedback with redacted quotes and record ids, never identities.
 - **Act on it.** Route urgent bugs to Jira, billing to Slack and unsure cases to a human, based on
   model confidence ([routing](https://docs.obsei.com/guides/routing/)).
@@ -167,10 +172,15 @@ signed with cosign, a
 
 ## What's next
 
-- A release candidate after real-world connector checks, then 1.0 (see the
-  [roadmap](https://github.com/obsei/obsei/blob/master/ROADMAP.md)).
-- A new post here every week: practical guides, analyses of how themes shift across companies and
-  domains, and experiments with new models.
+obsei 1.0 is coming. The first release candidate,
+[1.0.0rc1](https://github.com/obsei/obsei/releases/tag/v1.0.0-rc.1), is out today:
+
+```bash
+uv tool install "obsei[mcp]>=1.0.0rc1"
+```
+
+1.0 follows once real-world connector checks pass (see the
+[roadmap](https://github.com/obsei/obsei/blob/master/ROADMAP.md)).
 
 If customer feedback matters to your team, and privacy matters too, give obsei a try, [open an
 issue](https://github.com/obsei/obsei/issues/new/choose), or [start a discussion](https://github.com/obsei/obsei/discussions). Obsei is back, and this time it is built to last.
