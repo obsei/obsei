@@ -3,8 +3,9 @@
 Map ``fields.id`` and ``fields.created_at`` so redeliveries are recognised as unchanged;
 without a timestamp the receipt time is used and a redelivery counts as an edit.
 
-The signature covers the body only, with no timestamp, so a captured request can be replayed;
-replays of mapped ids are stored as unchanged. Each request is parsed in full before anything is
+Senders sign ``{X-Obsei-Timestamp}.{body}``; requests more than ``max_age_seconds`` old are
+refused, so a captured request cannot be replayed later. Body-only signatures (GitHub style) are
+accepted only with ``require_timestamp: false``. Each request is parsed in full before anything is
 stored: one bad item rejects the whole request, and items without text are skipped.
 """
 
@@ -13,6 +14,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
+import time
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -26,6 +28,7 @@ from obsei.core.record import Record
 from obsei.sources._common import FieldMap, lookup, map_item
 
 SIGNATURE_HEADERS = ("x-obsei-signature-256", "x-hub-signature-256")
+TIMESTAMP_HEADER = "x-obsei-timestamp"
 
 
 class WebhookSourceConfig(BaseModel):
@@ -33,6 +36,8 @@ class WebhookSourceConfig(BaseModel):
 
     secret_env: str | None = None
     allow_unsigned: bool = False
+    require_timestamp: bool = True
+    max_age_seconds: int = Field(default=300, ge=1)
     instance: str = "default"
     items_path: str | None = None
     fields: FieldMap = Field(default_factory=FieldMap)
@@ -77,10 +82,23 @@ class WebhookSource:
             raise SignatureError(f"{config.secret_env} is not set")
         self.pending: list[Record] = []
 
-    def verify(self, body: bytes, headers: dict[str, str]) -> None:
+    def verify(self, body: bytes, headers: dict[str, str], now: float | None = None) -> None:
         if not self.secret:
             return
-        expected = "sha256=" + hmac.new(self.secret, body, hashlib.sha256).hexdigest()
+        stamp = headers.get(TIMESTAMP_HEADER, "")
+        if stamp:
+            try:
+                sent = int(stamp)
+            except ValueError:
+                raise SignatureError("invalid X-Obsei-Timestamp") from None
+            if abs((now or time.time()) - sent) > self.config.max_age_seconds:
+                raise SignatureError("stale request: X-Obsei-Timestamp is outside the window")
+            signed = stamp.encode() + b"." + body
+        elif self.config.require_timestamp:
+            raise SignatureError("missing X-Obsei-Timestamp")
+        else:
+            signed = body
+        expected = "sha256=" + hmac.new(self.secret, signed, hashlib.sha256).hexdigest()
         given = next((headers[h] for h in SIGNATURE_HEADERS if h in headers), "")
         if not hmac.compare_digest(expected.encode(), given.encode()):
             raise SignatureError("invalid or missing signature")

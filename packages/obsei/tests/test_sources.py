@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import json
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -11,6 +13,7 @@ from obsei.core.record import Record
 from obsei.core.registry import Registry
 from obsei.sources import register
 from obsei.sources._common import html_to_text, parse_time
+from obsei.sources.webhook import SignatureError, WebhookSource, WebhookSourceConfig
 
 SALT = b"0123456789abcdef-test"
 Handler = Callable[[httpx.Request], httpx.Response]
@@ -348,3 +351,36 @@ def test_rest_pagination_sends_credentials_only_to_the_configured_origin() -> No
     assert "Authorization" not in leaked.headers
     assert "X-Api-Key" not in leaked.headers
     assert leaked.headers["Accept"] == "application/json"
+
+
+def _webhook(**config: object) -> WebhookSource:
+    return WebhookSource(WebhookSourceConfig(secret_env="HOOK", **config), Context())
+
+
+def _sign(message: bytes) -> str:
+    return "sha256=" + hmac.new(b"s3cret", message, hashlib.sha256).hexdigest()
+
+
+def test_webhook_signature_window(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HOOK", "s3cret")
+    source = _webhook()
+    body = b'{"text": "hi"}'
+    headers = {
+        "x-obsei-timestamp": "1800000000",
+        "x-obsei-signature-256": _sign(b"1800000000." + body),
+    }
+    source.verify(body, headers, now=1800000100)
+    with pytest.raises(SignatureError, match="stale"):
+        source.verify(body, headers, now=1800000301)
+    with pytest.raises(SignatureError, match="missing"):
+        source.verify(body, {"x-obsei-signature-256": _sign(body)})
+    with pytest.raises(SignatureError, match="invalid X-Obsei-Timestamp"):
+        source.verify(body, {**headers, "x-obsei-timestamp": "soon"})
+
+
+def test_webhook_body_only_signatures_need_opt_in(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HOOK", "s3cret")
+    body = b'{"text": "hi"}'
+    _webhook(require_timestamp=False).verify(body, {"x-hub-signature-256": _sign(body)})
+    with pytest.raises(SignatureError):
+        _webhook(require_timestamp=False).verify(body, {"x-hub-signature-256": _sign(b"other")})

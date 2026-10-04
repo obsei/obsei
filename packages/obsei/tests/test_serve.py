@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import json
+import time
 from typing import Any
 
 import pytest
@@ -61,9 +62,14 @@ def client(monkeypatch: pytest.MonkeyPatch, store: Store) -> TestClient:
     return TestClient(app, base_url=LOCAL)
 
 
-def signed(body: bytes) -> dict[str, str]:
-    digest = hmac.new(SECRET.encode(), body, hashlib.sha256).hexdigest()
-    return {"X-Obsei-Signature-256": f"sha256={digest}", "Content-Type": "application/json"}
+def signed(body: bytes, stamp: int | None = None) -> dict[str, str]:
+    sent = str(int(time.time()) if stamp is None else stamp)
+    digest = hmac.new(SECRET.encode(), sent.encode() + b"." + body, hashlib.sha256).hexdigest()
+    return {
+        "X-Obsei-Timestamp": sent,
+        "X-Obsei-Signature-256": f"sha256={digest}",
+        "Content-Type": "application/json",
+    }
 
 
 def test_health_is_public(client: TestClient) -> None:
@@ -96,6 +102,19 @@ def test_ingest_verifies_signature_and_redacts(client: TestClient, store: Store)
     )
     bad = {"X-Obsei-Signature-256": "sha256=ü".encode("latin-1")}
     assert client.post("/ingest/support/tickets", content=body, headers=bad).status_code == 401  # type: ignore[arg-type]
+
+
+def test_ingest_refuses_replays_and_untimestamped_signatures(client: TestClient) -> None:
+    body = json.dumps({"tickets": [{"id": "t1", "body": "Slow checkout"}]}).encode()
+    stale = signed(body, stamp=int(time.time()) - 600)
+    assert client.post("/ingest/support/tickets", content=body, headers=stale).status_code == 401
+    body_only = hmac.new(SECRET.encode(), body, hashlib.sha256).hexdigest()
+    untimed = {"X-Obsei-Signature-256": f"sha256={body_only}"}
+    assert client.post("/ingest/support/tickets", content=body, headers=untimed).status_code == 401
+    wrong_time = {**signed(body), "X-Obsei-Timestamp": str(int(time.time()) + 1)}
+    assert (
+        client.post("/ingest/support/tickets", content=body, headers=wrong_time).status_code == 401
+    )
 
 
 def test_mcp_requires_bearer_token(client: TestClient) -> None:
