@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>obsei: Voice of Customer without violating privacy</title>
-    <meta name="description" content="Open-source, self-hosted Voice of Customer. Feedback from every channel and language, personal data removed before it is stored, and AI agents that answer with cited evidence." />
+    <meta name="description" content="Open-source, self-hosted Voice of Customer. Feedback from every channel and language, personal data redacted before it is stored, and AI agents that answer with cited evidence." />
     <meta name="theme-color" content="#238a91" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://obsei.com/" />
@@ -33,7 +33,7 @@
         <div class="hero-text">
           <p class="eyebrow">Open source · Self-hosted · Apache-2.0</p>
           <h1>Voice of Customer <span>without violating privacy</span></h1>
-          <p class="lead">Understand feedback from every channel and language. Personal data is gone before anything is stored, and nothing leaves your infrastructure.</p>
+          <p class="lead">Understand feedback from every channel and language. Personal data is redacted before anything is stored, and nothing leaves your infrastructure unless you allow it.</p>
           <div class="actions">
             <a class="button" href="https://docs.obsei.com/quickstart/">Get started</a>
             <a class="button ghost" href="https://docs.obsei.com/demo/">Live demo</a>
@@ -50,20 +50,21 @@
           </div>
           <div class="arrow" aria-hidden="true"><span></span></div>
           <div class="card clean">
-            <p class="card-head"><span class="tag ok">Stored</span><span>author usr_7f3a</span></p>
-            <p>Hi, I'm <b>&lt;NAME&gt;</b>. Charged twice for order 4471. Call me on <b>&lt;PHONE&gt;</b> or <b>&lt;EMAIL&gt;</b></p>
+            <p class="card-head"><span class="tag ok">Stored</span><span>author psn_7f3a…</span></p>
+            <p>Hi, I'm <b>&lt;PERSON&gt;</b>. Charged twice for order 4471. Call me on <b>&lt;PHONE&gt;</b> or <b>&lt;EMAIL&gt;</b></p>
             <ul class="chips">
               <li>negative</li>
-              <li>billing</li>
-              <li>theme: Double charge</li>
+              <li>complaint</li>
+              <li>theme: Charged twice</li>
             </ul>
+            <p class="card-note">Names use the optional local model, <code>obsei[names]</code>.</p>
           </div>
         </figure>
       </section>
 
       <ul class="stats wrap" aria-label="At a glance">
         <li><strong>20+</strong><span>sources</span></li>
-        <li><strong>50+</strong><span>languages</span></li>
+        <li><strong>7</strong><span>ID regions</span></li>
         <li><strong>0</strong><span>telemetry</span></li>
         <li><strong>Air-gapped</strong><span>by default</span></li>
       </ul>
@@ -92,7 +93,7 @@
           <div class="boundary">
             <p class="boundary-title">Your infrastructure</p>
             <ol class="steps">
-              <li><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg><strong>Redact</strong><span>PII and names</span></li>
+              <li><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg><strong>Redact</strong><span>PII, names optional</span></li>
               <li><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="15" r="3"/></svg><strong>Classify</strong><span>decision model or LLM</span></li>
               <li><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="11" cy="17" r="2.5"/><path d="M8.4 7.3 14.6 6M7.3 9.2l2.6 5.6M16 8.3l-3.7 6.6"/></svg><strong>Theme</strong><span>across languages</span></li>
               <li><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><strong>Store</strong><span>encrypted</span></li>
@@ -111,10 +112,11 @@
       <section class="ask wrap" aria-labelledby="ask">
         <div>
           <h2 id="ask">Your agents answer, <span>with receipts</span></h2>
-          <p class="sub">A read-only MCP server for Claude, ChatGPT, Cursor and VS Code. Every answer cites the records behind it, never the people.</p>
+          <p class="sub">A read-only MCP server for Claude, ChatGPT, Cursor and VS Code. Results carry record ids your agent can cite, never author identities.</p>
           <a class="more" href="https://docs.obsei.com/guides/mcp/">Connect an agent →</a>
         </div>
         <figure class="chat" aria-label="Illustrative agent conversation">
+          <figcaption class="chat-cap">Illustrative conversation</figcaption>
           <p class="q">Why are Japanese users unhappy this week?</p>
           <div class="a">
             <p>Mostly <b>login failing after the 2.3 update</b>: 14 reviews, up from 2. Double charges are second.</p>
@@ -132,19 +134,19 @@
             <source srcset="/studio-dark.png" media="(prefers-color-scheme: dark)" />
             <img src="/studio-light.png" width="1280" height="860" loading="lazy" alt="obsei Studio showing themes, a knowledge graph of sources, languages and intents, and feedback in eleven languages" />
           </picture>
-          <figcaption><a href="https://docs.obsei.com/demo/">Open the live demo</a> · synthetic feedback in eight languages</figcaption>
+          <figcaption><a href="https://docs.obsei.com/demo/">Open the live demo</a> · synthetic feedback in eleven languages</figcaption>
         </figure>
       </section>
 
       <section class="features wrap" aria-labelledby="why">
         <h2 id="why">Built for teams that can't ship customer data to someone else's cloud</h2>
         <div class="grid">
-          <article><h3>Decision models or any LLM</h3><p>Labels with probabilities in milliseconds on CPU, or Ollama, vLLM, Azure OpenAI.</p></article>
-          <article><h3>Privacy by region</h3><p>Checksum-validated national IDs for 7 regions, any script.</p></article>
-          <article><h3>k-anonymous views</h3><p>Small groups never point at one customer.</p></article>
-          <article><h3>Erasure and audit</h3><p>Forget, export and an audit log, built in.</p></article>
-          <article><h3>Enterprise access</h3><p>Roles, SSO proxy, signed webhooks and image.</p></article>
-          <article><h3>Plugins</h3><p>Add a source or sink in one small package.</p></article>
+          <article><h3>Decision models or any LLM</h3><p>Fast labels with probabilities from a small model on CPU, or any OpenAI-compatible LLM.</p></article>
+          <article><h3>Privacy by region</h3><p>National ID detectors for 7 regions, checksum-validated where the format allows.</p></article>
+          <article><h3>k-anonymous views</h3><p>Themes and groups from fewer than k people are hidden.</p></article>
+          <article><h3>Erasure and audit</h3><p>Forget by author, source or age, export, and an audit log.</p></article>
+          <article><h3>Enterprise access</h3><p>Roles, SSO-proxy support, signed webhooks and container image.</p></article>
+          <article><h3>Plugins</h3><p>Add a source, enricher or sink as a small Python package.</p></article>
         </div>
       </section>
 
