@@ -29,8 +29,8 @@ jobs:
         env:
           OBSEI_LIVE: "1"
 
-  names:
-    name: Name redaction model (GLiNER)
+  models:
+    name: Local models (GLiNER names, multilingual embeddings)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -41,6 +41,6 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: false
       - run: uv sync --locked --all-extras
-      - run: uv run pytest packages/obsei/tests/test_names.py -v -rs
+      - run: uv run pytest packages/obsei/tests/test_names.py packages/obsei/tests/test_local_embed.py -v -rs
         env:
           OBSEI_LIVE: "1"
