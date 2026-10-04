@@ -19,7 +19,7 @@ from starlette.applications import Starlette
 from starlette.background import BackgroundTask
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import JSONResponse, RedirectResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
@@ -323,6 +323,10 @@ class Handlers:
         )
 
 
+async def _to_studio(request: Request) -> Response:
+    return RedirectResponse("/studio/")
+
+
 def create_app(
     config: ObseiConfig, ctx: Context, store: Store, *, token: str | None, host: str = "127.0.0.1"
 ) -> Starlette:
@@ -336,6 +340,7 @@ def create_app(
     )
     app.router.routes.extend(
         [
+            Route("/", _to_studio, methods=["GET"]),
             Route("/healthz", h.healthz, methods=["GET"]),
             Route("/ingest/{pipeline}/{source}", h.ingest, methods=["POST"]),
             Route("/api/snapshot", h.api_snapshot, methods=["GET"]),

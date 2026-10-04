@@ -3,6 +3,7 @@
 from obsei.store.duckdb_store import (
     DB_KEY_ENV_VAR,
     EXTENSIONS_ENV_VAR,
+    INSTALL_HINT,
     PREINSTALL_HINT,
     EncryptionUnavailableError,
     GroupBy,
@@ -12,6 +13,7 @@ from obsei.store.duckdb_store import (
     StoreError,
     UpsertResult,
     httpfs_installed,
+    install_httpfs,
     load_db_key,
 )
 from obsei.store.themes import Graph, GraphEdge, GraphNode, ThemeSummary
@@ -19,6 +21,7 @@ from obsei.store.themes import Graph, GraphEdge, GraphNode, ThemeSummary
 __all__ = [
     "DB_KEY_ENV_VAR",
     "EXTENSIONS_ENV_VAR",
+    "INSTALL_HINT",
     "PREINSTALL_HINT",
     "EncryptionUnavailableError",
     "Graph",
@@ -32,5 +35,6 @@ __all__ = [
     "ThemeSummary",
     "UpsertResult",
     "httpfs_installed",
+    "install_httpfs",
     "load_db_key",
 ]

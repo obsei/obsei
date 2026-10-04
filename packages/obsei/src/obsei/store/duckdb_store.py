@@ -234,6 +234,17 @@ def httpfs_installed() -> bool:
     return bool(row and row[0])
 
 
+def install_httpfs() -> None:
+    """Download DuckDB's httpfs extension into the extension directory (DuckDB's own server)."""
+    con = connect()
+    try:
+        con.execute("INSTALL httpfs")
+    finally:
+        con.close()
+
+
+INSTALL_HINT = "with network access, run 'obsei init' once (it keeps existing files)"
+
 PREINSTALL_HINT = (
     "pre-install it once on a machine with network access: "
     "python -c \"import duckdb; c = duckdb.connect(config={'extension_directory': "
@@ -352,8 +363,9 @@ class Store(ThemeQueries):
                 raise EncryptionUnavailableError(
                     "writing an encrypted store needs DuckDB's httpfs extension (OpenSSL), which "
                     f"is not installed, and air-gapped mode never downloads it ({exc}). To fix, "
-                    f"{PREINSTALL_HINT}; or use the obsei container image; or, only on an "
-                    f"encrypted disk, unset {DB_KEY_ENV_VAR} and set {_UNENCRYPTED_HINT}."
+                    f"{INSTALL_HINT}; offline, {PREINSTALL_HINT}; or use the obsei container "
+                    f"image; or, only on an encrypted disk, unset {DB_KEY_ENV_VAR} and set "
+                    f"{_UNENCRYPTED_HINT}."
                 ) from None
             raise EncryptionUnavailableError(
                 "writing an encrypted store needs DuckDB's httpfs extension (OpenSSL), which "
