@@ -70,8 +70,17 @@ until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`) or `hyb
 | Server | `obsei serve`: scheduled pipelines, signed webhook intake, MCP over HTTP, Studio, role-based access and SSO-proxy support |
 
 Agents: `obsei mcp` serves read-only MCP tools; the Claude Code plugin is
-`/plugin marketplace add obsei/obsei`. Docker: `ghcr.io/obsei/obsei`. See the
-[docs](https://docs.obsei.com/) and [integrations](integrations/README.md).
+`/plugin marketplace add obsei/obsei`. See the [docs](https://docs.obsei.com/) and
+[integrations](integrations/README.md).
+
+Docker (run in the project directory; images are tagged by release):
+
+<!-- x-release-please-start-version -->
+```bash
+docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
+  -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT ghcr.io/obsei/obsei:1.0.0-alpha.1 run
+```
+<!-- x-release-please-end -->
 
 ## Roadmap
 

@@ -41,7 +41,15 @@ Then ask: *"What are the top complaints this month, by country?"* See
 
 ## Run with Docker
 
+Run inside the project directory. The image's entrypoint is `obsei`, so arguments are subcommands:
+
+<!-- x-release-please-start-version -->
 ```bash
-docker run --rm -v "$PWD:/home/obsei" -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT \
-  ghcr.io/obsei/obsei run
+docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
+  -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT \
+  ghcr.io/obsei/obsei:1.0.0-alpha.1 run
 ```
+<!-- x-release-please-end -->
+
+Images are tagged by release (`1.0.0-alpha.1`); there is no `latest` tag yet. `--user` keeps the
+database and outputs owned by you.
