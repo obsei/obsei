@@ -10,7 +10,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
-from obsei.sinks._common import env, label, matches
+from obsei.routing import Conditions, When
+from obsei.sinks._common import env, label
 
 MAX_TEXT = 2800
 
@@ -19,7 +20,7 @@ class SlackConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     webhook_url_env: str = "SLACK_WEBHOOK_URL"
-    when: dict[str, list[str]] = Field(
+    when: Conditions = Field(
         default_factory=dict, description='e.g. {"classify.intent": ["bug", "churn_risk"]}'
     )
     max_rating: float | None = None
@@ -54,10 +55,11 @@ class SlackSink:
         self.url = env(config.webhook_url_env)
         ctx.egress.check(self.url)
         self.config = config
+        self.when = When.parse(config.when, max_rating=config.max_rating)
         self.ctx = ctx
 
     def send(self, batch: Sequence[Record]) -> SinkResult:
-        selected = [r for r in batch if matches(r, self.config.when, self.config.max_rating)]
+        selected = [r for r in batch if self.when.matches(r)]
         posted = selected[: self.config.max_messages]
         for record in posted:
             response = self.ctx.http.post(

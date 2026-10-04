@@ -10,7 +10,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
-from obsei.sinks._common import body, env, marker, matches, title
+from obsei.routing import Conditions, When
+from obsei.sinks._common import body, env, intents, marker, title
 
 
 class GitHubIssueSinkConfig(BaseModel):
@@ -20,9 +21,7 @@ class GitHubIssueSinkConfig(BaseModel):
     api_url: str = "https://api.github.com"
     token_env: str = "GITHUB_TOKEN"  # noqa: S105
     labels: list[str] = Field(default_factory=lambda: ["feedback"])
-    when: dict[str, list[str]] = Field(
-        default_factory=lambda: {"classify.intent": ["bug", "feature_request"]}
-    )
+    when: Conditions = Field(default_factory=lambda: intents("bug", "feature_request"))
     max_rating: float | None = None
     max_issues: int = Field(default=10, ge=1)
 
@@ -33,6 +32,7 @@ class GitHubIssueSink:
     def __init__(self, config: GitHubIssueSinkConfig, ctx: Context) -> None:
         ctx.egress.check(config.api_url)
         self.config = config
+        self.when = When.parse(config.when, max_rating=config.max_rating)
         self.ctx = ctx
         self.headers = {
             "Accept": "application/vnd.github+json",
@@ -53,7 +53,7 @@ class GitHubIssueSink:
         return isinstance(count, int) and count > 0
 
     def send(self, batch: Sequence[Record]) -> SinkResult:
-        selected = [r for r in batch if matches(r, self.config.when, self.config.max_rating)]
+        selected = [r for r in batch if self.when.matches(r)]
         result = SinkResult(skipped=len(batch) - len(selected))
         for record in selected[: self.config.max_issues]:
             if self._exists(record):

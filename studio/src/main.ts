@@ -234,6 +234,7 @@ function render(data: DataSource): void {
       bars("Intents", overview.by_intent),
     ),
     bars("Volume by week", overview.by_week),
+    overview.by_route?.length ? bars("Routes", overview.by_route) : null,
     el("footer", { class: "muted" }, `obsei ${overview.version} · text is redacted at ingest; authors are never shown`),
     ].filter((node): node is HTMLElement => node !== null),
   );

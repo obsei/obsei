@@ -91,7 +91,8 @@ def create_server(open_store: StoreOpener, *, k_anonymity: int = 5) -> MCPServer
         intent: Label = None,
         lang: Lang = None,
     ) -> StatsResult:
-        """Count feedback and average rating per group (source, sentiment, intent, lang, day...)."""
+        """Count feedback and average rating per group (source, sentiment, intent, lang, route,
+        day...)."""
         query = Query(
             text=text,
             source=source,

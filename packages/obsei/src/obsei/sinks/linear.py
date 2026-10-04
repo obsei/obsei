@@ -10,7 +10,8 @@ from pydantic import BaseModel, ConfigDict, Field, JsonValue
 from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
-from obsei.sinks._common import body, env, marker, matches, title
+from obsei.routing import Conditions, When
+from obsei.sinks._common import body, env, intents, marker, title
 from obsei.sources._common import lookup
 
 API_URL = "https://api.linear.app/graphql"
@@ -29,9 +30,7 @@ class LinearConfig(BaseModel):
     team_id: str
     api_key_env: str = "LINEAR_API_KEY"
     label_ids: list[str] = Field(default_factory=list)
-    when: dict[str, list[str]] = Field(
-        default_factory=lambda: {"classify.intent": ["bug", "feature_request"]}
-    )
+    when: Conditions = Field(default_factory=lambda: intents("bug", "feature_request"))
     max_rating: float | None = None
     max_issues: int = Field(default=10, ge=1)
 
@@ -42,6 +41,7 @@ class LinearSink:
     def __init__(self, config: LinearConfig, ctx: Context) -> None:
         ctx.egress.check(API_URL)
         self.config = config
+        self.when = When.parse(config.when, max_rating=config.max_rating)
         self.ctx = ctx
         self.headers = {"Authorization": env(config.api_key_env)}
 
@@ -59,7 +59,7 @@ class LinearSink:
         return payload
 
     def send(self, batch: Sequence[Record]) -> SinkResult:
-        selected = [r for r in batch if matches(r, self.config.when, self.config.max_rating)]
+        selected = [r for r in batch if self.when.matches(r)]
         result = SinkResult(skipped=len(batch) - len(selected))
         for record in selected[: self.config.max_issues]:
             found = self._graphql(FIND, {"m": marker(record)})
