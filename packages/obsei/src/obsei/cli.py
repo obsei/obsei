@@ -29,11 +29,19 @@ from obsei.config import (
     builtin_registry,
     load_config,
 )
-from obsei.core.context import Context
+from obsei.core.context import Context, LlmEndpoint
 from obsei.core.protocols import Drops
 from obsei.core.record import Record
 from obsei.core.registry import PluginError
-from obsei.demo import demo_records, label_demo_themes
+from obsei.demo import (
+    DECISION_MODEL,
+    decision_labels,
+    demo_records,
+    demo_snapshot,
+    raw_demo_records,
+    redacted_demo_records,
+    write_labels,
+)
 from obsei.llm import EgressPolicy
 from obsei.llm.client import LlmError, LlmUnreachableError
 from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, LocalEmbedder
@@ -586,18 +594,50 @@ def demo(
             "(obsei[embeddings]; run 'obsei models download' first)."
         ),
     ] = "hashing",
+    decision_url_env: Annotated[
+        str | None,
+        typer.Option(
+            help="Environment variable holding a decision endpoint URL: label the demo with that "
+            "model instead of the committed labels."
+        ),
+    ] = None,
+    decision_model: Annotated[
+        str, typer.Option(help="Model name recorded with labels from --decision-url-env.")
+    ] = DECISION_MODEL,
+    save_labels: Annotated[
+        Path | None,
+        typer.Option(help="Also write the labels from --decision-url-env to this JSON file."),
+    ] = None,
 ) -> None:
     """Build the static Studio demo from synthetic multilingual feedback."""
+    if save_labels is not None and decision_url_env is None:
+        raise typer.BadParameter("--save-labels needs --decision-url-env")
     settings = ThemesConfig(embedder=embedder, k_anonymity=5)
-    with Context(egress=EgressPolicy.from_env()) as ctx, Store(allow_unencrypted=True) as store:
+    llms = (
+        {"demo": LlmEndpoint(api="decision", url_env=decision_url_env, timeout=120)}
+        if decision_url_env
+        else {}
+    )
+    with (
+        Context(egress=EgressPolicy.from_env(), llms=llms) as ctx,
+        Store(allow_unencrypted=True) as store,
+    ):
         try:
             model = ctx.embedder(settings.embedder)
-            store.upsert(demo_records())
+            raw = raw_demo_records()
+            labels = None
+            if decision_url_env:
+                labels = decision_labels(
+                    redacted_demo_records(raw), ctx.decision("demo"), model=decision_model
+                )
+                if save_labels is not None:
+                    write_labels(labels, save_labels)
+            store.upsert(demo_records(raw, labels))
             update_themes(store, model, settings)
-        except (KeyError, OSError, RuntimeError) as exc:
+        except (KeyError, OSError, RuntimeError, LlmError) as exc:
             raise _fail(exc) from None
-        label_demo_themes(store, k=settings.k_anonymity)
-        studio.export(store, out, k=settings.k_anonymity, demo=True, embedder=model.model)
+        snap = demo_snapshot(store, raw, k=settings.k_anonymity, embedder=model.model)
+        studio.write(out, snap)
     typer.echo(f"wrote {out}/index.html; serve it with: python -m http.server -d {out}")
 
 

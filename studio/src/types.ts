@@ -14,7 +14,21 @@ export interface Overview {
   by_intent: Bucket[];
   by_lang: Bucket[];
   by_week: Bucket[];
+  decisions?: Decisions | null;
   by_route?: Bucket[];
+}
+
+export interface LabelCount {
+  value: string;
+  count: number;
+  score: number | null;
+}
+
+export interface Decisions {
+  model: string | null;
+  labelled: number;
+  review: number;
+  fields: Record<string, LabelCount[]>;
 }
 
 export interface Theme {
@@ -29,6 +43,7 @@ export interface Theme {
   sources: Record<string, number>;
   languages: Record<string, number>;
   intents: Record<string, number>;
+  weekly?: number[];
 }
 
 export type NodeKind = "theme" | "source" | "lang" | "intent" | "sentiment";
@@ -56,16 +71,52 @@ export interface Evidence {
   lang: string | null;
   text: string;
   labels: Record<string, string>;
+  fields?: Record<string, string | boolean>;
+  confidences?: Record<string, number>;
+  review?: boolean | null;
 }
 
 export type Role = "viewer" | "analyst" | "admin";
+
+export type EgressMode = "air_gapped" | "private" | "hybrid";
+
+export interface Privacy {
+  k_anonymity: number;
+  hidden_themes: number;
+  hidden_groups: number;
+  placeholders: Record<string, number>;
+  redacted_records: number;
+  pseudonymised_authors: number;
+  egress?: EgressMode | null;
+}
+
+export interface RedactionExample {
+  source: string;
+  lang: string;
+  raw: string;
+  stored: string;
+}
+
+export interface AskExample {
+  question: string;
+  answer: string;
+  citations: string[];
+}
+
+export interface Showcase {
+  redactions: RedactionExample[];
+  answers: AskExample[];
+  labelled_by?: string | null;
+}
 
 export interface Snapshot {
   demo?: boolean;
   embedder?: string | null;
   role?: Role | null;
   overview: Overview;
+  privacy?: Privacy;
   themes: Theme[];
   graph: { nodes: GraphNode[]; edges: GraphEdge[] };
   evidence: Record<string, Evidence[]>;
+  showcase?: Showcase | null;
 }

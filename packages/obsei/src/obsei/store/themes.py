@@ -13,6 +13,8 @@ PEOPLE = "count(DISTINCT coalesce({p}author_pseudonym, {p}id))"
 """k-anonymity counts people: distinct author pseudonyms, records without an author count alone."""
 _PEOPLE = PEOPLE.format(p="r.")
 _RATING = "CAST(json_extract_string(r.data, '$.rating') AS DOUBLE)"
+WEEKS = 8
+"""Weekly counts per theme cover this many seven-day windows ending now."""
 
 
 def _vec(vector: list[float]) -> str:
@@ -33,6 +35,7 @@ class ThemeSummary:
     sources: dict[str, int] = field(default_factory=dict)
     languages: dict[str, int] = field(default_factory=dict)
     intents: dict[str, int] = field(default_factory=dict)
+    weekly: list[int] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -247,6 +250,7 @@ class ThemeQueries:
         sources, languages, intents = (
             self._facet(f, ids, min_size) for f in ("source", "lang", "intent")
         )
+        weekly = self._weekly(ids, moment)
         return [
             ThemeSummary(
                 id=str(r[0]),
@@ -260,9 +264,33 @@ class ThemeQueries:
                 sources=sources.get(str(r[0]), {}),
                 languages=languages.get(str(r[0]), {}),
                 intents=intents.get(str(r[0]), {}),
+                weekly=weekly.get(str(r[0]), [0] * WEEKS),
             )
             for r in rows
         ]
+
+    def _weekly(self, theme_ids: list[str], now: datetime) -> dict[str, list[int]]:
+        """Records per seven-day window over the last ``WEEKS`` weeks, oldest first."""
+        rows = self._con.execute(
+            "SELECT t.theme_id, greatest(0, CAST(floor((epoch(?) - epoch(r.created_at)) / ?) "
+            "AS INTEGER)) AS w, count(*) FROM record_themes t JOIN records r ON r.id = t.record_id "
+            "WHERE list_contains(?, t.theme_id) AND r.created_at >= ? GROUP BY ALL",
+            [now, 7 * 86400, theme_ids, now - timedelta(days=7 * WEEKS)],
+        ).fetchall()
+        result = {theme_id: [0] * WEEKS for theme_id in theme_ids}
+        for theme_id, week, count in rows:
+            if int(week) < WEEKS:
+                result[str(theme_id)][WEEKS - 1 - int(week)] = int(count)
+        return result
+
+    def hidden_themes(self, min_size: int) -> int:
+        """Themes withheld by k-anonymity: from fewer than ``min_size`` people."""
+        row = self._con.execute(
+            "SELECT count(*) FROM (SELECT t.theme_id FROM record_themes t "  # noqa: S608
+            f"JOIN records r ON r.id = t.record_id GROUP BY t.theme_id HAVING {_PEOPLE} < ?)",
+            [min_size],
+        ).fetchone()
+        return int(row[0]) if row else 0
 
     def theme_record_ids(self, theme_id: str, limit: int) -> list[str]:
         rows = self._con.execute(
