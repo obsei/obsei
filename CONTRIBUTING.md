@@ -57,11 +57,16 @@ that PR tags the release, publishes to PyPI via Trusted Publishing and pushes a 
 `ghcr.io/obsei/obsei`.
 
 Until 1.0.0, releases are PyPI pre-releases (`1.0.0a1`, `1.0.0a2`, ...), which `pip install obsei`
-ignores unless `--pre` is passed. In `release-please-config.json`:
+ignores unless the requirement names one (`obsei>=1.0.0a1`). In `release-please-config.json`:
 
-- after `1.0.0-alpha.1` is released, remove `release-as`; later releases bump the alpha number;
-- to start betas or release candidates, set `release-as` to `1.0.0-beta.1` or `1.0.0-rc.1`;
-- for the launch, set `release-as` to `1.0.0` and remove the `prerelease` settings.
+- next releases bump the alpha number automatically (`1.0.0-alpha.2`, ...); nothing to change;
+- to start betas or release candidates, set `release-as` to `1.0.0-beta.1` or `1.0.0-rc.1` and
+  `prerelease-type` to `beta` or `rc`, then remove `release-as` after that release;
+- for the launch, set `release-as` to `1.0.0` and remove `versioning`, `prerelease` and
+  `prerelease-type`, then remove `release-as` after the release.
+
+Release-please also bumps the image tag in `README.md`, `packages/obsei/README.md` and the docs
+quickstart (lines marked `x-release-please-version`).
 
 ## For maintainers: websites
 
