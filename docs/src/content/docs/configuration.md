@@ -57,4 +57,22 @@ pipelines:
 4. Every sink receives the batch. Only then is the batch stored and the cursor advanced, so a
    failed run retries the same batch (at-least-once; sinks are idempotent by record id).
 
-`obsei run --every 60` repeats the run every hour.
+A failing pipeline is reported and the others still run; `obsei run` then exits with status 1.
+
+## Scheduling
+
+Set `every_minutes` on a pipeline and `obsei serve` runs it on that schedule, sharing the server's
+database. DuckDB allows a single writer, so do not point a separate `obsei run` at a database that
+`obsei serve` holds. `themes.auto: true` updates themes after each scheduled run, and
+`GET /api/runs` reports the last run of each pipeline.
+
+```yaml
+themes:
+  auto: true
+pipelines:
+  - name: reviews
+    every_minutes: 60
+    sources: [...]
+```
+
+Without a server, `obsei run --every 60` repeats the run every hour.

@@ -160,6 +160,7 @@ def test_air_gapped_pipeline(tmp_path: Path, services: str) -> None:
 def test_public_model_endpoint_is_refused(tmp_path: Path, services: str) -> None:
     config = write_project(tmp_path, "https://api.openai.com/v1", f"{services}/hook")
     result = runner.invoke(app, ["run", "--config", str(config)])
-    assert result.exit_code == 2
+    assert result.exit_code == 1
+    assert "feedback: failed" in result.output
     assert "blocked in air_gapped mode" in result.output
     assert LocalServices.hooks == []

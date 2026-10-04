@@ -88,14 +88,44 @@ class ThemeQueries:
         )
 
     def _unassign(self, ids: list[str]) -> None:
+        """Remove records from their themes and recompute those themes from what remains."""
+        affected = [
+            str(r[0])
+            for r in self._con.execute(
+                "SELECT DISTINCT theme_id FROM record_themes WHERE list_contains(?, record_id)",
+                [ids],
+            ).fetchall()
+        ]
+        self._con.execute("DELETE FROM record_themes WHERE list_contains(?, record_id)", [ids])
         self._con.execute(
-            "UPDATE themes SET size = size - n FROM (SELECT theme_id, count(*) AS n "
-            "FROM record_themes WHERE list_contains(?, record_id) GROUP BY theme_id) gone "
-            "WHERE themes.id = gone.theme_id",
+            "UPDATE record_themes SET duplicate_of = NULL WHERE list_contains(?, duplicate_of)",
             [ids],
         )
-        self._con.execute("DELETE FROM record_themes WHERE list_contains(?, record_id)", [ids])
-        self._con.execute("DELETE FROM themes WHERE size <= 0")
+        self._recenter(affected, exclude=ids)
+
+    def _recenter(self, theme_ids: list[str], *, exclude: list[str]) -> None:
+        if not theme_ids:
+            return
+        members: dict[str, list[list[float]]] = {t: [] for t in theme_ids}
+        for theme_id, vector in self._con.execute(
+            "SELECT t.theme_id, e.vector FROM record_themes t "
+            "JOIN embeddings e ON e.record_id = t.record_id "
+            "WHERE list_contains(?, t.theme_id) AND NOT list_contains(?, t.record_id)",
+            [theme_ids, exclude],
+        ).fetchall():
+            members[str(theme_id)].append([float(v) for v in vector])
+        now = datetime.now(UTC)
+        for theme_id, vectors in members.items():
+            if not vectors:
+                self._con.execute("DELETE FROM themes WHERE id = ?", [theme_id])
+                continue
+            mean = [sum(col) / len(vectors) for col in zip(*vectors, strict=True)]
+            norm = sum(v * v for v in mean) ** 0.5 or 1.0
+            self._con.execute(
+                "UPDATE themes SET centroid = CAST(? AS FLOAT[]), size = ?, updated_at = ? "
+                "WHERE id = ?",
+                [_vec([v / norm for v in mean]), len(vectors), now, theme_id],
+            )
 
     def unassigned(self, model: str, limit: int) -> list[tuple[str, list[float]]]:
         rows = self._con.execute(

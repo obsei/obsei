@@ -13,8 +13,10 @@ obsei serve --host 0.0.0.0 --port 8765
 | `GET /healthz` | none | liveness |
 | `POST /ingest/{pipeline}/{source}` | HMAC-SHA256 signature | push feedback into a `webhook` source |
 | `/mcp` | bearer token | MCP over streamable HTTP |
+| `GET /api/runs` | bearer token | last run of each scheduled pipeline |
 
-Binding to a non-loopback address requires `OBSEI_API_TOKEN`.
+Binding to a non-loopback address requires `OBSEI_API_TOKEN`. Pipelines with `every_minutes` run on
+their schedule inside the server (see [Configuration](/configuration/#scheduling)).
 
 ## Sending feedback
 
