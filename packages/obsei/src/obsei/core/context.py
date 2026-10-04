@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from types import TracebackType
+from types import MappingProxyType, TracebackType
 from typing import Self
 
 import httpx
@@ -34,6 +34,23 @@ class LlmEndpoint(BaseModel):
     timeout: float = 60.0
 
 
+EGRESS: Mapping[str, object] = MappingProxyType({"obsei_egress": True})
+"""Pass as ``extensions=EGRESS`` on requests that carry feedback out (sinks): every hop, redirects
+included, must then pass the egress policy."""
+_ORIGIN_KEY = "obsei_origin"
+_FORWARDED_HEADERS = frozenset(
+    {"accept", "accept-encoding", "accept-language", "content-type", "content-length", "host"}
+    | {"transfer-encoding", "user-agent"}
+)
+_DEFAULT_PORTS = {"http": 80, "https": 443}
+
+
+def origin(url: str | httpx.URL) -> tuple[str, str, int | None]:
+    """(scheme, host, port) with the default port filled in."""
+    parsed = httpx.URL(url)
+    return parsed.scheme, parsed.host, parsed.port or _DEFAULT_PORTS.get(parsed.scheme)
+
+
 def default_http() -> httpx.Client:
     return httpx.Client(headers={"User-Agent": USER_AGENT}, timeout=30.0, follow_redirects=True)
 
@@ -47,6 +64,20 @@ class Context:
     salt: bytes | None = None
     llms: Mapping[str, LlmEndpoint] = field(default_factory=dict)
     llm_transport: httpx.BaseTransport | None = None
+
+    def __post_init__(self) -> None:
+        hooks = self.http.event_hooks
+        self.http.event_hooks = {**hooks, "request": [*hooks["request"], self._guard_request]}
+
+    def _guard_request(self, request: httpx.Request) -> None:
+        """Runs for every request and redirect hop: a hop to another origin loses credentials
+        and custom headers, and egress-marked requests are checked against the policy."""
+        first = request.extensions.setdefault(_ORIGIN_KEY, origin(request.url))
+        if first != origin(request.url):
+            for name in [n for n in request.headers if n.lower() not in _FORWARDED_HEADERS]:
+                del request.headers[name]
+        if request.extensions.get("obsei_egress"):
+            self.egress.check(str(request.url))
 
     def author(self, handle: str | None, locale: str | None = None) -> Author | None:
         if self.salt is None or not handle or not handle.strip():

@@ -13,6 +13,7 @@ from collections.abc import Awaitable, Callable, Iterator
 from contextlib import contextmanager
 
 import anyio
+from mcp.server.transport_security import TransportSecuritySettings
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -20,10 +21,17 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
-from starlette.types import ASGIApp
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from obsei import slackbot, studio
-from obsei.access import AUDITED, RANK, Authenticator, Principal, required_role
+from obsei.access import (
+    AUDITED,
+    RANK,
+    Authenticator,
+    HostAllowlist,
+    Principal,
+    required_role,
+)
 from obsei.ask import ask
 from obsei.config import ObseiConfig, build_pipeline
 from obsei.core.context import Context
@@ -61,6 +69,27 @@ class AccessControl(BaseHTTPMiddleware):
             await self.audit(principal, request.url.path)
         request.state.principal = principal
         return await call_next(request)
+
+
+class HostGuard:
+    """Rejects requests whose Host (or Origin) is not allowed, on every route."""
+
+    def __init__(self, app: ASGIApp, allowlist: HostAllowlist) -> None:
+        self.app = app
+        self.allowlist = allowlist
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] in ("http", "websocket"):
+            headers = {k.decode("latin-1"): v.decode("latin-1") for k, v in scope["headers"]}
+            origin = headers.get("origin")
+            if not self.allowlist.allows(headers.get("host", "")) or (
+                origin is not None and not self.allowlist.allows(origin)
+            ):
+                await JSONResponse({"error": "host not allowed"}, status_code=421)(
+                    scope, receive, send
+                )
+                return
+        await self.app(scope, receive, send)
 
 
 class Intake:
@@ -219,7 +248,11 @@ def create_app(
 ) -> Starlette:
     h = Handlers(config, ctx, store)
     app = create_server(h.shared_store, k_anonymity=h.k).streamable_http_app(
-        streamable_http_path="/mcp", host=host
+        streamable_http_path="/mcp",
+        host=host,
+        transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False)
+        if config.access.allowed_hosts
+        else None,
     )
     app.router.routes.extend(
         [
@@ -246,5 +279,6 @@ def create_app(
             await anyio.to_thread.run_sync(write)
 
         app.add_middleware(AccessControl, authenticator=auth, audit=audit)
+    app.add_middleware(HostGuard, allowlist=HostAllowlist(host, config.access.allowed_hosts))
     app.state.scheduler = h.scheduler
     return app

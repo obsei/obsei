@@ -7,7 +7,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from obsei.core.context import Context
+from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.sinks._common import env, label, matches
@@ -60,10 +60,12 @@ class SlackSink:
         selected = [r for r in batch if matches(r, self.config.when, self.config.max_rating)]
         posted = selected[: self.config.max_messages]
         for record in posted:
-            response = self.ctx.http.post(self.url, json={"text": render(record)})
+            response = self.ctx.http.post(
+                self.url, json={"text": render(record)}, extensions=EGRESS
+            )
             if response.is_error:
                 return SinkResult(errors=[f"slack returned {response.status_code}"])
         if len(selected) > len(posted):
             summary = f"…and {len(selected) - len(posted)} more matching feedback item(s)."
-            self.ctx.http.post(self.url, json={"text": summary})
+            self.ctx.http.post(self.url, json={"text": summary}, extensions=EGRESS)
         return SinkResult(sent=len(posted), skipped=len(batch) - len(posted))
