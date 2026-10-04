@@ -10,7 +10,7 @@ checked against the egress policy when the pipeline starts.
 
 | Type | What | Idempotency |
 | --- | --- | --- |
-| `webhook` | JSON batches, optional HMAC signature; authors omitted by default | record ids in the payload |
+| `webhook` | JSON batches, optional HMAC signature over `{X-Obsei-Timestamp}.{body}`; authors omitted by default | record ids in the payload |
 | `slack` | Messages for matching feedback, capped per run | at-least-once |
 | `github_issues` | One issue per matching record | hidden marker, searched before creating |
 | `jira` | One issue per matching record (Cloud with ADF, or Data Center) | `obsei-rec_...` label |

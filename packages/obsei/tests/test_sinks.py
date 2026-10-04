@@ -61,7 +61,10 @@ def test_webhook_signs_and_omits_authors(monkeypatch: pytest.MonkeyPatch) -> Non
     result = sink.send([record("1", "Crash")])
     assert result.sent == 1
     request = captured[0]
-    expected = hmac.new(b"topsecret", request.content, hashlib.sha256).hexdigest()
+    stamp = request.headers["X-Obsei-Timestamp"]
+    expected = hmac.new(
+        b"topsecret", stamp.encode() + b"." + request.content, hashlib.sha256
+    ).hexdigest()
     assert request.headers["X-Obsei-Signature-256"] == f"sha256={expected}"
     payload = json.loads(request.content)
     assert "author" not in payload["records"][0]

@@ -5,7 +5,7 @@
 #          the generic REST source (HTML converted to text with text_format: html).
 # Model:   a local Ollama model.
 # Sinks:   a webhook in your network, each POST signed with HMAC-SHA256
-#          (X-Obsei-Signature-256: sha256=<hex digest of the body>).
+#          (X-Obsei-Signature-256: sha256=<hex HMAC of "{X-Obsei-Timestamp}.{body}">).
 #
 # Extras:  none (pip install obsei)
 # Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT

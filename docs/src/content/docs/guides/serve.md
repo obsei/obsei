@@ -41,10 +41,19 @@ sources:
       fields: {id: id, created_at: created_at, text: [subject, body], lang: locale}
 ```
 
-Sign the raw body: `X-Obsei-Signature-256: sha256=<hex HMAC of body>`. GitHub-style
-`X-Hub-Signature-256` is accepted too. Map `id` and `created_at` so that redeliveries are
-recognised as unchanged. The signature does not cover a timestamp, so there is no replay window:
-a replayed request with mapped ids is stored as unchanged.
+Send the current Unix time in `X-Obsei-Timestamp` and sign it with the raw body:
+`X-Obsei-Signature-256: sha256=<hex HMAC of "{timestamp}.{body}">`. Requests more than
+`max_age_seconds` (default 300) away from the server's clock are refused, so a captured request
+cannot be replayed later. Senders that sign the body only, such as GitHub (`X-Hub-Signature-256`),
+need `require_timestamp: false` on the source, which gives up that protection. Map `id` and
+`created_at` so that redeliveries are recognised as unchanged.
+
+```bash
+ts=$(date +%s)
+sig=$({ printf '%s.' "$ts"; cat body.json; } | openssl dgst -sha256 -hmac "$TICKETS_HOOK_SECRET" | sed 's/.*= //')
+curl -X POST https://obsei.internal/ingest/support/tickets --data-binary @body.json \
+  -H "X-Obsei-Timestamp: $ts" -H "X-Obsei-Signature-256: sha256=$sig"
+```
 
 A request is accepted as a whole or not at all: an invalid item returns `400` naming the item.
 Items without text are skipped, and the reply counts them:

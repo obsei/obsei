@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import time
 from collections.abc import Sequence
 from typing import ClassVar
 
@@ -16,6 +17,7 @@ from obsei.core.record import Record
 from obsei.sinks._common import env
 
 SIGNATURE_HEADER = "X-Obsei-Signature-256"
+TIMESTAMP_HEADER = "X-Obsei-Timestamp"
 
 
 class WebhookConfig(BaseModel):
@@ -45,7 +47,9 @@ class WebhookSink:
         ).encode()
         headers = {"Content-Type": "application/json", **self.config.headers}
         if self.secret:
-            digest = hmac.new(self.secret, body, hashlib.sha256).hexdigest()
+            stamp = str(int(time.time()))
+            digest = hmac.new(self.secret, stamp.encode() + b"." + body, hashlib.sha256).hexdigest()
+            headers[TIMESTAMP_HEADER] = stamp
             headers[SIGNATURE_HEADER] = f"sha256={digest}"
         response = self.ctx.http.post(
             self.config.url, content=body, headers=headers, extensions=EGRESS
