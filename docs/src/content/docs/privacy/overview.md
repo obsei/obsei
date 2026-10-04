@@ -16,14 +16,17 @@ retention and transfers.
 
 | Region | Detectors |
 | --- | --- |
-| global | email, payment card (Luhn), IBAN (mod 97), IPv4, IPv6, phone numbers |
-| north_america | US SSN, Canadian SIN |
-| uk | National Insurance number, NHS number |
-| eu | France NIR, Spain DNI/NIE, Italy codice fiscale, Poland PESEL, Netherlands BSN |
-| latam | Brazil CPF, Mexico CURP |
-| apac | China resident ID, Singapore NRIC/FIN, Japan My Number, Australia TFN |
-| india | Aadhaar (Verhoeff), PAN |
-| africa | South Africa ID |
+| Global | email, payment card (Luhn), IBAN (mod 97), IPv4, IPv6, phone numbers |
+| North America | US SSN, Canadian SIN |
+| United Kingdom | National Insurance number, NHS number |
+| European Union | France NIR, Spain DNI/NIE, Italy codice fiscale, Poland PESEL, Netherlands BSN |
+| Latin America | Brazil CPF, Mexico CURP |
+| Asia-Pacific | China resident ID, Singapore NRIC/FIN, Japan My Number, Australia TFN |
+| India | Aadhaar (Verhoeff), PAN |
+| Africa | South Africa ID |
+
+In `obsei.yaml`, `privacy.regions` takes the keys `global`, `north_america`, `uk`, `eu`, `latam`,
+`apac`, `india` and `africa` (all by default).
 
 - **Names (optional).** Regexes cannot find person names. `pip install "obsei[names]>=1.0.0a1"`
   adds a local multilingual GLiNER model that replaces names with `<PERSON>` after the regex pass:

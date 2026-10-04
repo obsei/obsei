@@ -4,6 +4,7 @@ description: Complete obsei.yaml files for common Voice of Customer setups.
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
+import Pipeline from "../../components/Pipeline.astro";
 
 Each example is a complete, commented `obsei.yaml` in the
 [`examples/`](https://github.com/obsei/obsei/tree/master/examples) folder. The header of each file
@@ -25,7 +26,9 @@ Secrets are always read from environment variables.
 App Store reviews from the US, UK, India, Brazil, Japan and Germany plus Google Play, classified
 by a local Ollama model, with negative reviews posted to Slack and multilingual themes.
 
-**Sources** `appstore`, `playstore` → **sinks** `slack` · extras `google,embeddings`
+<Pipeline compact sources={["App Store ×6 countries", "Google Play"]} steps={["Redact", "Classify", "Theme", "Store"]} outputs={["Slack"]} />
+
+Extras: `google,embeddings`
 
 <LinkCard
   title="app-reviews-multi-country.yaml"
@@ -38,7 +41,7 @@ Zendesk, Freshdesk and Intercom (EU region) tickets labelled by a small model; l
 results go to a larger in-house model. Bugs become Jira issues, feature requests Linear issues,
 and everything is exported to Parquet.
 
-**Sources** `zendesk`, `freshdesk`, `intercom` → **sinks** `jira`, `linear`, `parquet`
+<Pipeline compact sources={["Zendesk", "Freshdesk", "Intercom"]} steps={["Redact", "Classify", "Store"]} outputs={["Jira", "Linear", "Parquet"]} />
 
 <LinkCard
   title="support-tickets.yaml"
@@ -50,7 +53,7 @@ and everything is exported to Parquet.
 Bluesky (English and Portuguese), Hacker News, YouTube comments, a forum RSS feed and a Mastodon
 hashtag through the REST source, delivered to an internal service as HMAC-signed webhooks.
 
-**Sources** `bluesky`, `hackernews`, `youtube`, `rss`, `rest` → **sinks** `webhook`
+<Pipeline compact sources={["Bluesky", "Hacker News", "YouTube", "RSS", "Mastodon (REST)"]} steps={["Redact", "Classify", "Store"]} outputs={["Signed webhook"]} />
 
 <LinkCard
   title="social-listening.yaml"
@@ -63,7 +66,7 @@ Trustpilot Business reviews through the generic REST source, with the API key in
 header, star ratings mapped and 1-2 star reviews posted to Slack. Field names follow the public
 business-unit reviews endpoint; verify them against your account's API version.
 
-**Sources** `rest` → **sinks** `slack`
+<Pipeline compact sources={["Trustpilot (REST)"]} steps={["Redact", "Classify", "Store"]} outputs={["Slack"]} />
 
 <LinkCard
   title="trustpilot-rest.yaml"
@@ -75,7 +78,7 @@ business-unit reviews endpoint; verify them against your account's API version.
 HubSpot tickets (cursor paging on `paging.next.after`) and ServiceNow incidents (Table API with
 `sysparm_*` parameters), classified with custom fields; bugs and outages go to Jira Data Center.
 
-**Sources** `rest` (HubSpot, ServiceNow) → **sinks** `jira`, `parquet`
+<Pipeline compact sources={["HubSpot (REST)", "ServiceNow (REST)"]} steps={["Redact", "Classify", "Store"]} outputs={["Jira", "Parquet"]} />
 
 <LinkCard
   title="crm-and-itsm-rest.yaml"
@@ -87,7 +90,9 @@ HubSpot tickets (cursor paging on `paging.next.after`) and ServiceNow incidents 
 NPS responses read incrementally from Postgres, Snowflake or BigQuery, classified, and written
 back to a warehouse table without author pseudonyms.
 
-**Sources** `sql` → **sinks** `sql` · extras `sql` plus your database driver
+<Pipeline compact sources={["SQL warehouse"]} steps={["Redact", "Classify", "Store"]} outputs={["SQL warehouse"]} />
+
+Extras: `sql` plus your database driver
 
 <LinkCard
   title="warehouse.yaml"
@@ -99,7 +104,7 @@ back to a warehouse table without author pseudonyms.
 A support mailbox over IMAP and a drop folder for exported CSV and JSON Lines survey and NPS
 files, with churn risks posted to Slack and a Parquet export.
 
-**Sources** `imap`, `filedrop` → **sinks** `slack`, `parquet`
+<Pipeline compact sources={["IMAP mailbox", "File drop"]} steps={["Redact", "Classify", "Store"]} outputs={["Slack", "Parquet"]} />
 
 <LinkCard
   title="email-and-files.yaml"
@@ -112,7 +117,7 @@ vLLM with an Azure OpenAI fallback behind a private egress allowlist, person-nam
 local model, regional redaction, local multilingual embeddings, `k_anonymity: 10`, `obsei serve`
 behind an SSO proxy with group-to-role mapping, API tokens, `allowed_hosts` and a retention job.
 
-**Sources** `github_issues` (Enterprise), `webhook`, `sql` → **sinks** `jira`
+<Pipeline compact sources={["GitHub Enterprise", "Webhooks", "SQL"]} steps={["Redact", "Classify", "Theme", "Store"]} outputs={["Jira"]} />
 · extras `mcp,names,embeddings,sql`
 
 <LinkCard
@@ -126,7 +131,7 @@ One pipeline per market with market-specific intents, India, Latin America and A
 redaction plus name redaction, multilingual themes labelled in one language, and a Slack channel
 per team.
 
-**Sources** `appstore`, `freshdesk`, `intercom`, `bluesky` → **sinks** `slack`
+<Pipeline compact sources={["App Store", "Freshdesk", "Intercom", "Bluesky"]} steps={["Redact", "Classify", "Theme", "Store"]} outputs={["Slack"]} />
 · extras `names,embeddings`
 
 <LinkCard
@@ -140,7 +145,7 @@ A daily workflow: App Store and Google Play reviews, classified, turned into Git
 Slack messages, with the encrypted database kept in the Actions cache. See
 [GitHub Action](/guides/github-action/).
 
-**Sources** `appstore`, `playstore` → **sinks** `github_issues`, `slack`
+<Pipeline compact sources={["App Store", "Google Play"]} steps={["Redact", "Classify", "Store"]} outputs={["GitHub issues", "Slack"]} />
 
 <LinkCard
   title="examples/github-actions"
@@ -152,7 +157,25 @@ Slack messages, with the encrypted database kept in the Actions cache. See
 These use [plugins](/reference/plugins/) that are installed separately and allowed with
 `plugins:` in the file.
 
-- [`surveys-typeform.yaml`](https://github.com/obsei/obsei/blob/master/examples/surveys-typeform.yaml):
-  Typeform survey responses with the `typeform` source.
-- [`alerts-teams.yaml`](https://github.com/obsei/obsei/blob/master/examples/alerts-teams.yaml):
-  alerts to Microsoft Teams with the `teams` sink.
+### Surveys from Typeform
+
+Typeform survey responses plus a CSV NPS export, classified and grouped into themes, exported to
+Parquet.
+
+<Pipeline compact sources={["Typeform", "NPS CSV"]} steps={["Redact", "Classify", "Theme", "Store"]} outputs={["Parquet"]} />
+
+<LinkCard
+  title="surveys-typeform.yaml"
+  href="https://github.com/obsei/obsei/blob/master/examples/surveys-typeform.yaml"
+/>
+
+### Alerts in Microsoft Teams
+
+Negative App Store and Google Play reviews posted to a Teams channel.
+
+<Pipeline compact sources={["App Store", "Google Play"]} steps={["Redact", "Classify", "Store"]} outputs={["Microsoft Teams"]} />
+
+<LinkCard
+  title="alerts-teams.yaml"
+  href="https://github.com/obsei/obsei/blob/master/examples/alerts-teams.yaml"
+/>

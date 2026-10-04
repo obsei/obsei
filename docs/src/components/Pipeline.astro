@@ -1,7 +1,7 @@
 ---
-const sources = ["App Store", "Google Play", "Zendesk", "Intercom", "Gong", "GitHub", "Bluesky", "SQL", "Webhooks", "+ any REST or MCP"];
-const outputs = ["Studio", "AI agents via MCP", "Slack", "Jira", "Linear", "Warehouse"];
-const steps = [
+const defaultSources = ["App Store", "Google Play", "Zendesk", "Intercom", "Gong", "GitHub", "Bluesky", "SQL", "Webhooks", "+ any REST or MCP"];
+const defaultOutputs = ["Studio", "AI agents via MCP", "Slack", "Jira", "Linear", "Warehouse"];
+const allSteps = [
   {
     name: "Redact",
     note: "PII and names",
@@ -27,18 +27,29 @@ const steps = [
     icon: '<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
   },
 ];
+
+type StepName = "Redact" | "Classify" | "Theme" | "Store";
+interface Props {
+  sources?: string[];
+  outputs?: string[];
+  steps?: StepName[];
+  compact?: boolean;
+}
+const { sources = defaultSources, outputs = defaultOutputs, steps: only, compact = false } = Astro.props;
+const steps = only ? allSteps.filter((s) => only.includes(s.name as StepName)) : allSteps;
+const label = `obsei pipeline: ${sources.join(", ")} flow into your infrastructure (${steps.map((s) => s.name.toLowerCase()).join(", ")}), then reach ${outputs.join(", ")}`;
 ---
 
-<figure class="pipeline not-content" aria-label="obsei pipeline: sources flow into your infrastructure, where data is redacted, classified, themed and stored, then reaches Studio, agents and sinks">
+<figure class:list={["pipeline", "not-content", { compact }]} aria-label={label}>
   <div class="flow">
   <div class="lane">
-    <p class="title"><a href="/guides/sources/">Collect</a></p>
+    <p class="title"><a href="/guides/sources/">{compact ? "Sources" : "Collect"}</a></p>
     <ul class="pills">{sources.map((s) => <li>{s}</li>)}</ul>
   </div>
   <div class="link" aria-hidden="true"><span></span></div>
   <div class="boundary">
     <p class="title">Your infrastructure</p>
-    <ol class="steps">
+    <ol class="steps" data-steps={steps.length} style={`--steps: ${steps.length}`}>
       {steps.map((s) => (
         <li>
           <a href={s.href}>
@@ -53,13 +64,37 @@ const steps = [
   </div>
   <div class="link" aria-hidden="true"><span></span></div>
   <div class="lane">
-    <p class="title"><a href="/guides/sinks/">Act</a></p>
+    <p class="title"><a href="/guides/sinks/">{compact ? "Sinks" : "Act"}</a></p>
     <ul class="pills out">{outputs.map((s) => <li>{s}</li>)}</ul>
   </div>
   </div>
 </figure>
 
 <style>
+  .compact {
+    margin: 1rem 0 0.75rem;
+  }
+  .compact .note,
+  .compact .boundary .title {
+    display: none;
+  }
+  .compact .boundary {
+    padding: 0.6rem;
+  }
+  .compact .steps a {
+    padding: 0.55rem 0.3rem;
+  }
+  .compact .steps svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+  .compact .flow {
+    grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1.6fr) 28px minmax(0, 0.8fr);
+  }
+  .compact .steps strong {
+    font-size: 0.85rem;
+  }
+
   .pipeline {
     container-type: inline-size;
     margin: 2rem 0;
@@ -122,7 +157,7 @@ const steps = [
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--steps, 4), minmax(0, 1fr));
     gap: 0.6rem;
   }
   .steps li {
@@ -201,23 +236,36 @@ const steps = [
     }
   }
   @container (max-width: 52rem) {
-    .flow {
+    .pipeline:not(.compact) .flow {
       grid-template-columns: minmax(0, 1fr);
     }
-    .link {
+    .pipeline:not(.compact) .link {
       width: 2px;
       height: 32px;
       justify-self: center;
     }
-    .link span {
+    .pipeline:not(.compact) .link span {
+      animation-name: flow-down;
+    }
+  }
+  @container (max-width: 34rem) {
+    .compact .flow {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .compact .link {
+      width: 2px;
+      height: 32px;
+      justify-self: center;
+    }
+    .compact .link span {
       animation-name: flow-down;
     }
   }
   @container (max-width: 30rem) {
-    .steps {
+    .steps[data-steps="4"] {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .steps li + li::before {
+    .steps[data-steps="4"] li + li::before {
       display: none;
     }
   }
