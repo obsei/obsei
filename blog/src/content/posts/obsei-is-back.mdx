@@ -189,7 +189,7 @@ Or run it with Docker, in an empty folder:
 ```bash
 export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
 alias obsei='docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
-  -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT ghcr.io/obsei/obsei:1.0.0-rc.1'
+  -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT ghcr.io/obsei/obsei:1.0.0-rc.3'
 obsei init && obsei run      # sample feedback in ten languages, redacted and stored encrypted
 ```
 {/* x-release-please-end */}

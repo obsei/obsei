@@ -87,9 +87,9 @@ Run inside the project directory. The image's entrypoint is `obsei`, so argument
 ```bash
 docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
   -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT \
-  ghcr.io/obsei/obsei:1.0.0-rc.2 run
+  ghcr.io/obsei/obsei:1.0.0-rc.3 run
 ```
 
-Images are tagged by release (`1.0.0-rc.2`); there is no `latest` tag yet. `--user` keeps the
+Images are tagged by release (`1.0.0-rc.3`); there is no `latest` tag yet. `--user` keeps the
 database and outputs owned by you.
 <!-- x-release-please-end -->
