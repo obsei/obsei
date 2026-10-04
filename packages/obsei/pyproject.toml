@@ -23,6 +23,7 @@ keywords = [
     "llm",
     "gdpr",
     "dpdp",
+    "duckdb",
 ]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
@@ -39,6 +40,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    "duckdb>=1.5.6,<2",
     "pydantic>=2.9,<3",
     "typer>=0.15,<1",
 ]

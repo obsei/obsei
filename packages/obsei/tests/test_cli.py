@@ -21,6 +21,7 @@ def test_doctor_reports_missing_salt(monkeypatch: pytest.MonkeyPatch) -> None:
     result = runner.invoke(app, ["doctor"])
     assert result.exit_code == 0
     assert "not set" in result.output
+    assert "duckdb" in result.output
 
 
 def test_schema_is_valid_json() -> None:

@@ -1,19 +1,12 @@
-"""The feedback record: one normalised piece of customer feedback.
-
-Every source maps its native items into ``Record`` objects, so enrichers, sinks,
-storage and agents only ever deal with one schema. Identity is pseudonymous by
-design: ``Author`` carries a salted pseudonym, never a raw handle.
-"""
-
 from __future__ import annotations
 
 import hashlib
 import re
 import unicodedata
 from datetime import UTC, datetime
-from typing import Any, Literal, Self
+from typing import Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 SCHEMA_VERSION = "0.1"
 _ID_RE = re.compile(r"rec_[0-9a-f]{32}")
@@ -25,23 +18,24 @@ def _sha256(value: str) -> str:
 
 
 def normalize_text(text: str) -> str:
-    """Normalise text for content hashing: NFKC, case-folded, whitespace collapsed."""
     return " ".join(unicodedata.normalize("NFKC", text).casefold().split())
 
 
-class SourceRef(BaseModel):
-    """Where a record came from."""
+def _now() -> datetime:
+    return datetime.now(UTC)
 
+
+class SourceRef(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    type: str = Field(min_length=1, description="Source plugin name, e.g. 'appstore'.")
-    instance: str = Field(default="default", min_length=1, description="Configured instance.")
-    native_id: str = Field(min_length=1, description="The item's id in the source system.")
+    type: str = Field(min_length=1)
+    instance: str = Field(default="default", min_length=1)
+    native_id: str = Field(min_length=1)
     url: str | None = None
 
 
 class Author(BaseModel):
-    """A pseudonymous author. Raw identities are never stored here."""
+    """Pseudonymous author; raw handles are never stored."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -50,38 +44,35 @@ class Author(BaseModel):
 
 
 class Enrichment(BaseModel):
-    """The output of one enricher for one record, with provenance."""
-
     model_config = ConfigDict(extra="forbid")
 
-    value: Any
+    value: JsonValue
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
-    model: str | None = Field(default=None, description="Model or method that produced it.")
-    at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    model: str | None = None
+    at: datetime = Field(default_factory=_now)
 
 
 class Record(BaseModel):
-    """One piece of customer feedback in the obsei Feedback Record schema."""
+    """One piece of customer feedback. ``id`` and ``content_hash`` are derived when omitted."""
 
     model_config = ConfigDict(extra="forbid")
 
-    id: str = Field(default="", description="Derived from the source identity when omitted.")
+    id: str = ""
     source: SourceRef
     text: str
     created_at: datetime
-    fetched_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    fetched_at: datetime = Field(default_factory=_now)
     author: Author | None = None
     rating: float | None = None
     lang: str | None = None
     context: dict[str, str] = Field(default_factory=dict)
     enrichments: dict[str, Enrichment] = Field(default_factory=dict)
-    content_hash: str = Field(default="", description="SHA-256 of normalised text; derived.")
+    content_hash: str = ""
     purpose: str = Field(default="feedback-analytics", min_length=1)
     schema_version: Literal["0.1"] = "0.1"
 
     @staticmethod
     def make_id(source: SourceRef) -> str:
-        """Stable id derived from the source identity, so re-fetching never duplicates."""
         key = "\x1f".join((source.type, source.instance, source.native_id))
         return f"rec_{_sha256(key)[:32]}"
 
@@ -101,5 +92,4 @@ class Record(BaseModel):
         return self
 
     def with_enrichment(self, name: str, enrichment: Enrichment) -> Record:
-        """Return a copy with one enrichment added or replaced."""
         return self.model_copy(update={"enrichments": {**self.enrichments, name: enrichment}})

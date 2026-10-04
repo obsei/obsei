@@ -22,5 +22,7 @@ COPY --from=build /opt/obsei /opt/obsei
 ENV PATH="/opt/obsei/bin:${PATH}" PYTHONUNBUFFERED=1
 USER 10001
 WORKDIR /home/obsei
+# Pre-install DuckDB's OpenSSL-backed extension so encrypted stores work offline.
+RUN python -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"
 ENTRYPOINT ["obsei"]
 CMD ["--help"]
