@@ -12,7 +12,7 @@ obsei = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "obsei[google,mcp]",
+    "obsei[apple,google,mcp]",
     "mypy==2.4.0",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",

@@ -16,7 +16,7 @@ members = [
 [manifest.dependency-groups]
 dev = [
     { name = "mypy", specifier = "==2.4.0" },
-    { name = "obsei", extras = ["google", "mcp"], editable = "packages/obsei" },
+    { name = "obsei", extras = ["apple", "google", "mcp"], editable = "packages/obsei" },
     { name = "pytest", specifier = "==9.1.1" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "ruff", specifier = "==0.16.10" },
@@ -1029,6 +1029,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+apple = [
+    { name = "pyjwt", extra = ["crypto"] },
+]
 google = [
     { name = "google-auth", extra = ["requests"] },
 ]
@@ -1044,10 +1047,11 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28,<1" },
     { name = "mcp", marker = "extra == 'mcp'", specifier = ">=2.3,<3" },
     { name = "pydantic", specifier = ">=2.9,<3" },
+    { name = "pyjwt", extras = ["crypto"], marker = "extra == 'apple'", specifier = ">=2.10,<3" },
     { name = "pyyaml", specifier = ">=6.0.2,<7" },
     { name = "typer", specifier = ">=0.15,<1" },
 ]
-provides-extras = ["google", "mcp"]
+provides-extras = ["apple", "google", "mcp"]
 
 [[package]]
 name = "opentelemetry-api"

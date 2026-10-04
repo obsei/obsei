@@ -37,13 +37,17 @@ def test_registers_all_builtins() -> None:
     register(registry)
     assert registry.names()["source"] == [
         "appstore",
+        "appstoreconnect",
+        "bluesky",
         "csv",
         "github_issues",
+        "hackernews",
         "jsonl",
         "playstore",
         "rest",
         "rss",
         "webhook",
+        "youtube",
     ]
 
 
