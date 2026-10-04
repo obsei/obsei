@@ -25,8 +25,8 @@ retention and transfers.
 | india | Aadhaar (Verhoeff), PAN |
 | africa | South Africa ID |
 
-- **Names (optional).** Regexes cannot find person names. `pip install 'obsei[names]'` adds a
-  local multilingual GLiNER model that replaces names with `<PERSON>` after the regex pass:
+- **Names (optional).** Regexes cannot find person names. `pip install "obsei[names]>=1.0.0a1"`
+  adds a local multilingual GLiNER model that replaces names with `<PERSON>` after the regex pass:
 
   ```yaml
   privacy:
@@ -46,9 +46,11 @@ retention and transfers.
 ## At rest and in use
 
 - The DuckDB file is encrypted (AES via OpenSSL) with `OBSEI_DB_KEY`. Writing it needs DuckDB's
-  `httpfs` extension, which air-gapped mode never downloads: install it once with network access
-  (`INSTALL httpfs`) into a directory, copy that directory over and point
-  `OBSEI_DUCKDB_EXTENSIONS` at it. The container image ships it in `/opt/duckdb/extensions`.
+  `httpfs` extension. In `private` or `hybrid` egress mode the first encrypted write downloads it
+  if it is missing; air-gapped mode (the default) never downloads it. To pre-install it, run
+  `INSTALL httpfs` once with network access into a directory, copy that directory over (same
+  DuckDB version and platform) and point `OBSEI_DUCKDB_EXTENSIONS` at it. The container image
+  ships with it pre-installed.
   `obsei doctor` reports whether it is ready.
 - Egress is air-gapped by default; public model and sink endpoints must be allowed explicitly.
   Every redirect hop of a sink request is checked as well, and a redirect to another origin
@@ -77,6 +79,10 @@ audit log inside the encrypted store, with the filters and counts but never the 
 source that sends the same records again (CSV, file drop, REST without `since_param`) cannot
 bring them back, and new records by an erased author are not stored. Tombstones hold no raw
 personal data.
+
+`forget` erases records from the obsei database only. Copies already delivered to sinks (Parquet
+files, SQL tables, Slack messages, Jira, Linear or GitHub issues, webhook receivers) are not
+touched; erase them in those systems as part of the same request.
 
 These map to rights found in the GDPR and UK GDPR, India's DPDP Act, Brazil's LGPD, California's
 CCPA/CPRA, Japan's APPI, South Africa's POPIA, China's PIPL, Singapore's PDPA and others. Check

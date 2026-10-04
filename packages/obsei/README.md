@@ -8,11 +8,14 @@
 analytics: collect feedback from every channel and language, redact personal data before it is
 stored, find stable themes, and let your AI agents answer questions with cited evidence.
 
-> 1.0 is in pre-release and is not compatible with 0.0.x. Install with `--pre`.
+> 1.0 is in pre-release and is not compatible with 0.0.x. Install it with the `>=1.0.0a1`
+> specifier; a plain `pip install obsei` still gives 0.0.15.
 
 ```bash
-pip install --pre "obsei[mcp]"     # or: uv tool install --prerelease allow "obsei[mcp]"
-obsei init && obsei try && obsei run
+pip install "obsei[mcp]>=1.0.0a1"     # or: uv tool install "obsei[mcp]>=1.0.0a1"
+obsei init
+export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
+obsei try && obsei run
 ```
 
 Optional extras: `mcp` (MCP server, `obsei serve`), `sql`, `google`, `apple`, `names` (person-name
@@ -21,4 +24,4 @@ redaction), `embeddings` (multilingual themes).
 - Docs: https://docs.obsei.com
 - Live demo: https://docs.obsei.com/demo/
 - Source: https://github.com/obsei/obsei
-- Container: `ghcr.io/obsei/obsei`
+- Container: `ghcr.io/obsei/obsei:1.0.0-alpha.1` <!-- x-release-please-version -->

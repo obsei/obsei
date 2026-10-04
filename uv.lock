@@ -5,8 +5,8 @@ resolution-markers = [
     "python_full_version >= '3.15'",
     "python_full_version == '3.14.*'",
     "python_full_version == '3.13.*' and sys_platform == 'emscripten'",
-    "python_full_version == '3.12.*' and sys_platform == 'emscripten'",
     "python_full_version == '3.13.*' and sys_platform != 'emscripten'",
+    "python_full_version == '3.12.*' and sys_platform == 'emscripten'",
     "python_full_version == '3.12.*' and sys_platform != 'emscripten'",
     "python_full_version < '3.12'",
 ]
@@ -1541,8 +1541,8 @@ resolution-markers = [
     "python_full_version >= '3.15'",
     "python_full_version == '3.14.*'",
     "python_full_version == '3.13.*' and sys_platform == 'emscripten'",
-    "python_full_version == '3.12.*' and sys_platform == 'emscripten'",
     "python_full_version == '3.13.*' and sys_platform != 'emscripten'",
+    "python_full_version == '3.12.*' and sys_platform == 'emscripten'",
     "python_full_version == '3.12.*' and sys_platform != 'emscripten'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/dc/76/3af777226b63a5e64a6b36b1ec5855c14e2b94a37096d4760e595fc43511/networkx-3.7.tar.gz", hash = "sha256:fd77a511bd90f39f3d016351345b52cf5319b813bdca01de3f755d3cca62e96a", size = 1866482, upload-time = "2026-09-21T16:45:16.974Z" }
@@ -1640,8 +1640,8 @@ resolution-markers = [
     "python_full_version >= '3.15'",
     "python_full_version == '3.14.*'",
     "python_full_version == '3.13.*' and sys_platform == 'emscripten'",
-    "python_full_version == '3.12.*' and sys_platform == 'emscripten'",
     "python_full_version == '3.13.*' and sys_platform != 'emscripten'",
+    "python_full_version == '3.12.*' and sys_platform == 'emscripten'",
     "python_full_version == '3.12.*' and sys_platform != 'emscripten'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/13/01/11703282db468b85f6f7b8c7f22d058de5970d5c7e60a3a8aaa313c3de36/numpy-2.5.3.tar.gz", hash = "sha256:df2d5874ff183595a4ba404edd04f6bd9b5505c1d7708573f6a6c17489a67563", size = 20791231, upload-time = "2026-09-06T16:27:47.073Z" }
@@ -1888,7 +1888,10 @@ google = [
     { name = "google-auth", extra = ["requests"] },
 ]
 mcp = [
+    { name = "anyio" },
     { name = "mcp" },
+    { name = "starlette" },
+    { name = "uvicorn" },
 ]
 names = [
     { name = "gliner" },
@@ -1899,6 +1902,7 @@ sql = [
 
 [package.metadata]
 requires-dist = [
+    { name = "anyio", marker = "extra == 'mcp'", specifier = ">=4.9,<5" },
     { name = "defusedxml", specifier = ">=0.7.1,<1" },
     { name = "duckdb", specifier = ">=1.5.6,<2" },
     { name = "fastembed", marker = "extra == 'embeddings'", specifier = ">=0.8,<1" },
@@ -1910,7 +1914,9 @@ requires-dist = [
     { name = "pyjwt", extras = ["crypto"], marker = "extra == 'apple'", specifier = ">=2.10,<3" },
     { name = "pyyaml", specifier = ">=6.0.2,<7" },
     { name = "sqlalchemy", marker = "extra == 'sql'", specifier = ">=2.0.36,<3" },
+    { name = "starlette", marker = "extra == 'mcp'", specifier = ">=0.48,<2" },
     { name = "typer", specifier = ">=0.15,<1" },
+    { name = "uvicorn", marker = "extra == 'mcp'", specifier = ">=0.31.1,<1" },
 ]
 provides-extras = ["apple", "embeddings", "google", "mcp", "names", "sql"]
 

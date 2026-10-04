@@ -18,10 +18,10 @@ dashboards, tickets and agents can refer to them over time.
 
 ```yaml
 themes:
-  embedder: hashing        # offline, any script; or an llms name with embedding_model
+  embedder: hashing        # offline, any script; or local, or an llms name with embedding_model
   similarity: null         # default 0.3 hashing, 0.65 local multilingual, 0.75 other models
   duplicate_similarity: 0.9
-  labeler: local           # llms name; without it, keyword labels
+  labeler: ollama          # llms name; without it, keyword labels
   label_language: English  # labels in your team's language; feedback stays as written
   k_anonymity: 5
 ```
@@ -31,7 +31,7 @@ wording, so the same issue in two languages forms two themes. To group by meanin
 languages, use the local multilingual model (CPU only, about 220 MB, no PyTorch):
 
 ```bash
-pip install --pre 'obsei[embeddings]'
+pip install "obsei[embeddings]>=1.0.0a1"
 obsei models download --dir /models      # once, with network
 export OBSEI_MODELS_DIR=/models          # air-gapped runs load it from here
 ```
@@ -46,13 +46,16 @@ served by Ollama or vLLM (for example `bge-m3`) also works:
 
 ```yaml
 llms:
-  local:
+  ollama:
     base_url: http://localhost:11434/v1
     model: qwen3:8b
     embedding_model: bge-m3
 themes:
-  embedder: local
+  embedder: ollama         # the llms name, not "local"
 ```
+
+`hashing`, `local` and `local:<model>` always mean the built-in embedders, so do not use them as
+`llms` names for an embedding endpoint.
 
 ## k-anonymity
 

@@ -12,6 +12,18 @@
           "type": "json",
           "path": "/integrations/claude/obsei/.claude-plugin/plugin.json",
           "jsonpath": "$.version"
+        },
+        {
+          "type": "generic",
+          "path": "README.md"
+        },
+        {
+          "type": "generic",
+          "path": "/README.md"
+        },
+        {
+          "type": "generic",
+          "path": "/docs/src/content/docs/quickstart.md"
         }
       ]
     }
