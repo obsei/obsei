@@ -33,7 +33,10 @@ def parse_time(value: JsonValue) -> datetime | None:
     if value is None or isinstance(value, bool):
         return None
     if isinstance(value, int | float):
-        return datetime.fromtimestamp(value, UTC)
+        try:
+            return datetime.fromtimestamp(value, UTC)
+        except (OverflowError, OSError, ValueError):
+            return None
     if not isinstance(value, str) or not value.strip():
         return None
     raw = value.strip()
