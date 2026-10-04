@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.32.4"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
@@ -9,7 +9,7 @@ description = "Reddit posts and comments for obsei, from public RSS feeds (no AP
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.11"
-dependencies = ["obsei>=1.0.0a1"]
+dependencies = ["obsei>=1.0.0a1,<2"]
 
 [project.entry-points."obsei.plugins"]
 reddit = "obsei_reddit:register"

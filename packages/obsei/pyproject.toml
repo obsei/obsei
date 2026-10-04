@@ -74,6 +74,8 @@ obsei = "obsei.cli:app"
 
 [tool.hatch.version]
 path = "src/obsei/_version.py"
+source = "code"
+expression = "__version__"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/obsei"]
