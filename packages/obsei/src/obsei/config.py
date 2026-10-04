@@ -19,8 +19,9 @@ from obsei.core.registry import Registry
 from obsei.enrichers import register as register_enrichers
 from obsei.llm.egress import EgressPolicy
 from obsei.pipeline import Pipeline, SourceSpec
+from obsei.privacy.names import NamesConfig, redactor_for
 from obsei.privacy.pseudonym import SALT_ENV_VAR, load_salt
-from obsei.privacy.redact import ALL_REGIONS, RegexRedactor, Region
+from obsei.privacy.redact import ALL_REGIONS, Region
 from obsei.sinks import register as register_sinks
 from obsei.sources import register as register_sources
 from obsei.themes import ThemesConfig
@@ -48,6 +49,7 @@ class SourceEntry(PluginSpec):
 class PrivacyConfig(_Strict):
     redact: bool = True
     regions: list[Region] = Field(default_factory=lambda: list(ALL_REGIONS))
+    names: NamesConfig = Field(default_factory=NamesConfig)
 
 
 class StoreConfig(_Strict):
@@ -145,7 +147,9 @@ def build_pipeline(
             sinks=[registry.sink(s.type).create(s.config, ctx) for s in spec.sinks]
             if with_sinks
             else [],
-            redactor=RegexRedactor(config.privacy.regions) if config.privacy.redact else None,
+            redactor=redactor_for(config.privacy.regions, config.privacy.names, ctx.egress)
+            if config.privacy.redact
+            else None,
             allow_unredacted=not config.privacy.redact,
             batch_size=spec.batch_size,
         )
