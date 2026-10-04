@@ -9,7 +9,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from obsei.core.context import Context
-from obsei.core.protocols import Enricher
+from obsei.core.protocols import Enricher, ReportsErrors
 from obsei.core.record import Enrichment, Record
 from obsei.llm.client import ChatClient, ChatMessage, JsonSchema, LlmError
 
@@ -91,6 +91,7 @@ class LlmClassifier:
         self.config = config or ClassifierConfig()
         self.schema = build_schema(self.config)
         self.failures = 0
+        self.last_error: str | None = None
 
     def _classify(self, record: Record) -> Classification | None:
         messages: list[ChatMessage] = [
@@ -101,16 +102,23 @@ class LlmClassifier:
             result = Classification.model_validate_json(
                 self.client.complete(messages, schema=self.schema)
             )
-        except (LlmError, ValidationError):
-            self.failures += 1
+        except LlmError as exc:
+            self._fail(str(exc))
+            return None
+        except ValidationError:
+            self._fail(f"model {self.client.model} returned an invalid classification")
             return None
         if (
             result.sentiment not in self.config.sentiments
             or result.intent not in self.config.intents
         ):
-            self.failures += 1
+            self._fail(f"model {self.client.model} answered outside the configured labels")
             return None
         return result
+
+    def _fail(self, reason: str) -> None:
+        self.failures += 1
+        self.last_error = reason
 
     def enrich(self, batch: Sequence[Record]) -> list[Enrichment | None]:
         results: list[Enrichment | None] = []
@@ -138,6 +146,13 @@ class Cascade:
         self.primary = primary
         self.fallback = fallback
         self.threshold = threshold
+
+    @property
+    def last_error(self) -> str | None:
+        reasons = (
+            e.last_error for e in (self.fallback, self.primary) if isinstance(e, ReportsErrors)
+        )
+        return next((r for r in reasons if r), None)
 
     def enrich(self, batch: Sequence[Record]) -> list[Enrichment | None]:
         results = list(self.primary.enrich(batch))

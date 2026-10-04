@@ -271,6 +271,41 @@ def test_rss_rejects_entity_expansion() -> None:
         drain(source.fetch(None))
 
 
+def test_rest_text_format_html_converts_mastodon_statuses() -> None:
+    base = "https://mastodon.example/api/v1/timelines/tag/acme"
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.params.get("max_id") == "1":
+            status = {"id": "0", "content": "<p></p>", "created_at": "2026-09-01T09:00:00Z"}
+            return httpx.Response(200, json=[status])
+        status = {
+            "id": "2",
+            "content": "<p>App crashes on login&nbsp;<a href='#'>#acme</a></p><p>Please fix</p>",
+            "created_at": "2026-09-02T10:00:00Z",
+            "url": "https://mastodon.example/@ana/2",
+        }
+        return httpx.Response(
+            200, json=[status], headers={"Link": f'<{base}?max_id=1>; rel="next"'}
+        )
+
+    fields = {"text": "content", "url": "url"}
+    html = build(
+        "rest",
+        {"url": base, "pagination": "link", "text_format": "html", "fields": fields},
+        ctx(handler),
+    )
+    records, _ = drain(html.fetch(None))
+    assert [r.text for r in records] == ["App crashes on login #acme\nPlease fix"]
+    assert records[0].source.url == "https://mastodon.example/@ana/2"
+
+    plain = build("rest", {"url": base, "pagination": "link", "fields": fields}, ctx(handler))
+    raw, _ = drain(plain.fetch(None))
+    assert [r.text for r in raw] == [
+        "<p>App crashes on login&nbsp;<a href='#'>#acme</a></p><p>Please fix</p>",
+        "<p></p>",
+    ]
+
+
 def test_rest_pagination_sends_credentials_only_to_the_configured_origin() -> None:
     seen: list[httpx.Request] = []
     pages = {

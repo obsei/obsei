@@ -1,4 +1,5 @@
 import re
+import threading
 from collections.abc import Iterator, Sequence
 from datetime import UTC, datetime
 from typing import ClassVar
@@ -6,7 +7,7 @@ from typing import ClassVar
 import pytest
 
 from obsei import Enrichment, Record, SourceRef
-from obsei.core.protocols import Cursor, SinkResult
+from obsei.core.protocols import Cursor, Enricher, SinkResult
 from obsei.pipeline import Pipeline, PipelineError, SourceSpec, run
 from obsei.store import Store
 
@@ -78,7 +79,7 @@ def pipeline(
     source: ListSource,
     *,
     sinks: Sequence[MemorySink] = (),
-    enrichers: Sequence[LengthEnricher | BrokenEnricher] = (),
+    enrichers: Sequence[Enricher] = (),
     batch_size: int = 100,
 ) -> Pipeline:
     return Pipeline(
@@ -179,6 +180,73 @@ def test_failure_in_later_batch_keeps_earlier_batches(store: Store) -> None:
 def test_enricher_must_return_one_result_per_record(store: Store) -> None:
     with pytest.raises(PipelineError, match="returned 0 results"):
         run(pipeline(ListSource(["a"]), enrichers=[BrokenEnricher()]), store)
+
+
+class OutageEnricher:
+    name: ClassVar[str] = "classify"
+    version: ClassVar[str] = "1"
+
+    def __init__(self, *, down: bool) -> None:
+        self.down = down
+        self.last_error: str | None = None
+
+    def enrich(self, batch: Sequence[Record]) -> Sequence[Enrichment | None]:
+        if self.down:
+            self.last_error = "cannot reach the model at http://llm.internal/v1"
+            return [None] * len(batch)
+        return [Enrichment(value="ok", at=T0) for _ in batch]
+
+
+def test_failed_enrichment_is_reported_and_retried_next_run(store: Store) -> None:
+    source = ListSource(["a", "b"])
+    report = run(pipeline(source, enrichers=[OutageEnricher(down=True)]), store)
+    assert report.stored == 2
+    assert report.failed == {"classify": 2}
+    assert report.errors == {"classify": "cannot reach the model at http://llm.internal/v1"}
+    assert all("classify" not in r.enrichments for r in store.iter_records())
+
+    sink = MemorySink()
+    report = run(pipeline(source, sinks=[sink], enrichers=[OutageEnricher(down=False)]), store)
+    assert report.fetched == 0
+    assert report.enriched == {"classify": 2}
+    assert report.failed == {}
+    assert len(sink.received) == 2
+    assert all(r.enrichments["classify"].value == "ok" for r in store.iter_records())
+
+    again = run(pipeline(source, enrichers=[OutageEnricher(down=True)]), store)
+    assert again.failed == {}
+    assert store.retry_records("daily", "reviews", 10) == []
+
+
+def test_store_lock_is_free_while_fetching_enriching_and_delivering(store: Store) -> None:
+    lock = threading.Lock()
+    observed: list[bool] = []
+
+    def lock_free() -> bool:
+        free = lock.acquire(blocking=False)
+        if free:
+            lock.release()
+        return free
+
+    class ProbeSource(ListSource):
+        def fetch(self, cursor: Cursor | None) -> Iterator[tuple[Record, Cursor]]:
+            for item in super().fetch(cursor):
+                observed.append(lock_free())
+                yield item
+
+    class ProbeEnricher(LengthEnricher):
+        def enrich(self, batch: Sequence[Record]) -> Sequence[Enrichment | None]:
+            observed.append(lock_free())
+            return super().enrich(batch)
+
+    class ProbeSink(MemorySink):
+        def send(self, batch: Sequence[Record]) -> SinkResult:
+            observed.append(lock_free())
+            return super().send(batch)
+
+    probe = pipeline(ProbeSource(["a", "b"]), sinks=[ProbeSink()], enrichers=[ProbeEnricher()])
+    assert run(probe, store, lock=lock).stored == 2
+    assert observed == [True, True, True, True]
 
 
 def test_erased_records_are_not_refetched_enriched_or_delivered(store: Store) -> None:

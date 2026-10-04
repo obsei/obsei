@@ -1,0 +1,68 @@
+# Warehouse round trip: read feedback from Postgres, Snowflake or BigQuery, write it back enriched.
+#
+# Source:  any SQLAlchemy database, read incrementally by a cursor column (updated_at).
+# Model:   a model server inside your network (vLLM or Ollama).
+# Sink:    a table in the same warehouse with redacted text, labels and themes-ready metadata,
+#          without author pseudonyms (include_authors: false).
+#
+# Extras:  pip install "obsei[sql]" plus your database driver:
+#            Postgres   pip install psycopg[binary]        postgresql+psycopg://user:pass@host/db
+#            Snowflake  pip install snowflake-sqlalchemy   snowflake://user:pass@account/db/schema?warehouse=WH&role=R
+#            BigQuery   pip install sqlalchemy-bigquery    bigquery://project/dataset (uses ADC credentials)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          WAREHOUSE_URL         SQLAlchemy URL of a read-only user
+#          WAREHOUSE_WRITE_URL   SQLAlchemy URL of a user that may create and write obsei.feedback_enriched
+# Run:     obsei try -c examples/warehouse.yaml --enrich
+#          obsei run -c examples/warehouse.yaml
+version: 1
+
+store:
+  path: warehouse.duckdb
+
+privacy:
+  redact: true
+  regions: [global, north_america, uk, eu, latam, apac, india, africa]
+
+llms:
+  default:
+    base_url: http://vllm.internal:8000/v1
+    model: Qwen/Qwen3-14B
+
+pipelines:
+  - name: warehouse
+    batch_size: 500
+    sources:
+      - key: nps
+        type: sql
+        config:
+          url_env: WAREHOUSE_URL
+          instance: nps_responses
+          # :since is the last cursor_column value seen (initial_since on the first run).
+          # Order by the cursor column so a failed run resumes where it stopped.
+          query: >-
+            SELECT response_id, comment, score, locale, customer_email, plan, country,
+                   submitted_at, updated_at
+            FROM analytics.nps_responses
+            WHERE updated_at > :since AND comment IS NOT NULL
+            ORDER BY updated_at
+          cursor_column: updated_at
+          initial_since: "2026-01-01T00:00:00+00:00"
+          fetch_size: 1000
+          fields:
+            text: comment
+            id: response_id
+            created_at: submitted_at
+            rating: score
+            lang: locale
+            author: customer_email          # pseudonymised; never written back (see sink)
+            context: [plan, country]
+    enrichers:
+      - type: classify
+        config: {llm: default}
+    sinks:
+      - type: sql
+        config:
+          url_env: WAREHOUSE_WRITE_URL
+          schema_name: obsei
+          table: feedback_enriched
+          include_authors: false

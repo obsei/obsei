@@ -13,6 +13,8 @@ WORKDIR /src
 COPY pyproject.toml uv.lock ./
 COPY packages/obsei/pyproject.toml packages/obsei/
 COPY plugins/obsei-reddit/pyproject.toml plugins/obsei-reddit/
+COPY plugins/obsei-teams/pyproject.toml plugins/obsei-teams/
+COPY plugins/obsei-typeform/pyproject.toml plugins/obsei-typeform/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --package obsei --no-install-workspace $EXTRAS
 COPY packages ./packages

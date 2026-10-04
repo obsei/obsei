@@ -1,0 +1,69 @@
+# App reviews from six countries, classified on your own machine, negative ones sent to Slack.
+#
+# Sources: Apple App Store public feed (us, gb, in, br, jp, de) and Google Play (official API).
+# Model:   a local Ollama model; review text never leaves the machine for classification.
+# Sinks:   Slack for negative reviews; themes group the rest across languages.
+#
+# Extras:  pip install "obsei[google,embeddings]"
+#          (google: Play service-account auth; embeddings: multilingual themes)
+# Env:     OBSEI_DB_KEY          encrypts the local database (16+ characters)
+#          OBSEI_PSEUDONYM_SALT  pseudonymises reviewer names (16+ characters)
+#          SLACK_WEBHOOK_URL     Slack incoming webhook
+# Files:   play-service-account.json, a service account with access to your Play Console app
+# Run:     ollama pull qwen3:8b
+#          obsei try -c examples/app-reviews-multi-country.yaml --enrich
+#          obsei run -c examples/app-reviews-multi-country.yaml
+#          obsei themes -c examples/app-reviews-multi-country.yaml
+version: 1
+
+store:
+  path: app-reviews.duckdb
+
+privacy:
+  redact: true
+  # Detectors for every market below: US, UK, EU (de), India, Brazil (latam), Japan (apac).
+  regions: [global, north_america, uk, eu, india, latam, apac]
+
+# Ollama on localhost needs no allowlist; Slack is the only outside host feedback goes to.
+egress:
+  mode: private
+  allowed_hosts: [hooks.slack.com]
+
+llms:
+  default:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+    max_requests: 2000
+
+themes:
+  embedder: local          # multilingual: a Japanese and a German review of one bug share a theme
+  labeler: default
+  label_language: English
+  k_anonymity: 5           # themes from fewer than 5 reviewers stay hidden
+  auto: true               # update themes after each scheduled run in 'obsei serve'
+
+pipelines:
+  - name: app-reviews
+    every_minutes: 360     # with 'obsei serve'; or 'obsei run --every 360'
+    sources:
+      - key: ios
+        type: appstore
+        config:
+          app_id: "284882215"          # the number in your apps.apple.com URL
+          countries: [us, gb, in, br, jp, de]
+          max_pages: 10
+      - key: android
+        type: playstore
+        config:
+          package_name: com.example.app
+          credentials_file: play-service-account.json
+    enrichers:
+      - type: classify
+        config:
+          llm: default
+          intents: [bug, crash, performance, pricing, feature_request, praise, churn_risk, other]
+    sinks:
+      - type: slack
+        config:
+          when: {classify.sentiment: [negative]}
+          max_messages: 20

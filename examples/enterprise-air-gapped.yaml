@@ -1,0 +1,126 @@
+# Enterprise deployment: private models, name redaction, SSO, roles and retention.
+#
+# Network: egress is "private": models and sinks may reach internal hosts plus the allowlist
+#          below, nothing else. A public endpoint is refused before any request is made.
+# Models:  vLLM on your GPU servers for classification, with Azure OpenAI (your tenant) as the
+#          fallback for low-confidence results; local multilingual embeddings for themes.
+# Privacy: regex redaction for every region you operate in, plus person-name redaction with a
+#          GLiNER model loaded from local disk; themes need 10 distinct people to be shown.
+# Access:  'obsei serve' behind an SSO proxy (oauth2-proxy, Pomerium, Cloudflare Access) that maps
+#          directory groups to roles, plus named API tokens for automation.
+# Retention: run 'obsei forget --older-than-days 365 -c examples/enterprise-air-gapped.yaml'
+#          daily (cron or a Kubernetes CronJob); erasure requests use 'obsei forget --author'.
+#
+# Extras:  pip install "obsei[mcp,names,embeddings,sql]"
+# Models on disk (once, from a connected machine, then copy over):
+#          huggingface-cli download urchade/gliner_multi_pii-v1 --local-dir /opt/obsei/models/gliner_multi_pii-v1
+#          OBSEI_MODELS_DIR=/opt/obsei/models obsei models download
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT, OBSEI_MODELS_DIR=/opt/obsei/models
+#          AZURE_OPENAI_API_KEY      Azure OpenAI key (sent as the api-key header)
+#          GHE_TOKEN                 GitHub Enterprise token (read issues)
+#          INTAKE_SECRET             HMAC secret apps use to sign POST /ingest/... requests
+#          JIRA_API_TOKEN            Jira Data Center personal access token
+#          WAREHOUSE_URL             SQLAlchemy URL for the product database
+#          SSO_PROXY_SECRET          shared secret the SSO proxy sends on every request (16+)
+#          OBSEI_TOKEN_ETL, OBSEI_TOKEN_AGENT   API tokens (16+ characters)
+# Run:     obsei try -c examples/enterprise-air-gapped.yaml
+#          obsei serve -c examples/enterprise-air-gapped.yaml --host 0.0.0.0 --port 8765
+version: 1
+
+store:
+  path: /var/lib/obsei/obsei.duckdb    # encrypted with OBSEI_DB_KEY
+  unencrypted: false
+
+privacy:
+  redact: true
+  regions: [global, north_america, eu, uk, india, latam, apac]
+  names:
+    enabled: true
+    model: /opt/obsei/models/gliner_multi_pii-v1   # local directory: no download at runtime
+    threshold: 0.5
+    labels: [person]
+
+egress:
+  mode: private
+  allowed_hosts:
+    - contoso-feedback.openai.azure.com           # Azure OpenAI resource in your tenant
+    - jira.corp.example.com
+
+llms:
+  vllm:
+    base_url: http://vllm.internal:8000/v1
+    model: Qwen/Qwen3-32B
+    timeout: 120
+  azure:
+    base_url: https://contoso-feedback.openai.azure.com/openai/v1
+    model: gpt-5-mini                              # your deployment name
+    api_key_env: AZURE_OPENAI_API_KEY
+    api_key_header: api-key
+    max_requests: 2000
+
+themes:
+  embedder: local                    # paraphrase-multilingual-MiniLM-L12-v2 from OBSEI_MODELS_DIR
+  labeler: vllm
+  label_language: English
+  k_anonymity: 10
+  auto: true
+
+ask_llm: vllm
+
+access:
+  allowed_hosts: [obsei.corp.example.com]
+  trusted_proxy:
+    secret_env: SSO_PROXY_SECRET
+    secret_header: x-obsei-proxy-secret
+    user_header: x-forwarded-email
+    groups_header: x-forwarded-groups
+    roles:
+      viewer: [product-managers, design]
+      analyst: [cx-insights, research]
+      admin: [platform-team]
+    default_role: viewer
+  users:
+    - {name: etl, token_env: OBSEI_TOKEN_ETL, role: admin}
+    - {name: support-agent, token_env: OBSEI_TOKEN_AGENT, role: analyst}
+
+pipelines:
+  - name: internal
+    every_minutes: 30
+    sources:
+      - key: ghe
+        type: github_issues
+        config:
+          repo: mobile/app
+          api_url: https://github.corp.example.com/api/v3
+          token_env: GHE_TOKEN
+          labels: [customer-reported]
+          include_comments: true
+      - key: in-app
+        type: webhook                # POST /ingest/internal/in-app, signed with INTAKE_SECRET
+        config:
+          secret_env: INTAKE_SECRET
+          items_path: feedback
+          fields: {text: message, id: id, created_at: ts, rating: score, lang: locale}
+      - key: product-db
+        type: sql
+        config:
+          url_env: WAREHOUSE_URL
+          query: >-
+            SELECT id, body, created_at, updated_at, account_tier
+            FROM support.cancellation_reasons
+            WHERE updated_at > :since ORDER BY updated_at
+          fields: {text: body, id: id, created_at: created_at, context: [account_tier]}
+    enrichers:
+      - type: classify
+        config:
+          llm: vllm
+          fallback_llm: azure
+          threshold: 0.75
+    sinks:
+      - type: jira
+        config:
+          base_url: https://jira.corp.example.com
+          project_key: VOC
+          auth: bearer
+          api_version: "2"
+          when: {classify.intent: [bug]}

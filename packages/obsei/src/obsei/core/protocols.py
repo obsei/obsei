@@ -33,6 +33,14 @@ class Enricher(Protocol):
 
 
 @runtime_checkable
+class ReportsErrors(Protocol):
+    """Optional for enrichers: why the most recent ``None`` result was returned."""
+
+    @property
+    def last_error(self) -> str | None: ...
+
+
+@runtime_checkable
 class Sink(Protocol):
     """Must be idempotent by ``Record.id``."""
 

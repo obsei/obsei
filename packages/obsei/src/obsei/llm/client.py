@@ -29,6 +29,10 @@ class BudgetExceededError(LlmError):
     pass
 
 
+class LlmUnreachableError(LlmError):
+    pass
+
+
 class ChatClient(Protocol):
     @property
     def model(self) -> str: ...
@@ -90,14 +94,20 @@ class OpenAICompatibleClient:
     def model(self) -> str:
         return self._model
 
+    @property
+    def base_url(self) -> str:
+        return str(self._http.base_url).rstrip("/")
+
     def post_json(self, path: str, payload: dict[str, JsonValue]) -> bytes:
         if self._budget is not None:
             self._budget.charge()
         try:
             response = self._http.post(path, json=payload)
             response.raise_for_status()
+        except httpx.TransportError as exc:
+            raise LlmUnreachableError(f"cannot reach the model at {self.base_url}: {exc}") from None
         except httpx.HTTPError as exc:
-            raise LlmError(f"model request failed: {exc}") from None
+            raise LlmError(f"model request to {self.base_url} failed: {exc}") from None
         return response.content
 
     def complete(self, messages: Sequence[ChatMessage], *, schema: JsonSchema) -> str:

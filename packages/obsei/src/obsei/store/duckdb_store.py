@@ -92,6 +92,14 @@ MIGRATIONS: tuple[str, ...] = (
         PRIMARY KEY (kind, key)
     );
     """,
+    """
+    CREATE TABLE enrichment_retries (
+        pipeline VARCHAR NOT NULL,
+        source VARCHAR NOT NULL,
+        record_id VARCHAR NOT NULL,
+        PRIMARY KEY (pipeline, source, record_id)
+    );
+    """,
 )
 TombstoneKind: TypeAlias = Literal["record", "author"]
 
@@ -559,6 +567,39 @@ class Store(ThemeQueries):
         if ids:
             self._unassign(ids)
             self._con.execute("DELETE FROM embeddings WHERE list_contains(?, record_id)", [ids])
+            self._con.execute(
+                "DELETE FROM enrichment_retries WHERE list_contains(?, record_id)", [ids]
+            )
+
+    def retry_records(self, pipeline: str, source: str, limit: int) -> list[Record]:
+        """Stored records of ``pipeline``/``source`` whose enrichment failed, oldest first."""
+        rows = self._con.execute(
+            "SELECT r.data FROM enrichment_retries q JOIN records r ON r.id = q.record_id "
+            "WHERE q.pipeline = ? AND q.source = ? ORDER BY r.created_at, r.id LIMIT ?",
+            [pipeline, source, limit],
+        ).fetchall()
+        return [Record.model_validate_json(data) for (data,) in rows]
+
+    def track_retries(
+        self, pipeline: str, source: str, *, done: Iterable[str], failed: Iterable[str]
+    ) -> None:
+        """Forget ``done`` records and queue ``failed`` ones for the next run. Only stored,
+        non-erased records are queued, so an erasure mid-run is never retried."""
+        cleared = list(done)
+        if cleared:
+            self._con.execute(
+                "DELETE FROM enrichment_retries WHERE pipeline = ? AND source = ? "
+                "AND list_contains(?, record_id)",
+                [pipeline, source, cleared],
+            )
+        queued = list(failed)
+        if queued:
+            self._con.execute(
+                "INSERT INTO enrichment_retries SELECT ?, ?, id FROM records "
+                "WHERE list_contains(?, id) AND id NOT IN "
+                "(SELECT key FROM tombstones WHERE kind = 'record') ON CONFLICT DO NOTHING",
+                [pipeline, source, queued],
+            )
 
     def get_cursor(self, pipeline: str, source: str) -> Cursor | None:
         row = self._con.execute(

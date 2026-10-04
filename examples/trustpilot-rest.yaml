@@ -1,0 +1,69 @@
+# Trustpilot reviews of your business through the generic REST source.
+#
+# Verify against your account's API version: field names and paging below follow the
+# Trustpilot Business "business unit reviews" endpoint (reviews[].id, text, title, stars,
+# createdAt, language, consumer.displayName). Check them with 'obsei try' before scheduling.
+#
+# Source:  GET https://api.trustpilot.com/v1/business-units/{businessUnitId}/reviews
+#          with your API key in the "apikey" header. The response also carries
+#          links[{rel: next-page}], but as a list, so this config pages with page/perPage.
+# Model:   a local Ollama model.
+# Sinks:   Slack for 1-2 star reviews.
+#
+# Extras:  none (pip install obsei)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          TRUSTPILOT_API_KEY   API key from the Trustpilot Business developer portal
+#          SLACK_WEBHOOK_URL    Slack incoming webhook
+# Run:     obsei try -c examples/trustpilot-rest.yaml
+#          obsei run -c examples/trustpilot-rest.yaml
+version: 1
+
+store:
+  path: trustpilot.duckdb
+
+privacy:
+  redact: true
+  regions: [global, north_america, uk, eu]
+
+egress:
+  mode: private
+  allowed_hosts: [hooks.slack.com]
+
+llms:
+  default:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+
+pipelines:
+  - name: trustpilot
+    sources:
+      - key: trustpilot
+        type: rest
+        config:
+          # Replace with your business unit id (find it with /v1/business-units/find?name=...).
+          url: https://api.trustpilot.com/v1/business-units/46d6a890000064000500e0c3/reviews
+          instance: trustpilot
+          secret_headers: {apikey: TRUSTPILOT_API_KEY}
+          params: {orderBy: createdat.desc}
+          items_path: reviews
+          pagination: page
+          page_param: page
+          page_start: 1
+          page_size_param: perPage
+          page_size: 100
+          max_pages: 20
+          fields:
+            text: [title, text]
+            id: id
+            created_at: createdAt
+            rating: stars                       # 1-5
+            author: consumer.displayName        # pseudonymised before storage
+            lang: language
+    enrichers:
+      - type: classify
+        config: {llm: default}
+    sinks:
+      - type: slack
+        config:
+          max_rating: 2
+          max_messages: 20

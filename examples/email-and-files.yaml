@@ -1,0 +1,82 @@
+# A support mailbox plus a drop folder for exported survey and NPS files.
+#
+# Sources: an IMAP mailbox (one record per message, subject included), and a folder where
+#          survey tools, SFTP uploads or a scheduled export drop CSV and JSON Lines files.
+#          Each new or changed file is read once; the folder is checked on every run.
+# Model:   a local Ollama model.
+# Sinks:   Slack for churn risk and complaints; Parquet for analysts.
+#
+# Extras:  none (pip install obsei)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          IMAP_USERNAME, IMAP_PASSWORD   mailbox login (use an app password where required)
+#          SLACK_WEBHOOK_URL              Slack incoming webhook
+# Files:   drop/nps-*.csv     columns: id, comment, score, submitted_at, email, language, plan
+#          drop/*.jsonl       one object per line: {"id", "answers": {"open_text"}, "submitted_at",
+#                             "respondent": {"email"}, "locale"}
+# Run:     obsei try -c examples/email-and-files.yaml
+#          obsei run -c examples/email-and-files.yaml --every 30
+version: 1
+
+store:
+  path: inbox.duckdb
+
+privacy:
+  redact: true                       # signatures and quoted replies often hold phones and emails
+  regions: [global, north_america, uk, eu, latam, apac, india, africa]
+
+egress:
+  mode: private
+  allowed_hosts: [hooks.slack.com]
+
+llms:
+  default:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+
+pipelines:
+  - name: inbox-and-surveys
+    sources:
+      - key: support-mailbox
+        type: imap
+        config:
+          host: imap.example.com
+          port: 993
+          folder: INBOX
+          max_messages: 500
+          include_subject: true
+      - key: nps-csv
+        type: filedrop
+        config:
+          directory: drop
+          pattern: "nps-*.csv"
+          instance: nps
+          fields:
+            text: comment
+            id: id
+            created_at: submitted_at
+            rating: score              # 0-10
+            author: email
+            lang: language
+            context: [plan]
+      - key: survey-jsonl
+        type: filedrop
+        config:
+          directory: drop
+          pattern: "*.jsonl"
+          instance: survey
+          fields:
+            text: answers.open_text
+            id: id
+            created_at: submitted_at
+            author: respondent.email
+            lang: locale
+    enrichers:
+      - type: classify
+        config: {llm: default}
+    sinks:
+      - type: slack
+        config:
+          when: {classify.intent: [churn_risk, complaint]}
+      - type: parquet
+        config:
+          directory: exports/inbox

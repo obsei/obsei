@@ -34,7 +34,7 @@ from obsei.core.record import Record
 from obsei.core.registry import PluginError
 from obsei.demo import demo_records, label_demo_themes
 from obsei.llm import EgressPolicy
-from obsei.llm.client import LlmError
+from obsei.llm.client import LlmError, LlmUnreachableError
 from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, LocalEmbedder
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
 from obsei.runner import run_pipelines
@@ -354,6 +354,8 @@ def _run_once(config: Path, pipeline: list[str] | None, db: Path | None) -> bool
         outcomes = run_pipelines(cfg, ctx, store, names)
     for outcome in outcomes:
         typer.echo(outcome.summary(), err=not outcome.ok)
+        for warning in outcome.warnings():
+            typer.echo(f"warning: {warning}", err=True)
     return not all(o.ok for o in outcomes)
 
 
@@ -424,6 +426,7 @@ def serve(
     config: ConfigOption = DEFAULT_PATH,
     host: Annotated[str, typer.Option(help="Bind address.")] = "127.0.0.1",
     port: Annotated[int, typer.Option(help="Port.")] = 8765,
+    db: Annotated[Path | None, typer.Option("--db", envvar="OBSEI_DB")] = None,
 ) -> None:
     """Serve webhook intake (/ingest), MCP over HTTP (/mcp) and /healthz."""
     try:
@@ -439,7 +442,7 @@ def serve(
         raise _fail(f"set {API_TOKEN_ENV_VAR} or configure access before binding to {host}")
     with (
         build_context(cfg) as ctx,
-        _open_store(cfg.store.path, cfg.store.unencrypted, egress=ctx.egress) as store,
+        _open_store(db or cfg.store.path, cfg.store.unencrypted, egress=ctx.egress) as store,
     ):
         try:
             web = create_app(cfg, ctx, store, token=token, host=host)
@@ -486,6 +489,20 @@ def themes(
             typer.echo(f"{theme.size:>6}  {trend:+5d}  {theme.id}  {theme.label or '-'}")
 
 
+def _llm_hint(cfg: ObseiConfig, name: str) -> str:
+    endpoint = cfg.llms.get(name)
+    if endpoint is None:
+        return (
+            f"hint: add an llms entry named {name!r} to obsei.yaml (or set ask_llm), "
+            "e.g. a local Ollama at http://localhost:11434/v1"
+        )
+    return (
+        f"hint: start the model server at {endpoint.base_url} (for Ollama: 'ollama serve' and "
+        f"'ollama pull {endpoint.model}'), or point llms.{name} in obsei.yaml at a reachable "
+        "endpoint"
+    )
+
+
 @app.command()
 def ask(
     question: Annotated[str, typer.Argument(help="Your question, in any language.")],
@@ -506,7 +523,12 @@ def ask(
                 embedder=ctx.embedder(cfg.themes.embedder),
                 k_anonymity=cfg.themes.k_anonymity,
             )
-        except (KeyError, OSError, RuntimeError) as exc:
+        except LlmUnreachableError as exc:
+            raise _fail(f"{exc}\n{_llm_hint(cfg, cfg.ask_llm)}") from None
+        except KeyError as exc:
+            hint = "" if cfg.ask_llm in cfg.llms else f"\n{_llm_hint(cfg, cfg.ask_llm)}"
+            raise _fail(f"{exc.args[0] if exc.args else exc}{hint}") from None
+        except (OSError, RuntimeError) as exc:
             raise _fail(exc) from None
     typer.echo(answer.text)
     if answer.citations:

@@ -1,0 +1,46 @@
+# Survey feedback: Typeform responses plus a CSV NPS export, classified by a local model,
+# grouped into themes and written to Parquet. Nothing leaves the machine except the Typeform
+# API calls that fetch your own responses.
+#
+#   pip install "obsei>=1.0.0a1" "obsei-typeform @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-typeform"
+#   export TYPEFORM_TOKEN=...        # personal access token with responses:read
+#   export OBSEI_DB_KEY=...          # encrypts the local store (16+ characters)
+#   ollama pull qwen3:8b
+#   obsei run --config surveys-typeform.yaml && obsei themes --config surveys-typeform.yaml
+version: 1
+
+plugins: [typeform]
+
+llms:
+  default:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+
+themes:
+  labeler: default
+  auto: true
+
+pipelines:
+  - name: surveys
+    every_minutes: 60
+    sources:
+      - key: onboarding-survey
+        type: typeform
+        config:
+          form_id: aBcD1234
+          # EU data-center accounts: api_base: https://api.eu.typeform.com
+          text_fields: [what_could_be_better, anything_else]
+          rating_field: nps
+          lang_hidden_field: lang
+      - key: nps-export
+        type: csv
+        config:
+          path: nps-export.csv
+          instance: nps-2026-q3
+          fields: {text: comment, id: response_id, created_at: submitted_at, rating: score}
+    enrichers:
+      - type: classify
+        config: {llm: default}
+    sinks:
+      - type: parquet
+        config: {directory: exports/surveys}

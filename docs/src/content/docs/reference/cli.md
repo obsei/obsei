@@ -14,7 +14,7 @@ description: obsei command reference.
 | `obsei demo [--out DIR] [--embedder hashing\|local\|local:MODEL]` | Build the synthetic multilingual demo (default: offline `hashing` embedder) |
 | `obsei models download [--embeddings MODEL] [--dir DIR]` | Fetch the local multilingual embedding model for offline use |
 | `obsei mcp [-c FILE] [--db PATH]` | MCP server over stdio (read-only) |
-| `obsei serve [-c FILE] [--host] [--port]` | Scheduled pipelines, webhook intake, MCP over HTTP, Studio (see [Server](/guides/serve/)) |
+| `obsei serve [-c FILE] [--db PATH] [--host] [--port]` | Scheduled pipelines, webhook intake, MCP over HTTP, Studio (see [Server](/guides/serve/)) |
 | `obsei export --author HANDLE [--out FILE] [-c FILE] [--db PATH] [--unencrypted]` | Export one author's records |
 | `obsei forget --author / --source [--instance] / --older-than-days [-c FILE] [--db PATH] [--unencrypted]` | Erase records (tombstoned so they are never stored again) |
 | `obsei audit [--limit N] [-c FILE] [--db PATH] [--unencrypted]` | Show the erasure, export and access log |

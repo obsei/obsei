@@ -17,7 +17,7 @@ export default defineConfig({
       social: [{ icon: "github", label: "GitHub", href: "https://github.com/obsei/obsei" }],
       editLink: { baseUrl: "https://github.com/obsei/obsei/edit/master/docs/" },
       sidebar: [
-        { label: "Start", items: ["quickstart", "how-it-works", "configuration"] },
+        { label: "Start", items: ["quickstart", "how-it-works", "configuration", "examples"] },
         { label: "Guides", items: [{ autogenerate: { directory: "guides" } }] },
         { label: "Privacy", items: [{ autogenerate: { directory: "privacy" } }] },
         { label: "Reference", items: [{ autogenerate: { directory: "reference" } }] },
