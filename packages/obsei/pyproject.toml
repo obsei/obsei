@@ -41,6 +41,7 @@ classifiers = [
 ]
 dependencies = [
     "duckdb>=1.5.6,<2",
+    "httpx>=0.28,<1",
     "pydantic>=2.9,<3",
     "typer>=0.15,<1",
 ]

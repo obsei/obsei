@@ -13,6 +13,7 @@ import typer
 from obsei import __version__
 from obsei.core.record import Record
 from obsei.core.registry import Registry
+from obsei.llm import EgressPolicy
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
 from obsei.store import DB_KEY_ENV_VAR, Store, StoreError, load_db_key
 
@@ -65,6 +66,9 @@ def doctor() -> None:
         key_status = f"invalid ({exc})"
     typer.echo(f"db key    {key_status}")
     typer.echo(f"duckdb    {duckdb.__version__} (encryption: {_crypto_status()})")
+    policy = EgressPolicy.from_env()
+    allowed = f" (allow: {', '.join(sorted(policy.allowed_hosts))})" if policy.allowed_hosts else ""
+    typer.echo(f"egress    {policy.mode}{allowed}")
     registry = Registry()
     loaded = registry.load_entry_points()
     typer.echo(f"plugins   {', '.join(loaded) if loaded else 'none installed'}")
