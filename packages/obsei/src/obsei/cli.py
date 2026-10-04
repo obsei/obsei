@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import platform
 import sys
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Annotated
 
 import duckdb
@@ -11,8 +13,8 @@ import typer
 from obsei import __version__
 from obsei.core.record import Record
 from obsei.core.registry import Registry
-from obsei.privacy.pseudonym import PseudonymSaltError, load_salt
-from obsei.store import DB_KEY_ENV_VAR, StoreError, load_db_key
+from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
+from obsei.store import DB_KEY_ENV_VAR, Store, StoreError, load_db_key
 
 app = typer.Typer(
     name="obsei",
@@ -86,3 +88,79 @@ def _crypto_status() -> str:
 def schema() -> None:
     """Print the Feedback Record JSON Schema."""
     typer.echo(json.dumps(Record.model_json_schema(), indent=2, sort_keys=True))
+
+
+DbOption = Annotated[
+    Path, typer.Option("--db", envvar="OBSEI_DB", help="Path to the obsei DuckDB file.")
+]
+UnencryptedOption = Annotated[
+    bool,
+    typer.Option("--unencrypted", help="Open without an encryption key (encrypted disks only)."),
+]
+
+
+def _open_store(db: Path, unencrypted: bool, *, read_only: bool = False) -> Store:
+    try:
+        return Store(
+            db, encryption_key=load_db_key(), allow_unencrypted=unencrypted, read_only=read_only
+        )
+    except StoreError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(2) from None
+
+
+def _author_pseudonym(handle: str) -> str:
+    try:
+        return pseudonymize(handle, load_salt())
+    except PseudonymSaltError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(2) from None
+
+
+@app.command()
+def forget(
+    db: DbOption = Path("obsei.duckdb"),
+    author: Annotated[str | None, typer.Option(help="Author handle to erase.")] = None,
+    source: Annotated[str | None, typer.Option(help="Source type to erase.")] = None,
+    instance: Annotated[str | None, typer.Option(help="Source instance (with --source).")] = None,
+    older_than_days: Annotated[
+        int | None, typer.Option(min=1, help="Erase records created more than N days ago.")
+    ] = None,
+    unencrypted: UnencryptedOption = False,
+) -> None:
+    """Erase records by author, source or age (erasure requests and retention)."""
+    if author is None and source is None and older_than_days is None:
+        typer.echo("error: pass --author, --source or --older-than-days", err=True)
+        raise typer.Exit(2)
+    before = None
+    if older_than_days is not None:
+        before = datetime.now(UTC) - timedelta(days=older_than_days)
+    with _open_store(db, unencrypted) as store:
+        deleted = store.delete(
+            author_pseudonym=_author_pseudonym(author) if author else None,
+            source_type=source,
+            source_instance=instance,
+            before=before,
+        )
+    typer.echo(f"deleted {deleted} record(s)")
+
+
+@app.command()
+def export(
+    author: Annotated[str, typer.Option(help="Author handle whose records to export.")],
+    db: DbOption = Path("obsei.duckdb"),
+    out: Annotated[
+        Path | None, typer.Option(help="Write JSON Lines here (default stdout).")
+    ] = None,
+    unencrypted: UnencryptedOption = False,
+) -> None:
+    """Export one author's records as JSON Lines (access requests)."""
+    pseudonym = _author_pseudonym(author)
+    with _open_store(db, unencrypted, read_only=True) as store:
+        lines = [r.model_dump_json() for r in store.iter_records(author_pseudonym=pseudonym)]
+    if out is None:
+        for line in lines:
+            typer.echo(line)
+    else:
+        out.write_text("".join(f"{line}\n" for line in lines), encoding="utf-8")
+        typer.echo(f"exported {len(lines)} record(s) to {out}", err=True)

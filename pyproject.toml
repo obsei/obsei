@@ -32,7 +32,9 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF", "S", "PT", "C4", "PL"]
 ignore = ["PLR0913"]
 
 [tool.ruff.lint.per-file-ignores]
-"packages/*/tests/**" = ["S101", "PLR2004"]
+"packages/*/tests/**" = ["S101", "PLR2004", "RUF001"]
+"packages/obsei/src/obsei/privacy/redact.py" = ["RUF001"]
+"packages/obsei/src/obsei/cli.py" = ["PLR0917"]
 
 [tool.mypy]
 python_version = "3.11"
