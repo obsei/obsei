@@ -1,0 +1,85 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { SITE } from "../consts";
+import { jsonLd } from "../utils";
+
+export interface Article {
+  published: Date;
+  modified?: Date;
+  author: string;
+  tags: string[];
+}
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  imageAlt?: string;
+  article?: Article;
+  schema?: Record<string, unknown>[];
+  noindex?: boolean;
+}
+
+const { title, description, image = "/og/default.png", imageAlt = SITE.name, article, schema = [], noindex = false } =
+  Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const imageUrl = new URL(image, Astro.site).href;
+const fullTitle = title === SITE.title ? title : `${title} | ${SITE.name}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#238a91" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/logo.png" type="image/png" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.name} href={new URL("/rss.xml", Astro.site)} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content={article ? "article" : "website"} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    {
+      article && (
+        <>
+          <meta property="article:published_time" content={article.published.toISOString()} />
+          {article.modified && <meta property="article:modified_time" content={article.modified.toISOString()} />}
+          <meta property="article:author" content={article.author} />
+          <meta name="author" content={article.author} />
+          {article.tags.map((tag) => <meta property="article:tag" content={tag} />)}
+        </>
+      )
+    }
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+    {schema.map((data) => <script type="application/ld+json" set:html={jsonLd(data)} />)}
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

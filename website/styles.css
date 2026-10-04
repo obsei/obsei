@@ -156,7 +156,7 @@ footer a { color: var(--muted); }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 600px) {
-  .nav nav a:not(.pill):first-child { display: none; }
+  .nav nav a:not(.pill):first-child, .nav nav a.wide-only { display: none; }
   .nav nav { gap: 14px; }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 16px; }
   .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }

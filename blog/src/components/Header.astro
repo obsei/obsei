@@ -1,0 +1,26 @@
+---
+import { NAV, SITE } from "../consts";
+const path = Astro.url.pathname;
+const isBlog = (href: string) => href === "/" && !path.startsWith("/404");
+---
+
+<header class="nav wrap">
+  <a class="brand" href="https://obsei.com/" aria-label="obsei home">
+    <picture>
+      <source srcset="/mark-dark.svg" media="(prefers-color-scheme: dark)" />
+      <img src="/mark.svg" alt="" width="38" height="38" />
+    </picture>
+    <span>obsei</span>
+    <span class="sub" aria-hidden="true">Blog</span>
+  </a>
+  <nav aria-label="Main">
+    {
+      NAV.map(({ label, href }) => (
+        <a href={href} aria-current={isBlog(href) && path === "/" ? "page" : undefined}>
+          {label}
+        </a>
+      ))
+    }
+    <a href={SITE.repo} class="pill">GitHub</a>
+  </nav>
+</header>

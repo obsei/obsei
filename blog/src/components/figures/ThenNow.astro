@@ -1,0 +1,64 @@
+---
+// obsei 0.0.x (2021) compared with obsei 1.0 (2026).
+const rows = [
+  { label: "Data", then: "Copied to whatever the pipeline used", now: "Redacted at ingest, encrypted, air-gapped by default" },
+  { label: "Models", then: "Hugging Face transformers", now: "Bring your own: decision models on CPU or any LLM" },
+  { label: "Languages", then: "Translate first, then analyse", now: "Native, with themes across languages" },
+  { label: "Consumers", then: "Dashboards", now: "Studio, plus AI agents via MCP with citations" },
+  { label: "Actions", then: "Send everything everywhere", now: "Route by confidence: Jira, Slack, human review" },
+  { label: "Governance", then: "Company-backed", now: "Community-run, Apache-2.0, foundation-bound" },
+];
+const label =
+  "Comparison of obsei 0.0.x in 2021 and obsei 1.0 in 2026. " +
+  rows.map((r) => `${r.label}: then ${r.then}; now ${r.now}.`).join(" ");
+---
+
+<figure class="fig wide">
+  <div class="tn" role="img" aria-label={label}>
+    <div class="head">
+      <span></span>
+      <span class="then-h">obsei 0.0.x <small>2021</small></span>
+      <span></span>
+      <span class="now-h">obsei 1.0 <small>2026</small></span>
+    </div>
+    {
+      rows.map((r) => (
+        <div class="row">
+          <span class="label">{r.label}</span>
+          <span class="then">{r.then}</span>
+          <span class="arrow" />
+          <span class="now">{r.now}</span>
+        </div>
+      ))
+    }
+  </div>
+  <figcaption>Same mission, new rules: what changed between the first obsei and 1.0.</figcaption>
+</figure>
+
+<style>
+  .fig { margin: 1.4em 0 2em; }
+  .tn { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); }
+  .head, .row { display: grid; grid-template-columns: 130px minmax(0, 1fr) 28px minmax(0, 1.15fr); align-items: center; }
+  .head { padding: 14px 20px; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 0.95rem; }
+  .head small { font-weight: 600; font-size: 0.75rem; letter-spacing: 0.06em; color: var(--muted); margin-left: 6px; }
+  .then-h { color: var(--muted); }
+  .now-h { color: var(--teal-ink); padding-left: 15px; }
+  .row { padding: 12px 20px; border-bottom: 1px solid var(--line); font-size: 0.93rem; line-height: 1.4; }
+  .row:last-child { border-bottom: 0; }
+  .row:nth-child(even) { background: color-mix(in srgb, var(--tint) 45%, transparent); }
+  .label { font-size: 0.76rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .then { color: var(--muted); }
+  .arrow { justify-self: center; width: 14px; height: 2px; background: var(--teal); position: relative; }
+  .arrow::after { content: ""; position: absolute; right: -1px; top: -4px; width: 8px; height: 8px; border-right: 2px solid var(--teal); border-top: 2px solid var(--teal); transform: rotate(45deg); }
+  .now { font-weight: 600; color: var(--ink); padding-left: 12px; border-left: 3px solid var(--teal); }
+  figcaption { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 12px; }
+
+  @media (max-width: 680px) {
+    .head { display: none; }
+    .row { grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 14px 16px; }
+    .arrow { display: none; }
+    .then::before { content: "2021 · "; font-weight: 700; font-size: 0.78rem; }
+    .then { text-decoration: line-through; text-decoration-color: var(--line); }
+    .now::before { content: "2026 · "; font-weight: 700; font-size: 0.78rem; color: var(--teal-ink); }
+  }
+</style>

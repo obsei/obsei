@@ -1,0 +1,42 @@
+---
+import Base from "../../layouts/Base.astro";
+import PostCard from "../../components/PostCard.astro";
+import { SITE } from "../../consts";
+import { getPosts, slugifyTag, tagLabel, type Post } from "../../utils";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const byTag = new Map<string, { label: string; posts: Post[] }>();
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      const slug = slugifyTag(tag);
+      const entry = byTag.get(slug) ?? { label: tagLabel(tag), posts: [] };
+      entry.posts.push(post);
+      byTag.set(slug, entry);
+    }
+  }
+  return [...byTag].map(([tag, { label, posts }]) => ({ params: { tag }, props: { label, posts } }));
+}
+
+const { label, posts } = Astro.props as { label: string; posts: Post[] };
+const description = `Posts about ${label} on the ${SITE.name}: private, open-source Voice of Customer.`;
+---
+
+<Base title={`Posts tagged “${label}”`} description={description}>
+  <section class="intro wrap">
+    <p class="eyebrow"><a class="eyebrow" href="/tags/">Tags</a></p>
+    <h1>{label}</h1>
+    <p>{posts.length} {posts.length === 1 ? "post" : "posts"}</p>
+  </section>
+  <div class="wrap">
+    <ul class="posts">
+      {
+        posts.map((post) => (
+          <li>
+            <PostCard post={post} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Base>

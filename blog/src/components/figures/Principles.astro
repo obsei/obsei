@@ -1,0 +1,59 @@
+---
+// The four commitments behind obsei 1.0.
+const items = [
+  {
+    title: "Apache-2.0, forever",
+    text: "No relicensing, ever. The code you adopt today stays yours to use, change and ship.",
+    icon: '<path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>',
+  },
+  {
+    title: "No hosted upsell, no open core",
+    text: "Every feature lives in the open repository. There is no paid tier holding back the good parts.",
+    icon: '<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>',
+  },
+  {
+    title: "Privacy first, air-gapped by default",
+    text: "Personal data is redacted at ingest and nothing leaves your network unless you allow it.",
+    icon: '<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+  },
+  {
+    title: "Built in the open, foundation-bound",
+    text: "Roadmap, issues and decisions are public, with the goal of a neutral foundation home.",
+    icon: '<circle cx="6" cy="7" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="11" cy="17" r="2.5"/><path d="M8.4 7.3 14.6 6M7.3 9.2l2.6 5.6M16 8.3l-3.7 6.6"/>',
+  },
+];
+const label = "The four principles of obsei: " + items.map((i) => `${i.title}. ${i.text}`).join(" ");
+---
+
+<figure class="fig wide">
+  <div class="pr" role="img" aria-label={label}>
+    {
+      items.map((i, n) => (
+        <div class="card">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true" set:html={i.icon} />
+          </span>
+          <span class="n">0{n + 1}</span>
+          <strong>{i.title}</strong>
+          <span class="text">{i.text}</span>
+        </div>
+      ))
+    }
+  </div>
+  <figcaption>The commitments obsei is built on.</figcaption>
+</figure>
+
+<style>
+  .fig { margin: 1.4em 0 2em; }
+  .pr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+  .card { position: relative; display: grid; align-content: start; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--teal); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+  .card:nth-child(even) { border-top-color: var(--blue); }
+  .icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--tint); }
+  svg { width: 24px; height: 24px; fill: none; stroke: var(--teal); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .n { position: absolute; top: 16px; right: 18px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; color: var(--muted); }
+  strong { font-size: 1.02rem; line-height: 1.3; color: var(--ink); }
+  .text { font-size: 0.88rem; line-height: 1.45; color: var(--muted); }
+  figcaption { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 12px; }
+  @media (max-width: 900px) { .pr { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 520px) { .pr { grid-template-columns: minmax(0, 1fr); } }
+</style>

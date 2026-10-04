@@ -1,0 +1,34 @@
+---
+import Base from "../../layouts/Base.astro";
+import { SITE } from "../../consts";
+import { getPosts, slugifyTag, tagLabel, tagUrl } from "../../utils";
+
+const counts = new Map<string, { tag: string; count: number }>();
+for (const post of await getPosts()) {
+  for (const tag of post.data.tags) {
+    const slug = slugifyTag(tag);
+    counts.set(slug, { tag, count: (counts.get(slug)?.count ?? 0) + 1 });
+  }
+}
+const tags = [...counts.values()].sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+---
+
+<Base title="Tags" description={`All topics on the ${SITE.name}.`}>
+  <section class="intro wrap">
+    <p class="eyebrow">Browse</p>
+    <h1>Tags</h1>
+  </section>
+  <div class="wrap">
+    <ul class="tags tag-cloud">
+      {
+        tags.map(({ tag, count }) => (
+          <li>
+            <a href={tagUrl(tag)}>
+              {tagLabel(tag)} <span class="count">{count}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Base>

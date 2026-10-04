@@ -1,0 +1,40 @@
+---
+import { formatDate, postUrl, readingMinutes, tagLabel, tagUrl, type Post } from "../utils";
+
+interface Props {
+  post: Post;
+  featured?: boolean;
+}
+const { post, featured = false } = Astro.props;
+const { title, description, pubDate, tags, cover } = post.data;
+---
+
+<article class:list={["card", { featured }]}>
+  <img
+    src={cover.src}
+    width={cover.width}
+    height={cover.height}
+    alt=""
+    loading={featured ? "eager" : "lazy"}
+    decoding="async"
+  />
+  <div class="body">
+    <p class="meta">
+      <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+      <span>{readingMinutes(post.body)} min read</span>
+    </p>
+    <h2><a href={postUrl(post)}>{title}</a></h2>
+    <p>{description}</p>
+    {
+      tags.length > 0 && (
+        <ul class="tags" aria-label="Tags">
+          {tags.map((tag) => (
+            <li>
+              <a href={tagUrl(tag)}>{tagLabel(tag)}</a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</article>

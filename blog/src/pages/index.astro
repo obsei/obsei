@@ -1,0 +1,64 @@
+---
+import Base from "../layouts/Base.astro";
+import PostCard from "../components/PostCard.astro";
+import { SITE } from "../consts";
+import { publisher, person } from "../schema";
+import { getPosts, postUrl } from "../utils";
+
+const posts = await getPosts();
+const site = Astro.site!;
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "@id": `${SITE.url}/#blog`,
+    name: SITE.name,
+    url: `${SITE.url}/`,
+    description: SITE.description,
+    inLanguage: "en",
+    image: new URL("/og/default.png", site).href,
+    publisher,
+    blogPost: posts.map((post) => ({
+      "@type": "BlogPosting",
+      headline: post.data.title,
+      url: new URL(postUrl(post), site).href,
+      datePublished: post.data.pubDate.toISOString(),
+      author: person(post.data.author),
+    })),
+  },
+];
+---
+
+<Base title={SITE.title} description={SITE.description} schema={schema}>
+  <section class="intro wrap">
+    <p class="eyebrow">The obsei blog</p>
+    <h1>Private Voice of Customer, <span class="grad">built in the open</span></h1>
+    <p>
+      Practical guides, analyses of how customer themes shift across companies and languages, and experiments
+      with new models. A new post every week.
+    </p>
+    <a class="rss" href="/rss.xml"
+      ><svg viewBox="0 0 24 24" aria-hidden="true"
+        ><path
+          d="M5 3a16 16 0 0 1 16 16h-3A13 13 0 0 0 5 6V3Zm0 6a10 10 0 0 1 10 10h-3a7 7 0 0 0-7-7V9Zm2 8a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"
+        ></path></svg
+      >Subscribe via RSS</a
+    >
+  </section>
+  <div class="wrap">
+    <h2 class="visually-hidden">Latest posts</h2>
+    {
+      posts.length ? (
+        <ul class="posts">
+          {posts.map((post, i) => (
+            <li class:list={{ "featured-item": i === 0 }}>
+              <PostCard post={post} featured={i === 0} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No posts yet.</p>
+      )
+    }
+  </div>
+</Base>

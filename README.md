@@ -11,6 +11,7 @@ Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, 
   <a href="https://docs.obsei.com/">Docs</a> ·
   <a href="https://docs.obsei.com/demo/">Live demo</a> ·
   <a href="https://obsei.com/">Website</a> ·
+  <a href="https://blog.obsei.com/">Blog</a> ·
   <a href="https://github.com/obsei/obsei/discussions">Discussions</a>
 </p>
 

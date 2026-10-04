@@ -1,0 +1,4 @@
+/feed       /rss.xml   301
+/feed.xml   /rss.xml   301
+/atom.xml   /rss.xml   301
+/posts/*    /:splat    301
