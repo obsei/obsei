@@ -8,6 +8,7 @@ export default defineConfig({
       title: "obsei",
       logo: { light: "./src/assets/mark.svg", dark: "./src/assets/mark-dark.svg" },
       customCss: ["./src/styles/brand.css"],
+      routeMiddleware: "./src/routeData.ts",
       favicon: "/favicon.svg",
       description: "Privacy-first, self-hosted, AI-native Voice of Customer.",
       head: [
