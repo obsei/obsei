@@ -43,6 +43,7 @@
     <main>
       <section class="hero wrap">
         <div class="hero-text">
+          <a class="news" href="https://github.com/obsei/obsei/releases/tag/v1.0.0-rc.1"><b>New</b> 1.0 release candidate is out <span aria-hidden="true">→</span></a>
           <p class="eyebrow">Open source · Self-hosted · Apache-2.0</p>
           <h1>Voice of Customer <span>without violating privacy</span></h1>
           <p class="lead">Understand feedback from every channel and language. Personal data is redacted before anything is stored, and nothing leaves your infrastructure unless you allow it.</p>
@@ -50,7 +51,7 @@
             <a class="button" href="https://docs.obsei.com/quickstart/">Get started</a>
             <a class="button ghost" href="https://docs.obsei.com/demo/">Live demo</a>
           </div>
-          <pre class="install" aria-label="Install"><code><span class="prompt">$</span> uv tool install "obsei[mcp]>=1.0.0a1"
+          <pre class="install" aria-label="Install"><code><span class="prompt">$</span> uv tool install "obsei[mcp]>=1.0.0rc1"
 <span class="prompt">$</span> obsei init &amp;&amp; obsei try</code></pre>
         </div>
 
@@ -80,6 +81,7 @@
         <li><strong>Zero</strong><span>telemetry</span></li>
         <li><strong>Apache-2.0</strong><span>no open core</span></li>
       </ul>
+      <p class="proof wrap">Open source since 2020 · <a href="https://github.com/obsei/obsei">1,400+ GitHub stars</a> · Joint runner-up, RBI HARBINGER 2021</p>
 
       <section class="why wrap" aria-labelledby="whyp">
         <h2 id="whyp">Why privacy-first feedback analytics</h2>
@@ -124,7 +126,7 @@
       <section class="ask wrap" aria-labelledby="ask">
         <div>
           <h2 id="ask">Your agents answer, <span>with receipts</span></h2>
-          <p class="sub">A read-only MCP server for Claude, ChatGPT, Cursor and VS Code. Results carry record ids your agent can cite, never author identities.</p>
+          <p class="sub">A read-only MCP server for Claude, Cursor, VS Code and your own agents. Results carry record ids your agent can cite, never author identities.</p>
           <a class="more" href="https://docs.obsei.com/guides/mcp/">Connect an agent →</a>
         </div>
         <figure class="chat" aria-label="Illustrative agent conversation">
@@ -136,6 +138,23 @@
               <li>rec_3f9a</li><li>rec_b210</li><li>rec_77c4</li>
             </ul>
           </div>
+        </figure>
+      </section>
+
+      <section class="ask flip wrap" aria-labelledby="route">
+        <div>
+          <h2 id="route">Act on it, <span>when the model is sure</span></h2>
+          <p class="sub">Ordered routes on labels and confidence. Unsure answers go to a person, not to your issue tracker.</p>
+          <a class="more" href="https://docs.obsei.com/guides/routing/">See routing →</a>
+        </div>
+        <figure class="routes" aria-label="Example routes from the decision-routing example">
+          <figcaption class="chat-cap">Example routes</figcaption>
+          <ol>
+            <li class="unsure"><span class="cond"><i>model unsure</i></span><span class="to">Human review</span></li>
+            <li><span class="cond"><i>bug</i><i>confidence ≥ 0.8</i><i>urgent</i></span><span class="to">Jira + on-call</span></li>
+            <li><span class="cond"><i>billing</i></span><span class="to">Billing channel</span></li>
+            <li><span class="cond"><i>everything else</i></span><span class="to">Warehouse</span></li>
+          </ol>
         </figure>
       </section>
 
