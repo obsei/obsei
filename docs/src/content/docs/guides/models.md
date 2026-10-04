@@ -200,6 +200,20 @@ A record with any answer below its cutoff goes to `fallback_llm`, which labels t
 Without a fallback, or when the fallback fails, the decision model's labels are kept with
 `review: true`.
 
+### Known limits
+
+Decision models are small and new, so measure them on your own feedback before a route acts on
+their labels.
+
+- In the [demo](/demo/), Julia-1 (144M parameters, on a CPU) marks 67 of 136 records (49%) for
+  review at the demo's cutoffs, and some labels are wrong: 13 of 29 login complaints are labelled
+  as a `design` issue. The demo shows these labels as they came out of the model.
+- Start with a `review` route and a high `min_confidence`, read a sample of what goes to review,
+  then lower the cutoffs where the model is reliably right.
+- Not done yet: a small labelled test set from the demo data to report accuracy per question, and
+  a comparison with Clef-Flash, which currently aborts in the CPU build of llama.cpp (a GPU build
+  or Cloudflare Workers AI may work).
+
 ### Egress and air-gapped use
 
 A decision endpoint follows the same egress policy as chat endpoints: the URL is checked before any

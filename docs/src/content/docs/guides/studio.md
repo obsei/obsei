@@ -49,7 +49,8 @@ model, and agents get the same answers over MCP.
 
 The demo's labels (sentiment, intent, team, urgency and an angry yes/no) come from Julia-1, a
 144M-parameter decision model, run once on a CPU and committed as `obsei/demo_labels.json`, so the
-build needs no model server. To label it again with a decision model, put its endpoint URL in an
+build needs no model server. They are shown as the model produced them, mistakes included: 49% of
+records are marked for review (see [known limits](/guides/models/#known-limits)). To label it again with a decision model, put its endpoint URL in an
 environment variable:
 
 ```bash
