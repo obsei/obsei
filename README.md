@@ -88,7 +88,7 @@ Docker (run in the project directory; images are tagged by release):
 <!-- x-release-please-start-version -->
 ```bash
 docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
-  -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT ghcr.io/obsei/obsei:1.0.0-rc.1 run
+  -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT ghcr.io/obsei/obsei:1.0.0-rc.2 run
 ```
 <!-- x-release-please-end -->
 

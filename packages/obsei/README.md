@@ -24,4 +24,4 @@ redaction), `embeddings` (multilingual themes).
 - Docs: https://docs.obsei.com
 - Live demo: https://docs.obsei.com/demo/
 - Source: https://github.com/obsei/obsei
-- Container: `ghcr.io/obsei/obsei:1.0.0-rc.1` <!-- x-release-please-version -->
+- Container: `ghcr.io/obsei/obsei:1.0.0-rc.2` <!-- x-release-please-version -->

@@ -1,7 +1,7 @@
 {
   "name": "obsei",
   "description": "Query your self-hosted customer feedback (reviews, tickets, surveys, communities) with cited, privacy-filtered evidence.",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "author": {
     "name": "obsei",
     "url": "https://obsei.com"

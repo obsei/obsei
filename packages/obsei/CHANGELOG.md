@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0-rc.2](https://github.com/obsei/obsei/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2026-10-04)
+
+
+### Bug Fixes
+
+* **serve:** sign webhook timestamps and refuse replays outside a five-minute window ([#406](https://github.com/obsei/obsei/issues/406)) ([b21a415](https://github.com/obsei/obsei/commit/b21a415e3ee766ca4e332d080f077ae9eba00962))
+
+
+### Documentation
+
+* point installs at 1.0.0rc1 and document decision models and routing everywhere ([#401](https://github.com/obsei/obsei/issues/401)) ([96f6b23](https://github.com/obsei/obsei/commit/96f6b233820bfc35c439ba9c69af46953de7bdd8))
+
 ## [1.0.0-rc.1](https://github.com/obsei/obsei/compare/v1.0.0-alpha.1...v1.0.0-rc.1) (2026-10-04)
 
 
