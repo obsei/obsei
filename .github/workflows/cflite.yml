@@ -1,0 +1,37 @@
+# Fuzzes redaction, config parsing and source field mapping with ClusterFuzzLite (Atheris).
+name: ClusterFuzzLite
+
+on:
+  pull_request:
+    paths:
+      - "packages/obsei/src/**"
+      - "fuzz/**"
+      - ".clusterfuzzlite/**"
+  schedule:
+    - cron: "41 3 * * 0"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: cflite-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - name: Build fuzzers
+        uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
+        with:
+          language: python
+          sanitizer: address
+          github-token: ${{ github.token }}
+      - name: Run fuzzers
+        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
+        with:
+          github-token: ${{ github.token }}
+          fuzz-seconds: ${{ github.event_name == 'pull_request' && 300 || 1800 }}
+          mode: ${{ github.event_name == 'pull_request' && 'code-change' || 'batch' }}
+          sanitizer: address
