@@ -67,7 +67,7 @@ def _buckets(store: Store, group_by: GroupBy, k: int) -> list[Bucket]:
     return [
         Bucket(key=r.key, count=r.count, avg_rating=r.avg_rating)
         for r in store.stats(Query(), group_by, limit=200)
-        if r.key is not None and (r.count >= k or group_by in TIME_GROUPS)
+        if r.key is not None and (r.people >= k or group_by in TIME_GROUPS)
     ]
 
 

@@ -300,19 +300,39 @@ def redact_text(text: str, patterns: Sequence[PiiPattern] = PATTERNS) -> tuple[s
     return text, counts
 
 
+def _redact_url(url: str, patterns: Sequence[PiiPattern]) -> str:
+    """Placeholders are percent-encoded so the result stays a usable link."""
+    redacted, counts = redact_text(url, patterns)
+    return redacted.replace("<", "%3C").replace(">", "%3E") if counts else url
+
+
 class RegexRedactor:
+    """Redacts text, context, the source url and native id, and the author locale."""
+
     def __init__(self, regions: Iterable[Region] = ALL_REGIONS) -> None:
         self.patterns = patterns_for(regions)
 
+    def _text(self, text: str) -> str:
+        return redact_text(text, self.patterns)[0]
+
+    def _record(self, record: Record) -> Record:
+        source = record.source.model_copy(
+            update={
+                "native_id": self._text(record.source.native_id),
+                "url": _redact_url(record.source.url, self.patterns) if record.source.url else None,
+            }
+        )
+        author = record.author
+        if author is not None and author.locale:
+            author = author.model_copy(update={"locale": self._text(author.locale)})
+        return record.model_copy(
+            update={
+                "text": self._text(record.text),
+                "context": {k: self._text(v) for k, v in record.context.items()},
+                "source": source,
+                "author": author,
+            }
+        )
+
     def redact(self, batch: Sequence[Record]) -> list[Record]:
-        return [
-            record.model_copy(
-                update={
-                    "text": redact_text(record.text, self.patterns)[0],
-                    "context": {
-                        k: redact_text(v, self.patterns)[0] for k, v in record.context.items()
-                    },
-                }
-            )
-            for record in batch
-        ]
+        return [self._record(record) for record in batch]
