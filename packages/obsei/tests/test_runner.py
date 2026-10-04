@@ -1,13 +1,17 @@
 import json
-from collections.abc import Iterator
-from contextlib import contextmanager
+import threading
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+import duckdb
+import httpx
+import pytest
 from starlette.testclient import TestClient
 
+from obsei import runner
 from obsei.config import ObseiConfig
 from obsei.core.context import Context
+from obsei.pipeline import Pipeline, RunReport, run
 from obsei.runner import Scheduler, run_pipelines
 from obsei.serve import create_app
 from obsei.store import Store
@@ -51,12 +55,7 @@ def test_one_failing_pipeline_does_not_stop_the_others(tmp_path: Path) -> None:
 
 def test_scheduler_runs_due_pipelines_and_themes(tmp_path: Path) -> None:
     store = Store(allow_unencrypted=True)
-
-    @contextmanager
-    def lease() -> Iterator[Store]:
-        yield store
-
-    scheduler = Scheduler(config(tmp_path), Context(), lease)
+    scheduler = Scheduler(config(tmp_path), Context(), store)
     assert scheduler.scheduled() == {"broken": 5, "good": 60}
     first = scheduler.run_due(NOW)
     assert {o.pipeline for o in first} == {"broken", "good"}
@@ -77,4 +76,63 @@ def test_serve_reports_runs(tmp_path: Path) -> None:
     assert body["scheduled"] == {"broken": 5, "good": 60}
     assert body["last"]["good"]["ok"] is True
     assert body["last"]["broken"]["ok"] is False
+    assert "missing.csv" in body["last"]["broken"]["error"]
+    assert body["last"]["good"]["warnings"] == []
     assert json.dumps(body)
+
+
+@pytest.mark.parametrize(
+    "error",
+    [httpx.ConnectError("connection refused"), duckdb.IOException("disk I/O error")],
+    ids=["http", "duckdb"],
+)
+def test_network_and_database_errors_are_isolated(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, error: Exception
+) -> None:
+    def flaky(pipeline: Pipeline, store: Store, **kwargs: object) -> RunReport:
+        if pipeline.name == "manual":
+            raise error
+        return run(pipeline, store)
+
+    monkeypatch.setattr(runner, "run", flaky)
+    with Store(allow_unencrypted=True) as store:
+        outcomes = run_pipelines(config(tmp_path), Context(), store, ["manual", "good"])
+    assert [o.ok for o in outcomes] == [False, True]
+    assert str(error) in (outcomes[0].error or "")
+
+
+def test_scheduler_loop_survives_unexpected_errors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls = threading.Semaphore(0)
+
+    def boom(self: Scheduler, now: datetime | None = None) -> list[object]:
+        calls.release()
+        raise TypeError("plugin bug")
+
+    monkeypatch.setattr(Scheduler, "run_due", boom)
+    scheduler = Scheduler(config(tmp_path), Context(), Store(allow_unencrypted=True))
+    scheduler.tick_seconds = 0.01
+    scheduler.start()
+    try:
+        assert calls.acquire(timeout=5)
+        assert calls.acquire(timeout=5)
+        assert scheduler.healthy
+        assert scheduler.last_error == "TypeError: plugin bug"
+    finally:
+        scheduler.stop()
+
+
+def test_healthz_is_degraded_when_the_scheduler_died(tmp_path: Path) -> None:
+    web = create_app(config(tmp_path), Context(), Store(allow_unencrypted=True), token="t")
+    client = TestClient(web)
+    assert client.get("/healthz").status_code == 200
+    dead = threading.Thread(target=lambda: None)
+    dead.start()
+    dead.join()
+    web.state.scheduler._thread = dead
+    response = client.get("/healthz")
+    assert response.status_code == 503
+    assert response.json() == {"status": "degraded", "scheduler": "stopped"}
+    runs = client.get("/api/runs", headers={"Authorization": "Bearer t"}).json()
+    assert runs["scheduler"]["healthy"] is False

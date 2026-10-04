@@ -120,12 +120,25 @@ def test_cursors(store: Store) -> None:
     assert store.get_cursor("other", "appstore") is None
 
 
+def test_enrichment_retries_are_tracked_and_erased(store: Store) -> None:
+    store.upsert([rec("1"), rec("2", days=1), rec("3", source="rss")])
+    ids = {r.source.native_id: r.id for r in store.iter_records()}
+    store.track_retries("daily", "csv", done=[], failed=[ids["1"], ids["2"], ids["2"]])
+    assert [r.id for r in store.retry_records("daily", "csv", 10)] == [ids["1"], ids["2"]]
+    assert store.retry_records("daily", "other", 10) == []
+    store.track_retries("daily", "csv", done=[ids["1"]], failed=[])
+    assert [r.id for r in store.retry_records("daily", "csv", 10)] == [ids["2"]]
+    store.delete(source_type="csv")
+    assert store.retry_records("daily", "csv", 10) == []
+    assert store._con.execute("SELECT count(*) FROM enrichment_retries").fetchone() == (0,)
+
+
 def test_file_store_persists_and_reopens_read_only(tmp_path: Path) -> None:
     path = tmp_path / "obsei.duckdb"
     record = rec("1")
     with Store(path, allow_unencrypted=True) as store:
         store.upsert([record])
-        assert store.schema_version() == 3
+        assert store.schema_version() == 4
     with Store(path, allow_unencrypted=True, read_only=True) as store:
         assert store.get(record.id) == record
         with pytest.raises(duckdb.Error):

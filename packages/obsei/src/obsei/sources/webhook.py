@@ -2,6 +2,10 @@
 
 Map ``fields.id`` and ``fields.created_at`` so redeliveries are recognised as unchanged;
 without a timestamp the receipt time is used and a redelivery counts as an edit.
+
+The signature covers the body only, with no timestamp, so a captured request can be replayed;
+replays of mapped ids are stored as unchanged. Each request is parsed in full before anything is
+stored: one bad item rejects the whole request, and items without text are skipped.
 """
 
 from __future__ import annotations
@@ -9,11 +13,12 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import ClassVar
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError, model_validator
 
 from obsei.core.context import Context
 from obsei.core.protocols import Cursor
@@ -43,6 +48,24 @@ class SignatureError(PermissionError):
     pass
 
 
+class PayloadError(ValueError):
+    pass
+
+
+@dataclass(frozen=True)
+class Delivery:
+    """The records of one request; a ``Source`` that yields them once."""
+
+    name: ClassVar[str] = "webhook"
+    records: Sequence[Record]
+    received: int
+    skipped: int
+
+    def fetch(self, cursor: Cursor | None) -> Iterator[tuple[Record, Cursor]]:
+        for record in self.records:
+            yield record, dict(cursor or {})
+
+
 class WebhookSource:
     name: ClassVar[str] = "webhook"
 
@@ -62,21 +85,36 @@ class WebhookSource:
         if not hmac.compare_digest(expected, given):
             raise SignatureError("invalid or missing signature")
 
-    def accept(self, payload: JsonValue) -> int:
+    def parse(self, payload: JsonValue) -> Delivery:
+        """Map every item of one request, or raise ``PayloadError`` without keeping any."""
         items = lookup(payload, self.config.items_path) if self.config.items_path else payload
         rows = items if isinstance(items, list) else [items]
         now = datetime.now(UTC)
-        for row in rows:
-            record = map_item(
-                row,
-                self.config.fields,
-                source_type=self.name,
-                instance=self.config.instance,
-                ctx=self.ctx,
-                default_time=now,
-            )
+        records: list[Record] = []
+        for index, row in enumerate(rows):
+            try:
+                record = map_item(
+                    row,
+                    self.config.fields,
+                    source_type=self.name,
+                    instance=self.config.instance,
+                    ctx=self.ctx,
+                    default_time=now,
+                )
+            except ValidationError as exc:
+                fields = sorted({str(e["loc"][0]) for e in exc.errors() if e["loc"]})
+                raise PayloadError(
+                    f"item {index} is invalid: {', '.join(fields) or 'record'}"
+                ) from None
+            except (ValueError, TypeError, OverflowError, OSError) as exc:
+                raise PayloadError(f"item {index} is invalid: {exc}") from None
             if record is not None:
-                self.pending.append(record)
+                records.append(record)
+        return Delivery(records, received=len(rows), skipped=len(rows) - len(records))
+
+    def accept(self, payload: JsonValue) -> int:
+        """Queue one request's records for the next ``fetch``; all or nothing."""
+        self.pending.extend(self.parse(payload).records)
         return len(self.pending)
 
     def fetch(self, cursor: Cursor | None) -> Iterator[tuple[Record, Cursor]]:

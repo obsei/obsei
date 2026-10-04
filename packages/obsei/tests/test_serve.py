@@ -78,9 +78,9 @@ def test_ingest_verifies_signature_and_redacts(client: TestClient, store: Store)
     assert client.post("/ingest/support/tickets", content=body).status_code == 401
     accepted = client.post("/ingest/support/tickets", content=body, headers=signed(body))
     assert accepted.status_code == 202
-    assert accepted.json() == {"received": 1, "stored": 1}
+    assert accepted.json() == {"received": 1, "skipped": 0, "stored": 1}
     again = client.post("/ingest/support/tickets", content=body, headers=signed(body))
-    assert again.json() == {"received": 1, "stored": 0}
+    assert again.json() == {"received": 1, "skipped": 0, "stored": 0}
     (stored,) = store.iter_records()
     assert stored.text == "Erreur de paiement, écrivez à <EMAIL>"
     assert (
@@ -90,3 +90,16 @@ def test_ingest_verifies_signature_and_redacts(client: TestClient, store: Store)
 
 def test_mcp_requires_bearer_token(client: TestClient) -> None:
     assert client.post("/mcp", json={}).status_code == 401
+
+
+def test_ingest_is_atomic_per_request(client: TestClient, store: Store) -> None:
+    bad = json.dumps(
+        {"tickets": [{"id": "ok", "body": "fine"}, {"id": "x", "body": "late", "at": 1e20}]}
+    ).encode()
+    rejected = client.post("/ingest/support/tickets", content=bad, headers=signed(bad))
+    assert rejected.status_code == 400
+    assert "item 1" in rejected.json()["error"]
+    good = json.dumps({"tickets": [{"id": "t2", "body": "Works now"}, {"id": "t3"}]}).encode()
+    accepted = client.post("/ingest/support/tickets", content=good, headers=signed(good))
+    assert accepted.json() == {"received": 2, "skipped": 1, "stored": 1}
+    assert [r.source.native_id for r in store.iter_records()] == ["t2"]

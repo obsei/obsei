@@ -1,8 +1,13 @@
-"""Answer a question from stored feedback with your model, citing record ids."""
+"""Answer a question from stored feedback with your model, citing record ids.
+
+Store reads run under the optional ``lock``; embedding the question and the model call run
+outside it.
+"""
 
 from __future__ import annotations
 
 import json
+from contextlib import nullcontext
 from dataclasses import dataclass
 
 from pydantic import BaseModel, ValidationError
@@ -10,6 +15,7 @@ from pydantic import BaseModel, ValidationError
 from obsei.core.record import Record
 from obsei.llm.client import ChatClient, ChatMessage, JsonSchema, LlmError
 from obsei.llm.embed import Embedder
+from obsei.pipeline import Lock
 from obsei.store import Query, Store
 
 SYSTEM = (
@@ -46,10 +52,17 @@ class Answer:
 def retrieve(
     store: Store, question: str, embedder: Embedder | None, *, limit: int = 30
 ) -> list[Record]:
+    vector = embedder.embed([question])[0] if embedder is not None else None
+    model = embedder.model if embedder is not None else ""
+    return _retrieve(store, question, vector, model, limit)
+
+
+def _retrieve(
+    store: Store, question: str, vector: list[float] | None, model: str, limit: int
+) -> list[Record]:
     ids: list[str] = []
-    if embedder is not None:
-        (vector,) = embedder.embed([question])
-        ids = [rid for rid, _ in store.similar_records(vector, embedder.model, limit)]
+    if vector is not None:
+        ids = [rid for rid, _ in store.similar_records(vector, model, limit)]
     records = [r for rid in ids if (r := store.get(rid)) is not None]
     if len(records) < limit:
         seen = {r.id for r in records}
@@ -82,12 +95,16 @@ def ask(
     embedder: Embedder | None = None,
     k_anonymity: int = 5,
     limit: int = 30,
+    lock: Lock | None = None,
 ) -> Answer:
-    evidence = retrieve(store, question, embedder, limit=limit)
-    themes = [
-        {"label": t.label, "size": t.size, "last_7_days": t.last_7_days, "sources": t.sources}
-        for t in store.theme_summaries(min_size=k_anonymity)[:15]
-    ]
+    vector = embedder.embed([question])[0] if embedder is not None else None
+    model = embedder.model if embedder is not None else ""
+    with lock or nullcontext():
+        evidence = _retrieve(store, question, vector, model, limit)
+        themes = [
+            {"label": t.label, "size": t.size, "last_7_days": t.last_7_days, "sources": t.sources}
+            for t in store.theme_summaries(min_size=k_anonymity)[:15]
+        ]
     payload = {
         "question": question,
         "themes": themes,

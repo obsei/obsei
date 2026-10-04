@@ -1,7 +1,8 @@
 """``obsei serve``: webhook intake, scheduled pipelines, MCP over streamable HTTP, the read-only
 Studio and its API, an optional Slack command, and a health check, in one process.
 
-The store is opened once read-write and shared under a lock (DuckDB allows one writer).
+The store is opened once read-write and shared under a lock (DuckDB allows one writer). The lock
+is held only for store calls, never across source fetches or model and sink requests.
 """
 
 from __future__ import annotations
@@ -28,10 +29,11 @@ from obsei.ask import ask
 from obsei.config import ObseiConfig, build_pipeline
 from obsei.core.context import Context
 from obsei.llm.client import LlmError
+from obsei.llm.egress import EgressError
 from obsei.mcp_server import create_server
 from obsei.pipeline import Pipeline, PipelineError, SourceSpec, run
 from obsei.runner import Scheduler
-from obsei.sources.webhook import SignatureError, WebhookSource
+from obsei.sources.webhook import PayloadError, SignatureError, WebhookSource
 from obsei.store import Store
 
 MAX_BODY = 4 * 1024 * 1024
@@ -74,10 +76,7 @@ class Intake:
             pipeline = build_pipeline(config, spec.name, ctx)
             for source in pipeline.sources:
                 if isinstance(source.source, WebhookSource):
-                    only = dataclasses.replace(
-                        pipeline, sources=[SourceSpec(source.key, source.source)]
-                    )
-                    self.routes[(spec.name, source.key)] = (only, source.source)
+                    self.routes[(spec.name, source.key)] = (pipeline, source.source)
 
     def ingest(
         self, pipeline: str, key: str, body: bytes, headers: dict[str, str]
@@ -87,10 +86,10 @@ class Intake:
             raise LookupError(f"no webhook source {pipeline}/{key}")
         built, source = route
         source.verify(body, headers)
-        with self.lock:
-            source.accept(json.loads(body))
-            report = run(built, self.store)
-        return {"received": report.fetched, "stored": report.stored}
+        delivery = source.parse(json.loads(body))
+        only = dataclasses.replace(built, sources=[SourceSpec(key, delivery)])
+        report = run(only, self.store, lock=self.lock)
+        return {"received": delivery.received, "skipped": delivery.skipped, "stored": report.stored}
 
 
 class Handlers:
@@ -101,7 +100,7 @@ class Handlers:
         self.lock = threading.Lock()
         self.intake = Intake(config, ctx, store, self.lock)
         self.k = config.themes.k_anonymity
-        self.scheduler = Scheduler(config, ctx, self.shared_store)
+        self.scheduler = Scheduler(config, ctx, store, self.lock)
 
     @contextmanager
     def shared_store(self) -> Iterator[Store]:
@@ -109,19 +108,21 @@ class Handlers:
             yield self.store
 
     def answer(self, question: str) -> str:
-        with self.shared_store() as s:
-            result = ask(
-                s,
-                question,
-                self.ctx.chat(self.config.ask_llm),
-                embedder=self.ctx.embedder(self.config.themes.embedder),
-                k_anonymity=self.k,
-            )
+        result = ask(
+            self.store,
+            question,
+            self.ctx.chat(self.config.ask_llm),
+            embedder=self.ctx.embedder(self.config.themes.embedder),
+            k_anonymity=self.k,
+            lock=self.lock,
+        )
         cited = ", ".join(result.citations)
         return result.text + (f"\n\n_sources: {cited}_" if cited else "")
 
     async def healthz(self, request: Request) -> Response:
-        return JSONResponse({"status": "ok"})
+        if self.scheduler.healthy:
+            return JSONResponse({"status": "ok"})
+        return JSONResponse({"status": "degraded", "scheduler": "stopped"}, status_code=503)
 
     async def ingest(self, request: Request) -> Response:
         body = await request.body()
@@ -137,8 +138,9 @@ class Handlers:
             return JSONResponse({"error": str(exc)}, status_code=404)
         except SignatureError as exc:
             return JSONResponse({"error": str(exc)}, status_code=401)
-        except json.JSONDecodeError:
-            return JSONResponse({"error": "body must be JSON"}, status_code=400)
+        except (json.JSONDecodeError, PayloadError) as exc:
+            error = str(exc) if isinstance(exc, PayloadError) else "body must be JSON"
+            return JSONResponse({"error": error}, status_code=400)
         except PipelineError as exc:
             return JSONResponse({"error": str(exc)}, status_code=502)
         return JSONResponse(result, status_code=202)
@@ -166,10 +168,21 @@ class Handlers:
                 "started_at": o.started_at.isoformat(),
                 "ok": o.ok,
                 "summary": o.summary(),
+                "error": o.error,
+                "warnings": o.warnings(),
             }
             for name, o in self.scheduler.last.items()
         }
-        return JSONResponse({"scheduled": self.scheduler.scheduled(), "last": runs})
+        return JSONResponse(
+            {
+                "scheduled": self.scheduler.scheduled(),
+                "scheduler": {
+                    "healthy": self.scheduler.healthy,
+                    "last_error": self.scheduler.last_error,
+                },
+                "last": runs,
+            }
+        )
 
     async def api_ask(self, request: Request) -> Response:
         question = str((await request.json()).get("question", "")).strip()
@@ -205,7 +218,16 @@ class Handlers:
         question, response_url = slackbot.command(body)
         if not question or not slackbot.is_slack_url(response_url):
             return JSONResponse({"response_type": "ephemeral", "text": "Usage: /obsei <question>"})
-        self.ctx.egress.check(response_url)
+        try:
+            self.ctx.egress.check(response_url)
+        except EgressError:
+            return JSONResponse(
+                {
+                    "response_type": "ephemeral",
+                    "text": f"obsei cannot reply to Slack: its {self.ctx.egress.mode} egress "
+                    "policy blocks hooks.slack.com. Ask an admin to allow it.",
+                }
+            )
         task = BackgroundTask(
             anyio.to_thread.run_sync, self._reply_to_slack, question, response_url
         )

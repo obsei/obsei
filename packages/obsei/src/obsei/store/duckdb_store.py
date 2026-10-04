@@ -82,6 +82,14 @@ MIGRATIONS: tuple[str, ...] = (
         duplicate_of VARCHAR
     );
     """,
+    """
+    CREATE TABLE enrichment_retries (
+        pipeline VARCHAR NOT NULL,
+        source VARCHAR NOT NULL,
+        record_id VARCHAR NOT NULL,
+        PRIMARY KEY (pipeline, source, record_id)
+    );
+    """,
 )
 
 
@@ -465,6 +473,36 @@ class Store(ThemeQueries):
         if ids:
             self._unassign(ids)
             self._con.execute("DELETE FROM embeddings WHERE list_contains(?, record_id)", [ids])
+            self._con.execute(
+                "DELETE FROM enrichment_retries WHERE list_contains(?, record_id)", [ids]
+            )
+
+    def retry_records(self, pipeline: str, source: str, limit: int) -> list[Record]:
+        """Stored records of ``pipeline``/``source`` whose enrichment failed, oldest first."""
+        rows = self._con.execute(
+            "SELECT r.data FROM enrichment_retries q JOIN records r ON r.id = q.record_id "
+            "WHERE q.pipeline = ? AND q.source = ? ORDER BY r.created_at, r.id LIMIT ?",
+            [pipeline, source, limit],
+        ).fetchall()
+        return [Record.model_validate_json(data) for (data,) in rows]
+
+    def track_retries(
+        self, pipeline: str, source: str, *, done: Iterable[str], failed: Iterable[str]
+    ) -> None:
+        """Forget ``done`` records and queue ``failed`` ones for the next run."""
+        cleared = list(done)
+        if cleared:
+            self._con.execute(
+                "DELETE FROM enrichment_retries WHERE pipeline = ? AND source = ? "
+                "AND list_contains(?, record_id)",
+                [pipeline, source, cleared],
+            )
+        queued = list(failed)
+        if queued:
+            self._con.executemany(
+                "INSERT INTO enrichment_retries VALUES (?, ?, ?) ON CONFLICT DO NOTHING",
+                [(pipeline, source, rid) for rid in queued],
+            )
 
     def get_cursor(self, pipeline: str, source: str) -> Cursor | None:
         row = self._con.execute(

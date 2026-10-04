@@ -12,10 +12,10 @@ obsei serve --host 0.0.0.0 --port 8765
 
 | Path | Auth | Purpose |
 | --- | --- | --- |
-| `GET /healthz` | none | liveness |
+| `GET /healthz` | none | liveness; `503 {"status": "degraded"}` if the scheduler stopped |
 | `POST /ingest/{pipeline}/{source}` | HMAC-SHA256 signature | push feedback into a `webhook` source |
 | `/mcp` | bearer token | MCP over streamable HTTP |
-| `GET /api/runs` | bearer token | last run of each scheduled pipeline |
+| `GET /api/runs` | bearer token | last run of each scheduled pipeline, with errors and warnings |
 
 Binding to a non-loopback address requires `OBSEI_API_TOKEN`. Pipelines with `every_minutes` run on
 their schedule inside the server (see [Configuration](/configuration/#scheduling)).
@@ -34,7 +34,12 @@ sources:
 
 Sign the raw body: `X-Obsei-Signature-256: sha256=<hex HMAC of body>`. GitHub-style
 `X-Hub-Signature-256` is accepted too. Map `id` and `created_at` so that redeliveries are
-recognised as unchanged.
+recognised as unchanged. The signature does not cover a timestamp, so there is no replay window:
+a replayed request with mapped ids is stored as unchanged.
+
+A request is accepted as a whole or not at all: an invalid item returns `400` naming the item.
+Items without text are skipped, and the reply counts them:
+`{"received": 3, "skipped": 1, "stored": 2}`.
 
 ## Access
 

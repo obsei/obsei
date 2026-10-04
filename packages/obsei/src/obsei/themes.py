@@ -1,7 +1,8 @@
 """Stable themes: embed new feedback, mark near-duplicates, and assign each record to the nearest
 theme or start a new one. Theme ids never change; centroids drift slowly as records arrive.
 
-Only themes with at least ``k_anonymity`` records are labelled or shown.
+Only themes with at least ``k_anonymity`` records are labelled or shown. Store calls run under
+the optional ``lock``; embedding and labelling run outside it.
 """
 
 from __future__ import annotations
@@ -10,12 +11,14 @@ import hashlib
 import json
 import re
 from collections import Counter
+from contextlib import nullcontext
 from dataclasses import dataclass
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from obsei.llm.client import ChatClient, ChatMessage, JsonSchema, LlmError
 from obsei.llm.embed import Embedder, normalize
+from obsei.pipeline import Lock
 from obsei.store import Store
 
 LABEL_PROMPT = (
@@ -95,19 +98,23 @@ def _theme_id(record_id: str) -> str:
     return "thm_" + hashlib.sha256(record_id.encode()).hexdigest()[:16]
 
 
-def _embed(store: Store, embedder: Embedder, config: ThemesConfig, report: ThemeReport) -> None:
+def _embed(
+    store: Store, embedder: Embedder, config: ThemesConfig, report: ThemeReport, guard: Lock
+) -> None:
     remaining = config.max_records
     while remaining > 0:
-        pending = store.pending_embeddings(embedder.model, min(config.batch_size, remaining))
+        with guard:
+            pending = store.pending_embeddings(embedder.model, min(config.batch_size, remaining))
         if not pending:
             return
         vectors = embedder.embed([text for _, _, text in pending])
-        store.put_embeddings(
-            [
-                (rid, embedder.model, digest, vec)
-                for (rid, digest, _), vec in zip(pending, vectors, strict=True)
-            ]
-        )
+        with guard:
+            store.put_embeddings(
+                [
+                    (rid, embedder.model, digest, vec)
+                    for (rid, digest, _), vec in zip(pending, vectors, strict=True)
+                ]
+            )
         report.embedded += len(pending)
         remaining -= len(pending)
 
@@ -143,17 +150,27 @@ def _assign(store: Store, model: str, config: ThemesConfig, report: ThemeReport)
 
 
 def update_themes(
-    store: Store, embedder: Embedder, config: ThemesConfig, labeler: ChatClient | None = None
+    store: Store,
+    embedder: Embedder,
+    config: ThemesConfig,
+    labeler: ChatClient | None = None,
+    *,
+    lock: Lock | None = None,
 ) -> ThemeReport:
+    guard: Lock = lock or nullcontext()
     report = ThemeReport()
-    _embed(store, embedder, config, report)
-    _assign(store, embedder.model, config, report)
-    for theme_id in store.unlabeled_themes(config.k_anonymity):
-        samples = store.theme_samples(theme_id)
+    _embed(store, embedder, config, report, guard)
+    with guard:
+        _assign(store, embedder.model, config, report)
+        unlabeled = store.unlabeled_themes(config.k_anonymity)
+    for theme_id in unlabeled:
+        with guard:
+            samples = store.theme_samples(theme_id)
         label = _llm_label(labeler, samples, config.label_language) if labeler else None
-        if label is None:
-            store.label_theme(theme_id, keyword_label(samples), None)
-        else:
-            store.label_theme(theme_id, label.label, label.description)
+        with guard:
+            if label is None:
+                store.label_theme(theme_id, keyword_label(samples), None)
+            else:
+                store.label_theme(theme_id, label.label, label.description)
         report.labeled += 1
     return report

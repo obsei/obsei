@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import json
+import threading
 import time
 from pathlib import Path
 from urllib.parse import urlencode
@@ -127,3 +128,76 @@ def test_slack_command_answers_in_background(store: Store, monkeypatch: pytest.M
     response = client.post("/slack/commands", content=body, headers=headers)
     assert response.json()["response_type"] == "ephemeral"
     assert posted == [{"response_type": "in_channel", "text": "Login issues lead."}]
+
+
+def slack_request(text: str) -> tuple[bytes, dict[str, str]]:
+    body = urlencode({"text": text, "response_url": "https://hooks.slack.com/commands/1"}).encode()
+    stamp = str(int(time.time()))
+    sig = "v0=" + hmac.new(b"s3cret", f"v0:{stamp}:".encode() + body, hashlib.sha256).hexdigest()
+    return body, {"X-Slack-Request-Timestamp": stamp, "X-Slack-Signature": sig}
+
+
+def test_slack_command_explains_blocked_egress(
+    store: Store, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("SLACK_SIGNING_SECRET", "s3cret")
+    cfg = ObseiConfig.model_validate(
+        {
+            "pipelines": [
+                {"name": "p", "sources": [{"key": "s", "type": "csv", "config": {"path": "x.csv"}}]}
+            ]
+        }
+    )
+    client = TestClient(create_app(cfg, Context(), store, token="t"))
+    body, headers = slack_request("top issues?")
+    response = client.post("/slack/commands", content=body, headers=headers)
+    assert response.status_code == 200
+    reply = response.json()
+    assert reply["response_type"] == "ephemeral"
+    assert "air_gapped egress policy blocks hooks.slack.com" in reply["text"]
+
+
+def test_slow_model_does_not_block_other_requests(store: Store) -> None:
+    entered, release = threading.Event(), threading.Event()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        entered.set()
+        release.wait(10)
+        reply = {"answer": "Login issues lead.", "citations": []}
+        return httpx.Response(200, json={"choices": [{"message": {"content": json.dumps(reply)}}]})
+
+    ctx = Context(
+        llms={"default": LlmEndpoint(base_url="http://llm.internal/v1", model="m")},
+        llm_transport=httpx.MockTransport(handler),
+    )
+    cfg = ObseiConfig.model_validate(
+        {
+            "pipelines": [
+                {"name": "p", "sources": [{"key": "s", "type": "csv", "config": {"path": "x.csv"}}]}
+            ],
+        }
+    )
+    auth = {"Authorization": "Bearer t"}
+    answers: list[int] = []
+    with TestClient(create_app(cfg, ctx, store, token="t")) as client:
+        asking = threading.Thread(
+            target=lambda: answers.append(
+                client.post("/api/ask", json={"question": "top?"}, headers=auth).status_code
+            )
+        )
+        asking.start()
+        try:
+            assert entered.wait(10)
+            started = time.monotonic()
+            assert client.get("/api/snapshot", headers=auth).status_code == 200
+            assert client.get(f"/api/themes/{_any_theme(store)}", headers=auth).status_code == 200
+            assert time.monotonic() - started < 5
+            assert not release.is_set()
+        finally:
+            release.set()
+            asking.join(10)
+    assert answers == [200]
+
+
+def _any_theme(store: Store) -> str:
+    return studio.snapshot(store, k=5).themes[0].id

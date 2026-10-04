@@ -27,7 +27,9 @@ salt produces new pseudonyms.
 
 Start [Ollama](https://ollama.com) with a model such as `qwen3:8b`, then uncomment the
 `classify` enricher in `obsei.yaml`. Every record gets sentiment, intent, language and a
-confidence score. See [Models](/guides/models/) for hosted and enterprise endpoints.
+confidence score. If the model cannot be reached, `obsei run` warns with the endpoint, stores
+the records unlabelled and labels them on the next run. See [Models](/guides/models/) for hosted
+and enterprise endpoints.
 
 ## Ask your agent
 
