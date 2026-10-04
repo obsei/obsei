@@ -24,8 +24,8 @@ retention and transfers.
 | india | Aadhaar (Verhoeff), PAN |
 | africa | South Africa ID |
 
-- **Names (optional).** Regexes cannot find person names. `pip install "obsei[names]>=1.0.0a1"` adds a
-  local multilingual GLiNER model that replaces names with `<PERSON>` after the regex pass:
+- **Names (optional).** Regexes cannot find person names. `pip install "obsei[names]>=1.0.0a1"`
+  adds a local multilingual GLiNER model that replaces names with `<PERSON>` after the regex pass:
 
   ```yaml
   privacy:
@@ -44,7 +44,10 @@ retention and transfers.
 
 ## At rest and in use
 
-- The DuckDB file is encrypted (AES via OpenSSL) with `OBSEI_DB_KEY`.
+- The DuckDB file is encrypted (AES via OpenSSL) with `OBSEI_DB_KEY`. The first encrypted write
+  downloads DuckDB's `httpfs` extension, so it needs network access once unless the extension is
+  already installed (the container image ships with it). To pre-install it:
+  `python -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"`.
 - Egress is air-gapped by default; public model and sink endpoints must be allowed explicitly.
 - MCP tools never return author pseudonyms. Webhook and Parquet sinks omit them by default.
 
@@ -60,6 +63,10 @@ obsei audit                                               # log of erasures and 
 
 Every `forget` and `export` is written to an append-only audit log inside the encrypted store,
 with the filters and counts but never the raw handle.
+
+`forget` erases records from the obsei database only. Copies already delivered to sinks (Parquet
+files, SQL tables, Slack messages, Jira, Linear or GitHub issues, webhook receivers) are not
+touched; erase them in those systems as part of the same request.
 
 These map to rights found in the GDPR and UK GDPR, India's DPDP Act, Brazil's LGPD, California's
 CCPA/CPRA, Japan's APPI, South Africa's POPIA, China's PIPL, Singapore's PDPA and others. Check
