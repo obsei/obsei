@@ -42,13 +42,13 @@ obsei provides controls that *support* compliance with laws such as the GDPR, In
 Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain the data controller.
 
 > [!NOTE]
-> 1.0 is a new codebase, not compatible with 0.0.x, and is in pre-release: install it with the `>=1.0.0a1` specifier.
+> 1.0 is a new codebase, not compatible with 0.0.x, and is in pre-release: install it with the `>=1.0.0rc1` specifier.
 > A plain `pip install obsei` still gives 0.0.15, whose code lives on the `legacy/0.0.x` branch.
 
 ## Quickstart
 
 ```bash
-uv tool install "obsei[mcp]>=1.0.0a1"   # or: pip install "obsei[mcp]>=1.0.0a1"
+uv tool install "obsei[mcp]>=1.0.0rc1"   # or: pip install "obsei[mcp]>=1.0.0rc1"
 mkdir voc && cd voc
 obsei init                             # obsei.yaml plus a 10-language sample dataset
 export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
@@ -91,9 +91,9 @@ docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
 
 ## Roadmap
 
-Phases 0.1 to 0.4 (private core, MCP and Claude plugin, enterprise bring-your-own, themes and
-Studio) are in the 1.0 pre-releases. Next: live-connector validation, a release candidate, then the
-1.0.0 launch. See [ROADMAP.md](ROADMAP.md).
+Phases 0.1 to 0.5 (private core, MCP and Claude plugin, enterprise bring-your-own, themes and
+Studio, decision models and routing) are in the first release candidate, `1.0.0rc1`. Next:
+live-connector validation, further release candidates as needed, then the 1.0.0 launch. See [ROADMAP.md](ROADMAP.md).
 
 ## Contributing
 

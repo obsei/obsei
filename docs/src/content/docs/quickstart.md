@@ -7,7 +7,7 @@ obsei 1.0 is in pre-release. Install it with an explicit version specifier, whic
 dependencies on stable releases:
 
 ```bash
-uv tool install "obsei[mcp]>=1.0.0a1"     # or: pip install "obsei[mcp]>=1.0.0a1"
+uv tool install "obsei[mcp]>=1.0.0rc1"     # or: pip install "obsei[mcp]>=1.0.0rc1"
 ```
 
 Create a project with a ten-language sample dataset:
@@ -51,7 +51,7 @@ docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
   -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT \
   ghcr.io/obsei/obsei:1.0.0-alpha.1 run
 ```
-<!-- x-release-please-end -->
 
-Images are tagged by release (`1.0.0-alpha.1`); there is no `latest` tag yet. `--user` keeps the
+Images are tagged by release (`1.0.0-rc.1`); there is no `latest` tag yet. `--user` keeps the
 database and outputs owned by you.
+<!-- x-release-please-end -->

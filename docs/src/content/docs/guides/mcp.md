@@ -33,7 +33,7 @@ The plugin adds the MCP server and a `voice-of-customer` skill.
   "mcpServers": {
     "obsei": {
       "command": "uvx",
-      "args": ["--from", "obsei[mcp]>=1.0.0a1", "obsei", "mcp"],
+      "args": ["--from", "obsei[mcp]>=1.0.0rc1", "obsei", "mcp"],
       "env": { "OBSEI_DB": "/path/to/obsei.duckdb", "OBSEI_DB_KEY": "..." }
     }
   }
