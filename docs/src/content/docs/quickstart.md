@@ -49,7 +49,7 @@ Run inside the project directory. The image's entrypoint is `obsei`, so argument
 ```bash
 docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
   -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT \
-  ghcr.io/obsei/obsei:1.0.0-alpha.1 run
+  ghcr.io/obsei/obsei:1.0.0-rc.1 run
 ```
 <!-- x-release-please-end -->
 
