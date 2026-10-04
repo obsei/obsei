@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-rc.3](https://github.com/obsei/obsei/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2026-10-04)
+
+
+### Bug Fixes
+
+* **cli:** install DuckDB's encryption extension in obsei init and point / at Studio ([#412](https://github.com/obsei/obsei/issues/412)) ([0ef6323](https://github.com/obsei/obsei/commit/0ef63239f45ac78b7f128e34c7f7011147a2e69b))
+
 ## [1.0.0-rc.2](https://github.com/obsei/obsei/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2026-10-04)
 
 
