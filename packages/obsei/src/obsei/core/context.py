@@ -8,7 +8,7 @@ from types import TracebackType
 from typing import Self
 
 import httpx
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from obsei._version import __version__
 from obsei.core.record import Author
@@ -25,6 +25,9 @@ class LlmEndpoint(BaseModel):
     base_url: str
     model: str
     api_key_env: str | None = None
+    api_key_header: str = Field(
+        default="Authorization", description='"api-key" for Azure OpenAI keys.'
+    )
     max_requests: int | None = None
     timeout: float = 60.0
 
@@ -58,6 +61,7 @@ class Context:
             model=endpoint.model,
             policy=self.egress,
             api_key_env=endpoint.api_key_env,
+            api_key_header=endpoint.api_key_header,
             budget=RequestBudget(endpoint.max_requests) if endpoint.max_requests else None,
             timeout=endpoint.timeout,
             transport=self.llm_transport,

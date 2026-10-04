@@ -12,7 +12,7 @@ COPY packages ./packages
 COPY plugins ./plugins
 RUN uv build --package obsei --out-dir /dist \
     && uv venv /opt/obsei \
-    && uv pip install --python /opt/obsei "$(ls /dist/*.whl)[apple,google,mcp]"
+    && uv pip install --python /opt/obsei "$(ls /dist/*.whl)[apple,google,mcp,sql]"
 
 FROM python:3.12-slim-trixie
 LABEL org.opencontainers.image.source="https://github.com/obsei/obsei" \

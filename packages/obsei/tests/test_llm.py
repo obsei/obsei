@@ -89,6 +89,22 @@ def test_openai_compatible_client_sends_schema_and_key(monkeypatch: pytest.Monke
     assert seen[0].url.path == "/v1/chat/completions"
 
 
+def test_azure_style_api_key_header(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AZURE_KEY", "az")
+    seen: list[httpx.Request] = []
+    client = OpenAICompatibleClient(
+        base_url="http://openai.internal/openai/v1",
+        model="gpt",
+        policy=EgressPolicy(),
+        api_key_env="AZURE_KEY",
+        api_key_header="api-key",
+        transport=_transport("{}", seen),
+    )
+    client.complete([{"role": "user", "content": "x"}], schema={"type": "object"})
+    assert seen[0].headers["api-key"] == "az"
+    assert "Authorization" not in seen[0].headers
+
+
 def test_client_refuses_blocked_endpoint_and_missing_key(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(EgressError):
         OpenAICompatibleClient(

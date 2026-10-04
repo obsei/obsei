@@ -13,7 +13,7 @@ obsei-reddit = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "obsei[apple,google,mcp]",
+    "obsei[apple,google,mcp,sql]",
     "obsei-reddit",
     "mypy==2.4.0",
     "pytest==9.1.1",
