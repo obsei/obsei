@@ -1,0 +1,137 @@
+# Multilingual support tickets routed by a small decision model, with a chat model for hard cases.
+#
+# Sources: Zendesk and Freshdesk tickets in any language; a "sample" pipeline reads a CSV of eight
+#          tickets in seven languages for a quick local check.
+# Models:  Julia-1 (144M parameters, 50+ languages, runs on a CPU) behind llama.cpp's decision
+#          endpoint. One request per ticket answers sentiment, intent, urgency and a yes/no field;
+#          the answer is always one of your options, with probabilities. A filter drops spam before
+#          classification. Answers below their cutoff go to a local Ollama chat model; without it
+#          they are stored with review: true. Nothing leaves your network except the sinks.
+# Sinks:   urgent bugs become Jira issues; every other ticket goes to Slack.
+#
+# Extras:  none (pip install obsei)
+# Models:  llama serve -hf ggml-org/Julia-1-GGUF          (decision model on port 8080; see the
+#                                                         Models guide for OBSEI_DECISION_URL)
+#          ollama serve && ollama pull qwen3:8b           (chat fallback on port 11434)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          OBSEI_DECISION_URL                   decision endpoint URL documented by llama.cpp
+#          ZENDESK_EMAIL, ZENDESK_API_TOKEN     Zendesk agent email and API token
+#          FRESHDESK_API_KEY                    Freshdesk API key
+#          JIRA_EMAIL, JIRA_API_TOKEN           Jira Cloud user and API token
+#          SLACK_WEBHOOK_URL                    Slack incoming webhook
+# Try:     obsei try -c examples/decision-routing.yaml -p sample --enrich --limit 8
+# Run:     obsei run -c examples/decision-routing.yaml -p tickets
+version: 1
+
+store:
+  path: support-routing.duckdb
+
+privacy:
+  redact: true
+  regions: [global, north_america, eu, uk, latam, india, apac]
+
+egress:
+  mode: private
+  allowed_hosts: [acme.atlassian.net, hooks.slack.com]
+
+llms:
+  julia:
+    api: decision
+    url_env: OBSEI_DECISION_URL                 # the decision endpoint URL; see the header
+    timeout: 30
+  ollama:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+    max_requests: 200                           # caps how many tickets fall back per run
+
+ask_llm: ollama
+# ask_judge: kev    # a 4B+ decision model (e.g. Kev-4B) checks Ask answers against their sources
+
+pipelines:
+  - name: tickets
+    batch_size: 50
+    every_minutes: 15
+    sources:
+      - key: zendesk
+        type: zendesk
+        config:
+          subdomain: acme                       # acme.zendesk.com
+          start_time: "2026-01-01T00:00:00Z"
+      - key: freshdesk
+        type: freshdesk
+        config:
+          domain: acme                          # acme.freshdesk.com
+          since: "2026-01-01T00:00:00Z"
+    enrichers:
+      - type: filter                            # first, so spam never reaches the classifier
+        config: &spam
+          llm: julia
+          question: Is this spam rather than a real customer request?
+          yes_means: prize, lottery or giveaway scams, phishing links, advertising or bulk mail
+          no_means: a customer writing about a product, an account, a bill or a problem
+          threshold: 0.8
+          action: drop                           # not classified, sent or stored; counted per run
+      - type: classify
+        config: &classify
+          llm: julia
+          fallback_llm: ollama
+          threshold: 0.6                         # cutoff per answer; check it on your own sample
+          min_confidence:
+            urgency: 0.3                         # score confidence runs lower than choice
+          sentiments:
+            positive: satisfied, grateful or praising
+            neutral: factual request or question without a clear feeling
+            negative: frustrated, angry or disappointed
+          intents:
+            bug: something is broken, errors, crashes or does not work as documented
+            billing: charges, invoices, refunds, payment methods or prices
+            account_access: cannot log in, password resets, two-factor or locked accounts
+            how_to: asks how to do something the product already supports
+            feature_request: asks for a new feature or an improvement
+            churn_risk: threatens to cancel, downgrade or move to a competitor
+            praise: thanks or compliments with no request
+            other: none of the above
+          fields:
+            urgency:
+              description: How soon does the customer need this resolved?
+              levels: [can wait, this week, today, right now]
+            asks_for_refund:
+              type: yesno
+              description: Does the customer ask for money back?
+              yes_means: asks for a refund, a chargeback or money back
+              no_means: does not ask for money back
+    sinks:
+      - type: jira
+        config:
+          base_url: https://acme.atlassian.net
+          project_key: SUP
+          issue_type: Bug
+          labels: [feedback, urgent]
+          when:
+            classify.intent: [bug]
+            classify.fields.urgency: [today, right now]
+          max_issues: 20
+      - type: slack                             # bugs that can wait
+        config:
+          when:
+            classify.intent: [bug]
+            classify.fields.urgency: [can wait, this week]
+      - type: slack                             # everything that is not a bug
+        config:
+          when:
+            classify.intent:
+              [billing, account_access, how_to, feature_request, churn_risk, praise, other]
+          max_messages: 50
+
+  - name: sample
+    sources:
+      - key: csv
+        type: csv
+        config:
+          path: examples/data/support-sample.csv  # relative to where you run obsei
+          fields: {text: text, id: id, created_at: created_at, lang: lang}
+    enrichers:
+      - type: filter
+        config: *spam
+      - type: classify
+        config: *classify

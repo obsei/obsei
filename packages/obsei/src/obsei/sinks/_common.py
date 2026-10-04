@@ -17,14 +17,17 @@ def env(name: str) -> str:
 
 
 def label(record: Record, name: str) -> str | None:
-    """A string field of an enrichment value, e.g. ``label(r, "classify.intent")``."""
-    enricher, _, key = name.partition(".")
+    """A string or yes/no field of an enrichment value, e.g. ``label(r, "classify.intent")`` or
+    ``label(r, "classify.fields.urgency")``; yes/no reads as ``"true"`` or ``"false"``."""
+    enricher, _, path = name.partition(".")
     enrichment = record.enrichments.get(enricher)
     if enrichment is None:
         return None
     value = enrichment.value
-    if key and isinstance(value, dict):
-        value = value.get(key)
+    for key in path.split(".") if path else ():
+        value = value.get(key) if isinstance(value, dict) else None
+    if isinstance(value, bool):
+        return "true" if value else "false"
     return value if isinstance(value, str) else None
 
 

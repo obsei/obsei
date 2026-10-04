@@ -51,6 +51,16 @@ class RequestBudget:
         self.used += 1
 
 
+def auth_headers(api_key_env: str | None, api_key_header: str) -> dict[str, str]:
+    if not api_key_env:
+        return {}
+    key = os.environ.get(api_key_env)
+    if not key:
+        raise LlmError(f"{api_key_env} is not set")
+    bearer = api_key_header.lower() == "authorization"
+    return {api_key_header: f"Bearer {key}" if bearer else key}
+
+
 class _Message(BaseModel):
     content: str | None = None
 
@@ -77,13 +87,7 @@ class OpenAICompatibleClient:
         transport: httpx.BaseTransport | None = None,
     ) -> None:
         policy.check(base_url)
-        headers = {}
-        if api_key_env:
-            key = os.environ.get(api_key_env)
-            if not key:
-                raise LlmError(f"{api_key_env} is not set")
-            bearer = api_key_header.lower() == "authorization"
-            headers[api_key_header] = f"Bearer {key}" if bearer else key
+        headers = auth_headers(api_key_env, api_key_header)
         self._model = model
         self._budget = budget
         self._http = httpx.Client(

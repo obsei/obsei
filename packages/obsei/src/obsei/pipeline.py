@@ -3,7 +3,8 @@
 A batch is stored and its cursor advanced only after every sink accepted it, so a failed
 run is retried from the same position (at-least-once; sinks are idempotent by record id).
 Only new or changed records are enriched and delivered. Records an enricher could not label
-are stored, reported and enriched again on the next run.
+are stored, reported and enriched again on the next run. Records a filtering enricher drops are
+counted and neither delivered nor stored.
 
 Store calls run under the optional ``lock``; fetching, enrichers and sinks run outside it, so a
 slow source or model does not block other users of a shared store.
@@ -18,7 +19,7 @@ from datetime import UTC, datetime
 from itertools import islice
 from typing import Protocol, TypeAlias, runtime_checkable
 
-from obsei.core.protocols import Cursor, Enricher, ReportsErrors, Sink, Source
+from obsei.core.protocols import Cursor, Drops, Enricher, ReportsErrors, Sink, Source
 from obsei.core.record import Record
 from obsei.store import Store
 
@@ -79,6 +80,7 @@ class RunReport:
     enriched: dict[str, int] = field(default_factory=dict)
     sent: dict[str, int] = field(default_factory=dict)
     failed: dict[str, int] = field(default_factory=dict)
+    dropped: dict[str, int] = field(default_factory=dict)
     errors: dict[str, str] = field(default_factory=dict)
 
     @property
@@ -99,7 +101,9 @@ def _batches(
 
 def _enrich(
     enrichers: Sequence[Enricher], records: list[Record], report: RunReport
-) -> list[Record]:
+) -> tuple[list[Record], list[str]]:
+    """The enriched records still kept, and the ids of dropped ones."""
+    dropped: list[str] = []
     for enricher in enrichers:
         results = enricher.enrich(records)
         if len(results) != len(records):
@@ -119,7 +123,16 @@ def _enrich(
             report.failed[enricher.name] = report.failed.get(enricher.name, 0) + missing
             if isinstance(enricher, ReportsErrors) and enricher.last_error:
                 report.errors[enricher.name] = enricher.last_error
-    return records
+        if isinstance(enricher, Drops):
+            kept = [r for r in records if enricher.keep(r)]
+            if len(kept) < len(records):
+                ids = {r.id for r in kept}
+                dropped.extend(r.id for r in records if r.id not in ids)
+                report.dropped[enricher.name] = (
+                    report.dropped.get(enricher.name, 0) + len(records) - len(kept)
+                )
+            records = kept
+    return records, dropped
 
 
 def _deliver(sinks: Sequence[Sink], records: list[Record], report: RunReport) -> None:
@@ -140,7 +153,7 @@ def _process(
     report: RunReport,
     cursor: Cursor | None = None,
 ) -> int:
-    records = _enrich(pipeline.enrichers, records, report)
+    records, dropped = _enrich(pipeline.enrichers, records, report)
     _deliver(pipeline.sinks, records, report)
     names = [e.name for e in pipeline.enrichers]
     failed = {r.id for r in records if any(n not in r.enrichments for n in names)}
@@ -149,7 +162,7 @@ def _process(
         store.track_retries(
             pipeline.name,
             key,
-            done=[r.id for r in records if r.id not in failed],
+            done=[*dropped, *(r.id for r in records if r.id not in failed)],
             failed=sorted(failed),
         )
         if cursor is not None:
