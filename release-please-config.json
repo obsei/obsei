@@ -1,15 +1,18 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "bump-minor-pre-major": true,
-  "bump-patch-for-minor-pre-major": false,
   "include-component-in-tag": false,
   "packages": {
     "packages/obsei": {
       "release-type": "python",
       "package-name": "obsei",
-      "release-as": "0.1.0",
+      "release-as": "1.0.0-alpha.1",
       "changelog-path": "CHANGELOG.md",
-      "extra-files": ["src/obsei/_version.py"]
+      "extra-files": [
+        "src/obsei/_version.py"
+      ]
     }
-  }
+  },
+  "versioning": "prerelease",
+  "prerelease": true,
+  "prerelease-type": "alpha"
 }

@@ -16,8 +16,9 @@ Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, 
 ---
 
 > [!IMPORTANT]
-> **obsei is being rebuilt.** The next release, **0.1.0**, is a new codebase and is not compatible
-> with 0.0.x. The last 0.0.x release (0.0.15) stays available on PyPI, and its code remains in the
+> **obsei is being rebuilt.** The next stable release, **1.0.0**, is a new codebase and is not
+> compatible with 0.0.x. Pre-releases (`1.0.0a1`, ...) are opt-in with `pip install --pre`.
+> The last 0.0.x release (0.0.15) stays available on PyPI, and its code remains in the
 > git history. See the [roadmap](ROADMAP.md).
 
 ## What obsei is becoming
@@ -51,7 +52,8 @@ uv run obsei doctor
 uv run obsei schema    # Feedback Record JSON Schema
 ```
 
-Once 0.1.0 is released: `uvx obsei doctor` or `docker run --rm ghcr.io/obsei/obsei doctor`.
+Pre-releases of 1.0 will be published as they land: `uvx --prerelease allow obsei doctor`, or
+`pip install --pre obsei`. The first stable public release is 1.0.0.
 
 ## Roadmap at a glance
 

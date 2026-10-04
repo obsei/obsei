@@ -54,5 +54,11 @@ This project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 Releases are automated. Merging to `master` updates a release PR opened by release-please; merging
 that PR tags the release, publishes to PyPI via Trusted Publishing and pushes a signed image to
-`ghcr.io/obsei/obsei`. After the first 0.1.0 release, remove `"release-as": "0.1.0"` from
-`release-please-config.json`.
+`ghcr.io/obsei/obsei`.
+
+Until 1.0.0, releases are PyPI pre-releases (`1.0.0a1`, `1.0.0a2`, ...), which `pip install obsei`
+ignores unless `--pre` is passed. In `release-please-config.json`:
+
+- after `1.0.0-alpha.1` is released, remove `release-as`; later releases bump the alpha number;
+- to start betas or release candidates, set `release-as` to `1.0.0-beta.1` or `1.0.0-rc.1`;
+- for the launch, set `release-as` to `1.0.0` and remove the `prerelease` settings.
