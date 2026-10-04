@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-alpha.1](https://github.com/obsei/obsei/compare/v1.0.0-alpha.1...v1.0.0-alpha.1) (2026-10-04)
+
+
+### Features
+
+* brand the website, docs and Studio with the logo colours ([#373](https://github.com/obsei/obsei/issues/373)) ([a3e96ca](https://github.com/obsei/obsei/commit/a3e96ca61e1db722218f535e3dc1585b2bc05abf))
+
 ## [1.0.0-alpha.1](https://github.com/obsei/obsei/compare/v0.0.15...v1.0.0-alpha.1) (2026-10-04)
 
 
