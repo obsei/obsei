@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "obsei-teams"
+version = "0.1.0"
+description = "Post matching obsei feedback to a Microsoft Teams channel as Adaptive Cards."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["obsei>=1.0.0a1,<2"]
+
+[project.entry-points."obsei.plugins"]
+teams = "obsei_teams:register"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/obsei_teams"]

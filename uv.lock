@@ -15,6 +15,8 @@ resolution-markers = [
 members = [
     "obsei",
     "obsei-reddit",
+    "obsei-teams",
+    "obsei-typeform",
 ]
 
 [manifest.dependency-groups]
@@ -22,6 +24,8 @@ dev = [
     { name = "mypy", specifier = "==2.4.0" },
     { name = "obsei", extras = ["apple", "google", "mcp", "sql"], editable = "packages/obsei" },
     { name = "obsei-reddit", editable = "plugins/obsei-reddit" },
+    { name = "obsei-teams", editable = "plugins/obsei-teams" },
+    { name = "obsei-typeform", editable = "plugins/obsei-typeform" },
     { name = "playwright", specifier = "==1.63.0" },
     { name = "pytest", specifier = "==9.1.1" },
     { name = "pytest-cov", specifier = "==7.1.0" },
@@ -2002,6 +2006,28 @@ provides-extras = ["apple", "embeddings", "google", "mcp", "names", "sql"]
 name = "obsei-reddit"
 version = "0.1.0"
 source = { editable = "plugins/obsei-reddit" }
+dependencies = [
+    { name = "obsei" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "obsei", editable = "packages/obsei" }]
+
+[[package]]
+name = "obsei-teams"
+version = "0.1.0"
+source = { editable = "plugins/obsei-teams" }
+dependencies = [
+    { name = "obsei" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "obsei", editable = "packages/obsei" }]
+
+[[package]]
+name = "obsei-typeform"
+version = "0.1.0"
+source = { editable = "plugins/obsei-typeform" }
 dependencies = [
     { name = "obsei" },
 ]

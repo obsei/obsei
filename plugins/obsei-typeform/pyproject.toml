@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "obsei-typeform"
+version = "0.1.0"
+description = "Typeform survey responses for obsei, fetched incrementally with your API token."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["obsei>=1.0.0a1,<2"]
+
+[project.entry-points."obsei.plugins"]
+typeform = "obsei_typeform:register"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/obsei_typeform"]

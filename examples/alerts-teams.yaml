@@ -1,0 +1,42 @@
+# Negative App Store and Google Play reviews posted to a Microsoft Teams channel.
+#
+#   pip install "obsei[google]>=1.0.0a1" "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"
+#   export TEAMS_WEBHOOK_URL=...     # from the channel's Workflows "webhook request" template
+#   export OBSEI_DB_KEY=...          # encrypts the local store (16+ characters)
+#   obsei serve --config alerts-teams.yaml
+#
+# Reviews are redacted before they reach Teams. Teams is a public host, so the egress policy
+# below allows only the Power Automate webhook hosts.
+version: 1
+
+plugins: [teams]
+
+egress:
+  mode: private
+  allowed_hosts: [logic.azure.com, environment.api.powerplatform.com]
+
+llms:
+  default:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+
+pipelines:
+  - name: review-alerts
+    every_minutes: 30
+    sources:
+      - key: ios
+        type: appstore
+        config: {app_id: "284882215", countries: [us, gb, de]}
+      - key: android
+        type: playstore
+        config: {package_name: com.example.app, credentials_file: play-sa.json}
+    enrichers:
+      - type: classify
+        config: {llm: default}
+    sinks:
+      - type: teams
+        config:
+          title: Negative app reviews
+          when: {classify.sentiment: [negative]}
+          max_rating: 2
+          max_records: 10
