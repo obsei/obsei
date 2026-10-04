@@ -17,6 +17,11 @@ llms:
   default:
     base_url: http://localhost:11434/v1
     model: qwen3:8b
+  # Or a small decision model on a CPU for fast labels with probabilities, e.g. Julia-1 on llama.cpp:
+  # default:
+  #   api: decision
+  #   url_env: OBSEI_DECISION_URL
+  # See https://docs.obsei.com/guides/models/#decision-models
 
 pipelines:
   - name: feedback

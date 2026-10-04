@@ -9,8 +9,8 @@ Use the `obsei` MCP tools to ground every claim in real feedback.
 
 1. Start broad questions ("what are customers talking about?") with `list_themes`: stable themes
    with trends, sources, languages and intents.
-2. Size the question with `feedback_stats`: group by `intent`, `sentiment`, `source`, `lang` or
-   `week`, filtered to the period and topic asked about.
+2. Size the question with `feedback_stats`: group by `intent`, `sentiment`, `source`, `lang`,
+   `route` or `week`, filtered to the period and topic asked about.
 3. Pull evidence with `search_feedback`. Combine `text` with `intent`, `sentiment`, `source`,
    `lang` and rating filters. Search in the customers' languages too: a topic such as "login"
    may appear as "iniciar sesión", "connexion", "ログイン" or "लॉगिन".

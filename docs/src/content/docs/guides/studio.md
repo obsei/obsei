@@ -42,7 +42,8 @@ as ingest would, labels them, groups themes, and exports a snapshot marked `demo
 shows a short guided intro, before-and-after redaction cards (the raw text exists only because the
 data is synthetic; Studio never has raw text otherwise) and a few **Ask your data** answers recorded
 from the dataset, citing record ids shown in its evidence. Demo records are routed with the routes
-of `examples/decision-routing.yaml` (billing chosen by the demo's `team` field), using the same
+of `examples/decision-routing.yaml` without its refunds rule (billing chosen by the demo's `team`
+field), using the same
 routing code as a pipeline. In your deployment Ask uses your own
 model, and agents get the same answers over MCP.
 
