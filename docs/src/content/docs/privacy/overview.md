@@ -24,7 +24,7 @@ retention and transfers.
 | india | Aadhaar (Verhoeff), PAN |
 | africa | South Africa ID |
 
-- **Names (optional).** Regexes cannot find person names. `pip install 'obsei[names]'` adds a
+- **Names (optional).** Regexes cannot find person names. `pip install "obsei[names]>=1.0.0a1"` adds a
   local multilingual GLiNER model that replaces names with `<PERSON>` after the regex pass:
 
   ```yaml

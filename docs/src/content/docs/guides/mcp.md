@@ -5,7 +5,7 @@ sidebar:
   order: 5
 ---
 
-`obsei mcp` (install `obsei[mcp]`) serves three read-only tools over stdio:
+`obsei mcp` (install `obsei[mcp]`) serves four read-only tools over stdio:
 
 | Tool | Use |
 | --- | --- |
@@ -33,7 +33,7 @@ The plugin adds the MCP server and a `voice-of-customer` skill.
   "mcpServers": {
     "obsei": {
       "command": "uvx",
-      "args": ["--prerelease", "allow", "--from", "obsei[mcp]", "obsei", "mcp"],
+      "args": ["--from", "obsei[mcp]>=1.0.0a1", "obsei", "mcp"],
       "env": { "OBSEI_DB": "/path/to/obsei.duckdb", "OBSEI_DB_KEY": "..." }
     }
   }

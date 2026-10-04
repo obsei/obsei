@@ -3,10 +3,11 @@ title: Quickstart
 description: Install obsei, create a project and run your first pipeline.
 ---
 
-obsei 1.0 is in pre-release. Install it with pre-releases allowed:
+obsei 1.0 is in pre-release. Install it with an explicit version specifier, which keeps
+dependencies on stable releases:
 
 ```bash
-uv tool install --prerelease allow "obsei[mcp]"     # or: pip install --pre "obsei[mcp]"
+uv tool install "obsei[mcp]>=1.0.0a1"     # or: pip install "obsei[mcp]>=1.0.0a1"
 ```
 
 Create a project with a ten-language sample dataset:

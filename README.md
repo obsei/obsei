@@ -39,13 +39,13 @@ obsei provides controls that *support* compliance with laws such as the GDPR, In
 Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain the data controller.
 
 > [!NOTE]
-> 1.0 is a new codebase, not compatible with 0.0.x, and is in pre-release: install with `--pre`.
+> 1.0 is a new codebase, not compatible with 0.0.x, and is in pre-release: install it with the `>=1.0.0a1` specifier.
 > A plain `pip install obsei` still gives 0.0.15, whose code lives on the `legacy/0.0.x` branch.
 
 ## Quickstart
 
 ```bash
-uv tool install --prerelease allow "obsei[mcp]"   # or: pip install --pre "obsei[mcp]"
+uv tool install "obsei[mcp]>=1.0.0a1"   # or: pip install "obsei[mcp]>=1.0.0a1"
 mkdir voc && cd voc
 obsei init                             # obsei.yaml plus a 10-language sample dataset
 export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"

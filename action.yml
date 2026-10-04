@@ -31,7 +31,7 @@ runs:
         OBSEI_SPEC: ${{ inputs.version }}
         OBSEI_EXTRAS: ${{ inputs.extras }}
       run: |
-        package="obsei${OBSEI_EXTRAS:+[$OBSEI_EXTRAS]}${OBSEI_SPEC}"
+        package="obsei${OBSEI_EXTRAS:+[$OBSEI_EXTRAS]}${OBSEI_SPEC:->=1.0.0a1}"
         args=(run --config "$OBSEI_CONFIG")
         if [ -n "$OBSEI_PIPELINE" ]; then args+=(--pipeline "$OBSEI_PIPELINE"); fi
-        uvx --prerelease allow --from "$package" obsei "${args[@]}"
+        uvx --from "$package" obsei "${args[@]}"
