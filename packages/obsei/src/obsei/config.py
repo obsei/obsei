@@ -23,6 +23,7 @@ from obsei.privacy.pseudonym import SALT_ENV_VAR, load_salt
 from obsei.privacy.redact import ALL_REGIONS, RegexRedactor, Region
 from obsei.sinks import register as register_sinks
 from obsei.sources import register as register_sources
+from obsei.themes import ThemesConfig
 
 DEFAULT_PATH = Path("obsei.yaml")
 
@@ -68,6 +69,8 @@ class ObseiConfig(_Strict):
     privacy: PrivacyConfig = Field(default_factory=PrivacyConfig)
     egress: EgressPolicy | None = None
     llms: dict[str, LlmEndpoint] = Field(default_factory=dict)
+    themes: ThemesConfig = Field(default_factory=ThemesConfig)
+    ask_llm: str = Field(default="default", description="llms name used by ask and the Slack bot.")
     plugins: list[str] = Field(
         default_factory=list, description="Installed plugin entry points allowed to load."
     )

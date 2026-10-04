@@ -100,5 +100,10 @@ def test_mcp_lists_read_only_tools(store: Store) -> None:
         yield store
 
     tools = anyio.run(create_server(opener).list_tools)
-    assert {t.name for t in tools} == {"search_feedback", "feedback_stats", "get_feedback"}
+    assert {t.name for t in tools} == {
+        "search_feedback",
+        "feedback_stats",
+        "get_feedback",
+        "list_themes",
+    }
     assert all(t.annotations and t.annotations.read_only_hint for t in tools)

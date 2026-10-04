@@ -17,6 +17,7 @@ import duckdb
 import typer
 
 from obsei import __version__
+from obsei.ask import ask as ask_feedback
 from obsei.config import (
     DEFAULT_PATH,
     ConfigError,
@@ -33,6 +34,7 @@ from obsei.pipeline import PipelineError
 from obsei.pipeline import run as run_pipeline
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
 from obsei.store import DB_KEY_ENV_VAR, Store, StoreError, load_db_key
+from obsei.themes import update_themes
 
 app = typer.Typer(
     name="obsei",
@@ -380,3 +382,58 @@ def serve(
         except (ConfigError, PluginError, OSError, RuntimeError) as exc:
             raise _fail(exc) from None
         uvicorn.run(web, host=host, port=port, log_level="info")
+
+
+def _themes_context(config: Path, db: Path | None) -> tuple[ObseiConfig, Path]:
+    cfg = _load(config)
+    return cfg, db or cfg.store.path
+
+
+@app.command()
+def themes(
+    config: ConfigOption = DEFAULT_PATH,
+    db: Annotated[Path | None, typer.Option("--db", envvar="OBSEI_DB")] = None,
+) -> None:
+    """Embed new feedback, update stable themes and list them (k-anonymous)."""
+    cfg, path = _themes_context(config, db)
+    settings = cfg.themes
+    with build_context(cfg) as ctx, _open_store(path, cfg.store.unencrypted) as store:
+        try:
+            labeler = ctx.chat(settings.labeler) if settings.labeler else None
+            report = update_themes(store, ctx.embedder(settings.embedder), settings, labeler)
+        except (KeyError, OSError, RuntimeError) as exc:
+            raise _fail(exc) from None
+        typer.echo(
+            f"embedded {report.embedded}, assigned {report.assigned}, new themes "
+            f"{report.new_themes}, duplicates {report.duplicates}, labelled {report.labeled}"
+        )
+        for theme in store.theme_summaries(min_size=settings.k_anonymity):
+            trend = theme.last_7_days - theme.previous_7_days
+            typer.echo(f"{theme.size:>6}  {trend:+5d}  {theme.id}  {theme.label or '-'}")
+
+
+@app.command()
+def ask(
+    question: Annotated[str, typer.Argument(help="Your question, in any language.")],
+    config: ConfigOption = DEFAULT_PATH,
+    db: Annotated[Path | None, typer.Option("--db", envvar="OBSEI_DB")] = None,
+) -> None:
+    """Answer a question from your feedback with your model, citing record ids."""
+    cfg, path = _themes_context(config, db)
+    with (
+        build_context(cfg) as ctx,
+        _open_store(path, cfg.store.unencrypted, read_only=True) as store,
+    ):
+        try:
+            answer = ask_feedback(
+                store,
+                question,
+                ctx.chat(cfg.ask_llm),
+                embedder=ctx.embedder(cfg.themes.embedder),
+                k_anonymity=cfg.themes.k_anonymity,
+            )
+        except (KeyError, OSError, RuntimeError) as exc:
+            raise _fail(exc) from None
+    typer.echo(answer.text)
+    if answer.citations:
+        typer.echo("\nsources: " + ", ".join(answer.citations))
