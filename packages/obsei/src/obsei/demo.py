@@ -3,12 +3,23 @@ identifiers: contact details and ID numbers are made up (checksum-valid so redac
 
 from __future__ import annotations
 
+import json
 from collections import Counter
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from importlib import resources
+from pathlib import Path
 
 from obsei import studio
 from obsei.core.record import Author, Enrichment, Record, SourceRef
+from obsei.enrichers.classify import (
+    ClassifierConfig,
+    DecisionClassifier,
+    FieldSpec,
+)
+from obsei.llm.client import LlmError
+from obsei.llm.decision import DecisionClient
 from obsei.privacy.pseudonym import pseudonymize
 from obsei.privacy.redact import RegexRedactor
 from obsei.store import Store
@@ -28,6 +39,44 @@ LANGUAGES = {
     "ko": "Korean",
     "pt": "Portuguese",
 }
+LABELS_FILE = "demo_labels.json"
+DECISION_MODEL = "Julia-1"
+LABELLED_BY = "Julia-1, a 144M-parameter decision model running locally on a CPU"
+DECISION_CONFIG = ClassifierConfig(
+    sentiments={
+        "negative": "a complaint or a problem",
+        "positive": "praise or thanks",
+        "neutral": "a request or suggestion",
+    },
+    intents={
+        "bug": "something does not work: errors, cannot log in, slow, payment fails",
+        "complaint": "unhappy about a charge, a delay or a service",
+        "feature_request": "asks for something new",
+        "praise": "says something is good or thanks someone",
+    },
+    fields={
+        "team": FieldSpec(
+            description="Route this customer message to the team responsible for its topic.",
+            choices={
+                "engineering": "the app is broken: cannot log in, errors, crashes, slow loading",
+                "payments": "money: double charges, refunds, failed payments at checkout",
+                "logistics": "orders and deliveries arriving late",
+                "design": "requests for new features or comments on the app's look",
+                "support": "comments about how support agents helped",
+            },
+        ),
+        "urgency": FieldSpec(
+            description="How soon does the customer need this resolved?",
+            levels=["can wait", "this week", "today", "right now"],
+        ),
+        "angry": FieldSpec(
+            type="yesno",
+            description="Is the customer angry?",
+            yes_means="angry, furious or very frustrated",
+            no_means="calm, neutral, polite or happy",
+        ),
+    },
+)
 RATED_SOURCES = frozenset({"appstore", "playstore", "survey"})
 ANONYMOUS_SOURCES = frozenset({"survey"})
 
@@ -46,8 +95,6 @@ class Issue:
     """One recurring demo issue; ``days_ago`` is cycled over each group's records."""
 
     label: str
-    intent: str
-    sentiment: str
     rating: int
     days_ago: tuple[int, ...]
     groups: tuple[Group, ...]
@@ -56,8 +103,6 @@ class Issue:
 ISSUES: dict[str, Issue] = {
     "login": Issue(
         label="Can't log in",
-        intent="bug",
-        sentiment="negative",
         rating=1,
         days_ago=(0, 1, 2, 1, 3, 4, 2, 5, 0, 3, 47, 1, 2, 4, 30, 3, 1, 6),
         groups=(
@@ -125,8 +170,6 @@ ISSUES: dict[str, Issue] = {
     ),
     "billing": Issue(
         label="Charged twice",
-        intent="complaint",
-        sentiment="negative",
         rating=1,
         days_ago=(52, 38, 24, 11, 45, 3, 31, 17, 55, 20, 41, 27),
         groups=(
@@ -169,8 +212,6 @@ ISSUES: dict[str, Issue] = {
     ),
     "performance": Issue(
         label="Slow to load",
-        intent="bug",
-        sentiment="negative",
         rating=2,
         days_ago=(41, 27, 13, 50, 34, 19, 22, 44, 30, 5, 48),
         groups=(
@@ -211,8 +252,6 @@ ISSUES: dict[str, Issue] = {
     ),
     "dark_mode": Issue(
         label="Dark mode request",
-        intent="feature_request",
-        sentiment="neutral",
         rating=4,
         days_ago=(54, 36, 22, 10, 47, 29, 15, 40, 6, 33),
         groups=(
@@ -253,8 +292,6 @@ ISSUES: dict[str, Issue] = {
     ),
     "praise": Issue(
         label="Love the new look",
-        intent="praise",
-        sentiment="positive",
         rating=5,
         days_ago=(33, 26, 18, 19, 39, 14, 28, 45, 4, 23, 50),
         groups=(
@@ -295,8 +332,6 @@ ISSUES: dict[str, Issue] = {
     ),
     "checkout": Issue(
         label="Checkout fails",
-        intent="bug",
-        sentiment="negative",
         rating=1,
         days_ago=(25, 18, 32, 21, 11, 37, 16, 23, 29, 44),
         groups=(
@@ -338,8 +373,6 @@ ISSUES: dict[str, Issue] = {
     ),
     "support": Issue(
         label="Great support",
-        intent="praise",
-        sentiment="positive",
         rating=5,
         days_ago=(49, 35, 21, 2, 42, 28, 14, 53, 17, 38),
         groups=(
@@ -380,8 +413,6 @@ ISSUES: dict[str, Issue] = {
     ),
     "delivery": Issue(
         label="Delivery late",
-        intent="complaint",
-        sentiment="negative",
         rating=2,
         days_ago=(30, 44, 16, 51, 23, 37, 9, 26, 5, 19),
         groups=(
@@ -446,26 +477,56 @@ def raw_demo_records(now: datetime | None = None) -> list[Record]:
                         else Author(pseudonym=pseudonymize(handle, DEMO_SALT)),
                         rating=float(issue.rating) if group.source in RATED_SOURCES else None,
                         lang=group.lang,
-                        enrichments={
-                            "classify": Enrichment(
-                                value={
-                                    "intent": issue.intent,
-                                    "sentiment": issue.sentiment,
-                                    "language": group.lang,
-                                },
-                                confidence=0.9,
-                                model="demo",
-                                at=moment,
-                            )
-                        },
                     )
                 )
     return records
 
 
-def demo_records(raw: list[Record] | None = None) -> list[Record]:
-    """The synthetic records as stored: redacted at ingest."""
+def redacted_demo_records(raw: list[Record] | None = None) -> list[Record]:
+    """The synthetic records redacted at ingest, before labelling."""
     return RegexRedactor().redact(raw if raw is not None else raw_demo_records())
+
+
+def demo_records(
+    raw: list[Record] | None = None, labels: Mapping[str, Enrichment] | None = None
+) -> list[Record]:
+    """The synthetic records as stored: redacted at ingest, then labelled (by default with the
+    decision model labels committed in ``demo_labels.json``)."""
+    redacted = redacted_demo_records(raw)
+    found = stored_labels() if labels is None else labels
+    missing = [r.source.native_id for r in redacted if r.source.native_id not in found]
+    if missing:
+        raise KeyError(f"no demo labels for {missing[:3]}; rebuild them with --decision-url-env")
+    return [
+        r.model_copy(update={"enrichments": {"classify": found[r.source.native_id]}})
+        for r in redacted
+    ]
+
+
+def stored_labels() -> dict[str, Enrichment]:
+    data = json.loads((resources.files("obsei") / LABELS_FILE).read_text(encoding="utf-8"))
+    return {native_id: Enrichment.model_validate(e) for native_id, e in data.items()}
+
+
+def decision_labels(
+    records: Sequence[Record], client: DecisionClient, *, model: str
+) -> dict[str, Enrichment]:
+    """Label redacted ``records`` with a decision model, as ``classify`` with ``api: decision``
+    would, recording ``model`` as the model name."""
+    classifier = DecisionClassifier(
+        client, DECISION_CONFIG, threshold=0.6, min_confidence={"urgency": 0.3}
+    )
+    labels: dict[str, Enrichment] = {}
+    for record, enrichment in zip(records, classifier.enrich(records), strict=True):
+        if enrichment is None:
+            raise LlmError(classifier.last_error or "the decision model gave no answer")
+        labels[record.source.native_id] = enrichment.model_copy(update={"model": model})
+    return labels
+
+
+def write_labels(labels: Mapping[str, Enrichment], path: Path) -> None:
+    data = {k: e.model_dump(mode="json", exclude={"at"}) for k, e in sorted(labels.items())}
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
 def issue_of(record: Record) -> str:
@@ -518,7 +579,13 @@ def showcase(snapshot: Snapshot, raw: list[Record], store: Store) -> Showcase:
                     stored=stored.text,
                 )
             )
-    return Showcase(redactions=redactions, answers=_answers(snapshot, store))
+    decisions = snapshot.overview.decisions
+    model = decisions.model if decisions else None
+    return Showcase(
+        redactions=redactions,
+        answers=_answers(snapshot, store),
+        labelled_by=LABELLED_BY if model == DECISION_MODEL else model,
+    )
 
 
 def _shown(snapshot: Snapshot, store: Store, issue: str) -> list[tuple[str, Record]]:

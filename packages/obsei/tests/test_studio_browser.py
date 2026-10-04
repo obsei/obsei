@@ -230,6 +230,9 @@ def assert_studio_renders(page: Page, badge: str) -> None:
     assert page.locator(".privacy .stat").count() >= 3
     assert page.locator(".themes .spark").count() == page.locator(".themes li").count()
     assert page.locator(".columns li.peak").count() == 1
+    expect(page.locator(".decisions")).to_contain_text("Julia-1")
+    assert page.locator(".decisions h3").all_text_contents() == ["angry", "team", "urgency"]
+    assert page.locator(".evidence .labels").count() == page.locator(".evidence li").count()
     assert page.locator(".kpi").count() == 4
     assert page.locator(".themes li").count() >= 3
     assert page.locator(".graph .node").count() >= 5
@@ -249,6 +252,7 @@ def test_demo_export_renders_and_is_interactive(
     assert page.locator(".graph .node.kind-source").count() == 6
     for selector in DEMO_ONLY:
         expect(page.locator(selector)).to_be_visible()
+    expect(page.locator(".intro")).to_contain_text("144M-parameter decision model")
     rising = page.locator(".themes li.rising")
     assert rising.count() >= 1
     expect(rising.first.locator("strong")).to_have_text(re.compile(r"^Can't log in"))
@@ -363,6 +367,7 @@ def test_live_viewer_is_told_evidence_needs_analyst(
     page.wait_for_selector("text=Evidence needs the analyst role.")
     assert page.text_content(".badge") == "Live"
     expect(page.locator(".privacy")).to_be_visible()
+    expect(page.locator(".decisions")).to_be_visible()
     assert page.get_by_role("link", name="obsei website").get_attribute("href") == (
         "https://obsei.com"
     )

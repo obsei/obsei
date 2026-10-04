@@ -14,6 +14,20 @@ export interface Overview {
   by_intent: Bucket[];
   by_lang: Bucket[];
   by_week: Bucket[];
+  decisions?: Decisions | null;
+}
+
+export interface LabelCount {
+  value: string;
+  count: number;
+  score: number | null;
+}
+
+export interface Decisions {
+  model: string | null;
+  labelled: number;
+  review: number;
+  fields: Record<string, LabelCount[]>;
 }
 
 export interface Theme {
@@ -56,6 +70,9 @@ export interface Evidence {
   lang: string | null;
   text: string;
   labels: Record<string, string>;
+  fields?: Record<string, string | boolean>;
+  confidences?: Record<string, number>;
+  review?: boolean | null;
 }
 
 export type Role = "viewer" | "analyst" | "admin";
@@ -88,6 +105,7 @@ export interface AskExample {
 export interface Showcase {
   redactions: RedactionExample[];
   answers: AskExample[];
+  labelled_by?: string | null;
 }
 
 export interface Snapshot {

@@ -166,3 +166,9 @@ button.cite { padding: 2px 8px; font: 0.8rem ui-monospace, SFMono-Regular, Menlo
   .col-label.short { display: block; overflow: visible; text-overflow: clip; }
 }
 footer a { color: inherit; }
+.labels { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.label { font-size: 0.78rem; border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; background: var(--bg); }
+.label small { color: var(--muted); font-size: 0.72rem; }
+.label.review { border-color: var(--up); color: var(--up); }
+.decision-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.decision-fields h3 { margin: 0 0 8px; font-size: 0.9rem; text-transform: capitalize; }

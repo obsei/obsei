@@ -107,7 +107,24 @@ TombstoneKind: TypeAlias = Literal["record", "author"]
 GroupBy: TypeAlias = Literal[
     "source", "instance", "sentiment", "intent", "lang", "rating", "day", "week", "month"
 ]
+_CLASSIFY = "$.enrichments.classify.value"
 _LABEL = "json_extract_string(data, '$.enrichments.classify.value.{}')"
+_FIELD = "json_extract_string({}, '$.\"' || k || '\"')"
+_LABEL_FIELDS = (
+    f"SELECT k, {_FIELD.format('f')} AS v, count(*), {PEOPLE.format(p='')}, "  # noqa: S608
+    f"avg(CAST({_FIELD.format('s')} AS DOUBLE)) FROM (SELECT *, "
+    f"json_extract(data, '{_CLASSIFY}.fields') AS f, "
+    f"json_extract(data, '{_CLASSIFY}.scores') AS s, "
+    f"unnest(json_keys(data, '{_CLASSIFY}.fields')) AS k FROM records "
+    f"WHERE json_type(data, '{_CLASSIFY}.fields') = 'OBJECT') "
+    "WHERE v IS NOT NULL AND NOT contains(k, '\"') GROUP BY k, v ORDER BY k, 3 DESC, v"
+)
+_REVIEWS = (
+    "SELECT count(*), count(*) FILTER "  # noqa: S608
+    f"(WHERE json_extract_string(data, '{_CLASSIFY}.review') "
+    "= 'true'), mode(json_extract_string(data, '$.enrichments.classify.model')) "
+    f"FROM records WHERE json_extract(data, '{_CLASSIFY}.review') IS NOT NULL"
+)
 _GROUPS: dict[GroupBy, str] = {
     "source": "source_type",
     "instance": "source_type || '/' || source_instance",
@@ -656,6 +673,24 @@ class Store(ThemeQueries):
             [list(labels)],
         ).fetchone()
         return {str(r[0]): int(r[1]) for r in rows}, int(records[0]) if records else 0
+
+    def label_fields(self) -> list[tuple[str, StatRow, float | None]]:
+        """(field, value counts, mean score) of each ``classify`` field: choices, score levels
+        and yes/no answers stored by decision models (and chat models with fields)."""
+        rows = self._con.execute(_LABEL_FIELDS).fetchall()
+        return [
+            (
+                str(r[0]),
+                StatRow(key=str(r[1]), count=int(r[2]), avg_rating=None, people=int(r[3])),
+                r[4],
+            )
+            for r in rows
+        ]
+
+    def review_counts(self) -> tuple[int, int, str | None]:
+        """(records with a review flag, records marked for review, most common classify model)."""
+        row = self._con.execute(_REVIEWS).fetchone()
+        return (int(row[0]), int(row[1]), row[2]) if row else (0, 0, None)
 
     def author_count(self) -> int:
         """Distinct author pseudonyms; raw handles are never stored."""

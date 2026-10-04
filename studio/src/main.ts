@@ -2,7 +2,7 @@ import { isRising, sparkline, weekColumns } from "./charts";
 import { DataSource, type EvidenceResult, type Mode, type Refusal } from "./data";
 import { clear, el, languageName, number } from "./dom";
 import { type GraphControl, KIND_LABELS, renderGraph } from "./graph";
-import { askExamples, intro, privacyPanel, redacted, redactionPanel } from "./panels";
+import { askExamples, decisionsPanel, intro, labelChips, privacyPanel, redacted, redactionPanel } from "./panels";
 import type { Bucket, Evidence, Snapshot, Theme } from "./types";
 
 const app = document.getElementById("app")!;
@@ -87,6 +87,7 @@ function evidenceItem(item: Evidence): HTMLElement {
     "li",
     {},
     el("blockquote", { lang: item.lang ?? "" }, ...redacted(item.text)),
+    labelChips(item),
     el(
       "div",
       { class: "meta" },
@@ -156,14 +157,16 @@ function brand(): HTMLElement {
 }
 
 function demoSummary(snapshot: Snapshot): string {
-  const { overview, embedder } = snapshot;
+  const { overview, embedder, showcase } = snapshot;
+  const fields = ["sentiment", "intent", ...Object.keys(overview.decisions?.fields ?? {})].join(", ");
+  const labelled = showcase?.labelled_by ? ` Labels (${fields}) were produced by ${showcase.labelled_by}.` : "";
   const grouped = embedder?.startsWith("hashing")
     ? "This build used the offline hashing embedder, so each language forms its own theme; built with the multilingual model, the same issue in any language becomes one theme."
     : "The multilingual model groups the same issue in different languages into one theme.";
   return (
     `Synthetic customer feedback in ${overview.by_lang.length} languages from ${overview.by_source.map((b) => b.key).join(", ")}. ` +
     `Personal data was redacted at ingest. ${grouped} ` +
-    `Every group shown comes from at least ${overview.k_anonymity} people (k-anonymity).`
+    `Every group shown comes from at least ${overview.k_anonymity} people (k-anonymity).${labelled}`
   );
 }
 
@@ -349,6 +352,7 @@ function render(data: DataSource): void {
       evidencePanel,
       showcase && showcase.answers.length ? askExamples(showcase.answers, cite) : null,
       privacyRow,
+      overview.decisions && Object.keys(overview.decisions.fields).length ? decisionsPanel(overview.decisions) : null,
       weekColumns(overview.by_week),
       el(
         "div",

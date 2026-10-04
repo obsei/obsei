@@ -34,6 +34,22 @@ class Bucket(BaseModel):
     avg_rating: float | None
 
 
+class LabelCount(BaseModel):
+    value: str
+    count: int
+    score: float | None = None
+
+
+class Decisions(BaseModel):
+    """Answers of ``classify`` fields (team, urgency, yes/no...), k-anonymous, and how many
+    labels a model marked for review."""
+
+    model: str | None
+    labelled: int
+    review: int
+    fields: dict[str, list[LabelCount]]
+
+
 class Overview(BaseModel):
     generated_at: datetime
     version: str
@@ -44,6 +60,7 @@ class Overview(BaseModel):
     by_intent: list[Bucket]
     by_lang: list[Bucket]
     by_week: list[Bucket]
+    decisions: Decisions | None = None
 
 
 class Node(BaseModel):
@@ -94,6 +111,7 @@ class Showcase(BaseModel):
 
     redactions: list[RedactionExample]
     answers: list[AskExample]
+    labelled_by: str | None = None
 
 
 class Snapshot(BaseModel):
@@ -127,7 +145,21 @@ def overview(store: Store, *, k: int) -> Overview:
         by_intent=_buckets(store, "intent", k),
         by_lang=_buckets(store, "lang", k),
         by_week=_buckets(store, "week", k)[-26:],
+        decisions=decisions(store, k=k),
     )
+
+
+def decisions(store: Store, *, k: int) -> Decisions | None:
+    labelled, review, model = store.review_counts()
+    fields: dict[str, list[LabelCount]] = {}
+    for name, row, score in store.label_fields():
+        if row.people >= k and row.key is not None:
+            fields.setdefault(name, []).append(
+                LabelCount(value=row.key, count=row.count, score=score)
+            )
+    if not labelled and not fields:
+        return None
+    return Decisions(model=model, labelled=labelled, review=review, fields=fields)
 
 
 def privacy(store: Store, *, k: int, egress: EgressMode | None = None) -> Privacy:
@@ -136,7 +168,7 @@ def privacy(store: Store, *, k: int, egress: EgressMode | None = None) -> Privac
         for group_by in FACET_GROUPS
         for r in store.stats(Query(), group_by, limit=200)
         if r.key is not None and r.people < k
-    )
+    ) + sum(1 for _, r, _ in store.label_fields() if r.people < k)
     placeholders, redacted = store.placeholders(PLACEHOLDERS)
     return Privacy(
         k_anonymity=k,

@@ -6,6 +6,7 @@ import threading
 import time
 import types
 from collections.abc import Iterator
+from importlib import resources
 from pathlib import Path
 from urllib.parse import urlencode
 
@@ -18,9 +19,19 @@ from obsei import studio
 from obsei.cli import app as cli
 from obsei.config import ObseiConfig
 from obsei.core.context import Context, LlmEndpoint
-from obsei.demo import ISSUES, demo_records, label_demo_themes, raw_demo_records
+from obsei.demo import (
+    DECISION_MODEL,
+    ISSUES,
+    decision_labels,
+    demo_records,
+    label_demo_themes,
+    raw_demo_records,
+    redacted_demo_records,
+    stored_labels,
+)
 from obsei.evidence import ThemeInfo
 from obsei.llm import EgressPolicy
+from obsei.llm.decision import DecisionClient
 from obsei.llm.embed import LOCAL_MODEL, HashingEmbedder
 from obsei.serve import create_app
 from obsei.slackbot import SlackSignatureError, verify
@@ -83,6 +94,76 @@ def test_privacy_panel_aggregates(store: Store) -> None:
     strict = studio.snapshot(store, k=30)
     assert strict.privacy.hidden_themes == len(studio.snapshot(store, k=1).themes)
     assert strict.privacy.hidden_groups > 0
+
+
+def test_demo_labels_come_from_the_decision_model(store: Store) -> None:
+    labels = stored_labels()
+    assert {r.source.native_id for r in raw_demo_records()} == set(labels)
+    assert {e.model for e in labels.values()} == {DECISION_MODEL}
+    text = (resources.files("obsei") / "demo_labels.json").read_text(encoding="utf-8")
+    assert "http" not in text
+    assert not any(pii in text for pii in RAW_PII)
+    snap = studio.snapshot(store, k=5, evidence_per_theme=50)
+    decisions = snap.overview.decisions
+    assert decisions is not None
+    assert decisions.model == DECISION_MODEL
+    assert decisions.labelled == len(labels)
+    assert 0 < decisions.review < decisions.labelled
+    assert set(decisions.fields) == {"team", "urgency", "angry"}
+    assert all(c.count >= 5 for counts in decisions.fields.values() for c in counts)
+    assert all(c.score is not None for c in decisions.fields["urgency"])
+    item = next(e for items in snap.evidence.values() for e in items)
+    assert set(item.fields) == {"team", "urgency", "angry"}
+    assert {"sentiment", "intent", "team", "urgency", "angry"} <= set(item.confidences)
+    assert item.review is not None
+
+
+def test_demo_decision_labels_use_the_decision_api() -> None:
+    asked: list[dict[str, object]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        asked.append(body)
+        answers: dict[str, object] = {}
+        for name, q in body["questions"].items():
+            options = list(q.get("criteria") or [])
+            if q["type"] == "score":
+                answers[name] = {
+                    "type": "score",
+                    "score": 1.0,
+                    "probabilities": {str(i): float(i == 1) for i in range(len(options))},
+                    "confidence": 0.9,
+                }
+            else:
+                answers[name] = {
+                    "type": "choice",
+                    "choice": options[0],
+                    "probabilities": {o: float(i == 0) for i, o in enumerate(options)},
+                    "confidence": 0.95,
+                }
+        return httpx.Response(200, json={"model": "/models/local.gguf", "answers": answers})
+
+    client = DecisionClient(
+        url="http://127.0.0.1:9/decide",
+        policy=EgressPolicy(),
+        transport=httpx.MockTransport(handler),
+    )
+    records = redacted_demo_records()[:3]
+    labels = decision_labels(records, client, model=DECISION_MODEL)
+    assert len(asked) == 3
+    assert all("@example.com" not in str(b["state"]) for b in asked)
+    first = labels[records[0].source.native_id]
+    assert first.model == DECISION_MODEL
+    assert isinstance(first.value, dict)
+    assert first.value["fields"] == {"team": "engineering", "urgency": "this week", "angry": True}
+
+
+def test_demo_save_labels_needs_a_decision_model(tmp_path: Path) -> None:
+    result = CliRunner().invoke(
+        cli, ["demo", "--out", str(tmp_path), "--save-labels", str(tmp_path / "l.json")]
+    )
+    assert result.exit_code == 2
+    assert not (tmp_path / "l.json").exists()
 
 
 def test_theme_weekly_counts_match_trends(store: Store) -> None:
