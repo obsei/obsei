@@ -7,7 +7,20 @@ sidebar:
 
 [Open the demo](/demo/) (synthetic feedback in eight languages). The demo uses the offline
 `hashing` embedder, so the same issue in different languages appears as separate themes; with
-`obsei[embeddings]` they are grouped (see [Themes](/guides/themes/)).
+`obsei[embeddings]` they are grouped (see [Themes](/guides/themes/)). Demo themes carry curated
+labels; real themes are labelled from shared keywords or by your `labeler` model.
+
+To rebuild the demo with the multilingual model (needs network to Hugging Face once):
+
+```bash
+uv run --extra embeddings obsei models download
+uv run --extra embeddings obsei demo --embedder local --out docs/public/demo
+```
+
+`obsei demo` follows `OBSEI_EGRESS_MODE` (air-gapped by default), so it loads the model only from
+the local cache (`OBSEI_MODELS_DIR`, or the fastembed cache) that `obsei models download` fills.
+`--embedder` takes the same names as `themes.embedder`: `hashing`, `local` or `local:<model>`.
+The embedder that built the demo is recorded as `embedder` in `data.json`.
 
 Studio shows k-anonymous aggregates, stable themes with seven-day trends, a knowledge graph that
 links themes to sources, languages, intents and sentiment, and redacted evidence for each theme.
