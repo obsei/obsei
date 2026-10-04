@@ -61,6 +61,7 @@ class GraphView(BaseModel):
 
 class Snapshot(BaseModel):
     demo: bool = False
+    embedder: str | None = None
     role: Role | None = None
     overview: Overview
     themes: list[ThemeInfo]
@@ -132,10 +133,13 @@ def static_dir() -> Path:
     return Path(str(resources.files("obsei") / "studio_static"))
 
 
-def export(store: Store, out: Path, *, k: int, demo: bool = False) -> None:
+def export(
+    store: Store, out: Path, *, k: int, demo: bool = False, embedder: str | None = None
+) -> None:
     """Write a self-contained static Studio (HTML, JS, CSS and data.json) to ``out``.
 
-    ``demo`` marks the snapshot as synthetic; only ``obsei demo`` sets it.
+    ``demo`` marks the snapshot as synthetic; only ``obsei demo`` sets it, along with the
+    ``embedder`` model that grouped the themes.
     """
     out.mkdir(parents=True, exist_ok=True)
     for name in STATIC_FILES:
@@ -144,5 +148,5 @@ def export(store: Store, out: Path, *, k: int, demo: bool = False) -> None:
     if LIVE_DATA not in page:
         raise RuntimeError("studio_static/index.html has no data source marker")
     (out / "index.html").write_text(page.replace(LIVE_DATA, EXPORT_DATA), encoding="utf-8")
-    data = snapshot(store, k=k).model_copy(update={"demo": demo})
+    data = snapshot(store, k=k).model_copy(update={"demo": demo, "embedder": embedder})
     (out / "data.json").write_text(data.model_dump_json(), encoding="utf-8")

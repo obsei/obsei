@@ -61,6 +61,7 @@ export type Role = "viewer" | "analyst" | "admin";
 
 export interface Snapshot {
   demo?: boolean;
+  embedder?: string | null;
   role?: Role | null;
   overview: Overview;
   themes: Theme[];

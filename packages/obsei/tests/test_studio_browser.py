@@ -236,6 +236,9 @@ def test_demo_export_renders_and_is_interactive(
     page.goto(f"{static_site}/demo/")
     assert_studio_renders(page, "Demo data")
     assert page.locator("form.ask").count() == 0
+    assert page.locator(".graph .node.kind-source").count() == 5
+    expect(page.locator(".themes li").first.locator("strong")).to_have_text("Can't log in (en)")
+    expect(page.locator(".themes li").first.locator(".trend")).to_have_class(re.compile(r"\bup\b"))
 
     second = page.locator(".themes li").nth(1)
     second.click()

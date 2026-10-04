@@ -1,20 +1,25 @@
 import hashlib
 import hmac
 import json
+import sys
 import time
+import types
+from collections.abc import Iterator
 from pathlib import Path
 from urllib.parse import urlencode
 
 import httpx
 import pytest
 from starlette.testclient import TestClient
+from typer.testing import CliRunner
 
 from obsei import studio
+from obsei.cli import app as cli
 from obsei.config import ObseiConfig
 from obsei.core.context import Context, LlmEndpoint
-from obsei.demo import demo_records
+from obsei.demo import ISSUES, demo_records, label_demo_themes
 from obsei.llm import EgressPolicy
-from obsei.llm.embed import HashingEmbedder
+from obsei.llm.embed import LOCAL_MODEL, HashingEmbedder
 from obsei.serve import create_app
 from obsei.slackbot import SlackSignatureError, verify
 from obsei.store import Store
@@ -43,10 +48,96 @@ def test_demo_is_redacted_and_multilingual(store: Store) -> None:
     assert all(e.source in kept and e.target in kept for e in snap.graph.edges)
 
 
+def test_demo_labels_are_curated_and_sources_survive_k(store: Store) -> None:
+    label_demo_themes(store, k=5)
+    snap = studio.snapshot(store, k=5)
+    texts = [r.text.casefold() for r in demo_records()]
+    curated = {issue.label for issue in ISSUES.values()}
+    for theme in snap.themes:
+        assert theme.label is not None
+        assert theme.label.split(" (")[0] in curated
+        assert theme.sources
+        assert not any(t in theme.label.casefold() for t in texts)
+    assert {n.label for n in snap.graph.nodes if n.kind == "source"} == {
+        "appstore",
+        "playstore",
+        "zendesk",
+        "survey",
+        "bluesky",
+    }
+    login = [t for t in snap.themes if t.label and t.label.startswith("Can't log in")]
+    assert len(login) == 3
+    assert all(t.last_7_days > t.previous_7_days for t in login)
+    assert all(t.last_7_days <= t.previous_7_days for t in snap.themes if t not in login)
+
+
+class _Vector(list[float]):
+    def tolist(self) -> list[float]:
+        return list(self)
+
+
+class IssueTextEmbedding:
+    """Stands in for the multilingual model: same issue, close vectors, in any language."""
+
+    offline: list[bool] = []  # noqa: RUF012
+
+    def __init__(self, model_name: str, cache_dir: str | None, local_files_only: bool) -> None:
+        IssueTextEmbedding.offline.append(local_files_only)
+        records = demo_records()
+        keys = list(ISSUES)
+        self.vectors = {
+            r.text: [float(r.source.native_id.startswith(f"{k}-")) for k in keys]
+            + [0.6 * (i == j) for j in range(len(records))]
+            for i, r in enumerate(records)
+        }
+
+    def embed(self, documents: list[str], batch_size: int) -> Iterator[_Vector]:
+        return (_Vector(self.vectors[d]) for d in documents)
+
+
+@pytest.fixture
+def fake_multilingual(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = types.ModuleType("fastembed")
+    module.TextEmbedding = IssueTextEmbedding  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "fastembed", module)
+    monkeypatch.delenv("OBSEI_EGRESS_MODE", raising=False)
+    IssueTextEmbedding.offline.clear()
+
+
+@pytest.mark.usefixtures("fake_multilingual")
+def test_demo_with_local_embedder_merges_languages(tmp_path: Path) -> None:
+    result = CliRunner().invoke(cli, ["demo", "--embedder", "local", "--out", str(tmp_path)])
+    assert result.exit_code == 0, result.output
+    assert IssueTextEmbedding.offline == [True]
+    data = json.loads((tmp_path / "data.json").read_text(encoding="utf-8"))
+    assert data["embedder"] == LOCAL_MODEL
+    themes = {t["label"]: t for t in data["themes"]}
+    assert set(themes) == {issue.label for issue in ISSUES.values()}
+    login = themes["Can't log in"]
+    assert login["sources"] == {"appstore": 11, "playstore": 5}
+    assert set(login["languages"]) == {"en", "es", "ja"}
+    assert login["last_7_days"] > login["previous_7_days"]
+
+
+def test_demo_rejects_unknown_embedder(tmp_path: Path) -> None:
+    result = CliRunner().invoke(cli, ["demo", "--embedder", "nope", "--out", str(tmp_path)])
+    assert result.exit_code == 2
+    assert "nope" in result.output
+    assert not (tmp_path / "data.json").exists()
+
+
+def test_demo_records_hashing_embedder(tmp_path: Path) -> None:
+    result = CliRunner().invoke(cli, ["demo", "--out", str(tmp_path)])
+    assert result.exit_code == 0, result.output
+    assert json.loads((tmp_path / "data.json").read_text(encoding="utf-8"))["embedder"] == (
+        HashingEmbedder().model
+    )
+
+
 def test_k_anonymity_hides_small_groups(store: Store) -> None:
-    snap = studio.snapshot(store, k=6)
+    snap = studio.snapshot(store, k=7)
     assert snap.themes == []
-    assert all(b.count >= 6 for b in snap.overview.by_lang)
+    assert all(b.count >= 7 for b in snap.overview.by_lang)
     assert studio.theme_evidence(store, "thm_unknown", k=1) == []
 
 
@@ -104,7 +195,7 @@ def test_serve_studio_api(store: Store) -> None:
     theme = snap["themes"][0]["id"]
     assert snap["evidence"] == {theme_id: [] for theme_id in snap["evidence"]}
     items = client.get(f"/api/themes/{theme}", headers=auth).json()
-    assert len(items) == 5
+    assert len(items) == snap["themes"][0]["size"]
 
 
 def test_slack_signature() -> None:
