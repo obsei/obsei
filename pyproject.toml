@@ -12,11 +12,13 @@ obsei = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "obsei",
+    "obsei[google]",
     "mypy==2.4.0",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "ruff==0.16.10",
+    "types-pyyaml==6.0.12.20260906",
+    "types-defusedxml==0.7.0.20260504",
 ]
 
 [tool.ruff]
@@ -32,7 +34,9 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF", "S", "PT", "C4", "PL"]
 ignore = ["PLR0913"]
 
 [tool.ruff.lint.per-file-ignores]
-"packages/*/tests/**" = ["S101", "PLR2004"]
+"packages/*/tests/**" = ["S101", "PLR2004", "RUF001"]
+"packages/obsei/src/obsei/privacy/redact.py" = ["RUF001"]
+"packages/obsei/src/obsei/cli.py" = ["PLR0917"]
 
 [tool.mypy]
 python_version = "3.11"

@@ -22,11 +22,17 @@ not listed below ships only when a contributor builds and maintains it.
 | Phase | Target | Scope | Gate |
 | --- | --- | --- | --- |
 | Setup | Weeks 1-3 | New codebase skeleton, CI, release automation, security baseline | Green CI; publishing tested |
-| 0.1 Private core | Months 1-3 | Record schema, encrypted DuckDB, redaction, pseudonyms, TTL / forget / export, no-egress mode; LiteLLM and local models; CSV, webhook and declarative REST; App Store, Google Play, GitHub, RSS; Slack, webhook, GitHub Issues and Parquet sinks; CLI; Docker | Air-gapped end-to-end test passes |
-| 0.2 MCP and Claude plugin | Months 3-5 | MCP read tools, Claude plugin, GitHub Action recipes; App Store Connect, Hacker News, Bluesky, YouTube; plugin scaffold; docs site | Listed in the MCP Registry and Claude directory |
+| 0.1 Private core | Months 1-3 | Record schema, encrypted DuckDB, redaction, pseudonyms, TTL / forget / export, no-egress mode; LiteLLM and local models; CSV, JSON Lines and declarative REST; App Store, Google Play, GitHub, RSS; Slack, webhook, GitHub Issues and Parquet sinks; CLI; Docker | Air-gapped end-to-end test passes |
+| 0.2 MCP and Claude plugin | Months 3-5 | MCP read tools, Claude plugin, GitHub Action recipes; `obsei serve` with webhook intake; App Store Connect, Hacker News, Bluesky, YouTube; plugin scaffold; docs site | Listed in the MCP Registry and Claude directory |
 | 0.3 Enterprise BYO | Months 5-7 | SQL, MCP-client and file-drop sources; Zendesk, Intercom, Freshdesk, email; Jira, Linear and warehouse sinks | One enterprise design partner in production |
-| 0.4 Themes and Studio | Months 7-10 | Embeddings, dedupe, stable themes, k-anonymous views, `ask`; Gong; read-only Studio with a knowledge graph explorer; Slack bot; static demo | Demo live |
+| 0.4 Themes and Studio | Months 7-10 | Embeddings, dedupe, stable themes, k-anonymous views, `ask`; Gong; read-only Studio with a knowledge graph explorer; Slack bot; static demo | Demo live; release candidate tested |
 | 1.0 | Months 12-14 | Stable API and schema; write tools behind an approval queue; ChatGPT connector; full knowledge graph | |
+
+## Releases
+
+The first stable release is **1.0.0**. Milestones ship earlier as PyPI pre-releases, which
+`pip install obsei` ignores unless `--pre` is passed: 0.1 as `1.0.0a1`, 0.2 as `1.0.0a2`,
+0.3 as `1.0.0b1`, 0.4 as `1.0.0rc1`. The public launch, with Show HN, is 1.0.0.
 
 ## Not planned (contributor-gated)
 

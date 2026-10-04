@@ -4,7 +4,7 @@ from pathlib import Path
 import duckdb
 import pytest
 
-from obsei import Enrichment, Record, SourceRef
+from obsei import Author, Enrichment, Record, SourceRef
 from obsei.store import (
     EncryptionUnavailableError,
     Store,
@@ -176,3 +176,23 @@ def test_encrypted_store_hides_plaintext_and_needs_the_key(tmp_path: Path) -> No
         stored = store.get(rec("1").id)
         assert stored is not None
         assert stored.text == sensitive_text
+
+
+def test_delete_by_author_source_and_age(store: Store) -> None:
+    author = Author(pseudonym="psn_" + "a" * 32)
+    store.upsert(
+        [
+            rec("1").model_copy(update={"author": author}),
+            rec("2", days=10),
+            rec("3", source="appstore", days=20),
+        ]
+    )
+    assert [r.source.native_id for r in store.iter_records(author_pseudonym=author.pseudonym)] == [
+        "1"
+    ]
+    assert store.delete(author_pseudonym=author.pseudonym) == 1
+    assert store.delete(before=T0 + timedelta(days=15)) == 1
+    assert store.delete(source_type="appstore") == 1
+    assert store.count() == 0
+    with pytest.raises(StoreError, match="filter"):
+        store.delete()

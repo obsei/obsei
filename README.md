@@ -16,8 +16,9 @@ Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, 
 ---
 
 > [!IMPORTANT]
-> **obsei is being rebuilt.** The next release, **0.1.0**, is a new codebase and is not compatible
-> with 0.0.x. The last 0.0.x release (0.0.15) stays available on PyPI, and its code remains in the
+> **obsei is being rebuilt.** The next stable release, **1.0.0**, is a new codebase and is not
+> compatible with 0.0.x. Pre-releases (`1.0.0a1`, ...) are opt-in with `pip install --pre`.
+> The last 0.0.x release (0.0.15) stays available on PyPI, and its code remains in the
 > git history. See the [roadmap](ROADMAP.md).
 
 ## What obsei is becoming
@@ -40,18 +41,33 @@ does not make compliance claims; the deploying organisation remains the data con
 
 ## Try the preview
 
-The 0.1 development line is under active construction and not yet on PyPI (installing `obsei` from
-PyPI today still gives the old 0.0.15). It currently ships the Feedback Record schema, the plugin
-registry, pseudonymisation and the CLI. Run it from source:
+The 0.1 development line is not on PyPI yet (installing `obsei` from PyPI today still gives the
+old 0.0.15). Run it from source:
 
 ```bash
-git clone https://github.com/obsei/obsei && cd obsei
-uv sync
-uv run obsei doctor
-uv run obsei schema    # Feedback Record JSON Schema
+git clone https://github.com/obsei/obsei && cd obsei && uv sync
+mkdir demo && cd demo
+uv run obsei init                      # obsei.yaml plus a 10-language sample dataset
+export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
+uv run obsei try                       # preview redacted records; nothing stored or sent
+uv run obsei run                       # fetch, redact, enrich, deliver, store
+uv run obsei doctor                    # environment, encryption, egress mode, plugins
 ```
 
-Once 0.1.0 is released: `uvx obsei doctor` or `docker run --rm ghcr.io/obsei/obsei doctor`.
+Uncomment the `classify` enricher in `obsei.yaml` to label sentiment, intent and language with a
+local model (Ollama by default). Any OpenAI-compatible endpoint works: vLLM, llama.cpp, Azure
+OpenAI, OpenAI, Mistral, or a LiteLLM proxy for Bedrock and Vertex. Public endpoints are refused
+until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`) or `hybrid`.
+
+| | Built in |
+| --- | --- |
+| Sources | CSV, JSON Lines, declarative REST, App Store (any country), Google Play (official API), GitHub issues, RSS/Atom |
+| Enrichers | LLM classification (sentiment, intent, language, custom fields), cascade to a stronger model on low confidence |
+| Sinks | Webhook (HMAC-signed), Slack, GitHub issues, Parquet |
+| Privacy | Checksum-validated PII redaction for the Americas, Europe, UK, Asia-Pacific, India and Africa in any script; salted author pseudonyms; encrypted DuckDB; `obsei forget` and `obsei export` |
+
+Pre-releases of 1.0 will be published as they land: `uvx --prerelease allow obsei doctor`, or
+`pip install --pre obsei`. The first stable public release is 1.0.0.
 
 ## Roadmap at a glance
 

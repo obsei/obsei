@@ -84,6 +84,37 @@ def _comparable(record: Record) -> str:
     return record.model_dump_json(exclude={"fetched_at"})
 
 
+def _content(record: Record) -> str:
+    return record.model_dump_json(exclude={"fetched_at", "enrichments"})
+
+
+def _filters(
+    *,
+    source_type: str | None = None,
+    source_instance: str | None = None,
+    author_pseudonym: str | None = None,
+    since: datetime | None = None,
+    before: datetime | None = None,
+) -> tuple[list[str], list[SqlParam]]:
+    clauses: list[str] = []
+    params: list[SqlParam] = []
+    for column, value in (
+        ("source_type", source_type),
+        ("source_instance", source_instance),
+        ("author_pseudonym", author_pseudonym),
+    ):
+        if value is not None:
+            clauses.append(f"{column} = ?")
+            params.append(value)
+    for op, moment in ((">=", since), ("<", before)):
+        if moment is not None:
+            if moment.tzinfo is None:
+                raise ValueError("timestamps must be timezone-aware")
+            clauses.append(f"created_at {op} ?")
+            params.append(moment)
+    return clauses, params
+
+
 class Store:
     """Without ``encryption_key`` you must pass ``allow_unencrypted=True`` (e.g. encrypted disk)."""
 
@@ -195,17 +226,28 @@ class Store:
         ).fetchone()
         return int(row[0]) if row else 0
 
+    def _stored(self, ids: list[str]) -> dict[str, Record]:
+        return {
+            row[0]: Record.model_validate_json(row[1])
+            for row in self._con.execute(
+                "SELECT id, data FROM records WHERE list_contains(?, id)", [ids]
+            ).fetchall()
+        }
+
+    def changed(self, records: Iterable[Record]) -> list[Record]:
+        """New records, or records whose content differs from the stored copy."""
+        batch: dict[str, Record] = {r.id: r for r in records}
+        stored = self._stored(list(batch))
+        return [
+            r for r in batch.values() if r.id not in stored or _content(stored[r.id]) != _content(r)
+        ]
+
     def upsert(self, records: Iterable[Record]) -> UpsertResult:
         """Idempotent by id; a refetch that only changes ``fetched_at`` counts as unchanged."""
         batch: dict[str, Record] = {r.id: r for r in records}
         if not batch:
             return UpsertResult()
-        existing = {
-            row[0]: Record.model_validate_json(row[1])
-            for row in self._con.execute(
-                "SELECT id, data FROM records WHERE list_contains(?, id)", [list(batch)]
-            ).fetchall()
-        }
+        existing = self._stored(list(batch))
         now = datetime.now(UTC)
         inserts: list[InsertRow] = []
         updates: list[UpdateRow] = []
@@ -267,20 +309,14 @@ class Store:
         self,
         *,
         source_type: str | None = None,
+        author_pseudonym: str | None = None,
         since: datetime | None = None,
         limit: int | None = None,
         batch_size: int = 500,
     ) -> Iterator[Record]:
-        clauses: list[str] = []
-        params: list[SqlParam] = []
-        if source_type is not None:
-            clauses.append("source_type = ?")
-            params.append(source_type)
-        if since is not None:
-            if since.tzinfo is None:
-                raise ValueError("since must be timezone-aware")
-            clauses.append("created_at >= ?")
-            params.append(since)
+        clauses, params = _filters(
+            source_type=source_type, author_pseudonym=author_pseudonym, since=since
+        )
         sql = "SELECT data FROM records"
         if clauses:
             sql += " WHERE " + " AND ".join(clauses)
@@ -292,6 +328,29 @@ class Store:
         while rows := result.fetchmany(batch_size):
             for (data,) in rows:
                 yield Record.model_validate_json(data)
+
+    def delete(
+        self,
+        *,
+        source_type: str | None = None,
+        source_instance: str | None = None,
+        author_pseudonym: str | None = None,
+        before: datetime | None = None,
+    ) -> int:
+        """Delete matching records; at least one filter is required. Returns the count."""
+        clauses, params = _filters(
+            source_type=source_type,
+            source_instance=source_instance,
+            author_pseudonym=author_pseudonym,
+            before=before,
+        )
+        if not clauses:
+            raise StoreError("delete needs at least one filter")
+        row = self._con.execute(
+            "DELETE FROM records WHERE " + " AND ".join(clauses),  # noqa: S608 fixed columns
+            params,
+        ).fetchone()
+        return int(row[0]) if row else 0
 
     def get_cursor(self, pipeline: str, source: str) -> Cursor | None:
         row = self._con.execute(
