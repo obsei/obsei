@@ -1,15 +1,36 @@
 ---
-const sources = ["App Store", "Google Play", "Zendesk", "Intercom", "Gong", "GitHub", "Bluesky", "SQL", "Webhooks", "REST", "MCP"];
-const outputs = ["Studio", "Agents (MCP)", "Slack", "Jira", "Linear", "Warehouse"];
+const sources = ["App Store", "Google Play", "Zendesk", "Intercom", "Gong", "GitHub", "Bluesky", "SQL", "Webhooks", "+ any REST or MCP"];
+const outputs = ["Studio", "AI agents via MCP", "Slack", "Jira", "Linear", "Warehouse"];
 const steps = [
-  { name: "Redact", note: "PII and names", href: "/privacy/overview/" },
-  { name: "Classify", note: "your model", href: "/guides/models/" },
-  { name: "Theme", note: "across languages", href: "/guides/themes/" },
-  { name: "Store", note: "encrypted DuckDB", href: "/configuration/" },
+  {
+    name: "Redact",
+    note: "PII and names",
+    href: "/privacy/overview/",
+    icon: '<path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>',
+  },
+  {
+    name: "Classify",
+    note: "your own model",
+    href: "/guides/models/",
+    icon: '<path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="15" r="3"/>',
+  },
+  {
+    name: "Theme",
+    note: "across languages",
+    href: "/guides/themes/",
+    icon: '<circle cx="6" cy="7" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="11" cy="17" r="2.5"/><path d="M8.4 7.3 14.6 6M7.3 9.2l2.6 5.6M16 8.3l-3.7 6.6"/>',
+  },
+  {
+    name: "Store",
+    note: "encrypted",
+    href: "/configuration/",
+    icon: '<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+  },
 ];
 ---
 
 <figure class="pipeline not-content" aria-label="obsei pipeline: sources flow into your infrastructure, where data is redacted, classified, themed and stored, then reaches Studio, agents and sinks">
+  <div class="flow">
   <div class="lane">
     <p class="title"><a href="/guides/sources/">Collect</a></p>
     <ul class="pills">{sources.map((s) => <li>{s}</li>)}</ul>
@@ -20,7 +41,12 @@ const steps = [
     <ol class="steps">
       {steps.map((s) => (
         <li>
-          <a href={s.href}><strong>{s.name}</strong><span>{s.note}</span></a>
+          <a href={s.href}>
+            <svg aria-hidden="true" viewBox="0 0 24 24" set:html={s.icon} />
+            <strong>{s.name}</strong>
+            <span class="sr-only">: </span>
+            <span class="note">{s.note}</span>
+          </a>
         </li>
       ))}
     </ol>
@@ -30,14 +56,18 @@ const steps = [
     <p class="title"><a href="/guides/sinks/">Act</a></p>
     <ul class="pills out">{outputs.map((s) => <li>{s}</li>)}</ul>
   </div>
+  </div>
 </figure>
 
 <style>
   .pipeline {
-    display: grid;
-    grid-template-columns: minmax(0, 0.9fr) 40px minmax(0, 1.6fr) 40px minmax(0, 0.9fr);
-    align-items: center;
+    container-type: inline-size;
     margin: 2rem 0;
+  }
+  .flow {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) 44px minmax(0, 1.5fr) 44px minmax(0, 0.9fr);
+    align-items: center;
   }
   .title {
     margin: 0 0 0.75rem;
@@ -52,6 +82,9 @@ const steps = [
     color: inherit;
     text-decoration: none;
   }
+  .title a:hover {
+    color: var(--sl-color-accent-high);
+  }
   .pills {
     list-style: none;
     margin: 0;
@@ -59,12 +92,14 @@ const steps = [
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.45rem;
   }
   .pills li {
+    margin: 0;
+    background: var(--sl-color-black);
     border: 1px solid var(--sl-color-gray-5);
     border-radius: 999px;
-    padding: 0.15rem 0.65rem;
+    padding: 0.2rem 0.7rem;
     font-size: 0.8rem;
     white-space: nowrap;
   }
@@ -75,8 +110,8 @@ const steps = [
   }
   .boundary {
     border: 2px dashed var(--sl-color-accent);
-    border-radius: 1.25rem;
-    padding: 1rem;
+    border-radius: 1.4rem;
+    padding: 1.1rem 1rem 1.25rem;
     background: var(--sl-color-accent-low);
   }
   .boundary .title {
@@ -88,27 +123,53 @@ const steps = [
     padding: 0;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.5rem;
+    gap: 0.6rem;
+  }
+  .steps li {
+    margin: 0;
+    position: relative;
+  }
+  .steps li + li::before {
+    content: "";
+    position: absolute;
+    left: -0.6rem;
+    top: 50%;
+    width: 0.6rem;
+    height: 2px;
+    background: var(--sl-color-accent);
   }
   .steps a {
+    height: 100%;
     display: grid;
     justify-items: center;
+    align-content: start;
     text-align: center;
-    gap: 0.15rem;
-    padding: 0.75rem 0.4rem;
-    border-radius: 0.75rem;
+    gap: 0.2rem;
+    padding: 0.85rem 0.4rem;
+    border-radius: 0.9rem;
     background: var(--sl-color-black);
     border: 1px solid var(--sl-color-gray-5);
     color: var(--sl-color-white);
     text-decoration: none;
+    transition: border-color 0.15s, transform 0.15s;
   }
   .steps a:hover {
     border-color: var(--sl-color-accent);
+    transform: translateY(-2px);
+  }
+  .steps svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    fill: none;
+    stroke: var(--sl-color-accent);
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
   .steps strong {
     font-size: 0.95rem;
   }
-  .steps span {
+  .note {
     font-size: 0.75rem;
     line-height: 1.3;
     color: var(--sl-color-gray-3);
@@ -131,7 +192,7 @@ const steps = [
   }
   @keyframes flow {
     to {
-      transform: translateX(40px);
+      transform: translateX(44px);
     }
   }
   @keyframes flow-down {
@@ -139,8 +200,8 @@ const steps = [
       transform: translateY(32px);
     }
   }
-  @media (max-width: 64rem) {
-    .pipeline {
+  @container (max-width: 52rem) {
+    .flow {
       grid-template-columns: minmax(0, 1fr);
     }
     .link {
@@ -152,14 +213,20 @@ const steps = [
       animation-name: flow-down;
     }
   }
-  @media (max-width: 30rem) {
+  @container (max-width: 30rem) {
     .steps {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .steps li + li::before {
+      display: none;
     }
   }
   @media (prefers-reduced-motion: reduce) {
     .link span {
       animation: none;
+    }
+    .steps a {
+      transition: none;
     }
   }
 </style>
