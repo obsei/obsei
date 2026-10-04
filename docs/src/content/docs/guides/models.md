@@ -2,7 +2,7 @@
 title: Models
 description: Bring your own LLM, with egress control.
 sidebar:
-  order: 3
+  order: 4
 ---
 
 obsei talks to any OpenAI-compatible chat endpoint with structured JSON output, and to
@@ -166,14 +166,18 @@ chat model. Language is taken from the record, as before.
 
 The stored `classify` value keeps the usual `sentiment`, `intent`, `language`, `confidence` and
 `fields` (yes/no fields are `true` or `false`), plus `probabilities` per question, `scores` (the
-expected level of each score field, e.g. 2.28 between "today" and "right now"), `confidences`, and
-`review` with the `uncertain` questions. Sinks filter on nested and yes/no fields:
+expected level of each score field, e.g. 2.28 between "today" and "right now"), `levels` of each
+score field, `confidences`, and `review` with the `uncertain` questions. Sinks filter on nested and yes/no fields:
 
 ```yaml
 when: {classify.intent: [bug], classify.fields.urgency: [today, right now]}
 when: {classify.fields.asks_for_refund: ["true"]}
 when: {classify.review: ["true"]}
 ```
+
+Conditions can also test the stored numbers, e.g. `{classify.intent: {is: bug, min_confidence:
+0.8}}` or `{classify.fields.urgency: {gte: today}}`, and ordered `route:` rules send each record to
+one set of sinks. See [Routing](/guides/routing/).
 
 ### Choose a cutoff per model
 

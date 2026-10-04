@@ -2,14 +2,14 @@
 title: MCP and agents
 description: Let Claude, ChatGPT, Cursor and your own agents query feedback.
 sidebar:
-  order: 5
+  order: 6
 ---
 
 `obsei mcp` (install `obsei[mcp]`) serves four read-only tools over stdio:
 
 | Tool | Use |
 | --- | --- |
-| `feedback_stats` | Counts and average rating grouped by source, instance, sentiment, intent, language, rating, day, week or month |
+| `feedback_stats` | Counts and average rating grouped by source, instance, sentiment, intent, language, rating, route, day, week or month |
 | `search_feedback` | Matching feedback, newest first, as citable evidence |
 | `get_feedback` | One record by id, to verify a citation |
 | `list_themes` | Stable themes with trends, sources, languages and intents (k-anonymous) |

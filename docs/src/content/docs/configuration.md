@@ -50,6 +50,9 @@ pipelines:
         config: {when: {classify.intent: [bug, churn_risk]}}
 ```
 
+Sinks take an optional `key` (default: their type), and a pipeline can add ordered `route:` rules
+that send each record to the sinks of the first rule it matches; see [Routing](/guides/routing/).
+
 ## Enrichers
 
 Enrichers run in the order listed, on new or changed records only.
