@@ -69,7 +69,7 @@ The problem never went away. If anything, it got bigger:
 - **Agents need ground truth.** AI agents now write code, triage tickets and plan roadmaps. They
   should answer "what are customers saying?" from real, cited evidence, not from a guess.
 - **Models finally fit on your own machines.** Small open models, and now *decision models* that
-  answer in milliseconds on a CPU, make private analysis practical for any team.
+  answer in a fraction of a second on a CPU, make private analysis practical for any team.
 
 So obsei 1.0 is not a polish of the old library. It is a new product built around one rule:
 **understand customers without moving their personal data anywhere it shouldn't go.**
@@ -78,17 +78,17 @@ So obsei 1.0 is not a polish of the old library. It is a new product built aroun
 
 ## What obsei 1.0 is
 
-- **Private by design.** Personal data is redacted at ingest (checksum-validated IDs for seven
-  regions, optional names), authors become pseudonyms, the database is encrypted, and nothing
+- **Private by design.** Personal data is redacted at ingest (national IDs for seven regions,
+  checksum-validated where the format allows; names optional), authors become pseudonyms, the database is encrypted, and nothing
   leaves your network unless you allow it ([privacy controls](https://docs.obsei.com/privacy/overview/)). Air-gapped is the default.
 - **Bring your own sources and models.** 20+ sources, from App Store to Zendesk to SQL, plus
   plugins. Any OpenAI-compatible model, from Ollama to Azure, and [decision models](https://docs.obsei.com/guides/models/#decision-models) such as Julia-1
   for fast labels with real probabilities.
 - **Themes across languages.** The same issue raised in English, Japanese and Portuguese becomes
-  one theme, with trends, near-duplicate detection and k-anonymous views so small groups never
-  point at one customer.
+  one theme, with trends, near-duplicate detection and k-anonymous views: groups from fewer than k
+  people are hidden.
 - **Built for agents.** A read-only [MCP](https://modelcontextprotocol.io) server lets Claude, ChatGPT, Cursor and your own agents
-  query feedback with quotes and record ids, never identities.
+  query feedback with redacted quotes and record ids, never identities.
 - **Act on it.** Route urgent bugs to Jira, billing to Slack and unsure cases to a human, based on
   model confidence ([routing](https://docs.obsei.com/guides/routing/)).
 
@@ -116,7 +116,7 @@ route:
   - default: [lake]                      # everything else: your warehouse
 ```
 
-**You work in a regulated industry.** Banks, insurers, health and public services cannot send
+**You work in a regulated industry.** Banks, insurers, health and public services often cannot send
 customer text to a third-party SaaS. Obsei redacts Aadhaar, PAN, CPF, IBANs, card numbers and more
 at ingest, encrypts the store, and runs air-gapped with your own model. This is the setting obsei
 grew up in: spotting payment-fraud chatter on social media for the RBI hackathon.
@@ -127,8 +127,8 @@ privacy rules, while themes still show the issues they share.
 ([India, Brazil and Japan example](https://github.com/obsei/obsei/blob/master/examples/regional-india-brazil-japan.yaml))
 
 **You build or use AI agents.** Point Claude, Cursor or your own agent at obsei's MCP server and ask
-"Why are Japanese users unhappy this week?". The answer comes back with quotes and record ids you
-can check, and never with a customer's identity. ([MCP guide](https://docs.obsei.com/guides/mcp/))
+"Why are Japanese users unhappy this week?". The answer comes back with redacted quotes and record
+ids you can check, and never with a customer's identity. ([MCP guide](https://docs.obsei.com/guides/mcp/))
 
 ```bash
 claude mcp add obsei -- obsei mcp
@@ -158,11 +158,12 @@ open-core split. I will work on it in my free time, in the open.
 The goal is for obsei to outgrow me. I want it to become a project worth donating to a neutral
 foundation such as [LF AI & Data](https://lfaidata.foundation) or the
 [Apache Software Foundation](https://incubator.apache.org) (through its Incubator), so that the community, not a
-single vendor, decides its future. That needs contributors, users and honest feedback, and the groundwork is already in place: an
-[OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/obsei/obsei), signed releases, a
+single vendor, decides its future. That needs contributors, users and honest feedback (ironic for a
+feedback tool, I know). The groundwork is already in place: an
+[OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/obsei/obsei), container images
+signed with cosign, a
 [security policy](https://github.com/obsei/obsei/blob/master/SECURITY.md) and a
-[contributing guide](https://github.com/obsei/obsei/blob/master/CONTRIBUTING.md) with DCO sign-off. Ironic for
-a feedback tool, I know.
+[contributing guide](https://github.com/obsei/obsei/blob/master/CONTRIBUTING.md) with DCO sign-off.
 
 ## What's next
 
@@ -174,4 +175,4 @@ a feedback tool, I know.
 If customer feedback matters to your team, and privacy matters too, give obsei a try, [open an
 issue](https://github.com/obsei/obsei/issues/new/choose), or [start a discussion](https://github.com/obsei/obsei/discussions). Obsei is back, and this time it is built to last.
 
-*Lalit Pagaria*
+*Lalit Pagaria · [LinkedIn](https://www.linkedin.com/in/lalitpagaria/) · [GitHub](https://github.com/lalitpagaria)*

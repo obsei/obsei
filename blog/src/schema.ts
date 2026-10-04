@@ -10,6 +10,6 @@ export const publisher = {
 };
 
 export function person(name: string) {
-  const url = AUTHORS[name]?.url;
-  return { "@type": "Person", name, ...(url ? { url } : {}) };
+  const author = AUTHORS[name];
+  return { "@type": "Person", name, ...(author ? { url: author.url, sameAs: author.sameAs } : {}) };
 }

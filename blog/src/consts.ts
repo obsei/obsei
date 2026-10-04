@@ -9,8 +9,11 @@ export const SITE = {
   logo: "https://obsei.com/logo.png",
 };
 
-export const AUTHORS: Record<string, { url: string }> = {
-  "Lalit Pagaria": { url: "https://github.com/lalitpagaria" },
+export const AUTHORS: Record<string, { url: string; sameAs: string[] }> = {
+  "Lalit Pagaria": {
+    url: "https://www.linkedin.com/in/lalitpagaria/",
+    sameAs: ["https://www.linkedin.com/in/lalitpagaria/", "https://github.com/lalitpagaria"],
+  },
 };
 
 export const NAV = [
