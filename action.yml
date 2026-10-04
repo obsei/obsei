@@ -32,6 +32,9 @@ runs:
         OBSEI_EXTRAS: ${{ inputs.extras }}
       run: |
         package="obsei${OBSEI_EXTRAS:+[$OBSEI_EXTRAS]}${OBSEI_SPEC:->=1.0.0a1}"
+        export OBSEI_DUCKDB_EXTENSIONS="$RUNNER_TEMP/duckdb-extensions"
+        uvx --from "$package" python -c \
+          "import duckdb, os; duckdb.connect(config={'extension_directory': os.environ['OBSEI_DUCKDB_EXTENSIONS']}).execute('INSTALL httpfs')"
         args=(run --config "$OBSEI_CONFIG")
         if [ -n "$OBSEI_PIPELINE" ]; then args+=(--pipeline "$OBSEI_PIPELINE"); fi
         uvx --from "$package" obsei "${args[@]}"

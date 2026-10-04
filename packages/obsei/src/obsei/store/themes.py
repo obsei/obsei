@@ -9,6 +9,10 @@ from datetime import UTC, datetime, timedelta
 import duckdb
 
 _SIMILAR = "list_cosine_similarity({col}, CAST(? AS FLOAT[]))"
+PEOPLE = "count(DISTINCT coalesce({p}author_pseudonym, {p}id))"
+"""k-anonymity counts people: distinct author pseudonyms, records without an author count alone."""
+_PEOPLE = PEOPLE.format(p="r.")
+_RATING = "CAST(json_extract_string(r.data, '$.rating') AS DOUBLE)"
 
 
 def _vec(vector: list[float]) -> str:
@@ -181,8 +185,11 @@ class ThemeQueries:
         )
 
     def unlabeled_themes(self, min_size: int) -> list[str]:
+        """Unlabelled themes with at least ``min_size`` distinct people."""
         rows = self._con.execute(
-            "SELECT id FROM themes WHERE label IS NULL AND size >= ? ORDER BY size DESC",
+            "SELECT th.id FROM themes th JOIN record_themes t ON t.theme_id = th.id "  # noqa: S608
+            "JOIN records r ON r.id = t.record_id WHERE th.label IS NULL "
+            f"GROUP BY th.id, th.size HAVING {_PEOPLE} >= ? ORDER BY th.size DESC, th.id",
             [min_size],
         ).fetchall()
         return [str(r[0]) for r in rows]
@@ -202,12 +209,15 @@ class ThemeQueries:
             [label, description, theme_id],
         )
 
-    def _facet(self, facet: str, theme_ids: list[str]) -> dict[str, dict[str, int]]:
+    def _facet(
+        self, facet: str, theme_ids: list[str], min_people: int
+    ) -> dict[str, dict[str, int]]:
+        """Record counts per facet value, leaving out values from fewer than ``min_people``."""
         rows = self._con.execute(
             f"SELECT t.theme_id, {_FACETS[facet]} AS k, count(*) FROM record_themes t "  # noqa: S608
             "JOIN records r ON r.id = t.record_id WHERE list_contains(?, t.theme_id) "
-            "AND k IS NOT NULL GROUP BY ALL ORDER BY 3 DESC",
-            [theme_ids],
+            f"AND k IS NOT NULL GROUP BY ALL HAVING {_PEOPLE} >= ? ORDER BY 3 DESC",
+            [theme_ids, min_people],
         ).fetchall()
         result: dict[str, dict[str, int]] = {}
         for theme_id, key, count in rows:
@@ -217,21 +227,26 @@ class ThemeQueries:
     def theme_summaries(
         self, *, min_size: int = 1, now: datetime | None = None
     ) -> list[ThemeSummary]:
-        """Themes with at least ``min_size`` records (k-anonymity), largest first."""
+        """Themes from at least ``min_size`` people (k-anonymity), largest first. Facet values
+        and average ratings from fewer than ``min_size`` people are left out."""
         moment = now or datetime.now(UTC)
         week, fortnight = moment - timedelta(days=7), moment - timedelta(days=14)
         rows = self._con.execute(
-            "SELECT th.id, th.label, th.description, th.size, "
-            "count(t.duplicate_of), avg(CAST(json_extract_string(r.data, '$.rating') AS DOUBLE)), "
+            "SELECT th.id, th.label, th.description, th.size, "  # noqa: S608
+            f"count(t.duplicate_of), CASE WHEN {_PEOPLE} FILTER (WHERE {_RATING} IS NOT NULL) "
+            f">= ? THEN avg({_RATING}) END, "
             "count(*) FILTER (WHERE r.created_at >= ?), "
             "count(*) FILTER (WHERE r.created_at >= ? AND r.created_at < ?) "
             "FROM themes th JOIN record_themes t ON t.theme_id = th.id "
-            "JOIN records r ON r.id = t.record_id WHERE th.size >= ? "
-            "GROUP BY th.id, th.label, th.description, th.size ORDER BY th.size DESC, th.id",
-            [week, fortnight, week, min_size],
+            "JOIN records r ON r.id = t.record_id "
+            f"GROUP BY th.id, th.label, th.description, th.size HAVING {_PEOPLE} >= ? "
+            "ORDER BY th.size DESC, th.id",
+            [min_size, week, fortnight, week, min_size],
         ).fetchall()
         ids = [str(r[0]) for r in rows]
-        sources, languages, intents = (self._facet(f, ids) for f in ("source", "lang", "intent"))
+        sources, languages, intents = (
+            self._facet(f, ids, min_size) for f in ("source", "lang", "intent")
+        )
         return [
             ThemeSummary(
                 id=str(r[0]),
@@ -268,7 +283,9 @@ class ThemeQueries:
         return [(str(r[0]), float(r[1])) for r in rows]
 
     def graph(self, *, min_size: int = 1) -> Graph:
-        """Themes linked to sources, languages, intents and sentiments, with record counts."""
+        """Themes linked to sources, languages, intents and sentiments, with record counts.
+
+        Links from fewer than ``min_size`` people are left out."""
         themes = self.theme_summaries(min_size=min_size)
         ids = [t.id for t in themes]
         nodes: dict[str, GraphNode] = {
@@ -277,7 +294,7 @@ class ThemeQueries:
         edges: list[GraphEdge] = []
         for facet in _FACETS:
             totals: dict[str, int] = {}
-            for theme_id, counts in self._facet(facet, ids).items():
+            for theme_id, counts in self._facet(facet, ids, min_size).items():
                 for key, count in counts.items():
                     node_id = f"{facet}:{key}"
                     totals[node_id] = totals.get(node_id, 0) + count

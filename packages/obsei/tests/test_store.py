@@ -12,6 +12,7 @@ from obsei.store import (
     UpsertResult,
     load_db_key,
 )
+from obsei.store.duckdb_store import connect
 
 KEY = "correct-horse-battery-staple"
 T0 = datetime(2026, 9, 1, tzinfo=UTC)
@@ -128,7 +129,7 @@ def test_file_store_persists_and_reopens_read_only(tmp_path: Path) -> None:
     record = rec("1")
     with Store(path, allow_unencrypted=True) as store:
         store.upsert([record])
-        assert store.schema_version() == 3
+        assert store.schema_version() == 4
     with Store(path, allow_unencrypted=True, read_only=True) as store:
         assert store.get(record.id) == record
         with pytest.raises(duckdb.Error):
@@ -200,3 +201,52 @@ def test_delete_by_author_source_and_age(store: Store) -> None:
     assert store.count() == 0
     with pytest.raises(StoreError, match="filter"):
         store.delete()
+
+
+def test_tombstones_keep_erased_records_and_authors_out(store: Store) -> None:
+    author = Author(pseudonym="psn_" + "b" * 32)
+    by_author = rec("1").model_copy(update={"author": author})
+    store.upsert([by_author, rec("2"), rec("3", source="appstore")])
+    assert store.delete(author_pseudonym=author.pseudonym) == 1
+    assert store.delete(source_type="appstore") == 1
+    later = rec("9", "new feedback by the same person").model_copy(update={"author": author})
+    result = store.upsert([by_author, later, rec("3", source="appstore"), rec("4")])
+    assert result == UpsertResult(inserted=1, erased=3)
+    assert store.changed([by_author, later, rec("3", source="appstore")]) == []
+    assert sorted(r.source.native_id for r in store.iter_records()) == ["2", "4"]
+    keys = set(store._con.execute("SELECT kind, key FROM tombstones").fetchall())
+    assert keys == {
+        ("author", author.pseudonym),
+        ("record", rec("1").id),
+        ("record", rec("3", source="appstore").id),
+    }
+
+
+def test_delete_is_atomic_with_derived_data(store: Store, monkeypatch: pytest.MonkeyPatch) -> None:
+    store.upsert([rec("1"), rec("2")])
+
+    def broken(ids: list[str]) -> None:
+        raise RuntimeError("disk full")
+
+    monkeypatch.setattr(store, "_forget_derived", broken)
+    with pytest.raises(RuntimeError, match="disk full"):
+        store.delete(source_type="csv")
+    assert store.count() == 2
+    assert store.tombstones() == 0
+
+
+def test_extension_directory_and_air_gapped_never_downloads(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    extensions = tmp_path / "extensions"
+    extensions.mkdir()
+    monkeypatch.setenv("OBSEI_DUCKDB_EXTENSIONS", str(extensions))
+    con = connect()
+    assert con.execute("SELECT current_setting('extension_directory')").fetchone() == (
+        str(extensions),
+    )
+    con.close()
+    with pytest.raises(EncryptionUnavailableError, match="OBSEI_DUCKDB_EXTENSIONS") as exc:
+        Store(tmp_path / "enc.duckdb", encryption_key=KEY, install_extensions=False)
+    assert "air-gapped" in str(exc.value)
+    assert list(extensions.iterdir()) == []

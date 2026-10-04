@@ -15,6 +15,9 @@ from obsei.store import Store
 NOW = datetime(2026, 10, 1, tzinfo=UTC)
 
 
+TOKEN = "api-token-0123456789"
+
+
 def config(tmp_path: Path) -> ObseiConfig:
     good = tmp_path / "good.csv"
     good.write_text("id,text\n1,Lento\n2,遅い\n", encoding="utf-8")
@@ -71,9 +74,13 @@ def test_scheduler_runs_due_pipelines_and_themes(tmp_path: Path) -> None:
 def test_serve_reports_runs(tmp_path: Path) -> None:
     cfg = config(tmp_path)
     store = Store(allow_unencrypted=True)
-    web = create_app(cfg, Context(), store, token="t")
+    web = create_app(cfg, Context(), store, token=TOKEN)
     web.state.scheduler.run_due(NOW)
-    body = TestClient(web).get("/api/runs", headers={"Authorization": "Bearer t"}).json()
+    body = (
+        TestClient(web, base_url="http://127.0.0.1:8765")
+        .get("/api/runs", headers={"Authorization": f"Bearer {TOKEN}"})
+        .json()
+    )
     assert body["scheduled"] == {"broken": 5, "good": 60}
     assert body["last"]["good"]["ok"] is True
     assert body["last"]["broken"]["ok"] is False

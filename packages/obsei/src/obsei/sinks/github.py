@@ -7,7 +7,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from obsei.core.context import Context
+from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.sinks._common import body, env, marker, matches, title
@@ -43,7 +43,10 @@ class GitHubIssueSink:
     def _exists(self, record: Record) -> bool:
         query = f'repo:{self.config.repo} is:issue in:body "{marker(record)}"'
         response = self.ctx.http.get(
-            f"{self.config.api_url}/search/issues", params={"q": query}, headers=self.headers
+            f"{self.config.api_url}/search/issues",
+            params={"q": query},
+            headers=self.headers,
+            extensions=EGRESS,
         )
         response.raise_for_status()
         count = response.json().get("total_count", 0)
@@ -60,6 +63,7 @@ class GitHubIssueSink:
                 f"{self.config.api_url}/repos/{self.config.repo}/issues",
                 json={"title": title(record), "body": body(record), "labels": self.config.labels},
                 headers=self.headers,
+                extensions=EGRESS,
             )
             if response.is_error:
                 result.errors.append(f"GitHub returned {response.status_code}")

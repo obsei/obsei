@@ -9,7 +9,8 @@ retention and transfers.
 
 ## At ingest
 
-- **Redaction.** Detectors run before storage, models and sinks. Identifiers with checksums are
+- **Redaction.** Detectors run before storage, models and sinks, over the text, context fields,
+  source URL and native id, and author locale. Identifiers with checksums are
   validated to avoid false positives. Digits in any script are recognised (Arabic-Indic,
   Devanagari, full-width and others).
 
@@ -44,11 +45,20 @@ retention and transfers.
 
 ## At rest and in use
 
-- The DuckDB file is encrypted (AES via OpenSSL) with `OBSEI_DB_KEY`. The first encrypted write
-  downloads DuckDB's `httpfs` extension, so it needs network access once unless the extension is
-  already installed (the container image ships with it). To pre-install it:
-  `python -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"`.
+- The DuckDB file is encrypted (AES via OpenSSL) with `OBSEI_DB_KEY`. Writing it needs DuckDB's
+  `httpfs` extension. In `private` or `hybrid` egress mode the first encrypted write downloads it
+  if it is missing; air-gapped mode (the default) never downloads it. To pre-install it, run
+  `INSTALL httpfs` once with network access into a directory, copy that directory over (same
+  DuckDB version and platform) and point `OBSEI_DUCKDB_EXTENSIONS` at it. The container image
+  ships with it pre-installed.
+  `obsei doctor` reports whether it is ready.
 - Egress is air-gapped by default; public model and sink endpoints must be allowed explicitly.
+  Every redirect hop of a sink request is checked as well, and a redirect to another origin
+  drops credentials and custom headers. The REST source sends its credentials only to the origin
+  of its configured `url`, never to hosts named by pagination links.
+- Themes, their source, language and intent breakdowns, average ratings and graph links are shown
+  only when they come from at least `themes.k_anonymity` people (distinct author pseudonyms;
+  records without an author count individually). Theme labels never quote feedback.
 - MCP tools never return author pseudonyms. Webhook and Parquet sinks omit them by default.
 
 ## Data subject requests and retention
@@ -61,8 +71,14 @@ obsei forget --source appstore --instance 284882215       # remove a source
 obsei audit                                               # log of erasures and exports
 ```
 
-Every `forget` and `export` is written to an append-only audit log inside the encrypted store,
-with the filters and counts but never the raw handle.
+These commands use the store from `obsei.yaml` (`-c` picks another config, `--db` overrides the
+path) and never create a new database. Every `forget` and `export` is written to an append-only
+audit log inside the encrypted store, with the filters and counts but never the raw handle.
+
+`forget` leaves tombstones: the erased record ids and, for `--author`, the author pseudonym. A
+source that sends the same records again (CSV, file drop, REST without `since_param`) cannot
+bring them back, and new records by an erased author are not stored. Tombstones hold no raw
+personal data.
 
 `forget` erases records from the obsei database only. Copies already delivered to sinks (Parquet
 files, SQL tables, Slack messages, Jira, Linear or GitHub issues, webhook receivers) are not

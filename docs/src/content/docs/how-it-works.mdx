@@ -1,0 +1,61 @@
+---
+title: How it works
+description: The obsei pipeline, the trust boundary and who sees what.
+---
+
+import { Steps } from "@astrojs/starlight/components";
+import Pipeline from "../../components/Pipeline.astro";
+
+<Pipeline />
+
+obsei is one Python process (or container) that you run. Everything in the dashed box happens on
+your machines; data only leaves it for endpoints you configure and allow.
+
+<Steps>
+
+1. **Collect.** [Sources](/guides/sources/) fetch new feedback from app stores, helpdesks, call
+   tools, warehouses, communities, files, webhooks or any REST or MCP server. Each record gets a
+   stable id, so re-runs only process new or changed feedback.
+
+2. **Redact.** Before anything is stored or sent to a model, emails, phones, cards, IBANs and
+   national IDs for [seven regions](/privacy/overview/) are replaced with tokens such as
+   `<EMAIL>`, optionally names too. Authors become salted pseudonyms.
+
+3. **Classify.** Your own [model](/guides/models/) labels sentiment, intent, language and custom
+   fields. It only sees redacted text, and the egress policy blocks public endpoints unless you
+   allow them.
+
+4. **Theme.** Records are embedded and grouped into stable [themes](/guides/themes/) with trends
+   and near-duplicate detection. Groups smaller than k (default 5) are hidden.
+
+5. **Store.** Everything lands in an encrypted DuckDB file. `obsei forget`, `obsei export` and
+   the audit log cover access, erasure and retention.
+
+6. **Act.** [Sinks](/guides/sinks/) deliver new feedback to Slack, Jira, Linear, GitHub,
+   webhooks, Parquet or SQL. People use [Studio](/guides/studio/) and Slack; agents use the
+   read-only [MCP server](/guides/mcp/).
+
+</Steps>
+
+## Who sees what
+
+| | Aggregates and themes | Redacted quotes | Author pseudonyms | Raw text |
+| --- | :---: | :---: | :---: | :---: |
+| Studio viewer | ✓ | | | |
+| Studio analyst, Ask | ✓ | ✓ | | |
+| AI agents (MCP) | ✓ | ✓ | | |
+| Your model | | ✓ | | |
+| Sinks | | ✓ | opt-in | |
+| `obsei export` (CLI) | | ✓ | ✓ | |
+
+Raw text with personal data is never stored. Roles are set per token or through your SSO proxy;
+see [Server and access](/guides/serve/).
+
+## Run modes
+
+| Command | Use |
+| --- | --- |
+| `obsei try` | Preview redacted records; nothing stored or sent |
+| `obsei run` | One pass of every pipeline, from cron or CI |
+| `obsei serve` | Scheduled pipelines, webhooks, Studio and MCP over HTTP |
+| `obsei mcp` | MCP over stdio for a local agent |

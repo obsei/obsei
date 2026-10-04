@@ -10,7 +10,7 @@ from typing import ClassVar, Literal
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
-from obsei.core.context import Context
+from obsei.core.context import Context, origin
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record
 from obsei.sources._common import FieldMap, as_text, lookup, map_item
@@ -59,6 +59,10 @@ def _env(name: str) -> str:
     return value
 
 
+def _join(response: httpx.Response, url: str | None) -> str | None:
+    return str(response.url.join(url)) if url else None
+
+
 class RestSource:
     name: ClassVar[str] = "rest"
 
@@ -66,8 +70,11 @@ class RestSource:
         self.config = config
         self.ctx = ctx
 
-    def _headers(self) -> dict[str, str]:
+    def _headers(self, url: str) -> dict[str, str]:
+        """Credentials go only to the configured origin, never to hosts named by pagination."""
         headers = dict(self.config.headers)
+        if origin(url) != origin(self.config.url):
+            return headers
         headers.update({h: _env(env) for h, env in self.config.secret_headers.items()})
         if self.config.bearer_token_env:
             headers["Authorization"] = f"Bearer {_env(self.config.bearer_token_env)}"
@@ -79,7 +86,7 @@ class RestSource:
             url,
             params=params or None,
             json=self.config.body,
-            headers=self._headers(),
+            headers=self._headers(url),
         )
         if response.is_error:
             raise RestError(f"{self.config.method} {url} returned {response.status_code}")
@@ -115,10 +122,10 @@ class RestSource:
                 return
             page += 1
             if c.pagination == "link":
-                url = response.links.get("next", {}).get("url")
+                url = _join(response, response.links.get("next", {}).get("url"))
                 params = {}
             elif c.pagination == "next_url":
-                url = as_text(lookup(payload, c.next_path or "next"))
+                url = _join(response, as_text(lookup(payload, c.next_path or "next")))
                 params = {}
             elif c.pagination == "cursor":
                 token = as_text(lookup(payload, c.next_path or "next_cursor"))

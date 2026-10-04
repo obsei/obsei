@@ -18,6 +18,7 @@ Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, 
   <a href="https://github.com/obsei/obsei/actions/workflows/ci.yml"><img src="https://github.com/obsei/obsei/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://pypi.org/project/obsei/"><img src="https://img.shields.io/pypi/v/obsei?include_prereleases&color=238a91" alt="PyPI"></a>
   <a href="https://github.com/obsei/obsei/pkgs/container/obsei"><img src="https://img.shields.io/badge/container-ghcr.io-1a6d9d" alt="Container"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/obsei/obsei"><img src="https://api.scorecard.dev/projects/github.com/obsei/obsei/badge" alt="OpenSSF Scorecard"></a>
   <a href="https://github.com/obsei/obsei/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-238a91" alt="License"></a>
 </p>
 

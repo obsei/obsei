@@ -15,9 +15,9 @@ description: obsei command reference.
 | `obsei models download [--embeddings MODEL] [--dir DIR]` | Fetch the local multilingual embedding model for offline use |
 | `obsei mcp [-c FILE] [--db PATH]` | MCP server over stdio (read-only) |
 | `obsei serve [-c FILE] [--host] [--port]` | Scheduled pipelines, webhook intake, MCP over HTTP, Studio (see [Server](/guides/serve/)) |
-| `obsei export --author HANDLE [--out FILE] [--db PATH] [--unencrypted]` | Export one author's records |
-| `obsei forget --author / --source [--instance] / --older-than-days [--db PATH] [--unencrypted]` | Erase records |
-| `obsei audit [--limit N] [--db PATH] [--unencrypted]` | Show the erasure, export and access log |
+| `obsei export --author HANDLE [--out FILE] [-c FILE] [--db PATH] [--unencrypted]` | Export one author's records |
+| `obsei forget --author / --source [--instance] / --older-than-days [-c FILE] [--db PATH] [--unencrypted]` | Erase records (tombstoned so they are never stored again) |
+| `obsei audit [--limit N] [-c FILE] [--db PATH] [--unencrypted]` | Show the erasure, export and access log |
 | `obsei doctor` | Check environment, encryption, egress mode and plugins |
 | `obsei schema` | Print the Feedback Record JSON Schema |
 | `obsei version` (or `--version`) | Print the version |
@@ -34,6 +34,7 @@ database without `OBSEI_DB_KEY` (encrypted disks only); commands that read the c
 | `OBSEI_CONFIG` | Path to `obsei.yaml` |
 | `OBSEI_DB` | Database path override |
 | `OBSEI_DB_KEY` | Database encryption key (16+ characters) |
+| `OBSEI_DUCKDB_EXTENSIONS` | Directory with pre-installed DuckDB extensions (`httpfs`) |
 | `OBSEI_PSEUDONYM_SALT` | Author pseudonym salt (16+ characters) |
 | `OBSEI_EGRESS_MODE`, `OBSEI_EGRESS_ALLOW` | Egress policy |
 | `OBSEI_MODELS_DIR` | Directory for local models (`obsei models download --dir`); air-gapped runs load them from here |
