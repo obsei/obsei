@@ -65,8 +65,12 @@ ignores unless the requirement names one (`obsei>=1.0.0rc1`). In `release-please
 - for the launch, set `release-as` to `1.0.0` and remove `versioning`, `prerelease` and
   `prerelease-type`, then remove `release-as` after the release.
 
-Release-please also bumps the image tag in `README.md`, `packages/obsei/README.md` and the docs
-quickstart (lines marked `x-release-please-version`).
+Release-please also bumps exact versions on lines marked `x-release-please-version` (or between
+`x-release-please-start-version` and `x-release-please-end`) in the files listed under
+`extra-files`: the image tags in both READMEs, the docs quickstart and the blog post, and the
+release link on the website. Install specifiers such as `>=1.0.0rc1` are minimums and need no
+change: they already install the newest release. Prefer a minimum or a link to
+[Releases](https://github.com/obsei/obsei/releases) over an exact version in new text.
 
 ## For maintainers: websites
 

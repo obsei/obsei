@@ -26,7 +26,7 @@ not listed below ships only when a contributor builds and maintains it.
 | 0.3 Enterprise BYO | Done | SQL, MCP-client, file-drop, IMAP, Zendesk, Freshdesk, Intercom; Jira, Linear and SQL sinks; role-based access and SSO proxy |
 | 0.4 Themes and Studio | Done | Embeddings (offline and multilingual), dedupe, stable themes, k-anonymous views, `ask`, Gong, Studio with a knowledge graph, Slack command, static demo, name redaction |
 | 0.5 Decisions and routing | Done | Decision models (Julia-1, Clef) with probabilities, confidence fallback to a chat model or a human, `filter` enricher, grounding judge for `ask`, ordered routes on model confidence, Studio privacy, decisions, trends and routes panels |
-| Release candidate | In progress | `1.0.0rc1` published. Before 1.0: weekly live-connector checks green, one design partner in production, listed in the MCP Registry and Claude plugin directory |
+| Release candidate | In progress | [Release candidates](https://github.com/obsei/obsei/releases) published. Before 1.0: weekly live-connector checks green, one design partner in production, listed in the MCP Registry and Claude plugin directory |
 | 1.0 | Planned | Stable API and schema; write tools behind an approval queue; ChatGPT connector; fuller knowledge graph; Show HN launch |
 
 ## Releases

@@ -24,6 +24,14 @@
         {
           "type": "generic",
           "path": "/docs/src/content/docs/quickstart.md"
+        },
+        {
+          "type": "generic",
+          "path": "/website/index.html"
+        },
+        {
+          "type": "generic",
+          "path": "/blog/src/content/posts/obsei-is-back.mdx"
         }
       ]
     }
