@@ -75,6 +75,10 @@ Agents: `obsei mcp` serves read-only MCP tools; the Claude Code plugin is
 `/plugin marketplace add obsei/obsei`. See the [docs](https://docs.obsei.com/) and
 [integrations](integrations/README.md).
 
+Examples: ready-to-run configs for app reviews in many countries, helpdesks, social listening,
+REST APIs (Trustpilot, HubSpot, ServiceNow, Mastodon), warehouses, mailboxes and air-gapped
+enterprise setups are in the [examples gallery](https://docs.obsei.com/examples/).
+
 Docker (run in the project directory; images are tagged by release):
 
 <!-- x-release-please-start-version -->

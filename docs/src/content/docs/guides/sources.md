@@ -30,7 +30,7 @@ sidebar:
 
 ## Field mapping
 
-`csv`, `jsonl`, `rest` and `webhook` map fields with dotted paths:
+`csv`, `jsonl`, `filedrop`, `sql`, `rest`, `webhook` and `mcp` map fields with dotted paths:
 
 ```yaml
 fields:
@@ -43,6 +43,40 @@ fields:
   url: link
   context: [plan, region]     # kept as string metadata
 ```
+
+## Recipes with the REST source
+
+`rest` reads any JSON API. Set `items_path` to the list of items, map `fields`, and pick the
+pagination the API uses: `page` or `offset` (with `page_param`, `page_size_param`), `link`
+(the `Link: rel="next"` header), `next_url` or `cursor` (both read `next_path`; `cursor` sends the
+token as `cursor_param`). Credentials come from `bearer_token_env` or `secret_headers` and are only
+sent to the configured host, never to hosts named by pagination.
+
+APIs that return HTML (Mastodon, forums, some helpdesks) can set `text_format: html`: the mapped
+`text` fields are converted to plain text (tags removed, entities decoded, paragraphs kept as line
+breaks) before redaction. The default is `plain`, which keeps the text as returned.
+
+```yaml
+- key: mastodon
+  type: rest
+  config:
+    url: https://mastodon.social/api/v1/timelines/tag/yourproduct
+    params: {limit: 40}
+    pagination: link
+    max_pages: 5
+    text_format: html
+    fields: {text: content, id: id, created_at: created_at, author: account.acct, lang: language, url: url}
+```
+
+Complete recipes:
+
+| API | Example |
+| --- | --- |
+| Trustpilot business reviews (API key header, page paging) | [`trustpilot-rest.yaml`](https://github.com/obsei/obsei/blob/master/examples/trustpilot-rest.yaml) |
+| HubSpot tickets (cursor on `paging.next.after`) and ServiceNow incidents (`sysparm_offset`) | [`crm-and-itsm-rest.yaml`](https://github.com/obsei/obsei/blob/master/examples/crm-and-itsm-rest.yaml) |
+| Mastodon hashtag timeline (`Link` header, HTML) | [`social-listening.yaml`](https://github.com/obsei/obsei/blob/master/examples/social-listening.yaml) |
+
+More complete setups are on the [Examples](/examples/) page.
 
 ## Reddit plugin
 
