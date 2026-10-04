@@ -1,0 +1,3 @@
+/docs/*  https://docs.obsei.com/:splat  301
+/demo    https://docs.obsei.com/demo/   301
+/demo/*  https://docs.obsei.com/demo/:splat  301
