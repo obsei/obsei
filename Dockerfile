@@ -27,12 +27,13 @@ FROM python:3.12-slim-trixie
 LABEL org.opencontainers.image.source="https://github.com/obsei/obsei" \
       org.opencontainers.image.description="Privacy-first, self-hosted Voice of Customer for AI agents" \
       org.opencontainers.image.licenses="Apache-2.0"
-RUN useradd --create-home --uid 10001 obsei \
+RUN useradd --no-create-home --home-dir /tmp --uid 10001 obsei \
     && install -d -m 1777 /data
 COPY --from=build /opt/obsei /opt/obsei
 COPY --from=build /opt/duckdb /opt/duckdb
 COPY docker/healthcheck.py /opt/obsei/healthcheck.py
-ENV PATH="/opt/obsei/bin:${PATH}" PYTHONUNBUFFERED=1 \
+# HOME is writable for any UID so DuckDB and model caches work under `--user $(id -u):$(id -g)`.
+ENV PATH="/opt/obsei/bin:${PATH}" PYTHONUNBUFFERED=1 HOME=/tmp \
     OBSEI_DUCKDB_EXTENSIONS=/opt/duckdb/extensions
 USER 10001
 WORKDIR /data
