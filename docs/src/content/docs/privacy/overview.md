@@ -24,6 +24,20 @@ retention and transfers.
 | india | Aadhaar (Verhoeff), PAN |
 | africa | South Africa ID |
 
+- **Names (optional).** Regexes cannot find person names. `pip install 'obsei[names]'` adds a
+  local multilingual GLiNER model that replaces names with `<PERSON>` after the regex pass:
+
+  ```yaml
+  privacy:
+    names:
+      enabled: true
+      model: /models/gliner_multi_pii-v1   # downloaded once; required in air-gapped mode
+      threshold: 0.5
+  ```
+
+  Download the model with `huggingface-cli download urchade/gliner_multi_pii-v1 --local-dir
+  /models/gliner_multi_pii-v1`. It runs on CPU; expect tens of milliseconds per record. Like any
+  model it can miss names, so treat it as risk reduction, not a guarantee.
 - **Pseudonyms.** Author handles become salted HMAC pseudonyms (`psn_...`). Without
   `OBSEI_PSEUDONYM_SALT`, authors are dropped. Pseudonymised data is still personal data.
 - **Purpose.** Every record carries a purpose tag (default `feedback-analytics`).
