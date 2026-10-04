@@ -1,6 +1,8 @@
 ---
 title: Sources
 description: Built-in sources and their configuration.
+sidebar:
+  order: 1
 ---
 
 | Type | What | Auth |

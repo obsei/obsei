@@ -1,36 +1,58 @@
 ---
 title: obsei
-description: Voice of Customer without violating privacy.
+description: Open-source, self-hosted, AI-native Voice of Customer that never leaks customer data.
 template: splash
 hero:
-  tagline: Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, models and agents.
+  title: Voice of Customer without violating privacy
+  tagline: Collect feedback from every channel and language, remove personal data before it is stored, and let your AI agents answer questions with cited evidence. All inside your own infrastructure.
+  image:
+    file: ../../assets/logo.png
+    alt: obsei logo
   actions:
     - text: Quickstart
       link: /quickstart/
       icon: right-arrow
+    - text: Live demo
+      link: /demo/
+      variant: secondary
     - text: GitHub
       link: https://github.com/obsei/obsei
+      icon: github
       variant: minimal
 ---
 
-import { Card, CardGrid } from "@astrojs/starlight/components";
+import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+## Why obsei
 
 <CardGrid>
-  <Card title="Private by design" icon="seti:lock">
-    PII redacted at ingest for the Americas, Europe, Asia-Pacific, India and Africa, in any
-    script. Authors pseudonymised. Encrypted DuckDB. Air-gapped by default.
+  <Card title="Private by design" icon="approve-check">
+    Checksum-validated PII redaction for the Americas, Europe, Asia-Pacific, India and Africa in
+    any script, optional name redaction, pseudonymous authors, an encrypted database and
+    air-gapped egress by default.
   </Card>
   <Card title="Bring your own" icon="puzzle">
-    App stores, GitHub, Hacker News, Bluesky, YouTube, RSS, any REST API, webhooks and files.
-    Any OpenAI-compatible model: Ollama, vLLM, Azure OpenAI, OpenAI, or Bedrock and Vertex via
+    App stores, helpdesks, calls, SQL warehouses, webhooks, communities and any REST or MCP
+    source. Any OpenAI-compatible model, from Ollama to Azure OpenAI, or Bedrock and Vertex via
     LiteLLM.
   </Card>
   <Card title="AI-native" icon="rocket">
     A read-only MCP server and a Claude plugin, so agents answer "what are customers saying?"
-    with cited evidence.
+    with quotes and record ids, never author identities.
   </Card>
-  <Card title="Multilingual" icon="translate">
-    Feedback is classified in its own language and quoted verbatim, with translations when you
-    ask for them.
+  <Card title="Every language" icon="translate">
+    Feedback is classified and quoted in its own language; a local multilingual model groups the
+    same issue across 50+ languages.
   </Card>
+</CardGrid>
+
+## Start here
+
+<CardGrid>
+  <LinkCard title="Quickstart" description="Install, run the ten-language sample and ask your first question." href="/quickstart/" />
+  <LinkCard title="Configuration" description="Pipelines, scheduling, privacy and models in obsei.yaml." href="/configuration/" />
+  <LinkCard title="Sources and sinks" description="Every built-in connector and how to map your own data." href="/guides/sources/" />
+  <LinkCard title="Privacy controls" description="Redaction by region, pseudonyms, erasure, retention and the audit log." href="/privacy/overview/" />
+  <LinkCard title="MCP and agents" description="Connect Claude, ChatGPT, Cursor and your own agents." href="/guides/mcp/" />
+  <LinkCard title="Server and access" description="Webhooks, scheduling, Studio, SSO and roles with obsei serve." href="/guides/serve/" />
 </CardGrid>

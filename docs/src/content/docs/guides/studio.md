@@ -1,6 +1,8 @@
 ---
 title: Studio
 description: The read-only web UI with a knowledge-graph explorer.
+sidebar:
+  order: 7
 ---
 
 [Open the demo](/demo/) (synthetic feedback in eight languages).

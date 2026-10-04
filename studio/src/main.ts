@@ -97,7 +97,7 @@ function render(data: DataSource): void {
   const header = el(
     "header",
     {},
-    el("h1", {}, "obsei ", el("span", {}, "Studio")),
+    el("h1", {}, el("img", { src: "logo.png", alt: "", width: "32", height: "32" }), "obsei ", el("span", {}, "Studio")),
     el("span", { class: `badge ${data.mode}` }, data.mode === "demo" ? "Demo data" : "Live"),
     el(
       "span",

@@ -4,74 +4,127 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>obsei: Voice of Customer without violating privacy</title>
-    <meta name="description" content="Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, models and agents. Private by design." />
+    <meta name="description" content="Open-source, self-hosted, AI-native Voice of Customer. Collect feedback from every channel and language, redact personal data before anything is stored, and let your agents ask questions with cited evidence." />
+    <meta name="theme-color" content="#238a91" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://obsei.com/" />
     <meta property="og:title" content="obsei: Voice of Customer without violating privacy" />
     <meta property="og:description" content="Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, models and agents." />
-    <meta property="og:image" content="https://obsei.com/logo.png" />
+    <meta property="og:image" content="https://obsei.com/studio-light.png" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/logo.png" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <header class="nav">
-      <a class="brand" href="/"><img src="/logo.png" alt="" width="28" height="28" /> obsei</a>
-      <nav>
+    <header class="nav wrap">
+      <a class="brand" href="/"><img src="/logo.png" alt="" width="36" height="36" /><span>obsei</span></a>
+      <nav aria-label="Main">
         <a href="https://docs.obsei.com/">Docs</a>
         <a href="https://docs.obsei.com/demo/">Demo</a>
-        <a href="https://github.com/obsei/obsei">GitHub</a>
+        <a href="https://github.com/obsei/obsei" class="pill">GitHub</a>
       </nav>
     </header>
 
     <main>
-      <section class="hero">
-        <h1>Voice of Customer <span>without violating privacy</span></h1>
-        <p class="lead">
-          Open-source, self-hosted, AI-native feedback analytics. Reviews, tickets, calls, surveys and
-          communities in one place, in every language, with PII redacted before anything is stored.
-        </p>
-        <div class="actions">
-          <a class="button" href="https://docs.obsei.com/quickstart/">Get started</a>
-          <a class="button ghost" href="https://docs.obsei.com/demo/">Open the demo</a>
+      <section class="hero wrap">
+        <div class="hero-text">
+          <p class="eyebrow">Open source · Self-hosted · Apache-2.0</p>
+          <h1>Voice of Customer <span>without violating privacy</span></h1>
+          <p class="lead">
+            Collect feedback from app stores, tickets, calls, surveys and communities, in every
+            language. obsei removes personal data before anything is stored, finds the themes that
+            matter, and lets your AI agents answer questions with cited evidence. All inside your
+            own infrastructure.
+          </p>
+          <div class="actions">
+            <a class="button" href="https://docs.obsei.com/quickstart/">Get started</a>
+            <a class="button ghost" href="https://docs.obsei.com/demo/">Explore the live demo</a>
+          </div>
+          <pre class="install" aria-label="Install"><code><span class="prompt">$</span> uv tool install --prerelease allow "obsei[mcp]"
+<span class="prompt">$</span> obsei init &amp;&amp; obsei run</code></pre>
         </div>
-        <pre class="install"><code>uv tool install --prerelease allow "obsei[mcp]"
-obsei init &amp;&amp; obsei run</code></pre>
+        <figure class="shot">
+          <picture>
+            <source srcset="/studio-dark.png" media="(prefers-color-scheme: dark)" />
+            <img src="/studio-light.png" width="1280" height="860" alt="obsei Studio showing themes, a knowledge graph of sources, languages and intents, and feedback in eight languages" />
+          </picture>
+          <figcaption>Studio with synthetic feedback in eight languages.</figcaption>
+        </figure>
       </section>
 
-      <section class="grid">
-        <article>
-          <h2>Private by design</h2>
-          <p>Runs inside your infrastructure. Checksum-validated PII redaction for the Americas,
-          Europe, Asia-Pacific, India and Africa in any script, pseudonymous authors, an encrypted
-          database and air-gapped egress by default.</p>
-        </article>
-        <article>
-          <h2>Bring your own</h2>
-          <p>App stores, helpdesks, calls, SQL warehouses, webhooks, communities and any REST or MCP
-          source. Any OpenAI-compatible model: Ollama, vLLM, Azure OpenAI, or Bedrock and Vertex via
-          LiteLLM.</p>
-        </article>
-        <article>
-          <h2>AI-native</h2>
-          <p>A read-only MCP server and a Claude plugin, so agents answer "what are customers
-          saying?" with cited, redacted evidence. Ask questions in any language.</p>
-        </article>
-        <article>
-          <h2>Themes you can trust</h2>
-          <p>Stable themes with trends, near-duplicate detection, k-anonymous views and a knowledge
-          graph that links issues to sources, languages and intents.</p>
-        </article>
+      <section class="flow wrap" aria-labelledby="how">
+        <h2 id="how">How it works</h2>
+        <ol>
+          <li><strong>Collect</strong><span>App Store, Google Play, Zendesk, Intercom, Gong, GitHub, Bluesky, SQL, webhooks, files, any REST or MCP source.</span></li>
+          <li><strong>Protect</strong><span>Emails, phones, cards, national IDs and optionally names are redacted at ingest; authors become pseudonyms.</span></li>
+          <li><strong>Understand</strong><span>Your model classifies sentiment and intent; stable themes and near-duplicates emerge across languages.</span></li>
+          <li><strong>Act</strong><span>Send to Slack, Jira, Linear, GitHub, webhooks or your warehouse. Only new or changed feedback.</span></li>
+          <li><strong>Ask</strong><span>Agents query through MCP, people use Studio or Slack, and every answer cites its records.</span></li>
+        </ol>
       </section>
 
-      <section class="note">
-        <p>obsei provides controls that support compliance with laws such as the GDPR, India's DPDP
-        Act, Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain the data
-        controller.</p>
+      <section class="features wrap" aria-labelledby="why">
+        <h2 id="why">Built for teams that cannot send customer data to someone else's cloud</h2>
+        <div class="grid">
+          <article>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <h3>Private by design</h3>
+            <p>Checksum-validated PII redaction for the Americas, Europe, Asia-Pacific, India and Africa in any script. Encrypted database. Air-gapped by default.</p>
+          </article>
+          <article>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="2"/></svg>
+            <h3>Bring your own</h3>
+            <p>Your sources, your keys, your model: Ollama, vLLM, Azure OpenAI, OpenAI, or Bedrock and Vertex through LiteLLM. Nothing leaves without your say-so.</p>
+          </article>
+          <article>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="9" cy="18" r="2.5"/><path d="m8.2 7.2 7.6.6M7 8.4l1.4 7.2M16.6 10l-5.8 6.3"/></svg>
+            <h3>AI-native</h3>
+            <p>A read-only MCP server and a Claude plugin: agents answer "what are customers saying?" with quotes, record ids and no author identities.</p>
+          </article>
+          <article>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0Z"/><path d="M3 12h18M12 3c2.5 2.7 3.7 5.7 3.7 9s-1.2 6.3-3.7 9c-2.5-2.7-3.7-5.7-3.7-9S9.5 5.7 12 3Z"/></svg>
+            <h3>Every language</h3>
+            <p>Feedback is classified and quoted in its own language. A local multilingual model groups the same issue across 50+ languages.</p>
+          </article>
+          <article>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>
+            <h3>Themes you can trust</h3>
+            <p>Stable theme ids with trends, near-duplicate detection and k-anonymous views, so small groups never point at one customer.</p>
+          </article>
+          <article>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            <h3>Enterprise ready</h3>
+            <p>Role-based access, SSO-proxy support, an audit log for erasure, export and evidence access, scheduled pipelines and a signed container image.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="laws wrap" aria-labelledby="laws">
+        <h2 id="laws">Controls that support privacy law</h2>
+        <p>Access and erasure requests, retention, purpose tags and pseudonymisation map to rights in the
+        GDPR and UK GDPR, India's DPDP Act, Brazil's LGPD, California's CCPA, Japan's APPI, South
+        Africa's POPIA, China's PIPL and Singapore's PDPA. obsei makes no compliance claims: you remain
+        the data controller.</p>
+      </section>
+
+      <section class="cta wrap">
+        <h2>Try it in five minutes</h2>
+        <p>Ten languages of sample feedback, no API keys, nothing leaves your machine.</p>
+        <div class="actions">
+          <a class="button light" href="https://docs.obsei.com/quickstart/">Read the quickstart</a>
+          <a class="button outline" href="https://github.com/obsei/obsei">Star on GitHub</a>
+        </div>
       </section>
     </main>
 
-    <footer>
-      <span>Apache-2.0</span>
-      <a href="https://github.com/obsei/obsei/discussions">Discussions</a>
-      <a href="https://pypi.org/project/obsei/">PyPI</a>
+    <footer class="wrap">
+      <span>© obsei contributors · Apache-2.0</span>
+      <nav aria-label="Footer">
+        <a href="https://docs.obsei.com/">Docs</a>
+        <a href="https://github.com/obsei/obsei/discussions">Discussions</a>
+        <a href="https://pypi.org/project/obsei/">PyPI</a>
+        <a href="https://github.com/obsei/obsei/blob/master/SECURITY.md">Security</a>
+      </nav>
     </footer>
   </body>
 </html>

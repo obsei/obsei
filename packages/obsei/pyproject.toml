@@ -58,6 +58,7 @@ embeddings = ["fastembed>=0.8,<1"]
 
 [project.urls]
 Homepage = "https://obsei.com"
+Documentation = "https://docs.obsei.com"
 Repository = "https://github.com/obsei/obsei"
 Issues = "https://github.com/obsei/obsei/issues"
 Changelog = "https://github.com/obsei/obsei/blob/master/packages/obsei/CHANGELOG.md"

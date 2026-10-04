@@ -1,6 +1,8 @@
 ---
 title: Themes, dedupe and ask
 description: Stable themes, near-duplicates and cited answers.
+sidebar:
+  order: 4
 ---
 
 ```bash

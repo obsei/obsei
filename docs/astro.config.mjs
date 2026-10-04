@@ -6,9 +6,11 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "obsei",
-      logo: { src: "./public/logo.png" },
+      logo: { src: "./src/assets/logo.png" },
+      customCss: ["./src/styles/brand.css"],
       favicon: "/logo.png",
       description: "Privacy-first, self-hosted, AI-native Voice of Customer.",
+      head: [{ tag: "meta", attrs: { name: "theme-color", content: "#238a91" } }],
       social: [{ icon: "github", label: "GitHub", href: "https://github.com/obsei/obsei" }],
       editLink: { baseUrl: "https://github.com/obsei/obsei/edit/master/docs/" },
       sidebar: [

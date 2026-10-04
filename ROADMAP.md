@@ -1,7 +1,6 @@
 # obsei roadmap
 
-obsei is being rebuilt as an open-source, self-hosted, privacy-first Voice of Customer platform built
-for AI agents. Enterprises run it entirely inside their own environment with their own sources,
+obsei is an open-source, self-hosted, privacy-first Voice of Customer platform built for AI agents. Enterprises run it entirely inside their own environment with their own sources,
 models and agents; hobbyists run the same code on a laptop for free.
 
 The project is maintained part-time with heavy automation, so scope is deliberately tight. Anything
@@ -17,22 +16,22 @@ not listed below ships only when a contributor builds and maintains it.
 - **AI-native:** MCP server first; agents act only through an approval queue.
 - **One monorepo:** library, CLI, MCP server, REST server, web UI, platform apps, docs and every plugin.
 
-## Phases
+## Status
 
-| Phase | Target | Scope | Gate |
-| --- | --- | --- | --- |
-| Setup | Weeks 1-3 | New codebase skeleton, CI, release automation, security baseline | Green CI; publishing tested |
-| 0.1 Private core | Months 1-3 | Record schema, encrypted DuckDB, redaction, pseudonyms, TTL / forget / export, no-egress mode; LiteLLM and local models; CSV, JSON Lines and declarative REST; App Store, Google Play, GitHub, RSS; Slack, webhook, GitHub Issues and Parquet sinks; CLI; Docker | Air-gapped end-to-end test passes |
-| 0.2 MCP and Claude plugin | Months 3-5 | MCP read tools, Claude plugin, GitHub Action recipes; `obsei serve` with webhook intake; App Store Connect, Hacker News, Bluesky, YouTube; plugin scaffold; docs site | Listed in the MCP Registry and Claude directory |
-| 0.3 Enterprise BYO | Months 5-7 | SQL, MCP-client and file-drop sources; Zendesk, Intercom, Freshdesk, email; Jira, Linear and warehouse sinks | One enterprise design partner in production |
-| 0.4 Themes and Studio | Months 7-10 | Embeddings, dedupe, stable themes, k-anonymous views, `ask`; Gong; read-only Studio with a knowledge graph explorer; Slack bot; static demo | Demo live; release candidate tested |
-| 1.0 | Months 12-14 | Stable API and schema; write tools behind an approval queue; ChatGPT connector; full knowledge graph | |
+| Phase | Status | Scope |
+| --- | --- | --- |
+| Setup | Done | Codebase skeleton, CI, release automation, security baseline |
+| 0.1 Private core | Done | Record schema, encrypted DuckDB, redaction, pseudonyms, forget / export / audit, no-egress mode, bring-your-own LLM, first sources and sinks, CLI, Docker |
+| 0.2 MCP and Claude plugin | Done | MCP read tools, Claude plugin, GitHub Action, `obsei serve` with webhook intake, App Store Connect, Hacker News, Bluesky, YouTube, plugin workspace, docs site |
+| 0.3 Enterprise BYO | Done | SQL, MCP-client, file-drop, IMAP, Zendesk, Freshdesk, Intercom; Jira, Linear and SQL sinks; role-based access and SSO proxy |
+| 0.4 Themes and Studio | Done | Embeddings (offline and multilingual), dedupe, stable themes, k-anonymous views, `ask`, Gong, Studio with a knowledge graph, Slack command, static demo, name redaction |
+| Release candidate | Next | Weekly live-connector checks green, one design partner in production, listed in the MCP Registry and Claude plugin directory |
+| 1.0 | Planned | Stable API and schema; write tools behind an approval queue; ChatGPT connector; fuller knowledge graph; Show HN launch |
 
 ## Releases
 
-The first stable release is **1.0.0**. Milestones ship earlier as PyPI pre-releases, which
-`pip install obsei` ignores unless `--pre` is passed: 0.1 as `1.0.0a1`, 0.2 as `1.0.0a2`,
-0.3 as `1.0.0b1`, 0.4 as `1.0.0rc1`. The public launch, with Show HN, is 1.0.0.
+Everything above ships as PyPI pre-releases (`1.0.0a1`, then `1.0.0rc1`), which `pip install obsei`
+ignores unless `--pre` is passed. The first stable release and public launch is **1.0.0**.
 
 ## Not planned (contributor-gated)
 

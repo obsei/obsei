@@ -1,14 +1,24 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/obsei/obsei/master/docs/public/logo.png" alt="obsei" width="110">
+</p>
+
 # obsei
 
-Privacy-first, self-hosted, AI-native Voice of Customer. Bring your own sources, models and agents.
+**Voice of Customer without violating privacy.** Open-source, self-hosted, AI-native feedback
+analytics: collect feedback from every channel and language, redact personal data before it is
+stored, find stable themes, and let your AI agents answer questions with cited evidence.
 
-> **obsei is being rebuilt.** 1.0 is a new codebase and is not compatible with 0.0.x.
-> Until 1.0.0, releases are pre-releases: install with `pip install --pre obsei`.
+> 1.0 is in pre-release and is not compatible with 0.0.x. Install with `--pre`.
 
 ```bash
-uvx --prerelease allow obsei --version
-uvx --prerelease allow obsei doctor
-uvx --prerelease allow obsei schema   # Feedback Record JSON Schema
+pip install --pre "obsei[mcp]"     # or: uv tool install --prerelease allow "obsei[mcp]"
+obsei init && obsei try && obsei run
 ```
 
-See the [project README](https://github.com/obsei/obsei) and [roadmap](https://github.com/obsei/obsei/blob/master/ROADMAP.md).
+Optional extras: `mcp` (MCP server, `obsei serve`), `sql`, `google`, `apple`, `names` (person-name
+redaction), `embeddings` (multilingual themes).
+
+- Docs: https://docs.obsei.com
+- Live demo: https://docs.obsei.com/demo/
+- Source: https://github.com/obsei/obsei
+- Container: `ghcr.io/obsei/obsei`
