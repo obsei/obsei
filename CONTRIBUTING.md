@@ -56,10 +56,10 @@ Releases are automated. Merging to `master` updates a release PR opened by relea
 that PR tags the release, publishes to PyPI via Trusted Publishing and pushes a signed image to
 `ghcr.io/obsei/obsei`.
 
-Until 1.0.0, releases are PyPI pre-releases (`1.0.0a1`, `1.0.0a2`, ...), which `pip install obsei`
-ignores unless the requirement names one (`obsei>=1.0.0a1`). In `release-please-config.json`:
+Until 1.0.0, releases are PyPI pre-releases (`1.0.0a1`, `1.0.0rc1`, ...), which `pip install obsei`
+ignores unless the requirement names one (`obsei>=1.0.0rc1`). In `release-please-config.json`:
 
-- next releases bump the alpha number automatically (`1.0.0-alpha.2`, ...); nothing to change;
+- next releases bump the pre-release number automatically (`1.0.0-rc.2`, ...); nothing to change;
 - to start betas or release candidates, set `release-as` to `1.0.0-beta.1` or `1.0.0-rc.1` and
   `prerelease-type` to `beta` or `rc`, then remove `release-as` after that release;
 - for the launch, set `release-as` to `1.0.0` and remove `versioning`, `prerelease` and

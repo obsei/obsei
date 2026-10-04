@@ -4,6 +4,7 @@
   "packages": {
     "packages/obsei": {
       "release-type": "python",
+      "release-as": "1.0.0-rc.1",
       "package-name": "obsei",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
@@ -30,5 +31,5 @@
   },
   "versioning": "prerelease",
   "prerelease": true,
-  "prerelease-type": "alpha"
+  "prerelease-type": "rc"
 }
