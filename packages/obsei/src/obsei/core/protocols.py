@@ -41,6 +41,14 @@ class ReportsErrors(Protocol):
 
 
 @runtime_checkable
+class Drops(Protocol):
+    """Optional for enrichers: records ``keep`` rejects once enriched are dropped: not passed to
+    later enrichers, delivered or stored."""
+
+    def keep(self, record: Record) -> bool: ...
+
+
+@runtime_checkable
 class Sink(Protocol):
     """Must be idempotent by ``Record.id``."""
 

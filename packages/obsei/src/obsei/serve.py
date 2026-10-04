@@ -34,7 +34,7 @@ from obsei.access import (
     Role,
     required_role,
 )
-from obsei.ask import ask
+from obsei.ask import Answer, ask
 from obsei.config import ObseiConfig, build_pipeline
 from obsei.core.context import EGRESS, Context
 from obsei.llm.client import LlmError
@@ -169,17 +169,31 @@ class Handlers:
         with self.lock:
             yield self.store
 
-    def answer(self, question: str) -> str:
-        result = ask(
+    def answer(self, question: str) -> Answer:
+        judge = self.config.ask_judge
+        return ask(
             self.store,
             question,
             self.ctx.chat(self.config.ask_llm),
             embedder=self.ctx.embedder(self.config.themes.embedder),
             k_anonymity=self.k,
             lock=self.lock,
+            judge=self.ctx.decision(judge) if judge else None,
+            judge_threshold=self.config.ask_judge_threshold,
         )
+
+    @staticmethod
+    def render(result: Answer) -> str:
         cited = ", ".join(result.citations)
-        return result.text + (f"\n\n_sources: {cited}_" if cited else "")
+        text = result.text + (f"\n\n_sources: {cited}_" if cited else "")
+        if result.unsupported:
+            text += (
+                f"\n\n:warning: _possibly unsupported by the cited feedback "
+                f"(grounded {result.grounded:.2f})_"
+            )
+        elif result.grounded is not None:
+            text += f"\n_grounded: {result.grounded:.2f}_"
+        return text
 
     async def healthz(self, request: Request) -> Response:
         if self.scheduler.healthy:
@@ -254,14 +268,20 @@ class Handlers:
         if not question:
             return JSONResponse({"error": "question is required"}, status_code=400)
         try:
-            text = await anyio.to_thread.run_sync(self.answer, question)
+            result = await anyio.to_thread.run_sync(self.answer, question)
         except (KeyError, LlmError, OSError) as exc:
             return JSONResponse({"error": str(exc)}, status_code=502)
-        return JSONResponse({"answer": text})
+        return JSONResponse(
+            {
+                "answer": self.render(result),
+                "grounded": result.grounded,
+                "possibly_unsupported": result.unsupported,
+            }
+        )
 
     def _reply_to_slack(self, question: str, response_url: str) -> None:
         try:
-            text = self.answer(question)
+            text = self.render(self.answer(question))
         except (KeyError, LlmError, OSError) as exc:
             text = f"Sorry, I could not answer: {exc}"
         self.ctx.http.post(

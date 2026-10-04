@@ -18,7 +18,7 @@ obsei serve --host 0.0.0.0 --port 8765
 | `GET /studio/` | none (static files) | [Studio](/guides/studio/); its data comes from `/api/*` with the caller's token |
 | `GET /api/snapshot` | viewer | k-anonymous overview, themes and knowledge graph, without quotes |
 | `GET /api/themes/{id}` | analyst | redacted evidence for one theme (empty below `k_anonymity`) |
-| `POST /api/ask` | analyst | `{"question": "..."}` returns `{"answer": "..."}` with record-id citations |
+| `POST /api/ask` | analyst | `{"question": "..."}` returns `{"answer": "...", "grounded": 0.93, "possibly_unsupported": false}` with record-id citations; `grounded` is null without `ask_judge` |
 | `/mcp` | analyst | MCP over streamable HTTP |
 | `GET /api/runs` | admin | schedule and last run of each scheduled pipeline, with errors and warnings |
 

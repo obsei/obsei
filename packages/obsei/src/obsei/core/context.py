@@ -2,20 +2,24 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from types import MappingProxyType, TracebackType
-from typing import Self
+from types import TracebackType
+from typing import Literal, Self
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from obsei._version import __version__
 from obsei.core.record import Author
-from obsei.llm.client import OpenAICompatibleClient, RequestBudget
-from obsei.llm.egress import EgressPolicy
+from obsei.llm.client import LlmError, OpenAICompatibleClient, RequestBudget
+from obsei.llm.decision import URL_HINT, DecisionClient, check_url
+from obsei.llm.egress import EGRESS, EgressPolicy
 from obsei.llm.embed import LOCAL_MODEL, Embedder, HashingEmbedder, LocalEmbedder, RemoteEmbedder
 from obsei.privacy.pseudonym import pseudonymize
+
+__all__ = ["EGRESS", "USER_AGENT", "Context", "LlmEndpoint", "default_http", "origin"]
 
 USER_AGENT = f"obsei/{__version__} (+https://obsei.com)"
 
@@ -23,8 +27,17 @@ USER_AGENT = f"obsei/{__version__} (+https://obsei.com)"
 class LlmEndpoint(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    base_url: str
-    model: str
+    api: Literal["openai", "decision"] = Field(
+        default="openai", description='"decision" for decision models (set url, not base_url).'
+    )
+    base_url: str | None = Field(default=None, description="Chat endpoints: the /v1 base URL.")
+    url: str | None = Field(
+        default=None, description="Decision endpoints: the full URL requests are posted to."
+    )
+    url_env: str | None = Field(
+        default=None, description="Decision endpoints: environment variable holding the URL."
+    )
+    model: str | None = Field(default=None, description="Required for openai endpoints.")
     api_key_env: str | None = None
     api_key_header: str = Field(
         default="Authorization", description='"api-key" for Azure OpenAI keys.'
@@ -33,10 +46,36 @@ class LlmEndpoint(BaseModel):
     max_requests: int | None = None
     timeout: float = 60.0
 
+    @property
+    def address(self) -> str:
+        return self.url or self.base_url or (f"${self.url_env}" if self.url_env else "")
 
-EGRESS: Mapping[str, object] = MappingProxyType({"obsei_egress": True})
-"""Pass as ``extensions=EGRESS`` on requests that carry feedback out (sinks): every hop, redirects
-included, must then pass the egress policy."""
+    def decision_url(self) -> str:
+        if self.url:
+            return self.url
+        value = os.environ.get(self.url_env or "", "").strip()
+        if not value:
+            raise LlmError(f"{self.url_env} is not set; {URL_HINT}")
+        try:
+            return check_url(value)
+        except ValueError as exc:
+            raise LlmError(f"{self.url_env}: {exc}") from None
+
+    @model_validator(mode="after")
+    def _shape(self) -> LlmEndpoint:
+        if self.api == "decision":
+            if self.base_url is not None or (self.url is None) == (self.url_env is None):
+                raise ValueError(f"a decision endpoint takes one of url or url_env; {URL_HINT}")
+            if self.url is not None:
+                check_url(self.url)
+            return self
+        if self.url is not None or self.url_env is not None or not self.base_url:
+            raise ValueError("an openai endpoint takes base_url, not url or url_env")
+        if not self.model:
+            raise ValueError("an openai endpoint needs a model")
+        return self
+
+
 _ORIGIN_KEY = "obsei_origin"
 _FORWARDED_HEADERS = frozenset(
     {"accept", "accept-encoding", "accept-language", "content-type", "content-length", "host"}
@@ -84,13 +123,33 @@ class Context:
             return None
         return Author(pseudonym=pseudonymize(handle, self.salt), locale=locale)
 
-    def chat(self, name: str) -> OpenAICompatibleClient:
+    def _endpoint(self, name: str) -> LlmEndpoint:
         try:
-            endpoint = self.llms[name]
+            return self.llms[name]
         except KeyError:
             raise KeyError(f"no llm endpoint named {name!r}") from None
+
+    def chat(self, name: str) -> OpenAICompatibleClient:
+        endpoint = self._endpoint(name)
+        if endpoint.api != "openai" or endpoint.base_url is None or endpoint.model is None:
+            raise KeyError(f"llm endpoint {name!r} is a decision model, not a chat model")
         return OpenAICompatibleClient(
             base_url=endpoint.base_url,
+            model=endpoint.model,
+            policy=self.egress,
+            api_key_env=endpoint.api_key_env,
+            api_key_header=endpoint.api_key_header,
+            budget=RequestBudget(endpoint.max_requests) if endpoint.max_requests else None,
+            timeout=endpoint.timeout,
+            transport=self.llm_transport,
+        )
+
+    def decision(self, name: str) -> DecisionClient:
+        endpoint = self._endpoint(name)
+        if endpoint.api != "decision":
+            raise KeyError(f"llm endpoint {name!r} is a chat model; decisions need api: decision")
+        return DecisionClient(
+            url=endpoint.decision_url(),
             model=endpoint.model,
             policy=self.egress,
             api_key_env=endpoint.api_key_env,

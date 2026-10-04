@@ -9,7 +9,7 @@ description: obsei command reference.
 | `obsei try [-c FILE] [-p NAME] [--limit N] [--enrich]` | Preview redacted records; nothing stored or sent |
 | `obsei run [-c FILE] [-p NAME] [--db PATH] [--every MINUTES]` | Run pipelines |
 | `obsei themes [-c FILE] [--db PATH]` | Embed new feedback and update stable themes |
-| `obsei ask QUESTION [-c FILE] [--db PATH]` | Answer from your feedback with citations |
+| `obsei ask QUESTION [-c FILE] [--db PATH]` | Answer from your feedback with citations; with `ask_judge`, also a grounding score |
 | `obsei studio --out DIR [-c FILE] [--db PATH]` | Export a static Studio snapshot |
 | `obsei demo [--out DIR] [--embedder hashing\|local\|local:MODEL]` | Build the synthetic multilingual demo (default: offline `hashing` embedder) |
 | `obsei models download [--embeddings MODEL] [--dir DIR]` | Fetch the local multilingual embedding model for offline use |

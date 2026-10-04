@@ -30,3 +30,6 @@ Issue and chat sinks take `when` (labels from enrichers) and `max_rating`:
     when: {classify.intent: [bug]}
     max_rating: 2
 ```
+
+`when` reads nested fields and yes/no values too, e.g.
+`{classify.fields.urgency: [today, right now]}` or `{filter.match: ["false"]}`.

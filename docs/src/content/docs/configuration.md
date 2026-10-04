@@ -50,11 +50,60 @@ pipelines:
         config: {when: {classify.intent: [bug, churn_risk]}}
 ```
 
+## Enrichers
+
+Enrichers run in the order listed, on new or changed records only.
+
+| Type | What | Model |
+| --- | --- | --- |
+| `filter` | One yes/no question per record; matching records are tagged or dropped | decision |
+| `classify` | Sentiment, intent, language and your own fields, with a confidence | chat or decision |
+
+`classify` takes `llm`, `fallback_llm`, `threshold`, `min_confidence`, `sentiments`, `intents` and
+`fields`; see [Models](/guides/models/#decision-models) for decision endpoints, option
+descriptions and cutoffs. Put `filter` first so dropped records never reach the classifier:
+
+```yaml
+enrichers:
+  - type: filter
+    config:
+      llm: julia                 # an llms entry with api: decision
+      question: Is this spam rather than a real customer request?
+      yes_means: prize scams, phishing links, advertising or bulk mail   # optional, with no_means
+      no_means: a customer writing about a product, an account or a bill
+      threshold: 0.8             # probability of yes from which a record matches (default 0.5)
+      action: drop               # or tag (default): keep it with filter.match: true
+  - type: classify
+    config: {llm: julia, fallback_llm: local}
+```
+
+Dropped records are not classified, delivered or stored; the run summary counts them
+(`dropped 3`). A source that returns the same record again (a feed without a cursor) has it checked
+again. With `action: tag`, sinks can skip matches with `when: {filter.match: ["false"]}`.
+
+## Ask
+
+`obsei ask`, `POST /api/ask` and the Slack command answer from your feedback with `ask_llm`. Add
+`ask_judge`, a decision endpoint, to check each answer against the records it cites: the judge gets
+only the question, the answer and the cited records (redacted, as stored) and answers "Is every
+statement in the answer supported by the quoted records?".
+
+```yaml
+ask_llm: local
+ask_judge: kev               # an llms entry with api: decision
+ask_judge_threshold: 0.5     # default
+```
+
+The CLI prints `grounded: 0.93`, and below the threshold warns that the answer may not be
+supported. The API returns `grounded` and `possibly_unsupported`, and Slack replies carry a
+warning line. Judging needs a capable model: in our tests Julia-1 did not separate supported from
+unsupported answers, so use a 4B or larger decision model (Kev-4B, lev, Clef-Flash) as the judge.
+
 ## How a run works
 
 1. Each source resumes from its saved cursor and yields records.
 2. Records are redacted, then compared with the stored copy; unchanged records stop here.
-3. Enrichers label new or changed records.
+3. Enrichers label new or changed records; a `filter` with `action: drop` removes records here.
 4. Every sink receives the batch. Only then is the batch stored and the cursor advanced, so a
    failed run retries the same batch (at-least-once; sinks are idempotent by record id).
 

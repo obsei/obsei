@@ -50,10 +50,11 @@ class Outcome:
         r = self.report
         sent = ", ".join(f"{k}={v}" for k, v in r.sent.items()) or "none"
         failed = sum(r.failed.values())
+        dropped = sum(r.dropped.values())
         return (
             f"{self.pipeline}: fetched {r.fetched}, stored {r.stored}, "
             f"enriched {sum(r.enriched.values())}{f' ({failed} failed)' if failed else ''}, "
-            f"sent {sent}"
+            f"{f'dropped {dropped}, ' if dropped else ''}sent {sent}"
         )
 
     def warnings(self) -> list[str]:

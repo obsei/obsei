@@ -5,6 +5,8 @@ from __future__ import annotations
 import ipaddress
 import os
 import re
+from collections.abc import Mapping
+from types import MappingProxyType
 from typing import Literal, TypeAlias
 from urllib.parse import urlsplit
 
@@ -19,6 +21,11 @@ _INET_PART = re.compile(r"0[xX][0-9a-fA-F]+|0[0-7]*|[1-9][0-9]*")
 _INTERNAL_SUFFIXES = (".localhost", ".internal", ".local")
 _MAX_PARTS = 4
 _OCTET = 0xFF
+
+
+EGRESS: Mapping[str, object] = MappingProxyType({"obsei_egress": True})
+"""Pass as ``extensions=EGRESS`` on requests that carry feedback out (sinks): every hop, redirects
+included, must then pass the egress policy."""
 
 
 class EgressError(PermissionError):
