@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>obsei: Voice of Customer without violating privacy</title>
+    <meta name="description" content="Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, models and agents. Private by design." />
+    <meta property="og:title" content="obsei: Voice of Customer without violating privacy" />
+    <meta property="og:description" content="Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, models and agents." />
+    <meta property="og:image" content="https://obsei.com/logo.png" />
+    <link rel="icon" href="/logo.png" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <a class="brand" href="/"><img src="/logo.png" alt="" width="28" height="28" /> obsei</a>
+      <nav>
+        <a href="https://docs.obsei.com/">Docs</a>
+        <a href="https://docs.obsei.com/demo/">Demo</a>
+        <a href="https://github.com/obsei/obsei">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1>Voice of Customer <span>without violating privacy</span></h1>
+        <p class="lead">
+          Open-source, self-hosted, AI-native feedback analytics. Reviews, tickets, calls, surveys and
+          communities in one place, in every language, with PII redacted before anything is stored.
+        </p>
+        <div class="actions">
+          <a class="button" href="https://docs.obsei.com/quickstart/">Get started</a>
+          <a class="button ghost" href="https://docs.obsei.com/demo/">Open the demo</a>
+        </div>
+        <pre class="install"><code>uv tool install --prerelease allow "obsei[mcp]"
+obsei init &amp;&amp; obsei run</code></pre>
+      </section>
+
+      <section class="grid">
+        <article>
+          <h2>Private by design</h2>
+          <p>Runs inside your infrastructure. Checksum-validated PII redaction for the Americas,
+          Europe, Asia-Pacific, India and Africa in any script, pseudonymous authors, an encrypted
+          database and air-gapped egress by default.</p>
+        </article>
+        <article>
+          <h2>Bring your own</h2>
+          <p>App stores, helpdesks, calls, SQL warehouses, webhooks, communities and any REST or MCP
+          source. Any OpenAI-compatible model: Ollama, vLLM, Azure OpenAI, or Bedrock and Vertex via
+          LiteLLM.</p>
+        </article>
+        <article>
+          <h2>AI-native</h2>
+          <p>A read-only MCP server and a Claude plugin, so agents answer "what are customers
+          saying?" with cited, redacted evidence. Ask questions in any language.</p>
+        </article>
+        <article>
+          <h2>Themes you can trust</h2>
+          <p>Stable themes with trends, near-duplicate detection, k-anonymous views and a knowledge
+          graph that links issues to sources, languages and intents.</p>
+        </article>
+      </section>
+
+      <section class="note">
+        <p>obsei provides controls that support compliance with laws such as the GDPR, India's DPDP
+        Act, Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain the data
+        controller.</p>
+      </section>
+    </main>
+
+    <footer>
+      <span>Apache-2.0</span>
+      <a href="https://github.com/obsei/obsei/discussions">Discussions</a>
+      <a href="https://pypi.org/project/obsei/">PyPI</a>
+    </footer>
+  </body>
+</html>

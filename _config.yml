@@ -1,8 +1,0 @@
-theme: jekyll-theme-primer
-markdown: CommonMarkGhPages
-commonmark:
-  options: ["UNSAFE", "SMART", "FOOTNOTES"]
-  extensions: ["strikethrough", "autolink", "table", "tagfilter"]
-title: "obsei: privacy-first, self-hosted Voice of Customer for AI agents"
-description: "Open-source, self-hosted, AI-native Voice of Customer. Bring your own sources, models and agents."
-

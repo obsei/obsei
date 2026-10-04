@@ -1,0 +1,36 @@
+:root {
+  color-scheme: light dark;
+  --bg: #fbfbfd;
+  --text: #1c1d21;
+  --muted: #5d616c;
+  --line: #e3e4e8;
+  --panel: #ffffff;
+  --accent: #6d4aff;
+  font: 17px/1.6 system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #111216; --text: #e8e9ed; --muted: #a2a6b2; --line: #2c2f38; --panel: #1a1c22; --accent: #9b85ff; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); }
+a { color: inherit; }
+.nav, main, footer { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+.nav { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; padding-bottom: 20px; }
+.brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; text-decoration: none; font-size: 1.1rem; }
+.nav nav { display: flex; gap: 20px; }
+.nav nav a { text-decoration: none; color: var(--muted); }
+.nav nav a:hover { color: var(--text); }
+.hero { padding: 64px 0 40px; max-width: 760px; }
+h1 { font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.15; margin: 0 0 16px; }
+h1 span { color: var(--accent); }
+.lead { font-size: 1.15rem; color: var(--muted); margin: 0 0 28px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+.button { padding: 10px 18px; border-radius: 10px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; }
+.button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+.install { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; overflow-x: auto; font-size: 0.9rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; padding: 24px 0; }
+.grid article { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.grid h2 { font-size: 1.05rem; margin: 0 0 8px; }
+.grid p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.note { color: var(--muted); font-size: 0.85rem; padding: 16px 0 40px; max-width: 760px; }
+footer { display: flex; gap: 20px; padding-top: 24px; padding-bottom: 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
