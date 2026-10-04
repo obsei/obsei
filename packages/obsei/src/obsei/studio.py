@@ -13,10 +13,13 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from obsei._version import __version__
+from obsei.access import Role
 from obsei.evidence import Evidence, ThemeInfo, evidence
 from obsei.store import GroupBy, Query, Store
 
-STATIC_FILES = ("index.html", "app.js", "styles.css", "logo.png")
+STATIC_FILES = ("app.js", "styles.css", "logo.png")
+LIVE_DATA = '<meta name="obsei-data" content="api" />'
+EXPORT_DATA = '<meta name="obsei-data" content="data.json" />'
 TIME_GROUPS: tuple[GroupBy, ...] = ("day", "week", "month")
 
 
@@ -57,6 +60,8 @@ class GraphView(BaseModel):
 
 
 class Snapshot(BaseModel):
+    demo: bool = False
+    role: Role | None = None
     overview: Overview
     themes: list[ThemeInfo]
     graph: GraphView
@@ -127,9 +132,17 @@ def static_dir() -> Path:
     return Path(str(resources.files("obsei") / "studio_static"))
 
 
-def export(store: Store, out: Path, *, k: int) -> None:
-    """Write a self-contained static Studio (HTML, JS, CSS and data.json) to ``out``."""
+def export(store: Store, out: Path, *, k: int, demo: bool = False) -> None:
+    """Write a self-contained static Studio (HTML, JS, CSS and data.json) to ``out``.
+
+    ``demo`` marks the snapshot as synthetic; only ``obsei demo`` sets it.
+    """
     out.mkdir(parents=True, exist_ok=True)
     for name in STATIC_FILES:
         shutil.copyfile(static_dir() / name, out / name)
-    (out / "data.json").write_text(snapshot(store, k=k).model_dump_json(), encoding="utf-8")
+    page = (static_dir() / "index.html").read_text(encoding="utf-8")
+    if LIVE_DATA not in page:
+        raise RuntimeError("studio_static/index.html has no data source marker")
+    (out / "index.html").write_text(page.replace(LIVE_DATA, EXPORT_DATA), encoding="utf-8")
+    data = snapshot(store, k=k).model_copy(update={"demo": demo})
+    (out / "data.json").write_text(data.model_dump_json(), encoding="utf-8")

@@ -93,6 +93,78 @@ function fit(list: Point[]): void {
   }
 }
 
+interface Box {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+interface Label {
+  point: Point;
+  text: SVGTextElement;
+}
+
+const LABEL_PX = 11;
+
+function truncate(label: string, max: number): string {
+  return label.length > max ? `${label.slice(0, max - 1)}…` : label;
+}
+
+function overlaps(a: Box, b: Box): boolean {
+  return a.x1 < b.x2 && b.x1 < a.x2 && a.y1 < b.y2 && b.y1 < a.y2;
+}
+
+function hitsCircle(box: Box, p: Point): boolean {
+  const cx = Math.max(box.x1, Math.min(p.x, box.x2));
+  const cy = Math.max(box.y1, Math.min(p.y, box.y2));
+  return Math.hypot(p.x - cx, p.y - cy) < p.r;
+}
+
+/** Places labels largest-first beside their node, hiding those that would collide. */
+function placeLabels(labels: Label[], scale: number): void {
+  const size = Math.min(32, Math.max(LABEL_PX, LABEL_PX / scale));
+  const maxChars = scale < 0.6 ? 14 : 22;
+  const placed: Box[] = [];
+  const points = labels.map((l) => l.point);
+  const order = [...labels].sort(
+    (a, b) =>
+      Number(b.point.node.kind === "theme") - Number(a.point.node.kind === "theme") ||
+      b.point.node.weight - a.point.node.weight,
+  );
+  for (const { point: p, text } of order) {
+    const content = truncate(p.node.label, maxChars);
+    text.textContent = content;
+    text.setAttribute("font-size", size.toFixed(1));
+    text.removeAttribute("visibility");
+    const w = text.getComputedTextLength() || content.length * size * 0.6;
+    const h = size * 1.15;
+    const gap = 3;
+    const candidates: Box[] = [
+      { x1: p.x - w / 2, y1: p.y + p.r + gap, x2: p.x + w / 2, y2: p.y + p.r + gap + h },
+      { x1: p.x - w / 2, y1: p.y - p.r - gap - h, x2: p.x + w / 2, y2: p.y - p.r - gap },
+      { x1: p.x + p.r + gap, y1: p.y - h / 2, x2: p.x + p.r + gap + w, y2: p.y + h / 2 },
+      { x1: p.x - p.r - gap - w, y1: p.y - h / 2, x2: p.x - p.r - gap, y2: p.y + h / 2 },
+    ];
+    const box = candidates.find(
+      (c) =>
+        c.x1 >= 0 &&
+        c.y1 >= 0 &&
+        c.x2 <= WIDTH &&
+        c.y2 <= HEIGHT &&
+        !placed.some((other) => overlaps(c, other)) &&
+        !points.some((other) => other !== p && hitsCircle(c, other)),
+    );
+    if (!box) {
+      text.setAttribute("visibility", "hidden");
+      continue;
+    }
+    placed.push(box);
+    text.setAttribute("x", ((box.x1 + box.x2) / 2).toFixed(1));
+    text.setAttribute("y", (box.y2 - size * 0.25).toFixed(1));
+  }
+}
+
 export function renderGraph(
   host: Element,
   nodes: GraphNode[],
@@ -130,11 +202,12 @@ export function renderGraph(
     }
   }
   const nodeEls = new Map<string, SVGGElement>();
+  const labels: Label[] = [];
   for (const p of points.values()) {
     const group = svg("g", { class: `node kind-${p.node.kind}`, tabindex: 0 });
     group.append(svg("circle", { cx: p.x, cy: p.y, r: p.r }));
-    const text = svg("text", { x: p.x, y: p.y + p.r + 13, "text-anchor": "middle" });
-    text.textContent = p.node.label.length > 28 ? `${p.node.label.slice(0, 27)}…` : p.node.label;
+    const text = svg("text", { "text-anchor": "middle" });
+    labels.push({ point: p, text });
     const title = svg("title");
     title.textContent = `${KIND_LABELS[p.node.kind]}: ${p.node.label} (${p.node.weight})`;
     group.append(text, title);
@@ -158,6 +231,17 @@ export function renderGraph(
   }
   root.append(edgeLayer, nodeLayer);
   host.append(root);
+  let size = 0;
+  const relabel = () => {
+    const width = root.getBoundingClientRect().width;
+    const scale = width > 0 ? width / WIDTH : 1;
+    const next = Math.round(Math.max(LABEL_PX, LABEL_PX / scale));
+    if (next === size) return;
+    size = next;
+    placeLabels(labels, scale);
+  };
+  relabel();
+  new ResizeObserver(relabel).observe(root);
   return (themeId) => {
     for (const [id, g] of nodeEls) g.classList.toggle("selected", id === themeId);
   };
