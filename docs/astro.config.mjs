@@ -6,6 +6,8 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "obsei",
+      logo: { src: "./public/logo.png" },
+      favicon: "/logo.png",
       description: "Privacy-first, self-hosted, AI-native Voice of Customer.",
       social: [{ icon: "github", label: "GitHub", href: "https://github.com/obsei/obsei" }],
       editLink: { baseUrl: "https://github.com/obsei/obsei/edit/master/docs/" },

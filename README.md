@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/obsei/obsei/master/images/logos/obsei_200x200.png" alt="obsei" width="120">
+  <img src="docs/public/logo.png" alt="obsei" width="120">
 </p>
 
 <h1 align="center">obsei</h1>
