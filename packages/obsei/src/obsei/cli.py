@@ -16,7 +16,7 @@ from typing import Annotated
 import duckdb
 import typer
 
-from obsei import __version__
+from obsei import __version__, studio
 from obsei.ask import ask as ask_feedback
 from obsei.config import (
     DEFAULT_PATH,
@@ -29,12 +29,14 @@ from obsei.config import (
 )
 from obsei.core.record import Record
 from obsei.core.registry import PluginError
+from obsei.demo import demo_records
 from obsei.llm import EgressPolicy
+from obsei.llm.embed import HashingEmbedder
 from obsei.pipeline import PipelineError
 from obsei.pipeline import run as run_pipeline
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
 from obsei.store import DB_KEY_ENV_VAR, Store, StoreError, load_db_key
-from obsei.themes import update_themes
+from obsei.themes import ThemesConfig, update_themes
 
 app = typer.Typer(
     name="obsei",
@@ -437,3 +439,29 @@ def ask(
     typer.echo(answer.text)
     if answer.citations:
         typer.echo("\nsources: " + ", ".join(answer.citations))
+
+
+@app.command("studio")
+def studio_export(
+    out: Annotated[Path, typer.Option(help="Directory for the static Studio.")],
+    config: ConfigOption = DEFAULT_PATH,
+    db: Annotated[Path | None, typer.Option("--db", envvar="OBSEI_DB")] = None,
+) -> None:
+    """Export a static, read-only Studio snapshot (k-anonymous) to a directory."""
+    cfg, path = _themes_context(config, db)
+    with _open_store(path, cfg.store.unencrypted, read_only=True) as store:
+        studio.export(store, out, k=cfg.themes.k_anonymity)
+    typer.echo(f"wrote {out}/index.html")
+
+
+@app.command()
+def demo(
+    out: Annotated[Path, typer.Option(help="Directory for the static demo.")] = Path("demo"),
+) -> None:
+    """Build the static Studio demo from synthetic multilingual feedback."""
+    settings = ThemesConfig(k_anonymity=5)
+    with Store(allow_unencrypted=True) as store:
+        store.upsert(demo_records())
+        update_themes(store, HashingEmbedder(), settings)
+        studio.export(store, out, k=settings.k_anonymity)
+    typer.echo(f"wrote {out}/index.html; serve it with: python -m http.server -d {out}")
