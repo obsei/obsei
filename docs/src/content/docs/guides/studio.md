@@ -5,7 +5,9 @@ sidebar:
   order: 7
 ---
 
-[Open the demo](/demo/) (synthetic feedback in eight languages).
+[Open the demo](/demo/) (synthetic feedback in eight languages). The demo uses the offline
+`hashing` embedder, so the same issue in different languages appears as separate themes; with
+`obsei[embeddings]` they are grouped (see [Themes](/guides/themes/)).
 
 Studio shows k-anonymous aggregates, stable themes with seven-day trends, a knowledge graph that
 links themes to sources, languages, intents and sentiment, and redacted evidence for each theme.

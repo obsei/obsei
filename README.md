@@ -32,8 +32,9 @@ send that text to another SaaS or a public LLM. obsei runs entirely inside your 
   Bedrock and Vertex through LiteLLM.
 - **AI-native.** A read-only MCP server and a Claude plugin, so agents answer questions about
   customers with cited, privacy-filtered evidence.
-- **Every language.** Feedback is classified and quoted in its own language; themes group the same
-  issue across 50+ languages with a local multilingual model.
+- **Every language.** Feedback is classified and quoted in its own language. With
+  `obsei[embeddings]`, a local multilingual model groups the same issue across 50+ languages; the
+  default offline embedder groups by wording, so each language forms its own themes.
 
 obsei provides controls that *support* compliance with laws such as the GDPR, India's DPDP Act,
 Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain the data controller.
