@@ -21,6 +21,7 @@ from obsei.store.themes import ThemeQueries
 DB_KEY_ENV_VAR = "OBSEI_DB_KEY"
 MIN_KEY_LENGTH = 16
 _ALIAS = "obsei"
+_UNENCRYPTED_HINT = "store.unencrypted: true in obsei.yaml (or pass --unencrypted where supported)"
 
 RecordRow: TypeAlias = tuple[str, str, str, datetime, str, str | None, str, str]
 InsertRow: TypeAlias = tuple[str, str, str, datetime, str, str | None, str, str, datetime, datetime]
@@ -233,8 +234,8 @@ class Store(ThemeQueries):
     ) -> None:
         if encryption_key is None and not allow_unencrypted:
             raise StoreError(
-                f"an encryption key is required: set {DB_KEY_ENV_VAR} or pass "
-                "allow_unencrypted=True (only when the disk is encrypted)"
+                f"an encryption key is required: set {DB_KEY_ENV_VAR}. Only on an encrypted disk, "
+                f"set {_UNENCRYPTED_HINT} instead"
             )
         if encryption_key is not None and len(encryption_key) < MIN_KEY_LENGTH:
             raise StoreError(f"encryption key must be at least {MIN_KEY_LENGTH} characters")
@@ -285,8 +286,8 @@ class Store(ThemeQueries):
                 "writing an encrypted store needs DuckDB's httpfs extension (OpenSSL), which "
                 f"could not be loaded: {exc}. Install it once with network access "
                 "(python -c \"import duckdb; duckdb.connect().execute('INSTALL httpfs')\"), "
-                "use the obsei container image, or rely on disk encryption with "
-                "allow_unencrypted=True."
+                "use the obsei container image, or, only on an encrypted disk, unset "
+                f"{DB_KEY_ENV_VAR} and set {_UNENCRYPTED_HINT}."
             ) from None
 
     def _migrate(self) -> None:
