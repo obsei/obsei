@@ -12,7 +12,7 @@ from obsei.store import (
     UpsertResult,
     load_db_key,
 )
-from obsei.store.duckdb_store import connect
+from obsei.store.duckdb_store import MIGRATIONS, connect
 
 KEY = "correct-horse-battery-staple"
 T0 = datetime(2026, 9, 1, tzinfo=UTC)
@@ -124,12 +124,34 @@ def test_cursors(store: Store) -> None:
     assert store.get_cursor("other", "appstore") is None
 
 
+def test_enrichment_retries_are_tracked_and_erased(store: Store) -> None:
+    store.upsert([rec("1"), rec("2", days=1), rec("3", source="rss")])
+    ids = {r.source.native_id: r.id for r in store.iter_records()}
+    store.track_retries("daily", "csv", done=[], failed=[ids["1"], ids["2"], ids["2"]])
+    assert [r.id for r in store.retry_records("daily", "csv", 10)] == [ids["1"], ids["2"]]
+    assert store.retry_records("daily", "other", 10) == []
+    store.track_retries("daily", "csv", done=[ids["1"]], failed=[])
+    assert [r.id for r in store.retry_records("daily", "csv", 10)] == [ids["2"]]
+    store.delete(source_type="csv")
+    assert store.retry_records("daily", "csv", 10) == []
+    assert store._con.execute("SELECT count(*) FROM enrichment_retries").fetchone() == (0,)
+
+
+def test_erased_records_are_never_queued_for_retry(store: Store) -> None:
+    store.upsert([rec("1"), rec("2", days=1)])
+    ids = {r.source.native_id: r.id for r in store.iter_records()}
+    store.delete(source_type="csv")
+    store.track_retries("daily", "csv", done=[], failed=[ids["1"], ids["2"], "never-stored"])
+    assert store.retry_records("daily", "csv", 10) == []
+    assert store._con.execute("SELECT count(*) FROM enrichment_retries").fetchone() == (0,)
+
+
 def test_file_store_persists_and_reopens_read_only(tmp_path: Path) -> None:
     path = tmp_path / "obsei.duckdb"
     record = rec("1")
     with Store(path, allow_unencrypted=True) as store:
         store.upsert([record])
-        assert store.schema_version() == 4
+        assert store.schema_version() == len(MIGRATIONS) == 5
     with Store(path, allow_unencrypted=True, read_only=True) as store:
         assert store.get(record.id) == record
         with pytest.raises(duckdb.Error):

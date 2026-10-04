@@ -130,6 +130,26 @@ def test_version_is_a_release_version() -> None:
     assert not Version(__version__).is_devrelease
 
 
+def offline_project(tmp_path: Path) -> Path:
+    (tmp_path / "feedback.csv").write_text("id,text\n1,App crashes\n", encoding="utf-8")
+    config = tmp_path / "obsei.yaml"
+    config.write_text(
+        f"""
+store: {{path: {tmp_path / "obsei.duckdb"}, unencrypted: true}}
+llms:
+  default: {{base_url: "http://127.0.0.1:9/v1", model: qwen3:8b, timeout: 5}}
+pipelines:
+  - name: reviews
+    sources:
+      - {{key: csv, type: csv, config: {{path: {tmp_path / "feedback.csv"}}}}}
+    enrichers:
+      - {{type: classify, config: {{llm: default}}}}
+""",
+        encoding="utf-8",
+    )
+    return config
+
+
 @pytest.mark.parametrize(
     ("release", "expected"),
     [
@@ -179,6 +199,44 @@ def _project(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, k: int = 5) -> Pat
         encoding="utf-8",
     )
     return config
+
+
+def test_run_warns_when_the_classifier_model_is_unreachable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("OBSEI_PSEUDONYM_SALT", SALT)
+    result = runner.invoke(app, ["run", "-c", str(offline_project(tmp_path))])
+    assert result.exit_code == 0, result.output
+    assert "enriched 0 (1 failed)" in result.output
+    assert "warning: reviews: classify failed for 1 record(s)" in result.output
+    assert "cannot reach the model at http://127.0.0.1:9/v1" in result.output
+    assert "retried on the next run" in result.output
+    with Store(tmp_path / "obsei.duckdb", allow_unencrypted=True) as store:
+        assert len(store.retry_records("reviews", "csv", 10)) == 1
+
+
+def test_ask_names_the_unreachable_endpoint(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("OBSEI_PSEUDONYM_SALT", SALT)
+    config = offline_project(tmp_path)
+    assert runner.invoke(app, ["run", "-c", str(config)]).exit_code == 0
+    result = runner.invoke(app, ["ask", "what breaks?", "-c", str(config)])
+    assert result.exit_code == 2
+    assert "cannot reach the model at http://127.0.0.1:9/v1" in result.output
+    assert "ollama serve" in result.output
+
+
+def test_serve_honours_db_option(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import uvicorn  # noqa: PLC0415
+
+    monkeypatch.setenv("OBSEI_PSEUDONYM_SALT", SALT)
+    monkeypatch.setattr(uvicorn, "run", lambda *args, **kwargs: None)
+    other = tmp_path / "elsewhere.duckdb"
+    result = runner.invoke(app, ["serve", "-c", str(offline_project(tmp_path)), "--db", str(other)])
+    assert result.exit_code == 0, result.output
+    assert other.exists()
+    assert not (tmp_path / "obsei.duckdb").exists()
 
 
 def test_forget_export_and_audit_use_the_configured_store(
