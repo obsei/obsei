@@ -181,7 +181,9 @@ function render(data: DataSource): void {
         "div",
         { class: "theme-meta" },
         el("span", {}, `${number.format(theme.size)} records`),
-        theme.avg_rating !== null ? el("span", {}, `★ ${theme.avg_rating.toFixed(1)}`) : null,
+        theme.avg_rating !== null
+          ? el("span", {}, `★ ${theme.avg_rating.toFixed(1)}`)
+          : el("span", { class: "muted", title: "No rating, or too few people to show one" }, "★ –"),
         chips(theme.sources),
         chips(theme.languages, languageName),
       ),
