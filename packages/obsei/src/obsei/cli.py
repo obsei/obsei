@@ -7,12 +7,14 @@ import platform
 import sys
 from typing import Annotated
 
+import duckdb
 import typer
 
 from obsei import __version__
 from obsei.core.record import Record
 from obsei.core.registry import PLUGIN_KINDS, Registry
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt
+from obsei.store import DB_KEY_ENV_VAR, StoreError, load_db_key
 
 app = typer.Typer(
     name="obsei",
@@ -57,6 +59,12 @@ def doctor() -> None:
     except PseudonymSaltError:
         salt_status = "not set (OBSEI_PSEUDONYM_SALT is required before ingesting authors)"
     typer.echo(f"salt      {salt_status}")
+    try:
+        key_status = "configured" if load_db_key() else f"not set ({DB_KEY_ENV_VAR})"
+    except StoreError as exc:
+        key_status = f"invalid ({exc})"
+    typer.echo(f"db key    {key_status}")
+    typer.echo(f"duckdb    {duckdb.__version__} (encryption: {_crypto_status()})")
     registry = Registry()
     loaded = registry.load_entry_points()
     typer.echo(f"plugins   {', '.join(loaded) if loaded else 'none installed'}")
@@ -64,6 +72,17 @@ def doctor() -> None:
         names = registry.names(kind)
         if names:
             typer.echo(f"  {kind:<9}{', '.join(names)}")
+
+
+def _crypto_status() -> str:
+    row = (
+        duckdb.connect()
+        .execute("SELECT installed FROM duckdb_extensions() WHERE extension_name = 'httpfs'")
+        .fetchone()
+    )
+    if row and row[0]:
+        return "ready"
+    return "httpfs extension not installed; it is installed on first encrypted write"
 
 
 @app.command()
