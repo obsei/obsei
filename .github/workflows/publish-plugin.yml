@@ -1,0 +1,77 @@
+# Publishes a first-party plugin from plugins/<name> to PyPI with Trusted Publishing.
+# Bump the plugin's version in its pyproject.toml, merge, then run this workflow by hand.
+
+name: Publish plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: Plugin package to publish.
+        type: choice
+        options: [obsei-reddit, obsei-typeform, obsei-teams]
+
+permissions: {}
+
+env:
+  UV_VERSION: "0.12.23"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: false
+      - id: meta
+        name: Read version and refuse to republish
+        env:
+          PLUGIN: ${{ inputs.plugin }}
+        run: |
+          version=$(uv version --package "$PLUGIN" --short)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          status=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/$PLUGIN/$version/json")
+          if [ "$status" = "200" ]; then
+            echo "::error::$PLUGIN $version is already on PyPI; bump its version first"
+            exit 1
+          fi
+      - name: Build
+        env:
+          PLUGIN: ${{ inputs.plugin }}
+        run: uv build --package "$PLUGIN" --out-dir dist
+      - run: uvx twine check --strict dist/*
+      - name: Smoke-test the wheel against obsei from PyPI
+        env:
+          PLUGIN: ${{ inputs.plugin }}
+        run: |
+          uv venv /tmp/smoke
+          uv pip install --python /tmp/smoke dist/*.whl
+          /tmp/smoke/bin/obsei doctor | grep -E "^plugins +.*\b${PLUGIN#obsei-}\b"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  pypi:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/${{ inputs.plugin }}/${{ needs.build.outputs.version }}/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
