@@ -205,6 +205,13 @@ def graph(store: Store, *, k: int) -> GraphView:
 def theme_evidence(store: Store, theme_id: str, *, k: int, limit: int = 20) -> list[Evidence]:
     if not any(t.id == theme_id for t in store.theme_summaries(min_size=k)):
         return []
+    return _evidence(store, theme_id, limit)
+
+
+def _evidence(store: Store, theme_id: str, limit: int) -> list[Evidence]:
+    """Evidence for a theme already known to pass k-anonymity."""
+    if limit <= 0:
+        return []
     records = [store.get(rid) for rid in store.theme_record_ids(theme_id, limit)]
     return [evidence(r) for r in records if r is not None]
 
@@ -218,9 +225,7 @@ def snapshot(
         privacy=privacy(store, k=k, egress=egress),
         themes=theme_list,
         graph=graph(store, k=k),
-        evidence={
-            t.id: theme_evidence(store, t.id, k=k, limit=evidence_per_theme) for t in theme_list
-        },
+        evidence={t.id: _evidence(store, t.id, evidence_per_theme) for t in theme_list},
     )
 
 

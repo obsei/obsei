@@ -466,9 +466,10 @@ def test_slow_model_does_not_block_other_requests(store: Store) -> None:
         asking.start()
         try:
             assert entered.wait(10)
+            theme = _any_theme(store)
             started = time.monotonic()
             assert client.get("/api/snapshot", headers=auth).status_code == 200
-            assert client.get(f"/api/themes/{_any_theme(store)}", headers=auth).status_code == 200
+            assert client.get(f"/api/themes/{theme}", headers=auth).status_code == 200
             assert time.monotonic() - started < 5
             assert not release.is_set()
         finally:
