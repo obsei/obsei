@@ -31,7 +31,8 @@ from obsei.core.record import Record
 from obsei.core.registry import PluginError
 from obsei.demo import demo_records
 from obsei.llm import EgressPolicy
-from obsei.llm.embed import HashingEmbedder
+from obsei.llm.client import LlmError
+from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, HashingEmbedder, LocalEmbedder
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
 from obsei.runner import run_pipelines
 from obsei.store import DB_KEY_ENV_VAR, Store, StoreError, load_db_key
@@ -468,3 +469,23 @@ def demo(
         update_themes(store, HashingEmbedder(), settings)
         studio.export(store, out, k=settings.k_anonymity)
     typer.echo(f"wrote {out}/index.html; serve it with: python -m http.server -d {out}")
+
+
+models_app = typer.Typer(help="Download local models for offline (air-gapped) use.")
+app.add_typer(models_app, name="models")
+
+
+@models_app.command("download")
+def models_download(
+    embeddings: Annotated[str, typer.Option(help="Embedding model for themes.")] = LOCAL_MODEL,
+    directory: Annotated[
+        Path | None, typer.Option("--dir", envvar=MODELS_DIR_ENV, help="Model cache directory.")
+    ] = None,
+) -> None:
+    """Fetch the multilingual embedding model so 'themes.embedder: local' works offline."""
+    try:
+        LocalEmbedder(embeddings, cache_dir=str(directory) if directory else None, offline=False)
+    except LlmError as exc:
+        raise _fail(exc) from None
+    where = directory or os.environ.get(MODELS_DIR_ENV) or "the fastembed cache"
+    typer.echo(f"downloaded {embeddings} to {where}; set {MODELS_DIR_ENV} to use it offline")

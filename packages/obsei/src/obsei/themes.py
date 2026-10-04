@@ -39,7 +39,10 @@ class ThemesConfig(BaseModel):
 
     embedder: str = Field(default="hashing", description="'hashing' or an llms name.")
     similarity: float | None = Field(
-        default=None, gt=0, le=1, description="Default 0.3 for hashing, 0.75 for models."
+        default=None,
+        gt=0,
+        le=1,
+        description="Default 0.3 for hashing, 0.65 for local multilingual, 0.75 for others.",
     )
     duplicate_similarity: float = Field(default=0.9, gt=0, le=1)
     labeler: str | None = Field(default=None, description="llms name used to label themes.")
@@ -109,8 +112,16 @@ def _embed(store: Store, embedder: Embedder, config: ThemesConfig, report: Theme
         remaining -= len(pending)
 
 
+def default_similarity(model: str) -> float:
+    if model.startswith("hashing-"):
+        return 0.3
+    if "multilingual" in model or "paraphrase" in model:
+        return 0.65
+    return 0.75
+
+
 def _assign(store: Store, model: str, config: ThemesConfig, report: ThemeReport) -> None:
-    threshold = config.similarity or (0.3 if model.startswith("hashing-") else 0.75)
+    threshold = config.similarity or default_similarity(model)
     for record_id, vector in store.unassigned(model, config.max_records):
         nearest = store.nearest_record(vector, model)
         duplicate_of = nearest[0] if nearest and nearest[1] >= config.duplicate_similarity else None
