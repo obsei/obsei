@@ -1,0 +1,38 @@
+name: Connector request
+description: Request a new source or sink integration.
+labels: ["connector", "triage"]
+body:
+  - type: input
+    id: system
+    attributes:
+      label: System
+      placeholder: e.g. Zendesk, Typeform, Snowflake
+    validations:
+      required: true
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Direction
+      options: ["Source (read feedback from it)", "Sink (send results to it)", "Both"]
+    validations:
+      required: true
+  - type: dropdown
+    id: access
+    attributes:
+      label: How can it be reached?
+      multiple: true
+      options:
+        - Official REST API
+        - Official MCP server
+        - SQL / warehouse table
+        - File export (CSV, JSON)
+        - Webhook
+        - Not sure
+    validations:
+      required: true
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I'm willing to help build or maintain this connector.
