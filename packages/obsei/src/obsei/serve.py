@@ -7,7 +7,6 @@ The store is opened once read-write and shared under a lock (DuckDB allows one w
 from __future__ import annotations
 
 import dataclasses
-import hmac
 import json
 import threading
 from collections.abc import Awaitable, Callable, Iterator
@@ -24,6 +23,7 @@ from starlette.staticfiles import StaticFiles
 from starlette.types import ASGIApp
 
 from obsei import slackbot, studio
+from obsei.access import AUDITED, RANK, Authenticator, Principal, required_role
 from obsei.ask import ask
 from obsei.config import ObseiConfig, build_pipeline
 from obsei.core.context import Context
@@ -35,22 +35,31 @@ from obsei.sources.webhook import SignatureError, WebhookSource
 from obsei.store import Store
 
 MAX_BODY = 4 * 1024 * 1024
-PUBLIC_PATHS = ("/healthz", "/ingest/", "/studio", "/slack/")
 
 
-class BearerAuth(BaseHTTPMiddleware):
-    def __init__(self, app: ASGIApp, token: str) -> None:
+AuditHook = Callable[[Principal, str], Awaitable[None]]
+
+
+class AccessControl(BaseHTTPMiddleware):
+    def __init__(self, app: ASGIApp, authenticator: Authenticator, audit: AuditHook) -> None:
         super().__init__(app)
-        self.expected = f"Bearer {token}"
+        self.auth = authenticator
+        self.audit = audit
 
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        if request.url.path.startswith(PUBLIC_PATHS):
+        needed = required_role(request.url.path)
+        if needed is None:
             return await call_next(request)
-        given = request.headers.get("authorization", "")
-        if not hmac.compare_digest(given, self.expected):
+        principal = self.auth.resolve({k.lower(): v for k, v in request.headers.items()})
+        if principal is None:
             return JSONResponse({"error": "unauthorized"}, status_code=401)
+        if RANK[principal.role] < RANK[needed]:
+            return JSONResponse({"error": f"needs the {needed} role"}, status_code=403)
+        if needed in AUDITED:
+            await self.audit(principal, request.url.path)
+        request.state.principal = principal
         return await call_next(request)
 
 
@@ -224,7 +233,18 @@ def create_app(
             Mount("/studio", StaticFiles(directory=studio.static_dir(), html=True), name="studio"),
         ]
     )
-    if token:
-        app.add_middleware(BearerAuth, token=token)
+    auth = Authenticator(config.access, token)
+    if auth.enabled:
+
+        async def audit(principal: Principal, path: str) -> None:
+            def write() -> None:
+                with h.shared_store() as s:
+                    s.audit(
+                        "access", {"user": principal.name, "role": principal.role, "path": path}
+                    )
+
+            await anyio.to_thread.run_sync(write)
+
+        app.add_middleware(AccessControl, authenticator=auth, audit=audit)
     app.state.scheduler = h.scheduler
     return app
