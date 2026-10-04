@@ -30,6 +30,7 @@ from obsei.config import (
     load_config,
 )
 from obsei.core.context import Context
+from obsei.core.protocols import Drops
 from obsei.core.record import Record
 from obsei.core.registry import PluginError
 from obsei.demo import demo_records, demo_snapshot, raw_demo_records
@@ -385,6 +386,15 @@ def try_(
                         r if e is None else r.with_enrichment(enricher.name, e)
                         for r, e in zip(records, results, strict=True)
                     ]
+                    if isinstance(enricher, Drops):
+                        kept = [r for r in records if enricher.keep(r)]
+                        if len(kept) < len(records):
+                            typer.echo(
+                                f"{name}/{spec.key}: {enricher.name} dropped "
+                                f"{len(records) - len(kept)} record(s)",
+                                err=True,
+                            )
+                        records = kept
                 for record in records:
                     typer.echo(
                         record.model_dump_json(
@@ -496,6 +506,12 @@ def _llm_hint(cfg: ObseiConfig, name: str) -> str:
             f"hint: add an llms entry named {name!r} to obsei.yaml (or set ask_llm), "
             "e.g. a local Ollama at http://localhost:11434/v1"
         )
+    if endpoint.api == "decision":
+        return (
+            f"hint: start the decision model server for {endpoint.address} (for llama.cpp: "
+            "'llama serve -hf ggml-org/Julia-1-GGUF'), or point llms."
+            f"{name} in obsei.yaml at a reachable endpoint"
+        )
     return (
         f"hint: start the model server at {endpoint.base_url} (for Ollama: 'ollama serve' and "
         f"'ollama pull {endpoint.model}'), or point llms.{name} in obsei.yaml at a reachable "
@@ -522,6 +538,8 @@ def ask(
                 ctx.chat(cfg.ask_llm),
                 embedder=ctx.embedder(cfg.themes.embedder),
                 k_anonymity=cfg.themes.k_anonymity,
+                judge=ctx.decision(cfg.ask_judge) if cfg.ask_judge else None,
+                judge_threshold=cfg.ask_judge_threshold,
             )
         except LlmUnreachableError as exc:
             raise _fail(f"{exc}\n{_llm_hint(cfg, cfg.ask_llm)}") from None
@@ -533,6 +551,16 @@ def ask(
     typer.echo(answer.text)
     if answer.citations:
         typer.echo("\nsources: " + ", ".join(answer.citations))
+    if answer.grounded is not None:
+        typer.echo(f"grounded: {answer.grounded:.2f}")
+    if answer.unsupported:
+        typer.echo(
+            "warning: the answer may not be supported by the cited feedback "
+            f"(grounded {answer.grounded:.2f} < {cfg.ask_judge_threshold:g}); check the sources",
+            err=True,
+        )
+    if answer.judge_error:
+        typer.echo(f"warning: grounding check failed: {answer.judge_error}", err=True)
 
 
 @app.command("studio")

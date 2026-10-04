@@ -78,6 +78,14 @@ class ObseiConfig(_Strict):
     themes: ThemesConfig = Field(default_factory=ThemesConfig)
     access: AccessConfig = Field(default_factory=AccessConfig)
     ask_llm: str = Field(default="default", description="llms name used by ask and the Slack bot.")
+    ask_judge: str | None = Field(
+        default=None,
+        description="llms name of a decision endpoint that checks answers against the cited "
+        "records.",
+    )
+    ask_judge_threshold: float = Field(
+        default=0.5, ge=0.0, le=1.0, description="Below this, answers are flagged unsupported."
+    )
     plugins: list[str] = Field(
         default_factory=list, description="Installed plugin entry points allowed to load."
     )
@@ -88,6 +96,15 @@ class ObseiConfig(_Strict):
         names = [p.name for p in self.pipelines]
         if len(names) != len(set(names)):
             raise ValueError("pipeline names must be unique")
+        return self
+
+    @model_validator(mode="after")
+    def _judge_is_decision_model(self) -> ObseiConfig:
+        judge = self.llms.get(self.ask_judge) if self.ask_judge else None
+        if self.ask_judge and (judge is None or judge.api != "decision"):
+            raise ValueError(
+                f"ask_judge {self.ask_judge!r} must name an llms entry with api: decision"
+            )
         return self
 
     def pipeline(self, name: str) -> PipelineConfig:
