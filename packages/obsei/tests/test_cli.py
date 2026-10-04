@@ -77,6 +77,10 @@ def test_forget_author_and_retention(db: Path) -> None:
     assert "deleted 1 record(s)" in result.output
     with Store(db, allow_unencrypted=True) as store:
         assert store.count() == 0
+    log = runner.invoke(app, ["audit", *args]).output
+    assert log.count("forget") == 2
+    assert "alice" not in log
+    assert '"deleted": 1' in log
 
 
 def test_forget_requires_a_filter_and_a_key(db: Path) -> None:

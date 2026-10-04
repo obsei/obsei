@@ -125,7 +125,7 @@ def test_file_store_persists_and_reopens_read_only(tmp_path: Path) -> None:
     record = rec("1")
     with Store(path, allow_unencrypted=True) as store:
         store.upsert([record])
-        assert store.schema_version() == 1
+        assert store.schema_version() == 2
     with Store(path, allow_unencrypted=True, read_only=True) as store:
         assert store.get(record.id) == record
         with pytest.raises(duckdb.Error):
