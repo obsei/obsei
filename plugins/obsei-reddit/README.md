@@ -1,6 +1,12 @@
 # obsei-reddit
 
-Community plugin, not published to PyPI. Install it from Git:
+Install it from PyPI once published:
+
+```bash
+pip install obsei-reddit
+```
+
+Until then, install it from Git:
 
 ```bash
 pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
