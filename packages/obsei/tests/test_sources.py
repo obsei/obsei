@@ -63,6 +63,7 @@ def test_parse_time_formats() -> None:
     assert parse_time("2026-09-01T10:00:00Z") == parse_time("Tue, 01 Sep 2026 10:00:00 +0000")
     assert parse_time(0) is not None
     assert parse_time("not a date") is None
+    assert all(parse_time(v) is None for v in (1e20, -1e20, 10**30, float("nan"), float("inf")))
     assert html_to_text("<p>Hello&nbsp;<b>world</b></p><p>2</p>") == "Hello world\n2"
 
 

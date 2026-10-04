@@ -2,9 +2,9 @@
 # obsei container image: one rootless image for CLI, server and MCP.
 # Dependencies come from uv.lock, so the image runs exactly what CI tested.
 
-FROM ghcr.io/astral-sh/uv:0.12.23 AS uv
+FROM ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecce245946826e608e11c93ad4f5bba55b21 AS uv
 
-FROM python:3.12-slim-trixie AS build
+FROM python:3.12-slim-trixie@sha256:dddfd7e07f9d15aeeca61529320492139d21cac7f0070c00609243e51e4e0016 AS build
 COPY --from=uv /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never \
     UV_FROZEN=1 UV_NO_DEV=1 UV_PROJECT_ENVIRONMENT=/opt/obsei
@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 RUN /opt/obsei/bin/python -c "import duckdb; duckdb.connect(config={'extension_directory': '/opt/duckdb/extensions'}).execute('INSTALL httpfs')" \
     && chmod -R a+rX /opt/duckdb
 
-FROM python:3.12-slim-trixie
+FROM python:3.12-slim-trixie@sha256:dddfd7e07f9d15aeeca61529320492139d21cac7f0070c00609243e51e4e0016
 LABEL org.opencontainers.image.source="https://github.com/obsei/obsei" \
       org.opencontainers.image.description="Privacy-first, self-hosted Voice of Customer for AI agents" \
       org.opencontainers.image.licenses="Apache-2.0"
