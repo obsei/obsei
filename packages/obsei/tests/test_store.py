@@ -49,8 +49,11 @@ needs_crypto = pytest.mark.skipif(
 
 
 def test_requires_key_or_explicit_opt_out() -> None:
-    with pytest.raises(StoreError, match="encryption key is required"):
+    with pytest.raises(StoreError, match="encryption key is required") as exc:
         Store()
+    assert "OBSEI_DB_KEY" in str(exc.value)
+    assert "store.unencrypted: true" in str(exc.value)
+    assert "allow_unencrypted" not in str(exc.value)
     with pytest.raises(StoreError, match="at least"):
         Store(encryption_key="short")
 
@@ -179,8 +182,9 @@ def test_load_db_key(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.mark.skipif(_crypto_available(), reason="only meaningful where httpfs is missing")
 def test_clear_error_when_crypto_missing(tmp_path: Path) -> None:
-    with pytest.raises(EncryptionUnavailableError, match="httpfs"):
+    with pytest.raises(EncryptionUnavailableError, match="httpfs") as exc:
         Store(tmp_path / "enc.duckdb", encryption_key=KEY, install_extensions=False)
+    assert "store.unencrypted: true" in str(exc.value)
 
 
 @needs_crypto

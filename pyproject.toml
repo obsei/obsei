@@ -21,6 +21,7 @@ dev = [
     "ruff==0.16.10",
     "types-pyyaml==6.0.12.20260906",
     "types-defusedxml==0.7.0.20260504",
+    "playwright==1.63.0",
 ]
 
 [tool.ruff]
@@ -45,7 +46,7 @@ ignore = ["PLR0913"]
 python_version = "3.11"
 strict = true
 plugins = ["pydantic.mypy"]
-files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/template/src"]
+files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/template/src", "plugins/template/tests"]
 mypy_path = "packages/obsei/src:plugins/template/src"
 
 [[tool.mypy.overrides]]
@@ -54,7 +55,9 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["packages/obsei/tests", "plugins"]
+pythonpath = ["plugins/template/src"]
 addopts = "-ra --strict-markers"
+markers = ["browser: Studio in Chromium via Playwright (skipped when it is not installed)"]
 
 [tool.coverage.run]
 source = ["obsei"]

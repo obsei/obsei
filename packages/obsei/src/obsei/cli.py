@@ -556,7 +556,7 @@ def demo(
     with Store(allow_unencrypted=True) as store:
         store.upsert(demo_records())
         update_themes(store, HashingEmbedder(), settings)
-        studio.export(store, out, k=settings.k_anonymity)
+        studio.export(store, out, k=settings.k_anonymity, demo=True)
     typer.echo(f"wrote {out}/index.html; serve it with: python -m http.server -d {out}")
 
 

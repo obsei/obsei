@@ -2,6 +2,7 @@ import json
 import subprocess
 import sys
 from datetime import UTC, datetime, timedelta
+from importlib import metadata
 from pathlib import Path
 
 import pytest
@@ -9,7 +10,9 @@ from packaging.version import Version
 from typer.testing import CliRunner
 
 from obsei import Author, Record, SourceRef, __version__
+from obsei._version import RELEASE_VERSION, pep440
 from obsei.cli import app
+from obsei.core.context import USER_AGENT
 from obsei.privacy import pseudonymize
 from obsei.store import Store
 
@@ -145,6 +148,35 @@ pipelines:
         encoding="utf-8",
     )
     return config
+
+
+@pytest.mark.parametrize(
+    ("release", "expected"),
+    [
+        ("1.0.0", "1.0.0"),
+        ("1.0.0-alpha.1", "1.0.0a1"),
+        ("2.3.4-beta.12", "2.3.4b12"),
+        ("1.0.0-rc.2", "1.0.0rc2"),
+        ("1.0.0-alpha", "1.0.0a0"),
+    ],
+)
+def test_pep440_normalises_release_please_versions(release: str, expected: str) -> None:
+    assert pep440(release) == expected
+    assert str(Version(release)) == expected
+
+
+def test_displayed_version_is_pep440_normalised() -> None:
+    assert __version__ == str(Version(RELEASE_VERSION))
+    assert __version__ == metadata.version("obsei")
+    assert f"obsei/{__version__} " in USER_AGENT
+    result = runner.invoke(app, ["version"])
+    assert result.output.strip() == f"obsei {__version__}"
+    assert f"obsei     {__version__}\n" in runner.invoke(app, ["doctor"]).output
+
+
+def test_pep440_rejects_unknown_formats() -> None:
+    with pytest.raises(ValueError, match="unsupported version"):
+        pep440("1.0.0-dev.1")
 
 
 def _project(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, k: int = 5) -> Path:

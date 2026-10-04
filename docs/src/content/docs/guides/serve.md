@@ -12,12 +12,21 @@ obsei serve --host 0.0.0.0 --port 8765
 
 | Path | Auth | Purpose |
 | --- | --- | --- |
-| `GET /healthz` | none | liveness; `503 {"status": "degraded"}` if the scheduler stopped |
-| `POST /ingest/{pipeline}/{source}` | HMAC-SHA256 signature | push feedback into a `webhook` source |
-| `/mcp` | bearer token | MCP over streamable HTTP |
-| `GET /api/runs` | bearer token | last run of each scheduled pipeline, with errors and warnings |
+| `GET /healthz` | none | liveness: `{"status": "ok"}`, or `503 {"status": "degraded"}` if the scheduler stopped |
+| `POST /ingest/{pipeline}/{source}` | HMAC-SHA256 signature | push feedback into a `webhook` source (1 MB max) |
+| `POST /slack/commands` | Slack request signature | the `/obsei` slash command (404 without `SLACK_SIGNING_SECRET`) |
+| `GET /studio/` | none (static files) | [Studio](/guides/studio/); its data comes from `/api/*` with the caller's token |
+| `GET /api/snapshot` | viewer | k-anonymous overview, themes and knowledge graph, without quotes |
+| `GET /api/themes/{id}` | analyst | redacted evidence for one theme (empty below `k_anonymity`) |
+| `POST /api/ask` | analyst | `{"question": "..."}` returns `{"answer": "..."}` with record-id citations |
+| `/mcp` | analyst | MCP over streamable HTTP |
+| `GET /api/runs` | admin | schedule and last run of each scheduled pipeline, with errors and warnings |
 
-Binding to a non-loopback address requires `OBSEI_API_TOKEN` (at least 16 characters). Pipelines with `every_minutes` run on
+Any other path needs admin. Roles are checked only when `OBSEI_API_TOKEN` or `access` is
+configured; without either, every path is open, which `obsei serve` allows only on a loopback
+address (`127.0.0.1`, `::1`, `localhost`). Binding to any other address requires
+`OBSEI_API_TOKEN` or `access`. Every token (`OBSEI_API_TOKEN` and each user's `token_env`) must
+be at least 16 characters. Pipelines with `every_minutes` run on
 their schedule inside the server (see [Configuration](/configuration/#scheduling)).
 
 ## Sending feedback

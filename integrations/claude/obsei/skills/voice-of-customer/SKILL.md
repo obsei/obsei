@@ -7,12 +7,14 @@ description: Answer questions about what customers say (bugs, requests, churn ri
 
 Use the `obsei` MCP tools to ground every claim in real feedback.
 
-1. Size the question with `feedback_stats`: group by `intent`, `sentiment`, `source`, `lang` or
+1. Start broad questions ("what are customers talking about?") with `list_themes`: stable themes
+   with trends, sources, languages and intents.
+2. Size the question with `feedback_stats`: group by `intent`, `sentiment`, `source`, `lang` or
    `week`, filtered to the period and topic asked about.
-2. Pull evidence with `search_feedback`. Combine `text` with `intent`, `sentiment`, `source`,
+3. Pull evidence with `search_feedback`. Combine `text` with `intent`, `sentiment`, `source`,
    `lang` and rating filters. Search in the customers' languages too: a topic such as "login"
    may appear as "iniciar sesión", "connexion", "ログイン" or "लॉगिन".
-3. Report findings with volume, trend, affected sources, languages and regions. Give two or three
+4. Report findings with volume, trend, affected sources, languages and regions. Give two or three
    quotes per finding in the original language, with a translation, and cite each by its record
    id (`rec_...`). Use `get_feedback` to verify a citation when unsure.
 

@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 import anyio
 import pytest
 
-from obsei import Author, Enrichment, Record, SourceRef
+from obsei import Author, Enrichment, Record, SourceRef, __version__
 from obsei.mcp_server import create_server
 from obsei.store import Query, Store
 
@@ -107,3 +107,12 @@ def test_mcp_lists_read_only_tools(store: Store) -> None:
         "list_themes",
     }
     assert all(t.annotations and t.annotations.read_only_hint for t in tools)
+
+
+def test_server_reports_pep440_version(store: Store) -> None:
+    @contextmanager
+    def opener() -> Iterator[Store]:
+        yield store
+
+    assert create_server(opener).version == __version__
+    assert "-" not in __version__

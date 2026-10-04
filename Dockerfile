@@ -1,30 +1,45 @@
 # syntax=docker/dockerfile:1
 # obsei container image: one rootless image for CLI, server and MCP.
+# Dependencies come from uv.lock, so the image runs exactly what CI tested.
 
 FROM ghcr.io/astral-sh/uv:0.12.23 AS uv
 
 FROM python:3.12-slim-trixie AS build
 COPY --from=uv /uv /usr/local/bin/uv
-ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never \
+    UV_FROZEN=1 UV_NO_DEV=1 UV_PROJECT_ENVIRONMENT=/opt/obsei
+ARG EXTRAS="--extra apple --extra google --extra mcp --extra sql"
 WORKDIR /src
 COPY pyproject.toml uv.lock ./
+COPY packages/obsei/pyproject.toml packages/obsei/
+COPY plugins/obsei-reddit/pyproject.toml plugins/obsei-reddit/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --package obsei --no-install-workspace $EXTRAS
 COPY packages ./packages
 COPY plugins ./plugins
-RUN uv build --package obsei --out-dir /dist \
-    && uv venv /opt/obsei \
-    && uv pip install --python /opt/obsei "$(ls /dist/*.whl)[apple,google,mcp,sql]"
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --package obsei --no-editable $EXTRAS
+# Pre-install DuckDB's OpenSSL-backed extension so encrypted stores work offline, for any UID.
+RUN /opt/obsei/bin/python -c "import duckdb; duckdb.connect(config={'extension_directory': '/opt/duckdb/extensions'}).execute('INSTALL httpfs')" \
+    && chmod -R a+rX /opt/duckdb
 
 FROM python:3.12-slim-trixie
 LABEL org.opencontainers.image.source="https://github.com/obsei/obsei" \
       org.opencontainers.image.description="Privacy-first, self-hosted Voice of Customer for AI agents" \
       org.opencontainers.image.licenses="Apache-2.0"
-RUN useradd --create-home --uid 10001 obsei
+RUN useradd --no-create-home --home-dir /tmp --uid 10001 obsei \
+    && install -d -m 1777 /data
 COPY --from=build /opt/obsei /opt/obsei
-ENV PATH="/opt/obsei/bin:${PATH}" PYTHONUNBUFFERED=1
+COPY --from=build /opt/duckdb /opt/duckdb
+COPY docker/healthcheck.py /opt/obsei/healthcheck.py
+# HOME is writable for any UID so DuckDB and model caches work under `--user $(id -u):$(id -g)`.
+ENV PATH="/opt/obsei/bin:${PATH}" PYTHONUNBUFFERED=1 HOME=/tmp \
+    OBSEI_DUCKDB_EXTENSIONS=/opt/duckdb/extensions
 USER 10001
-WORKDIR /home/obsei
-# Pre-install DuckDB's OpenSSL-backed extension so encrypted stores work offline.
-RUN python -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"
+WORKDIR /data
 EXPOSE 8765
+# Probes /healthz only when the container runs `obsei serve`; one-shot commands always pass.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD ["python", "/opt/obsei/healthcheck.py"]
 ENTRYPOINT ["obsei"]
 CMD ["--help"]

@@ -22,6 +22,7 @@ DB_KEY_ENV_VAR = "OBSEI_DB_KEY"
 EXTENSIONS_ENV_VAR = "OBSEI_DUCKDB_EXTENSIONS"
 MIN_KEY_LENGTH = 16
 _ALIAS = "obsei"
+_UNENCRYPTED_HINT = "store.unencrypted: true in obsei.yaml (or pass --unencrypted where supported)"
 
 RecordRow: TypeAlias = tuple[str, str, str, datetime, str, str | None, str, str]
 InsertRow: TypeAlias = tuple[str, str, str, datetime, str, str | None, str, str, datetime, datetime]
@@ -279,8 +280,8 @@ class Store(ThemeQueries):
         """``install_extensions=False`` (air-gapped) never downloads DuckDB extensions."""
         if encryption_key is None and not allow_unencrypted:
             raise StoreError(
-                f"an encryption key is required: set {DB_KEY_ENV_VAR} or pass "
-                "allow_unencrypted=True (only when the disk is encrypted)"
+                f"an encryption key is required: set {DB_KEY_ENV_VAR}. Only on an encrypted disk, "
+                f"set {_UNENCRYPTED_HINT} instead"
             )
         if encryption_key is not None and len(encryption_key) < MIN_KEY_LENGTH:
             raise StoreError(f"encryption key must be at least {MIN_KEY_LENGTH} characters")
@@ -333,13 +334,14 @@ class Store(ThemeQueries):
                 raise EncryptionUnavailableError(
                     "writing an encrypted store needs DuckDB's httpfs extension (OpenSSL), which "
                     f"is not installed, and air-gapped mode never downloads it ({exc}). To fix, "
-                    f"{PREINSTALL_HINT}; or use the obsei container image, or rely on disk "
-                    "encryption with store.unencrypted: true."
+                    f"{PREINSTALL_HINT}; or use the obsei container image; or, only on an "
+                    f"encrypted disk, unset {DB_KEY_ENV_VAR} and set {_UNENCRYPTED_HINT}."
                 ) from None
             raise EncryptionUnavailableError(
                 "writing an encrypted store needs DuckDB's httpfs extension (OpenSSL), which "
                 f"could not be loaded: {exc}. To fix, {PREINSTALL_HINT}; or use the obsei "
-                "container image, or rely on disk encryption with allow_unencrypted=True."
+                f"container image; or, only on an encrypted disk, unset {DB_KEY_ENV_VAR} and set "
+                f"{_UNENCRYPTED_HINT}."
             ) from None
 
     def _migrate(self) -> None:

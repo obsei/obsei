@@ -33,20 +33,21 @@ send that text to another SaaS or a public LLM. obsei runs entirely inside your 
   Bedrock and Vertex through LiteLLM.
 - **AI-native.** A read-only MCP server and a Claude plugin, so agents answer questions about
   customers with cited, privacy-filtered evidence.
-- **Every language.** Feedback is classified and quoted in its own language; themes group the same
-  issue across 50+ languages with a local multilingual model.
+- **Every language.** Feedback is classified and quoted in its own language. With
+  `obsei[embeddings]`, a local multilingual model groups the same issue across 50+ languages; the
+  default offline embedder groups by wording, so each language forms its own themes.
 
 obsei provides controls that *support* compliance with laws such as the GDPR, India's DPDP Act,
 Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain the data controller.
 
 > [!NOTE]
-> 1.0 is a new codebase, not compatible with 0.0.x, and is in pre-release: install with `--pre`.
+> 1.0 is a new codebase, not compatible with 0.0.x, and is in pre-release: install it with the `>=1.0.0a1` specifier.
 > A plain `pip install obsei` still gives 0.0.15, whose code lives on the `legacy/0.0.x` branch.
 
 ## Quickstart
 
 ```bash
-uv tool install --prerelease allow "obsei[mcp]"   # or: pip install --pre "obsei[mcp]"
+uv tool install "obsei[mcp]>=1.0.0a1"   # or: pip install "obsei[mcp]>=1.0.0a1"
 mkdir voc && cd voc
 obsei init                             # obsei.yaml plus a 10-language sample dataset
 export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
@@ -63,7 +64,7 @@ until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`) or `hyb
 
 | | Built in |
 | --- | --- |
-| Sources | CSV, JSON Lines, declarative REST, webhooks, App Store (any country), App Store Connect, Google Play (official API), GitHub issues, Hacker News, Bluesky, YouTube, RSS/Atom, SQL databases and warehouses, file drops, IMAP mailboxes, any MCP server, Zendesk, Freshdesk, Intercom, Gong; Reddit as a community plugin |
+| Sources | CSV, JSON Lines, declarative REST, webhooks, App Store (any country), App Store Connect, Google Play (official API), GitHub issues, Hacker News, Bluesky, YouTube, RSS/Atom, SQL databases and warehouses, file drops, IMAP mailboxes, any MCP server, Zendesk, Freshdesk, Intercom, Gong; Reddit as an unpublished community plugin (install from Git) |
 | Enrichers | LLM classification (sentiment, intent, language, custom fields), cascade to a stronger model on low confidence |
 | Sinks | Webhook (HMAC-signed), Slack, GitHub issues, Jira, Linear, Parquet, SQL databases and warehouses |
 | Analysis | Stable themes (offline, or multilingual with `obsei[embeddings]`) with near-duplicate detection, k-anonymous views, `obsei ask` with cited answers, read-only Studio with a knowledge-graph explorer ([demo](https://docs.obsei.com/demo/)), Slack `/obsei` command |
@@ -71,8 +72,17 @@ until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`) or `hyb
 | Server | `obsei serve`: scheduled pipelines, signed webhook intake, MCP over HTTP, Studio, role-based access and SSO-proxy support |
 
 Agents: `obsei mcp` serves read-only MCP tools; the Claude Code plugin is
-`/plugin marketplace add obsei/obsei`. Docker: `ghcr.io/obsei/obsei`. See the
-[docs](https://docs.obsei.com/) and [integrations](integrations/README.md).
+`/plugin marketplace add obsei/obsei`. See the [docs](https://docs.obsei.com/) and
+[integrations](integrations/README.md).
+
+Docker (run in the project directory; images are tagged by release):
+
+<!-- x-release-please-start-version -->
+```bash
+docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
+  -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT ghcr.io/obsei/obsei:1.0.0-alpha.1 run
+```
+<!-- x-release-please-end -->
 
 ## Roadmap
 

@@ -22,7 +22,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
-from starlette.types import ASGIApp, Receive, Scope, Send
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from obsei import slackbot, studio
 from obsei.access import (
@@ -31,6 +31,7 @@ from obsei.access import (
     Authenticator,
     HostAllowlist,
     Principal,
+    Role,
     required_role,
 )
 from obsei.ask import ask
@@ -45,6 +46,16 @@ from obsei.sources.webhook import PayloadError, SignatureError, WebhookSource
 from obsei.store import Store
 
 MAX_BODY = 4 * 1024 * 1024
+SECURITY_HEADERS: tuple[tuple[bytes, bytes], ...] = (
+    (
+        b"content-security-policy",
+        b"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
+        b"connect-src 'self'; frame-ancestors 'none'; base-uri 'none'",
+    ),
+    (b"x-content-type-options", b"nosniff"),
+    (b"referrer-policy", b"no-referrer"),
+    (b"x-frame-options", b"DENY"),
+)
 
 
 AuditHook = Callable[[Principal, str], Awaitable[None]]
@@ -71,6 +82,28 @@ class AccessControl(BaseHTTPMiddleware):
             await self.audit(principal, request.url.path)
         request.state.principal = principal
         return await call_next(request)
+
+
+class SecurityHeaders:
+    """Adds a strict CSP and anti-sniffing/framing headers to every HTTP response."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def with_headers(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                headers = list(message.get("headers", []))
+                present = {name.lower() for name, _ in headers}
+                headers.extend(h for h in SECURITY_HEADERS if h[0] not in present)
+                message["headers"] = headers
+            await send(message)
+
+        await self.app(scope, receive, with_headers)
 
 
 class HostGuard:
@@ -174,12 +207,15 @@ class Handlers:
             return JSONResponse({"error": str(exc)}, status_code=502)
         return JSONResponse(result, status_code=202)
 
-    def _snapshot(self) -> str:
+    def _snapshot(self, role: Role | None) -> str:
         with self.shared_store() as s:
-            return studio.snapshot(s, k=self.k, evidence_per_theme=0).model_dump_json()
+            snap = studio.snapshot(s, k=self.k, evidence_per_theme=0)
+        return snap.model_copy(update={"role": role}).model_dump_json()
 
     async def api_snapshot(self, request: Request) -> Response:
-        body = await anyio.to_thread.run_sync(self._snapshot)
+        principal: Principal | None = getattr(request.state, "principal", None)
+        role = principal.role if principal else None
+        body = await anyio.to_thread.run_sync(self._snapshot, role)
         return Response(body, media_type="application/json")
 
     def _theme(self, theme_id: str) -> str:
@@ -304,5 +340,7 @@ def create_app(
 
         app.add_middleware(AccessControl, authenticator=auth, audit=audit)
     app.add_middleware(HostGuard, allowlist=HostAllowlist(host, config.access.allowed_hosts))
+    # Added last so it is outermost: even HostGuard's 421s carry the security headers.
+    app.add_middleware(SecurityHeaders)
     app.state.scheduler = h.scheduler
     return app

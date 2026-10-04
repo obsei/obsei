@@ -3,10 +3,8 @@
     "obsei": {
       "command": "uvx",
       "args": [
-        "--prerelease",
-        "allow",
         "--from",
-        "obsei[mcp]",
+        "obsei[mcp]>=1.0.0a1",
         "obsei",
         "mcp"
       ]

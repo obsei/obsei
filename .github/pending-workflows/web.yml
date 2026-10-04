@@ -3,13 +3,31 @@ name: Web
 
 on:
   pull_request:
-    paths: ["docs/**", "studio/**", "website/**", ".github/workflows/web.yml"]
+    paths:
+      - "docs/**"
+      - "studio/**"
+      - "website/**"
+      - "packages/obsei/src/obsei/serve.py"
+      - "packages/obsei/src/obsei/studio.py"
+      - "packages/obsei/src/obsei/studio_static/**"
+      - "packages/obsei/tests/test_studio_browser.py"
+      - ".github/workflows/web.yml"
   push:
     branches: [master]
-    paths: ["docs/**", "studio/**", "website/**"]
+    paths:
+      - "docs/**"
+      - "studio/**"
+      - "website/**"
+      - "packages/obsei/src/obsei/serve.py"
+      - "packages/obsei/src/obsei/studio.py"
+      - "packages/obsei/src/obsei/studio_static/**"
+      - "packages/obsei/tests/test_studio_browser.py"
 
 permissions:
   contents: read
+
+env:
+  UV_VERSION: "0.12.23"
 
 jobs:
   docs:
@@ -43,3 +61,28 @@ jobs:
         working-directory: studio
       - name: Committed bundle matches the TypeScript sources
         run: git diff --exit-code -- packages/obsei/src/obsei/studio_static
+
+  browser:
+    name: Studio in Chromium (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: false
+      - run: uv sync --locked
+      - run: uv run playwright install --with-deps chromium
+      - run: uv run pytest -m browser -v -rs packages/obsei/tests/test_studio_browser.py
+        env:
+          OBSEI_SCREENSHOTS: screenshots
+      - name: Fail if the browser tests were skipped
+        run: test -f screenshots/live-viewer.png
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: studio-screenshots
+          path: screenshots
+          if-no-files-found: ignore
