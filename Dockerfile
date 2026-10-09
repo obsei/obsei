@@ -2,7 +2,7 @@
 # obsei container image: one rootless image for CLI, server and MCP.
 # Dependencies come from uv.lock, so the image runs exactly what CI tested.
 
-FROM ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecce245946826e608e11c93ad4f5bba55b21 AS uv
+FROM ghcr.io/astral-sh/uv:0.12.24@sha256:3af4716e991d6956a41e573eab705d0ee08500cd829ed30293eb8472f372c65a AS uv
 
 FROM python:3.12-slim-trixie@sha256:dddfd7e07f9d15aeeca61529320492139d21cac7f0070c00609243e51e4e0016 AS build
 COPY --from=uv /uv /usr/local/bin/uv
