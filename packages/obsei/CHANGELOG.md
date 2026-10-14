@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.0-rc.4](https://github.com/obsei/obsei/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2026-10-14)
+
+
+### Features
+
+* **classify:** run the default classifier in process ([#424](https://github.com/obsei/obsei/issues/424)) ([3c45adf](https://github.com/obsei/obsei/commit/3c45adfcd0cd6652f8d4d0da077eca673ba98a59))
+* **sinks:** signed event webhooks with retries, and a notify sink ([#423](https://github.com/obsei/obsei/issues/423)) ([5d14ecd](https://github.com/obsei/obsei/commit/5d14ecda4fd8bfda64e95a706958cd813e2286ac))
+
+
+### Bug Fixes
+
+* **studio:** measure graph label height so labels never touch ([#425](https://github.com/obsei/obsei/issues/425)) ([1cfb6c2](https://github.com/obsei/obsei/commit/1cfb6c2c8d49f77e382356761d56db751b3c3fd2))
+* **teams:** accept the full routing conditions in when ([#419](https://github.com/obsei/obsei/issues/419)) ([b023999](https://github.com/obsei/obsei/commit/b02399946a8994f372e899e0a33bb246fc623ef7))
+
+
+### Documentation
+
+* positioning, docs for coding agents, governance and docker compose ([#421](https://github.com/obsei/obsei/issues/421)) ([2357581](https://github.com/obsei/obsei/commit/2357581e9a5eb78dbc27c471aabaebef2a816051))
+
 ## [1.0.0-rc.3](https://github.com/obsei/obsei/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2026-10-04)
 
 
