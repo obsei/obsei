@@ -1,7 +1,7 @@
 # obsei serve with an encrypted store in a named volume. Docs: https://docs.obsei.com/quickstart/#docker-compose
 services:
   obsei:
-    image: ghcr.io/obsei/obsei:1.0.0-rc.3 # x-release-please-version
+    image: ghcr.io/obsei/obsei:1.0.0-rc.4 # x-release-please-version
     command: ["serve", "--host", "0.0.0.0", "--port", "8765"]
     env_file: .env
     ports:
