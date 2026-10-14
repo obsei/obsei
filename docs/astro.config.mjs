@@ -1,5 +1,6 @@
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
+import starlightLlmsTxt from "starlight-llms-txt";
 
 const ogImage = "https://docs.obsei.com/og.png";
 const softwareJsonLd = {
@@ -43,6 +44,15 @@ export default defineConfig({
       social: [
         { icon: "github", label: "GitHub", href: "https://github.com/obsei/obsei" },
         { icon: "rss", label: "Blog", href: "https://blog.obsei.com/" },
+      ],
+      plugins: [
+        starlightLlmsTxt({
+          description:
+            "obsei is the self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it.",
+          details:
+            "obsei collects customer feedback (reviews, tickets, surveys, communities), redacts personal data and pseudonymizes authors at ingest, enriches it with your own models, routes it to sinks and serves it to agents through a read-only MCP server. Configuration lives in `obsei.yaml`; the CLI is `obsei`.",
+          promote: ["index*", "quickstart", "how-it-works", "configuration"],
+        }),
       ],
       editLink: { baseUrl: "https://github.com/obsei/obsei/edit/master/docs/" },
       sidebar: [

@@ -4,9 +4,9 @@
 
 # obsei
 
-**Voice of Customer without violating privacy.** Open-source, self-hosted, AI-native feedback
-analytics: collect feedback from every channel and language, redact personal data before it is
-stored, find stable themes, and let your AI agents answer questions with cited evidence.
+**Voice of Customer without violating privacy.** The self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it.
+Collect feedback from every channel and language, redact personal data before it is stored, find
+stable themes, and let your AI agents answer questions with cited evidence.
 
 > 1.0 is in pre-release and is not compatible with 0.0.x. Install it with the `>=1.0.0rc1`
 > specifier; a plain `pip install obsei` still gives 0.0.15.

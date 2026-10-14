@@ -5,7 +5,7 @@
 <h1 align="center">obsei</h1>
 
 <p align="center"><b>Voice of Customer without violating privacy.</b><br>
-Open-source, self-hosted, AI-native feedback analytics. Bring your own sources, models and agents.</p>
+The self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it.<br>Bring your own sources, models and agents.</p>
 
 <p align="center">
   <a href="https://docs.obsei.com/">Docs</a> ·
@@ -45,6 +45,7 @@ Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain t
 > [!NOTE]
 > 1.0 is a new codebase, not compatible with 0.0.x, and is in pre-release: install it with the `>=1.0.0rc1` specifier.
 > A plain `pip install obsei` still gives 0.0.15, whose code lives on the `legacy/0.0.x` branch.
+> See [Migrate from 0.0.x](https://docs.obsei.com/guides/migrate-from-0-0/).
 
 ## Quickstart
 

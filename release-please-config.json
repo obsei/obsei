@@ -31,6 +31,10 @@
         },
         {
           "type": "generic",
+          "path": "/docker-compose.yml"
+        },
+        {
+          "type": "generic",
           "path": "/blog/src/content/posts/obsei-is-back.mdx"
         }
       ]
