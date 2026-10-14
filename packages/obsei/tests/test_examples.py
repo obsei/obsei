@@ -53,7 +53,7 @@ def test_example_is_valid(path: Path) -> None:
 
     themes = config.themes
     _check_llm(config, themes.labeler, "themes.labeler")
-    if themes.embedder != "hashing" and not themes.embedder.startswith("local"):
+    if themes.embedder not in ("auto", "hashing") and not themes.embedder.startswith("local"):
         _check_llm(config, themes.embedder, "themes.embedder")
         assert config.llms[themes.embedder].embedding_model, "themes.embedder needs embedding_model"
     if config.llms:

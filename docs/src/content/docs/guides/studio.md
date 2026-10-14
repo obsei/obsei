@@ -69,7 +69,7 @@ uv run --extra embeddings obsei demo --embedder local --out docs/public/demo
 
 `obsei demo` follows `OBSEI_EGRESS_MODE` (air-gapped by default), so it loads the model only from
 the local cache (`OBSEI_MODELS_DIR`, or the fastembed cache) that `obsei models download` fills.
-`--embedder` takes the same names as `themes.embedder`: `hashing`, `local` or `local:<model>`;
+`--embedder` takes the same names as `themes.embedder`: `hashing`, `auto`, `local` or `local:<model>`;
 with the offline `hashing` embedder each language forms its own theme. The embedder that built the
 demo is recorded as `embedder` in `data.json`. Demo themes carry curated labels; real themes are
 labelled from shared keywords or by your `labeler` model.

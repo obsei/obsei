@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping, Sequence
-from typing import ClassVar, Literal, Self, TypeAlias
+from typing import ClassVar, Literal, Protocol, Self, TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError, model_validator
 
@@ -13,9 +13,9 @@ from obsei.core.protocols import Enricher, ReportsErrors
 from obsei.core.record import Enrichment, Record
 from obsei.llm.client import ChatClient, ChatMessage, JsonSchema, LlmError
 from obsei.llm.decision import (
+    Answer,
     ChoiceAnswer,
     ChoiceQuestion,
-    DecisionClient,
     Question,
     ScoreAnswer,
     ScoreQuestion,
@@ -299,6 +299,13 @@ def decision_state(record: Record) -> str:
     return f"Message ({', '.join(meta)}):\n\n{record.text[:MAX_STATE_CHARS]}"
 
 
+class Decider(Protocol):
+    @property
+    def model(self) -> str: ...
+
+    def decide(self, state: str, questions: Mapping[str, Question]) -> dict[str, Answer]: ...
+
+
 class DecisionClassifier:
     """One decision request per record, one question per output field. Answers below their
     cutoff (``min_confidence`` per field, else ``threshold``) mark the result for review."""
@@ -308,7 +315,7 @@ class DecisionClassifier:
 
     def __init__(
         self,
-        client: DecisionClient,
+        client: Decider,
         config: ClassifierConfig | None = None,
         *,
         threshold: float = 0.7,
@@ -324,9 +331,12 @@ class DecisionClassifier:
         self.failures = 0
         self.last_error: str | None = None
 
+    def _state(self, record: Record) -> str:
+        return decision_state(record)
+
     def _classify(self, record: Record) -> DecisionClassification | None:
         try:
-            answers = self.client.decide(decision_state(record), self.questions)
+            answers = self.client.decide(self._state(record), self.questions)
         except LlmError as exc:
             self.failures += 1
             self.last_error = str(exc)
@@ -386,6 +396,13 @@ class DecisionClassifier:
         return results
 
 
+class LocalClassifier(DecisionClassifier):
+    """Zero-shot models in process (``api: local``); they read the message text only."""
+
+    def _state(self, record: Record) -> str:
+        return record.text[:MAX_STATE_CHARS]
+
+
 def needs_review(enrichment: Enrichment) -> bool:
     value = enrichment.value
     return isinstance(value, dict) and value.get("review") is True
@@ -438,8 +455,8 @@ class ClassifyPluginConfig(ClassifierConfig):
     threshold: float = Field(default=0.7, ge=0.0, le=1.0)
     min_confidence: dict[str, float] = Field(
         default_factory=dict,
-        description="Per-field cutoffs for decision models (sentiment, intent or a field name); "
-        "others use threshold.",
+        description="Per-field cutoffs for decision and local models (sentiment, intent or a "
+        "field name); others use threshold.",
     )
 
     @model_validator(mode="after")
@@ -454,9 +471,20 @@ class ClassifyPluginConfig(ClassifierConfig):
 
 def build_classifier(config: ClassifyPluginConfig, ctx: Context) -> Enricher:
     endpoint = ctx.llms.get(config.llm)
-    decides = endpoint is not None and endpoint.api == "decision"
+    api = "openai" if endpoint is None else endpoint.api
+    decides = api != "openai"
     primary: Enricher
-    if decides:
+    if api == "local":
+        bare = sorted(n for n, f in config.fields.items() if f.kind == "yesno" and not f.yes_means)
+        if bare:
+            raise ValueError(f"fields {bare}: local models need yes_means and no_means for yesno")
+        primary = LocalClassifier(
+            ctx.local(config.llm),
+            config,
+            threshold=config.threshold,
+            min_confidence=config.min_confidence,
+        )
+    elif decides:
         primary = DecisionClassifier(
             ctx.decision(config.llm),
             config,
