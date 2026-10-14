@@ -1,4 +1,3 @@
-# Manual and weekly checks against real services. Move to .github/workflows/ to enable.
 name: Live checks
 
 on:
@@ -14,7 +13,7 @@ env:
 
 jobs:
   connectors:
-    name: Free connectors against live endpoints
+    name: Connectors against live endpoints
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -28,6 +27,9 @@ jobs:
       - run: uv run pytest packages/obsei/tests/live -v -rs
         env:
           OBSEI_LIVE: "1"
+          OBSEI_LIVE_SLACK_WEBHOOK: ${{ secrets.OBSEI_LIVE_SLACK_WEBHOOK }}
+          OBSEI_LIVE_LINEAR_API_KEY: ${{ secrets.OBSEI_LIVE_LINEAR_API_KEY }}
+          OBSEI_LIVE_LINEAR_TEAM_ID: ${{ secrets.OBSEI_LIVE_LINEAR_TEAM_ID }}
 
   models:
     name: Local models (GLiNER names, multilingual embeddings)

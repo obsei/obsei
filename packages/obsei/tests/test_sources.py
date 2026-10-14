@@ -236,6 +236,19 @@ def test_github_issues_skip_prs_and_follow_links() -> None:
     assert cursor == {"since": "2026-09-03T00:00:00Z"}
 
 
+def test_github_issues_skip_the_issue_at_the_cursor() -> None:
+    issue = {
+        "number": 3,
+        "title": "Seen",
+        "created_at": "2026-09-01T00:00:00Z",
+        "updated_at": "2026-09-03T00:00:00Z",
+    }
+    source = build(
+        "github_issues", {"repo": "o/r"}, ctx(lambda _: httpx.Response(200, json=[issue]))
+    )
+    assert drain(source.fetch({"since": "2026-09-03T00:00:00Z"}))[0] == []
+
+
 RSS = b"""<?xml version="1.0"?>
 <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel>
 <item><guid>a</guid><title>Bonjour</title>

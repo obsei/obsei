@@ -8,15 +8,20 @@ sidebar:
 Sinks receive only new or changed records, after redaction and enrichment. Outbound sinks are
 checked against the egress policy when the pipeline starts.
 
-| Type | What | Idempotency |
-| --- | --- | --- |
-| `webhook` | JSON batches, optional HMAC signature over `{X-Obsei-Timestamp}.{body}`; authors omitted by default | record ids in the payload |
-| `slack` | Messages for matching feedback, capped per run | at-least-once |
-| `github_issues` | One issue per matching record | hidden marker, searched before creating |
-| `jira` | One issue per matching record (Cloud with ADF, or Data Center) | `obsei-rec_...` label |
-| `linear` | One issue per matching record | marker in the description |
-| `parquet` | Parquet files for notebooks and lakes | file named by batch content |
-| `sql` | Upsert into a table in any SQLAlchemy database or warehouse | delete and insert by id |
+| Type | What | Idempotency | Status |
+| --- | --- | --- | --- |
+| `webhook` | JSON batches, optional HMAC signature over `{X-Obsei-Timestamp}.{body}`; authors omitted by default | record ids in the payload | beta |
+| `slack` | Messages for matching feedback, capped per run | at-least-once | verified |
+| `github_issues` | One issue per matching record | hidden marker, searched before creating | beta |
+| `jira` | One issue per matching record (Cloud with ADF, or Data Center) | `obsei-rec_...` label | beta |
+| `linear` | One issue per matching record | marker in the description | verified |
+| `parquet` | Parquet files for notebooks and lakes | file named by batch content | beta |
+| `sql` | Upsert into a table in any SQLAlchemy database or warehouse | delete and insert by id | beta |
+
+`verified` means a live test in
+[`packages/obsei/tests/live`](https://github.com/obsei/obsei/tree/master/packages/obsei/tests/live)
+exercises the connector end to end against the real service or data; `beta` connectors are
+covered by mocked tests only.
 
 ## Filters
 

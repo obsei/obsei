@@ -5,28 +5,34 @@ sidebar:
   order: 1
 ---
 
-| Type | What | Auth |
-| --- | --- | --- |
-| `csv`, `jsonl` | Survey exports, ticket dumps, NPS verbatims | none |
-| `rest` | Any JSON API, with page, offset, link, next-URL or cursor pagination | bearer or headers from env |
-| `webhook` | Pushed feedback via `obsei serve` (`POST /ingest/{pipeline}/{key}`) | HMAC-SHA256 |
-| `appstore` | Apple public review feed, any list of countries | none |
-| `appstoreconnect` | Your apps' reviews in every territory (official API) | `.p8` key, `obsei[apple]` |
-| `playstore` | Your apps' reviews (official Android Publisher API) | service account, `obsei[google]` |
-| `github_issues` | Issues and comments, GitHub or GitHub Enterprise | `GITHUB_TOKEN` (optional) |
-| `hackernews` | Stories and comments matching a query | none |
-| `bluesky` | Posts matching a query, optionally by language | none or app password |
-| `youtube` | Comments on videos or a whole channel | `YOUTUBE_API_KEY` |
-| `rss` | RSS 2.0 and Atom: forums, status pages, review sites | none |
-| `reddit` (community plugin, [not on PyPI](#reddit-plugin)) | Subreddit posts, comments and searches via RSS | none |
-| `sql` | Any SQLAlchemy database or warehouse, incremental by a cursor column | URL in env, `obsei[sql]` |
-| `filedrop` | New or changed CSV, JSON Lines and JSON files in a folder (SFTP drop, mounted bucket) | none |
-| `imap` | Feedback mailboxes | username and password in env |
-| `mcp` | A tool on any MCP server (stdio command or HTTP URL) | `obsei[mcp]` |
-| `zendesk` | Tickets, incremental export | email and API token |
-| `freshdesk` | Tickets updated since the last run | API key |
-| `intercom` | Conversations, in the US, EU or AU data region | access token |
-| `gong` | Call transcripts, customer speech only | access key and secret |
+| Type | What | Auth | Status |
+| --- | --- | --- | --- |
+| `csv` | Survey exports, ticket dumps, NPS verbatims | none | verified |
+| `jsonl` | Ticket dumps and other JSON Lines exports | none | beta |
+| `rest` | Any JSON API, with page, offset, link, next-URL or cursor pagination | bearer or headers from env | beta |
+| `webhook` | Pushed feedback via `obsei serve` (`POST /ingest/{pipeline}/{key}`) | HMAC-SHA256 | beta |
+| `appstore` | Apple public review feed, any list of countries | none | verified |
+| `appstoreconnect` | Your apps' reviews in every territory (official API) | `.p8` key, `obsei[apple]` | beta |
+| `playstore` | Your apps' reviews (official Android Publisher API) | service account, `obsei[google]` | beta |
+| `github_issues` | Issues and comments, GitHub or GitHub Enterprise | `GITHUB_TOKEN` (optional) | verified |
+| `hackernews` | Stories and comments matching a query | none | verified |
+| `bluesky` | Posts matching a query, optionally by language | none or app password | beta |
+| `youtube` | Comments on videos or a whole channel | `YOUTUBE_API_KEY` | beta |
+| `rss` | RSS 2.0 and Atom: forums, status pages, review sites | none | verified |
+| `reddit` (community plugin, [not on PyPI](#reddit-plugin)) | Subreddit posts, comments and searches via RSS | none | beta |
+| `sql` | Any SQLAlchemy database or warehouse, incremental by a cursor column | URL in env, `obsei[sql]` | beta |
+| `filedrop` | New or changed CSV, JSON Lines and JSON files in a folder (SFTP drop, mounted bucket) | none | beta |
+| `imap` | Feedback mailboxes | username and password in env | beta |
+| `mcp` | A tool on any MCP server (stdio command or HTTP URL) | `obsei[mcp]` | beta |
+| `zendesk` | Tickets, incremental export | email and API token | beta |
+| `freshdesk` | Tickets updated since the last run | API key | beta |
+| `intercom` | Conversations, in the US, EU or AU data region | access token | beta |
+| `gong` | Call transcripts, customer speech only | access key and secret | beta |
+
+`verified` means a live test in
+[`packages/obsei/tests/live`](https://github.com/obsei/obsei/tree/master/packages/obsei/tests/live)
+exercises the connector end to end against the real service or data; `beta` connectors are
+covered by mocked tests only.
 
 ## Field mapping
 
