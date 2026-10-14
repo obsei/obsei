@@ -59,7 +59,7 @@ class SinkEntry(PluginSpec):
         return self.key or self.type
 
 
-CONDITION_SINKS = frozenset({"slack", "jira", "linear", "github_issues", "teams"})
+CONDITION_SINKS = frozenset({"slack", "jira", "linear", "github_issues", "teams", "notify"})
 """Sinks whose ``when`` is checked on load."""
 
 

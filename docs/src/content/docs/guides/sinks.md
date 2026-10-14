@@ -5,13 +5,16 @@ sidebar:
   order: 2
 ---
 
-Sinks receive only new or changed records, after redaction and enrichment. Outbound sinks are
-checked against the egress policy when the pipeline starts.
+Sinks receive only new or changed records, after redaction and enrichment, and are not called
+when a batch has none for them. Outbound sinks are checked against the egress policy when the
+pipeline starts; `sql` checks the database host in its URL (BigQuery and Snowflake accounts count
+as their cloud hosts, SQLite files as local).
 
 | Type | What | Idempotency | Status |
 | --- | --- | --- | --- |
-| `webhook` | JSON batches, optional HMAC signature over `{X-Obsei-Timestamp}.{body}`; authors omitted by default | record ids in the payload | beta |
+| `webhook` | One CloudEvents JSON event per batch, signed per [Standard Webhooks](https://www.standardwebhooks.com/), retried; authors omitted by default | `webhook-id` per event, record ids in the payload | beta |
 | `slack` | Messages for matching feedback, capped per run | at-least-once | verified |
+| `notify` | One summary per batch to Telegram, Discord, email, Teams and 100+ services via [Apprise](https://github.com/caronc/apprise) (`obsei[notify]`) | at-least-once | beta |
 | `github_issues` | One issue per matching record | hidden marker, searched before creating | beta |
 | `jira` | One issue per matching record (Cloud with ADF, or Data Center) | `obsei-rec_...` label | beta |
 | `linear` | One issue per matching record | marker in the description | verified |
@@ -63,3 +66,95 @@ route:
 Sinks no route names still receive every record through their own `when`. The
 [Routing](/guides/routing/) guide covers the rules, the stored `route` enrichment and a full
 example.
+
+## Webhooks
+
+```yaml
+- key: hub
+  type: webhook
+  config:
+    url: https://feedback-hub.internal/obsei
+    secret_env: FEEDBACK_HUB_SECRET
+    headers: {X-Team: voc}          # optional extra headers
+    exclude: [author]               # the default: pseudonyms are never forwarded
+```
+
+Each batch is one event, a [CloudEvents 1.0](https://cloudevents.io/) JSON envelope; `source` is
+`obsei/<pipeline>/<sink key>`:
+
+```json
+{"specversion": "1.0", "id": "evt_4f0c…", "type": "obsei.records.routed",
+ "source": "obsei/support/hub", "time": "2026-10-15T09:00:00.123456+00:00",
+ "datacontenttype": "application/json", "data": {"records": [{"id": "rec_…", "text": "…"}]}}
+```
+
+The headers follow [Standard Webhooks](https://www.standardwebhooks.com/):
+
+| Header | Value |
+| --- | --- |
+| `webhook-id` | the event `id`; the same on every retry of the event, so use it to skip repeats |
+| `webhook-timestamp` | Unix seconds of the attempt |
+| `webhook-signature` | with `secret_env`: `v1,<base64 HMAC-SHA256 of "{webhook-id}.{webhook-timestamp}.{body}">` |
+
+Use a `whsec_` secret, `whsec_` followed by 24 to 64 random bytes in base64
+(`echo "whsec_$(openssl rand -base64 32)"`), and the standardwebhooks libraries take it as is. Any
+other value is used as its raw UTF-8 bytes; pass it to the libraries as bytes (Python
+`Webhook(secret.encode())`, JavaScript `new Webhook(secret, {format: "raw"})`).
+
+```python
+from standardwebhooks import Webhook  # pip install standardwebhooks
+
+event = Webhook(os.environ["FEEDBACK_HUB_SECRET"]).verify(body, headers)  # raw body bytes
+for record in event["data"]["records"]:
+    ...
+```
+
+```js
+import { Webhook } from "standardwebhooks"; // npm install standardwebhooks
+
+const event = new Webhook(process.env.FEEDBACK_HUB_SECRET).verify(rawBody, req.headers);
+```
+
+Both refuse events more than 5 minutes old. Automation tools take these events too: point an n8n
+Webhook node or a Zapier "Catch Hook" at the URL and read `data.records`.
+
+Connection errors, `429` and `5xx` replies are retried up to 3 attempts in all, waiting 1 s then
+2 s (or the reply's `Retry-After`, up to 30 s). Other `4xx` replies fail at once. If the last
+attempt fails, the run fails: the batch is not stored and the next run sends it again as a new
+event with a new `webhook-id`, so receivers should also deduplicate by record `id`.
+
+Each event's final outcome (event id, pipeline, sink, host, type, attempts, status, error) is kept
+in the store's `deliveries` table; admins read the latest 100 at `GET /api/deliveries` on
+[`obsei serve`](/guides/serve/).
+
+Earlier release candidates posted `{"records": [...]}` signed with `X-Obsei-Timestamp` and
+`X-Obsei-Signature-256`. Receivers now read `data.records` and verify the headers above.
+
+## Notifications
+
+`notify` sends one short message per batch through [Apprise](https://github.com/caronc/apprise)
+(`pip install 'obsei[notify]'`): how many records matched, then up to `max_items` (default 5)
+redacted first lines with links. It takes `when` and `max_rating` like the issue sinks. The
+Apprise URLs hold tokens, so they are read from the environment variable `urls_env` names
+(default `APPRISE_URLS`); separate several with spaces or commas.
+
+```yaml
+- type: notify
+  config:
+    urls_env: VOC_ALERT_URLS
+    when: {classify.intent: [bug, churn_risk]}
+    max_rating: 2
+```
+
+| Service | `VOC_ALERT_URLS` |
+| --- | --- |
+| Telegram | `tgram://{bot_token}/{chat_id}` |
+| Discord | `discord://{webhook_id}/{webhook_token}` |
+| Email | `mailtos://{user}:{app_password}@gmail.com?to=voc@acme.com` |
+| Microsoft Teams (Power Automate workflow) | `workflows://{host}:{port}/{workflow}/{signature}` |
+
+The [Apprise wiki](https://github.com/caronc/apprise/wiki) lists every service. Each target must
+pass the egress policy: obsei checks the service's API host (`api.telegram.org`, `discord.com`),
+the SMTP server of email, and the host in the URL for self-hosted services (`json://`, `ntfys://`
+on your server, Matrix). A service whose host obsei cannot tell, such as `ntfy://` on ntfy.sh, needs
+hybrid mode. Apprise makes its own connections, so they do not go through obsei's HTTP client.

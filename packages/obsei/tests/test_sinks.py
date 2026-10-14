@@ -1,6 +1,8 @@
+import base64
 import hashlib
 import hmac
 import json
+import time
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -14,8 +16,11 @@ from obsei.core.context import Context
 from obsei.core.protocols import Sink
 from obsei.core.registry import Registry
 from obsei.llm import EgressError, EgressPolicy
-from obsei.sinks import register
+from obsei.sinks import register, webhook
+from obsei.sinks._common import SinkConfigError
+from obsei.sinks.notify import NotifyConfig, NotifySink
 from obsei.sinks.slack import render
+from obsei.sources.webhook import WebhookSource, WebhookSourceConfig
 
 Handler = Callable[[httpx.Request], httpx.Response]
 HYBRID = EgressPolicy(mode="hybrid")
@@ -47,7 +52,14 @@ def build(
     return registry.sink(name).create(json.loads(json.dumps(config)), context)
 
 
-def test_webhook_signs_and_omits_authors(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.fixture
+def sleeps(monkeypatch: pytest.MonkeyPatch) -> list[float]:
+    waits: list[float] = []
+    monkeypatch.setattr(time, "sleep", waits.append)
+    return waits
+
+
+def test_webhook_sends_signed_events_without_authors(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("HOOK_SECRET", "topsecret")
     captured: list[httpx.Request] = []
 
@@ -61,18 +73,60 @@ def test_webhook_signs_and_omits_authors(monkeypatch: pytest.MonkeyPatch) -> Non
     result = sink.send([record("1", "Crash")])
     assert result.sent == 1
     request = captured[0]
-    stamp = request.headers["X-Obsei-Timestamp"]
-    expected = hmac.new(
-        b"topsecret", stamp.encode() + b"." + request.content, hashlib.sha256
-    ).hexdigest()
-    assert request.headers["X-Obsei-Signature-256"] == f"sha256={expected}"
-    payload = json.loads(request.content)
-    assert "author" not in payload["records"][0]
+    event = json.loads(request.content)
+    assert event["specversion"] == "1.0"
+    assert (event["type"], event["source"]) == ("obsei.records.routed", "obsei")
+    assert request.headers["webhook-id"] == event["id"] == result.deliveries[0].event_id
+    signed = f"{event['id']}.{request.headers['webhook-timestamp']}.".encode() + request.content
+    digest = hmac.new(b"topsecret", signed, hashlib.sha256).digest()
+    assert request.headers["webhook-signature"] == f"v1,{base64.b64encode(digest).decode()}"
+    intake = WebhookSource(WebhookSourceConfig(secret_env="HOOK_SECRET"), Context())
+    intake.verify(request.content, dict(request.headers))
+    assert "author" not in event["data"]["records"][0]
 
 
-def test_webhook_reports_errors() -> None:
+def test_webhook_signature_matches_standard_webhooks() -> None:
+    key = webhook.signing_key("whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw")
+    body = b'{"test": 2432232314}'
+    given = webhook.signature(key, "msg_p5jXN8AQM9LWM0D4loKWxJek", "1614265330", body)
+    assert given == "v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE="
+
+
+def test_webhook_retries_with_the_same_event_id(sleeps: list[float]) -> None:
+    replies = [
+        httpx.Response(503),
+        httpx.Response(429, headers={"Retry-After": "7"}),
+        httpx.Response(200),
+    ]
+    ids: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        ids.append(json.loads(request.content)["id"])
+        return replies.pop(0)
+
+    result = build("webhook", {"url": "http://hooks.internal/x"}, handler).send([record("1", "a")])
+    assert result.sent == 1
+    assert len(ids) == 3
+    assert len(set(ids)) == 1
+    assert sleeps == [1.0, 7.0]
+    delivery = result.deliveries[0]
+    assert (delivery.attempts, delivery.status, delivery.error) == (3, 200, None)
+
+
+def test_webhook_reports_errors(sleeps: list[float]) -> None:
     sink = build("webhook", {"url": "http://hooks.internal/x"}, lambda _: httpx.Response(503))
-    assert sink.send([record("1", "a")]).errors == ["webhook returned 503"]
+    result = sink.send([record("1", "a")])
+    assert result.errors == ["webhook returned 503"]
+    assert (result.deliveries[0].attempts, sleeps) == (3, [1.0, 2.0])
+    refused = build("webhook", {"url": "http://hooks.internal/x"}, lambda _: httpx.Response(400))
+    assert refused.send([record("1", "a")]).deliveries[0].attempts == 1
+
+    def down(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("connection refused", request=request)
+
+    unreachable = build("webhook", {"url": "http://hooks.internal/x"}, down)
+    delivery = unreachable.send([record("1", "a")]).deliveries[0]
+    assert (delivery.status, delivery.error) == (None, "webhook unreachable: connection refused")
 
 
 def test_outbound_sinks_respect_egress_policy() -> None:
@@ -181,8 +235,52 @@ def test_cross_origin_redirects_drop_credentials(monkeypatch: pytest.MonkeyPatch
     assert sink.send([record("1", "Crash")]).sent == 1
     first, hop = seen
     assert first.headers["X-Api-Key"] == "k"
-    assert "X-Obsei-Signature-256" in first.headers
+    assert "webhook-signature" in first.headers
     assert hop.url.host == "other.internal"
     assert hop.content == first.content
-    for name in ("X-Api-Key", "Authorization", "X-Obsei-Signature-256"):
+    for name in ("X-Api-Key", "Authorization", "webhook-signature"):
         assert name not in hop.headers
+
+
+def notify_sink(config: dict[str, object], policy: EgressPolicy = HYBRID) -> NotifySink:
+    return NotifySink(NotifyConfig.model_validate(config), Context(egress=policy))
+
+
+def test_notify_targets_must_pass_egress(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("APPRISE_URLS", "tgram://123456:ABCdef/987654")
+    with pytest.raises(EgressError, match=r"api\.telegram\.org"):
+        notify_sink({}, EgressPolicy())
+    notify_sink({}, EgressPolicy(mode="private", allowed_hosts=frozenset({"api.telegram.org"})))
+    monkeypatch.setenv("APPRISE_URLS", "mailtos://u:p@example.com?smtp=smtp.example.com")
+    with pytest.raises(EgressError, match=r"smtp\.example\.com"):
+        notify_sink({}, EgressPolicy())
+    monkeypatch.setenv("APPRISE_URLS", "ntfy://alerts")
+    with pytest.raises(EgressError, match="hybrid"):
+        notify_sink({}, EgressPolicy(mode="private"))
+    notify_sink({})
+    monkeypatch.setenv("APPRISE_URLS", "nonsense://x")
+    with pytest.raises(SinkConfigError, match="invalid Apprise URL"):
+        notify_sink({})
+
+
+def test_notify_sends_one_summary_per_batch(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("TEAM_ALERTS", "json://alerts.internal/obsei")
+    sink = notify_sink(
+        {"urls_env": "TEAM_ALERTS", "when": {"classify.intent": ["bug"]}, "max_items": 1}
+    )
+    sent: list[dict[str, str]] = []
+
+    def notify(**message: str) -> bool:
+        sent.append(message)
+        return True
+
+    monkeypatch.setattr(sink.targets[0], "notify", notify)
+    batch = [record("1", "Crash on login"), record("2", "love it", "praise"), record("3", "Freeze")]
+    result = sink.send(batch)
+    assert (result.sent, result.skipped) == (2, 1)
+    assert sent[0]["title"] == "obsei: 2 matching feedback item(s)"
+    assert sent[0]["body"] == "- [bug] Crash on login\n  https://example.com/r\n…and 1 more."
+    assert sink.send([record("2", "love it", "praise")]).skipped == 1
+    assert len(sent) == 1
+    monkeypatch.setattr(sink.targets[0], "notify", lambda **_: False)
+    assert sink.send(batch).errors == ["notify failed for JSON"]

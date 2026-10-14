@@ -15,9 +15,10 @@ from obsei import Enrichment, Record, SourceRef
 from obsei.core.context import Context
 from obsei.core.protocols import Sink, Source
 from obsei.core.registry import Registry
-from obsei.llm import EgressPolicy
+from obsei.llm import EgressError, EgressPolicy
 from obsei.mcp_server import create_server
 from obsei.sinks import register as register_sinks
+from obsei.sinks.sql import SqlSink, SqlSinkConfig
 from obsei.sources import register as register_sources
 from obsei.sources.imap import ImapSource
 from obsei.sources.mcp_client import McpClientSource
@@ -282,6 +283,22 @@ def test_sql_sink_upserts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
             sa.text("SELECT id, text, author_pseudonym FROM obsei_feedback ORDER BY text")
         ).all()
     assert [(r[1], r[2]) for r in rows] == [("a edited", None), ("b", None)]
+
+
+@pytest.mark.parametrize(
+    ("url", "host"),
+    [
+        ("postgresql://u:p@db.example.com/dwh", "db.example.com"),
+        ("snowflake://u:p@acme/feedback", "acme.snowflakecomputing.com"),
+        ("bigquery://project/dataset", "bigquery.googleapis.com"),
+    ],
+)
+def test_sql_sink_respects_egress_policy(
+    monkeypatch: pytest.MonkeyPatch, url: str, host: str
+) -> None:
+    monkeypatch.setenv("DWH_URL", url)
+    with pytest.raises(EgressError, match=host.replace(".", r"\.")):
+        SqlSink(SqlSinkConfig(url_env="DWH_URL"), Context())
 
 
 def test_gong_keeps_only_customer_speech(monkeypatch: pytest.MonkeyPatch) -> None:

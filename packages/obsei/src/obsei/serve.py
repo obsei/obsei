@@ -263,6 +263,15 @@ class Handlers:
             }
         )
 
+    def _deliveries(self) -> str:
+        with self.shared_store() as s:
+            rows = s.deliveries()
+        return "[" + ",".join(d.model_dump_json() for d in rows) + "]"
+
+    async def api_deliveries(self, request: Request) -> Response:
+        body = await anyio.to_thread.run_sync(self._deliveries)
+        return Response(body, media_type="application/json")
+
     async def api_ask(self, request: Request) -> Response:
         question = str((await request.json()).get("question", "")).strip()
         if not question:
@@ -347,6 +356,7 @@ def create_app(
             Route("/api/themes/{theme}", h.api_theme, methods=["GET"]),
             Route("/api/ask", h.api_ask, methods=["POST"]),
             Route("/api/runs", h.api_runs, methods=["GET"]),
+            Route("/api/deliveries", h.api_deliveries, methods=["GET"]),
             Route("/slack/commands", h.slack, methods=["POST"]),
             Mount("/studio", StaticFiles(directory=studio.static_dir(), html=True), name="studio"),
         ]

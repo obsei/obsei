@@ -19,6 +19,7 @@ RANK: dict[Role, int] = {"viewer": 1, "analyst": 2, "admin": 3}
 PUBLIC_PATHS = ("/healthz", "/ingest/", "/studio", "/slack/")
 RULES: tuple[tuple[str, Role], ...] = (
     ("/api/runs", "admin"),
+    ("/api/deliveries", "admin"),
     ("/api/themes/", "analyst"),
     ("/api/ask", "analyst"),
     ("/mcp", "analyst"),

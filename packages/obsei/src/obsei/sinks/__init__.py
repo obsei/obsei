@@ -5,6 +5,7 @@ from obsei.core.registry import Registry
 from obsei.sinks.github import GitHubIssueSink, GitHubIssueSinkConfig
 from obsei.sinks.jira import JiraConfig, JiraSink
 from obsei.sinks.linear import LinearConfig, LinearSink
+from obsei.sinks.notify import NotifyConfig, NotifySink
 from obsei.sinks.parquet import ParquetConfig, ParquetSink
 from obsei.sinks.slack import SlackConfig, SlackSink
 from obsei.sinks.sql import SqlSink, SqlSinkConfig
@@ -19,6 +20,7 @@ def register(registry: Registry) -> None:
     registry.add_sink("jira", factory(JiraConfig, JiraSink))
     registry.add_sink("linear", factory(LinearConfig, LinearSink))
     registry.add_sink("sql", factory(SqlSinkConfig, SqlSink))
+    registry.add_sink("notify", factory(NotifyConfig, NotifySink))
 
 
 __all__ = ["register"]

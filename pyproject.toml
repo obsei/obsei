@@ -15,7 +15,7 @@ obsei-typeform = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "obsei[apple,google,mcp,sql]",
+    "obsei[apple,google,mcp,notify,sql]",
     "obsei-reddit",
     "obsei-teams",
     "obsei-typeform",

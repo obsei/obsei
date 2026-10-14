@@ -10,7 +10,7 @@ sidebar:
 | `csv` | Survey exports, ticket dumps, NPS verbatims | none | verified |
 | `jsonl` | Ticket dumps and other JSON Lines exports | none | beta |
 | `rest` | Any JSON API, with page, offset, link, next-URL or cursor pagination | bearer or headers from env | beta |
-| `webhook` | Pushed feedback via `obsei serve` (`POST /ingest/{pipeline}/{key}`) | HMAC-SHA256 | beta |
+| `webhook` | Pushed feedback via `obsei serve` (`POST /ingest/{pipeline}/{key}`) | Standard Webhooks signature | beta |
 | `appstore` | Apple public review feed, any list of countries | none | verified |
 | `appstoreconnect` | Your apps' reviews in every territory (official API) | `.p8` key, `obsei[apple]` | beta |
 | `playstore` | Your apps' reviews (official Android Publisher API) | service account, `obsei[google]` | beta |

@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import hmac
 import json
@@ -64,10 +65,11 @@ def client(monkeypatch: pytest.MonkeyPatch, store: Store) -> TestClient:
 
 def signed(body: bytes, stamp: int | None = None) -> dict[str, str]:
     sent = str(int(time.time()) if stamp is None else stamp)
-    digest = hmac.new(SECRET.encode(), sent.encode() + b"." + body, hashlib.sha256).hexdigest()
+    digest = hmac.new(SECRET.encode(), f"evt_1.{sent}.".encode() + body, hashlib.sha256).digest()
     return {
-        "X-Obsei-Timestamp": sent,
-        "X-Obsei-Signature-256": f"sha256={digest}",
+        "webhook-id": "evt_1",
+        "webhook-timestamp": sent,
+        "webhook-signature": f"v1,{base64.b64encode(digest).decode()}",
         "Content-Type": "application/json",
     }
 
@@ -100,7 +102,7 @@ def test_ingest_verifies_signature_and_redacts(client: TestClient, store: Store)
     assert (
         client.post("/ingest/support/nope", content=body, headers=signed(body)).status_code == 404
     )
-    bad = {"X-Obsei-Signature-256": "sha256=ü".encode("latin-1")}
+    bad = {**signed(body), "webhook-signature": "v1,ü".encode("latin-1")}
     assert client.post("/ingest/support/tickets", content=body, headers=bad).status_code == 401  # type: ignore[arg-type]
 
 
@@ -109,9 +111,9 @@ def test_ingest_refuses_replays_and_untimestamped_signatures(client: TestClient)
     stale = signed(body, stamp=int(time.time()) - 600)
     assert client.post("/ingest/support/tickets", content=body, headers=stale).status_code == 401
     body_only = hmac.new(SECRET.encode(), body, hashlib.sha256).hexdigest()
-    untimed = {"X-Obsei-Signature-256": f"sha256={body_only}"}
+    untimed = {"X-Hub-Signature-256": f"sha256={body_only}"}
     assert client.post("/ingest/support/tickets", content=body, headers=untimed).status_code == 401
-    wrong_time = {**signed(body), "X-Obsei-Timestamp": str(int(time.time()) + 1)}
+    wrong_time = {**signed(body), "webhook-timestamp": str(int(time.time()) + 1)}
     assert (
         client.post("/ingest/support/tickets", content=body, headers=wrong_time).status_code == 401
     )

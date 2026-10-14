@@ -69,7 +69,7 @@ A CSV of eight sample tickets in seven languages lets you try it locally:
 ## Social listening
 
 Bluesky (English and Portuguese), Hacker News, YouTube comments, a forum RSS feed and a Mastodon
-hashtag through the REST source, delivered to an internal service as HMAC-signed webhooks.
+hashtag through the REST source, delivered to an internal service as signed webhooks.
 
 <Pipeline compact sources={["Bluesky", "Hacker News", "YouTube", "RSS", "Mastodon (REST)"]} steps={["Redact", "Classify", "Store"]} outputs={["Signed webhook"]} />
 

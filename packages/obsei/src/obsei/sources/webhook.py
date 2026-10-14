@@ -3,9 +3,10 @@
 Map ``fields.id`` and ``fields.created_at`` so redeliveries are recognised as unchanged;
 without a timestamp the receipt time is used and a redelivery counts as an edit.
 
-Senders sign ``{X-Obsei-Timestamp}.{body}``; requests more than ``max_age_seconds`` old are
-refused, so a captured request cannot be replayed later. Body-only signatures (GitHub style) are
-accepted only with ``require_timestamp: false``. Each request is parsed in full before anything is
+Senders sign per Standard Webhooks (``webhook-id``, ``webhook-timestamp``, ``webhook-signature``);
+requests more than ``max_age_seconds`` old are refused, so a captured request cannot be replayed
+later. Body-only signatures (GitHub's ``X-Hub-Signature-256``) are accepted only with
+``require_timestamp: false``. Each request is parsed in full before anything is
 stored: one bad item rejects the whole request, and items without text are skipped.
 """
 
@@ -25,10 +26,10 @@ from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError, m
 from obsei.core.context import Context
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record
+from obsei.sinks.webhook import signature, signing_key
 from obsei.sources._common import FieldMap, lookup, map_item
 
-SIGNATURE_HEADERS = ("x-obsei-signature-256", "x-hub-signature-256")
-TIMESTAMP_HEADER = "x-obsei-timestamp"
+GITHUB_SIGNATURE_HEADER = "x-hub-signature-256"
 
 
 class WebhookSourceConfig(BaseModel):
@@ -77,30 +78,34 @@ class WebhookSource:
     def __init__(self, config: WebhookSourceConfig, ctx: Context) -> None:
         self.config = config
         self.ctx = ctx
-        self.secret = os.environ.get(config.secret_env, "").encode() if config.secret_env else b""
-        if config.secret_env and not self.secret:
+        secret = os.environ.get(config.secret_env, "") if config.secret_env else ""
+        if config.secret_env and not secret:
             raise SignatureError(f"{config.secret_env} is not set")
+        self.secret = signing_key(secret)
         self.pending: list[Record] = []
 
     def verify(self, body: bytes, headers: dict[str, str], now: float | None = None) -> None:
         if not self.secret:
             return
-        stamp = headers.get(TIMESTAMP_HEADER, "")
+        stamp = headers.get("webhook-timestamp", "")
         if stamp:
             try:
                 sent = int(stamp)
             except ValueError:
-                raise SignatureError("invalid X-Obsei-Timestamp") from None
+                raise SignatureError("invalid webhook-timestamp") from None
             if abs((now or time.time()) - sent) > self.config.max_age_seconds:
-                raise SignatureError("stale request: X-Obsei-Timestamp is outside the window")
-            signed = stamp.encode() + b"." + body
+                raise SignatureError("stale request: webhook-timestamp is outside the window")
+            event_id = headers.get("webhook-id", "")
+            if not event_id:
+                raise SignatureError("missing webhook-id")
+            expected = signature(self.secret, event_id, stamp, body)
+            given = headers.get("webhook-signature", "").split()
         elif self.config.require_timestamp:
-            raise SignatureError("missing X-Obsei-Timestamp")
+            raise SignatureError("missing webhook-timestamp")
         else:
-            signed = body
-        expected = "sha256=" + hmac.new(self.secret, signed, hashlib.sha256).hexdigest()
-        given = next((headers[h] for h in SIGNATURE_HEADERS if h in headers), "")
-        if not hmac.compare_digest(expected.encode(), given.encode()):
+            expected = "sha256=" + hmac.new(self.secret, body, hashlib.sha256).hexdigest()
+            given = [headers.get(GITHUB_SIGNATURE_HEADER, "")]
+        if not any(hmac.compare_digest(expected.encode(), g.encode()) for g in given):
             raise SignatureError("invalid or missing signature")
 
     def parse(self, payload: JsonValue) -> Delivery:
