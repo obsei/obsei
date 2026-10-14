@@ -109,6 +109,8 @@ jobs:
           load: true
           push: false
           tags: obsei:ci
+      - name: Compose file is valid
+        run: cp .env.example .env && docker compose config -q
       - run: docker run --rm obsei:ci --version
       - run: docker run --rm obsei:ci doctor
       - name: Quickstart in the image, offline with an encrypted store

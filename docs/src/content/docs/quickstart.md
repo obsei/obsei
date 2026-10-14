@@ -93,3 +93,21 @@ docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
 Images are tagged by release (`1.0.0-rc.3`); there is no `latest` tag yet. `--user` keeps the
 database and outputs owned by you.
 <!-- x-release-please-end -->
+
+## Docker Compose
+
+[`docker-compose.yml`](https://github.com/obsei/obsei/blob/master/docker-compose.yml) runs
+`obsei serve` with the store in a named volume and your `obsei.yaml` mounted read-only. Copy it and
+[`.env.example`](https://github.com/obsei/obsei/blob/master/.env.example) into your project
+directory:
+
+```bash
+cp .env.example .env    # fill in OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT and OBSEI_API_TOKEN
+docker compose up -d
+docker compose ps       # healthy once /healthz answers
+```
+
+Studio is at `http://localhost:8765/studio/` and MCP at `http://localhost:8765/mcp`, both behind
+`OBSEI_API_TOKEN` (see [Server and webhooks](/guides/serve/)). The port is published on
+`127.0.0.1` only; change the mapping to expose it. Files your pipelines read, such as a CSV,
+need their own mount under `/data`.

@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "obsei"
 dynamic = ["version"]
-description = "Privacy-first, self-hosted, AI-native Voice of Customer. Bring your own sources, models and agents."
+description = "The self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it."
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
