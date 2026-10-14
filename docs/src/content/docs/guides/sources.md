@@ -23,7 +23,7 @@ sidebar:
 | `sql` | Any SQLAlchemy database or warehouse, incremental by a cursor column | URL in env, `obsei[sql]` | beta |
 | `filedrop` | New or changed CSV, JSON Lines and JSON files in a folder (SFTP drop, mounted bucket) | none | beta |
 | `imap` | Feedback mailboxes | username and password in env | beta |
-| `mcp` | A tool on any MCP server (stdio command or HTTP URL) | `obsei[mcp]` | beta |
+| `mcp` | A tool on any MCP server (stdio command or HTTP URL) | none | beta |
 | `zendesk` | Tickets, incremental export | email and API token | beta |
 | `freshdesk` | Tickets updated since the last run | API key | beta |
 | `intercom` | Conversations, in the US, EU or AU data region | access token | beta |
@@ -92,7 +92,7 @@ More complete setups are on the [Examples](/examples/) page.
 ```bash
 pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 # or, with uv tool:
-uv tool install "obsei[mcp]>=1.0.0rc1" \
+uv tool install "obsei>=1.0.0rc1" \
   --with "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 ```
 

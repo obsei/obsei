@@ -1,0 +1,20 @@
+{
+  "name": "obsei",
+  "interface": {
+    "displayName": "obsei"
+  },
+  "plugins": [
+    {
+      "name": "obsei",
+      "source": {
+        "source": "local",
+        "path": "./integrations/claude/obsei"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

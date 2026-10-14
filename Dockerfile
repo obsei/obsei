@@ -8,7 +8,7 @@ FROM python:3.12-slim-trixie@sha256:dddfd7e07f9d15aeeca61529320492139d21cac7f007
 COPY --from=uv /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never \
     UV_FROZEN=1 UV_NO_DEV=1 UV_PROJECT_ENVIRONMENT=/opt/obsei
-ARG EXTRAS="--extra apple --extra google --extra mcp --extra sql"
+ARG EXTRAS="--extra apple --extra google --extra sql"
 WORKDIR /src
 COPY pyproject.toml uv.lock ./
 COPY packages/obsei/pyproject.toml packages/obsei/

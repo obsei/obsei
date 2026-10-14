@@ -26,7 +26,7 @@ Install a plugin from PyPI once it is published, for example:
 ```bash
 pip install obsei-typeform
 # uv tool: add it with --with, and keep your extras
-uv tool install --force "obsei[mcp]>=1.0.0rc1" --with obsei-typeform
+uv tool install --force "obsei>=1.0.0rc1" --with obsei-typeform
 ```
 
 Until then, install it from Git:
@@ -36,7 +36,7 @@ pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plug
 pip install "obsei-typeform @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-typeform"
 pip install "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"
 # uv tool: repeat --with for each plugin
-uv tool install --force "obsei[mcp]>=1.0.0rc1" \
+uv tool install --force "obsei>=1.0.0rc1" \
   --with "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"
 ```
 

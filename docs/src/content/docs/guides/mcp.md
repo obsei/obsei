@@ -5,7 +5,7 @@ sidebar:
   order: 6
 ---
 
-`obsei mcp` (install `obsei[mcp]`) serves four read-only tools over stdio:
+`obsei mcp` serves four read-only tools over stdio:
 
 | Tool | Use |
 | --- | --- |
@@ -24,16 +24,17 @@ pseudonyms. The server also offers a `voc_report` prompt.
 /plugin install obsei@obsei
 ```
 
-The plugin adds the MCP server and a `voice-of-customer` skill.
+The plugin adds the MCP server and a `voice-of-customer` skill. Codex, Copilot, VS Code, Cursor,
+Gemini and other tools: see [Use obsei from your AI tool](/guides/ai-tools/).
 
-## Claude Desktop, Cursor, VS Code and others
+## Claude Desktop and other clients
 
 ```json
 {
   "mcpServers": {
     "obsei": {
       "command": "uvx",
-      "args": ["--from", "obsei[mcp]>=1.0.0rc1", "obsei", "mcp"],
+      "args": ["--from", "obsei>=1.0.0rc1", "obsei", "mcp"],
       "env": { "OBSEI_DB": "/path/to/obsei.duckdb", "OBSEI_DB_KEY": "..." }
     }
   }

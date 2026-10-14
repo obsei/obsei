@@ -1,7 +1,7 @@
 """Pull feedback from any MCP server's tool (CRM, data platform, internal agents).
 
-Needs ``pip install 'obsei[mcp]'``. The tool's structured result (or JSON text) is mapped with
-``fields``; ``since_argument`` receives the newest timestamp seen for incremental pulls.
+The tool's structured result (or JSON text) is mapped with ``fields``; ``since_argument``
+receives the newest timestamp seen for incremental pulls.
 """
 
 from __future__ import annotations
@@ -75,11 +75,9 @@ class McpClientSource:
         return StdioServerParameters(command=command[0], args=command[1:], env=env or None)
 
     async def _call(self, arguments: dict[str, JsonValue]) -> JsonValue:
-        try:
-            from mcp.client import Client  # noqa: PLC0415
-            from mcp.types import TextContent  # noqa: PLC0415
-        except ImportError:
-            raise McpClientError("the mcp source needs: pip install 'obsei[mcp]'") from None
+        from mcp.client import Client  # noqa: PLC0415
+        from mcp.types import TextContent  # noqa: PLC0415
+
         async with Client(self._target()) as client:
             result = await client.call_tool(self.config.tool, arguments)
         if result.is_error:

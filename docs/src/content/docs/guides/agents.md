@@ -43,7 +43,8 @@ Two transports serve the same tools:
 | stdio | `obsei mcp` | opens the store read-only on the local machine |
 | streamable HTTP | `obsei serve`, at `/mcp` | analyst role: `Authorization: Bearer <token>` or your SSO proxy |
 
-Setup for Claude, Cursor, VS Code and other clients is in [MCP and agents](/guides/mcp/).
+Setup for Claude, Codex, Copilot, Cursor, Gemini and other tools is in
+[Use obsei from your AI tool](/guides/ai-tools/).
 
 ## Customer text is untrusted input
 
@@ -70,7 +71,7 @@ the agent should run, so you can check its work. Agents can read the whole docs 
 > https://docs.obsei.com/llms-full.txt first. Don't put secrets in obsei.yaml.
 
 ```bash
-uv tool install "obsei[mcp]>=1.0.0rc1"
+uv tool install "obsei>=1.0.0rc1"
 mkdir voc && cd voc && obsei init
 export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
 export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."   # from you, not invented
