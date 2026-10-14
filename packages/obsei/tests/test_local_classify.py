@@ -218,7 +218,7 @@ def test_models_download_fetches_the_classifier(monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setattr("obsei.cli.find_spec", lambda name: name == "gliner2")
     result = CliRunner().invoke(app, ["models", "download", "--dir", "/models"])
     assert result.exit_code == 0, result.output
-    assert fetched == [(LOCAL_CLASSIFIER, "/models")]
+    assert fetched == [(LOCAL_CLASSIFIER, str(Path("/models")))]
 
     monkeypatch.setattr("obsei.cli.find_spec", lambda name: False)
     result = CliRunner().invoke(app, ["models", "download"])
