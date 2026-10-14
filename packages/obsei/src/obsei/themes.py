@@ -41,7 +41,11 @@ _PLACEHOLDER = re.compile(r"<[A-Z0-9_]+>")
 class ThemesConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    embedder: str = Field(default="hashing", description="'hashing' or an llms name.")
+    embedder: str = Field(
+        default="auto",
+        description="'auto' (local when obsei[embeddings] is installed, else hashing), "
+        "'hashing', 'local', 'local:<model>' or an llms name.",
+    )
     similarity: float | None = Field(
         default=None,
         gt=0,

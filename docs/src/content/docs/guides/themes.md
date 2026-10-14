@@ -18,7 +18,7 @@ dashboards, tickets and agents can refer to them over time.
 
 ```yaml
 themes:
-  embedder: hashing        # offline, any script; or local, or an llms name with embedding_model
+  embedder: auto           # local when obsei[embeddings] is installed, else hashing; or an llms name
   similarity: null         # default 0.3 hashing, 0.65 local multilingual, 0.75 other models
   duplicate_similarity: 0.9
   labeler: ollama          # llms name; without it, keyword labels
@@ -35,6 +35,9 @@ uv tool install --force "obsei[mcp,embeddings]>=1.0.0rc1"   # or: pip install "o
 obsei models download --dir /models      # once, with network
 export OBSEI_MODELS_DIR=/models          # air-gapped runs load it from here
 ```
+
+With the extra installed, the default `embedder: auto` uses this model; set `embedder: local` to
+fail instead of falling back to `hashing` when it is missing:
 
 ```yaml
 themes:
@@ -54,7 +57,7 @@ themes:
   embedder: ollama         # the llms name, not "local"
 ```
 
-`hashing`, `local` and `local:<model>` always mean the built-in embedders, so do not use them as
+`auto`, `hashing`, `local` and `local:<model>` always mean the built-in embedders, so do not use them as
 `llms` names for an embedding endpoint.
 
 ## k-anonymity

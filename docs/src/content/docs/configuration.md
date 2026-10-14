@@ -24,7 +24,9 @@ egress:                     # optional; otherwise OBSEI_EGRESS_MODE / OBSEI_EGRE
   allowed_hosts: [my-tenant.openai.azure.com]
 
 llms:
-  local:
+  default:
+    api: local                # in-process classifier (obsei[local])
+  ollama:
     base_url: http://localhost:11434/v1
     model: qwen3:8b
   azure:
@@ -44,7 +46,7 @@ pipelines:
         config: {app_id: "284882215", countries: [us, de, br, jp, in, ng]}
     enrichers:
       - type: classify
-        config: {llm: local, fallback_llm: azure, threshold: 0.7}
+        config: {llm: default, fallback_llm: azure, threshold: 0.7}
     sinks:
       - type: slack
         config: {when: {classify.intent: [bug, churn_risk]}}
@@ -60,11 +62,11 @@ Enrichers run in the order listed, on new or changed records only.
 | Type | What | Model |
 | --- | --- | --- |
 | `filter` | One yes/no question per record; matching records are tagged or dropped | decision |
-| `classify` | Sentiment, intent, language and your own fields, with a confidence | chat or decision |
+| `classify` | Sentiment, intent, language and your own fields, with a confidence | local, decision or chat |
 
 `classify` takes `llm`, `fallback_llm`, `threshold`, `min_confidence`, `sentiments`, `intents` and
-`fields`; see [Models](/guides/models/#decision-models) for decision endpoints, option
-descriptions and cutoffs. Put `filter` first so dropped records never reach the classifier:
+`fields`; see [Models](/guides/models/) for local and decision endpoints, option descriptions and
+cutoffs. Put `filter` first so dropped records never reach the classifier:
 
 ```yaml
 enrichers:
@@ -77,7 +79,7 @@ enrichers:
       threshold: 0.8             # probability of yes from which a record matches (default 0.5)
       action: drop               # or tag (default): keep it with filter.match: true
   - type: classify
-    config: {llm: julia, fallback_llm: local}
+    config: {llm: julia, fallback_llm: ollama}
 ```
 
 Dropped records are not classified, delivered or stored; the run summary counts them
@@ -92,7 +94,7 @@ only the question, the answer and the cited records (redacted, as stored) and an
 statement in the answer supported by the quoted records?".
 
 ```yaml
-ask_llm: local
+ask_llm: ollama
 ask_judge: kev               # an llms entry with api: decision
 ask_judge_threshold: 0.5     # default
 ```

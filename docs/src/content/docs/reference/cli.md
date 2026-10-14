@@ -12,7 +12,7 @@ description: obsei command reference.
 | `obsei ask QUESTION [-c FILE] [--db PATH]` | Answer from your feedback with citations; with `ask_judge`, also a grounding score |
 | `obsei studio --out DIR [-c FILE] [--db PATH]` | Export a static Studio snapshot |
 | `obsei demo [--out DIR] [--embedder hashing\|local\|local:MODEL] [--decision-url-env VAR [--decision-model NAME] [--save-labels FILE]]` | Build the synthetic multilingual demo (default: offline `hashing` embedder and the committed decision-model labels) |
-| `obsei models download [--embeddings MODEL] [--dir DIR]` | Fetch the local multilingual embedding model for offline use |
+| `obsei models download [--embeddings MODEL] [--classifier MODEL ...] [--dir DIR]` | Fetch the local embedding model (`obsei[embeddings]`) and classifier models (`obsei[local]`) for offline use; by default, those of the installed extras |
 | `obsei mcp [-c FILE] [--db PATH]` | MCP server over stdio (read-only) |
 | `obsei serve [-c FILE] [--db PATH] [--host] [--port]` | Scheduled pipelines, webhook intake, MCP over HTTP, Studio (see [Server](/guides/serve/)) |
 | `obsei export --author HANDLE [--out FILE] [-c FILE] [--db PATH] [--unencrypted]` | Export one author's records |

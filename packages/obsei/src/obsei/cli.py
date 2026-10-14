@@ -10,6 +10,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from importlib import resources
+from importlib.util import find_spec
 from itertools import islice
 from pathlib import Path
 from typing import Annotated
@@ -45,6 +46,7 @@ from obsei.demo import (
 from obsei.llm import EgressPolicy
 from obsei.llm.client import LlmError, LlmUnreachableError
 from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, LocalEmbedder
+from obsei.llm.local import LOCAL_CLASSIFIER, fetch
 from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
 from obsei.runner import run_pipelines
 from obsei.store import (
@@ -536,16 +538,10 @@ def themes(
 
 def _llm_hint(cfg: ObseiConfig, name: str) -> str:
     endpoint = cfg.llms.get(name)
-    if endpoint is None:
+    if endpoint is None or endpoint.api != "openai":
         return (
-            f"hint: add an llms entry named {name!r} to obsei.yaml (or set ask_llm), "
-            "e.g. a local Ollama at http://localhost:11434/v1"
-        )
-    if endpoint.api == "decision":
-        return (
-            f"hint: start the decision model server for {endpoint.address} (for llama.cpp: "
-            "'llama serve -hf ggml-org/Julia-1-GGUF'), or point llms."
-            f"{name} in obsei.yaml at a reachable endpoint"
+            "hint: ask needs a chat model: add one under llms in obsei.yaml and set ask_llm to "
+            "its name, e.g. a local Ollama at http://localhost:11434/v1"
         )
     return (
         f"hint: start the model server at {endpoint.base_url} (for Ollama: 'ollama serve' and "
@@ -579,7 +575,8 @@ def ask(
         except LlmUnreachableError as exc:
             raise _fail(f"{exc}\n{_llm_hint(cfg, cfg.ask_llm)}") from None
         except KeyError as exc:
-            hint = "" if cfg.ask_llm in cfg.llms else f"\n{_llm_hint(cfg, cfg.ask_llm)}"
+            chat = cfg.llms.get(cfg.ask_llm)
+            hint = "" if chat and chat.api == "openai" else f"\n{_llm_hint(cfg, cfg.ask_llm)}"
             raise _fail(f"{exc.args[0] if exc.args else exc}{hint}") from None
         except (OSError, RuntimeError) as exc:
             raise _fail(exc) from None
@@ -674,15 +671,39 @@ app.add_typer(models_app, name="models")
 
 @models_app.command("download")
 def models_download(
-    embeddings: Annotated[str, typer.Option(help="Embedding model for themes.")] = LOCAL_MODEL,
+    embeddings: Annotated[
+        str | None,
+        typer.Option(
+            help=f"Embedding model for themes [default: {LOCAL_MODEL} with obsei[embeddings]]."
+        ),
+    ] = None,
+    classifier: Annotated[
+        list[str] | None,
+        typer.Option(
+            help=f"Model for 'api: local', repeatable "
+            f"[default: {LOCAL_CLASSIFIER} with obsei[local]]."
+        ),
+    ] = None,
     directory: Annotated[
         Path | None, typer.Option("--dir", envvar=MODELS_DIR_ENV, help="Model cache directory.")
     ] = None,
 ) -> None:
-    """Fetch the multilingual embedding model so 'themes.embedder: local' works offline."""
+    """Fetch the local embedding and classifier models so they work offline (air-gapped)."""
+    if embeddings is None and find_spec("fastembed"):
+        embeddings = LOCAL_MODEL
+    if classifier is None:
+        classifier = [LOCAL_CLASSIFIER] if find_spec("gliner2") else []
+    if not embeddings and not classifier:
+        raise _fail("nothing to download: pip install 'obsei[local]' or 'obsei[embeddings]' first")
+    cache = str(directory) if directory else None
     try:
-        LocalEmbedder(embeddings, cache_dir=str(directory) if directory else None, offline=False)
+        if embeddings:
+            LocalEmbedder(embeddings, cache_dir=cache, offline=False)
+            typer.echo(f"downloaded {embeddings}")
+        for model in classifier:
+            fetch(model, offline=False, cache_dir=cache)
+            typer.echo(f"downloaded {model}")
     except LlmError as exc:
         raise _fail(exc) from None
-    where = directory or os.environ.get(MODELS_DIR_ENV) or "the fastembed cache"
-    typer.echo(f"downloaded {embeddings} to {where}; set {MODELS_DIR_ENV} to use it offline")
+    where = cache or os.environ.get(MODELS_DIR_ENV) or "the default cache"
+    typer.echo(f"models are in {where}; set {MODELS_DIR_ENV} to use them offline")

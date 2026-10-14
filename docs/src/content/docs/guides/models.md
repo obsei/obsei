@@ -1,20 +1,102 @@
 ---
 title: Models
-description: Bring your own LLM, with egress control.
+description: A local classifier by default; decision models or any LLM when you choose, with egress control.
 sidebar:
   order: 4
 ---
 
-obsei talks to any OpenAI-compatible chat endpoint with structured JSON output, and to
-[decision models](#decision-models) for labels, routing and moderation. Endpoints are named under
-`llms` in `obsei.yaml`; plugins refer to them by name (`default` unless set):
+Models are named under `llms` in `obsei.yaml`; plugins refer to them by name (`default` unless
+set). Each entry has an `api`:
+
+| `api` | What runs | Use it for |
+| --- | --- | --- |
+| `local` (the `obsei init` default) | zero-shot classifiers inside obsei, on the CPU | `classify` labels, routing fields and scores, with nothing to serve |
+| `decision` | a [decision model](#decision-models) on llama.cpp or a hosted API | the same labels from a model server; `filter` and `ask_judge` |
+| `openai` (default when `api` is unset) | any OpenAI-compatible chat endpoint | `ask`, theme labels, free-text fields, or `classify` with a chat model |
+
+## Local classifier
+
+The default classifier runs in process, so feedback never leaves the machine and there is no server
+to start:
+
+```bash
+pip install 'obsei[local]'           # PyTorch, Transformers and GLiNER2
+obsei models download                # once, with network; --dir or OBSEI_MODELS_DIR picks the cache
+```
 
 ```yaml
 llms:
   default:
+    api: local
+    model: MoritzLaurer/bge-m3-zeroshot-v2.0       # the default; any zero-shot NLI model works
+    models: {sentiment: fastino/gliner2-multi-v1}   # optional: another model for one question
+```
+
+Each question is answered on its own. Every option, written as `key: description`, is scored as the
+hypothesis "This customer message is …" against the message text, which gives a probability per
+option. The answer is the most likely option, and its probability is the confidence. A score field
+scores each level with its question, so `scores` and `levels` work as with decision models. A
+`yesno` field needs `yes_means` and `no_means` and is asked as a two-option choice. Free-text fields
+need a chat model. Models with `gliner2` in their name run with
+[GLiNER2](https://github.com/fastino-ai/GLiNER2) instead of NLI.
+
+`bge-m3-zeroshot-v2.0` (MIT, 568M parameters, about 2.2 GB) labelled about 0.7 records a second on
+one CPU with three questions per record. Each extra field costs about as much as one of those
+questions. `gliner2-multi-v1` (Apache-2.0) is about five times faster and slightly better at sentiment,
+but it routed no Japanese message to the right team, so the example above uses it for sentiment
+only. `obsei models download --classifier <model>` (repeatable) fetches other models.
+
+In `air_gapped` mode (the default) obsei never downloads a model: it loads them from
+`OBSEI_MODELS_DIR`, or from a local directory given as `model`. Run `obsei models download` once
+on a machine with network and copy the directory over if needed.
+
+### Benchmark
+
+We labelled the 136 records of the [demo](/demo/) (8 issues in 11 languages) with three questions:
+intent, sentiment and team. Each model got the demo's option descriptions, and the expected answer
+for each record comes from the demo issue it was written for.
+
+| Model | How it answers | Intent | Sentiment | Team | Mean | Worst ECE | Review at 0.7 | Records/s |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Julia-1 (144M) | decision API, llama.cpp | .71 | .75 | .62 | .69 | .33 | 23% | not timed |
+| mDeBERTa-v3-base xnli | zero-shot NLI | .46 | .65 | .76 | .62 | .31 | 96% | 0.64 |
+| **bge-m3-zeroshot-v2.0** (default) | zero-shot NLI | .82 | .90 | .91 | .88 | .26 | 80% | 0.69 |
+| gliner2-multi-v1 | GLiNER2 | .77 | .92 | .75 | .81 | .19 | 36% | 3.25 |
+| gliner2-base-v1 | GLiNER2, English only | .76 | .61 | .65 | .67 | .38 | 21% | 3.52 |
+| Qwen3-0.6B | option-letter probabilities | .74 | .75 | .86 | .78 | .21 | 43% | 0.18 |
+| gliner2-multi for sentiment, bge-m3 for the rest | `models: {sentiment: …}` | .82 | .95 | .91 | .90 | | 71% | 0.56 |
+
+Intent, sentiment and team are accuracy. ECE is the expected calibration error of the confidence,
+for the worst of the three questions (0 means a confidence of 0.8 is right 80% of the time). Review
+at 0.7 is the share of records with at least one answer below 0.7. The mixed row was measured through obsei's
+`api: local` classifier; the others with the benchmark script, calling each model the same way.
+
+- bge-m3 was the most accurate, and right at least half the time in every language for every
+  question. Its probabilities are spread out, so at the usual 0.7 cutoff it sends 80% of records to
+  review; `obsei init` uses 0.4 for it, which sends 13% ([cutoffs](#choose-a-cutoff-per-question)).
+- Julia-1 was the least accurate and the most overconfident: few answers fall below the cutoff, but
+  many confident answers are wrong (team .62, ECE .33). Its numbers are from the labels committed
+  with the demo.
+- mDeBERTa and gliner2-base missed whole languages (0% in Japanese, Korean, Hindi or Arabic on some
+  questions). Qwen3-0.6B was the best calibrated on team routing (ECE .05) but the slowest.
+
+Caveats: the records are synthetic, about 12 per language, and expected answers come from the demo's
+issue definitions, not from human review of each message. Timings are PyTorch on one CPU, one record
+at a time. Qwen3 1.7B and 4B, larger decision models (Kev-4B, Clef-Flash) and GPUs were not tested.
+Your options and your feedback differ, so measure on a labelled sample of your own before a route
+acts on labels.
+
+## Chat endpoints
+
+obsei talks to any OpenAI-compatible chat endpoint with structured JSON output:
+
+```yaml
+llms:
+  chat:
     base_url: http://localhost:11434/v1
     model: qwen3:8b
     max_requests: 500        # optional; also api_key_env, api_key_header, timeout
+ask_llm: chat                # ask and the Slack bot use this entry (default: default)
 ```
 
 | Where | `base_url` |
@@ -24,6 +106,10 @@ llms:
 | Azure OpenAI | `https://<resource>.openai.azure.com/openai/v1` with `api_key_header: api-key` |
 | OpenAI, Mistral, Groq, OpenRouter | the provider's `/v1` URL |
 | AWS Bedrock, Google Vertex AI, Anthropic | a [LiteLLM proxy](https://docs.litellm.ai) in your network |
+
+To classify with a chat model instead, point `classify` at it (`llm: chat`). A cloud model needs its
+own `llms` entry and must pass the [egress policy](#egress-modes): send feedback to a provider only
+when you have consent to do so.
 
 ## Egress modes
 
@@ -35,14 +121,16 @@ llms:
 
 Set the mode with `OBSEI_EGRESS_MODE`, or with `egress: {mode: private, allowed_hosts: [...]}` in
 `obsei.yaml`, which takes precedence over the environment. A public endpoint is refused before any
-request is made.
+request is made. Local classifiers make no requests at run time; in `air_gapped` mode they also
+never download.
 
 ## Cost and quality
 
-`max_requests` caps requests per endpoint client, so a run cannot exceed it. With `fallback_llm` on the `classify` enricher, the `llm` model labels everything and
-only results below `threshold` confidence (default 0.7) go to the larger model.
+`max_requests` caps requests per endpoint client, so a run cannot exceed it. With `fallback_llm` on
+the `classify` enricher, the `llm` model labels everything and records it is unsure about go to the
+`fallback_llm` chat model ([cutoffs](#choose-a-cutoff-per-question)).
 
-Feedback is sent to the model as JSON data, and the system prompt tells the model never to follow
+Feedback is sent to chat models as JSON data, and the system prompt tells the model never to follow
 instructions inside it.
 
 ## Decision models
@@ -51,15 +139,16 @@ A decision model does not write text: you give it the feedback and a few questio
 options, and it scores every option in one forward pass. The answer is always one of your options,
 with a probability for each, so there is nothing to parse and nothing to retry. Small decision
 models run fast on a CPU: Julia-1 answered four questions about a ticket in about 140 ms in our
-tests.
+tests. Local classifiers give answers of the same shape, so everything below about fields,
+probabilities and cutoffs applies to `api: local` too.
 
-| Use a decision model for | Use a chat model for |
+| Use a decision or local model for | Use a chat model for |
 | --- | --- |
 | Labels from a fixed list: sentiment, intent, product area | Theme labels (short phrases you have not listed) |
 | Routing: which team, which queue, which sink | Ask answers and summaries |
-| Moderation: spam, bots, off-topic (the `filter` enricher) | Free-text `classify` fields |
+| Moderation: spam, bots, off-topic (the `filter` enricher, decision only) | Free-text `classify` fields |
 | Ordered scores: urgency, severity, effort | Feedback no option fits well |
-| Judging: is an Ask answer supported by its sources (`ask_judge`) | |
+| Judging: is an Ask answer supported by its sources (`ask_judge`, decision only) | |
 
 obsei speaks the decision API served by llama.cpp, the OpenJev helper and hosted services. Set
 `url`, or `url_env` (an environment variable holding it), to the full endpoint URL your server
@@ -68,20 +157,17 @@ documents ([Serving](#serving)); obsei posts to it as is:
 ```yaml
 llms:
   julia:
-    api: decision                   # default: openai (chat, with base_url)
+    api: decision
     url_env: OBSEI_DECISION_URL     # or url: <the endpoint URL>
     model: Julia-1                  # optional; picks a model on a llama.cpp router
     timeout: 30                     # also api_key_env, api_key_header, max_requests
-  ollama:
-    base_url: http://localhost:11434/v1
-    model: qwen3:8b
 ```
 
 ### Models
 
 | Model | Size | Languages | Images | Get it |
 | --- | --- | --- | --- | --- |
-| **Julia-1** (recommended default) | 144M (mmBERT-small) | 50+ | no | `ggml-org/Julia-1-GGUF` (Q8_0, 168 MB) |
+| Julia-1 | 144M (mmBERT-small) | 50+ | no | `ggml-org/Julia-1-GGUF` (Q8_0, 168 MB) |
 | Laya | 421M (ModernBERT-large) | English | no | the model's page |
 | Kev-4B | 4B | English | no | `ggml-org/Kev-4B-GGUF` |
 | lev | 4B | English | no | the model's page |
@@ -91,9 +177,10 @@ llms:
 
 Check each model's page for its licence and terms.
 
-Start with **Julia-1**: it is multilingual, small enough for any CPU and labels tickets in dozens
-of languages. Use **Kev-4B** or **lev** for English-only feedback, and **Clef-Flash** when you
-have a GPU and want higher accuracy (its published benchmarks are English).
+Julia-1 is the smallest multilingual decision model and the fastest per record, but in the
+[benchmark](#benchmark) it was less accurate than the local default. Use **Kev-4B** or **lev** for
+English-only feedback, and **Clef-Flash** when you have a GPU (its published benchmarks are
+English). A 4B or larger decision model is also what `ask_judge` needs.
 
 ### Serving
 
@@ -139,7 +226,7 @@ sentiments and intents.
 ```yaml
 - type: classify
   config:
-    llm: julia
+    llm: default
     intents:
       bug: something is broken, errors, crashes or does not work as documented
       billing: charges, invoices, refunds, payment methods or prices
@@ -159,10 +246,10 @@ sentiments and intents.
         no_means: does not ask for money back
 ```
 
-Each field is one question, and all questions for a record go in one request. A `yesno` field with
-`yes_means` and `no_means` is asked as a choice between two described options; small models answer
-that far more reliably than a bare yes/no question, so describe both sides. Free-text fields need a
-chat model. Language is taken from the record, as before.
+Each field is one question; a decision model gets all questions for a record in one request. A
+`yesno` field with `yes_means` and `no_means` is asked as a choice between two described options;
+small models answer that far more reliably than a bare yes/no question, so describe both sides
+(local models require it). Free-text fields need a chat model. Language is taken from the record.
 
 The stored `classify` value keeps the usual `sentiment`, `intent`, `language`, `confidence` and
 `fields` (yes/no fields are `true` or `false`), plus `probabilities` per question, `scores` (the
@@ -179,40 +266,56 @@ Conditions can also test the stored numbers, e.g. `{classify.intent: {is: bug, m
 0.8}}` or `{classify.fields.urgency: {gte: today}}`, and ordered `route:` rules send each record to
 one set of sinks. See [Routing](/guides/routing/).
 
-### Choose a cutoff per model
+### Choose a cutoff per question
 
-Each answer has a confidence: for a choice, 0 when every option is equally likely; for a yes/no,
-the larger of p and 1 - p. Probabilities are scaled with temperatures stored in the model file and
-are not guaranteed to be calibrated for your data, so check a cutoff on a sample of your own
-feedback (`obsei try --enrich` prints every probability) and set it per model:
+Each answer has a confidence. For a local model it is the top probability. For a decision model
+it is the server's confidence, which is 0 when every option is equally likely. For a yes/no it is
+the larger of p and 1 - p. These probabilities are not calibrated for your data: in the
+[benchmark](#benchmark) one model was overconfident and another underconfident on the same
+question. Check cutoffs on a sample of your own feedback (`obsei try --enrich` prints every
+probability) and set them per question:
 
 ```yaml
 - type: classify
   config:
-    llm: julia
-    fallback_llm: ollama         # a chat model on another endpoint
+    llm: default
+    fallback_llm: chat           # a chat model on another endpoint
     threshold: 0.6               # cutoff for every answer
     min_confidence:              # per-question overrides
+      team: 0.45                 # options that overlap spread the probability
       urgency: 0.3               # score confidence runs lower than choice confidence
 ```
 
 A record with any answer below its cutoff goes to `fallback_llm`, which labels the whole record.
-Without a fallback, or when the fallback fails, the decision model's labels are kept with
-`review: true`.
+Without a fallback, or when the fallback fails, the labels are kept with `review: true`.
+
+The cutoff trades review load against accuracy. For the local default (bge-m3) on the 136 demo
+records:
+
+| Cutoff | Records marked for review | Accuracy of kept answers (intent / sentiment / team) |
+| --- | --- | --- |
+| 0.3 | 1% | .82 / .90 / .92 |
+| 0.4 | 13% | .83 / .90 / .95 |
+| 0.5 | 41% | .88 / .94 / .98 |
+| 0.7 | 80% | .97 / .98 / 1.00 |
+
+`obsei init` sets `threshold: 0.4` for the local classifier; the built-in default stays 0.7, which
+suits decision models such as Julia-1. These numbers hold for this model and these options only:
+cutoffs depend on the model, so tune them per question on labelled feedback of your own (the
+upcoming `obsei eval` will suggest them).
 
 ### Known limits
 
-Decision models are small and new, so measure them on your own feedback before a route acts on
-their labels.
+Small models make mistakes, so measure them on your own feedback before a route acts on their
+labels.
 
-- In the [demo](/demo/), Julia-1 (144M parameters, on a CPU) marks 67 of 136 records (49%) for
-  review at the demo's cutoffs, and some labels are wrong: 13 of 29 login complaints are labelled
-  as a `design` issue. The demo shows these labels as they came out of the model.
+- The [demo](/demo/) shows labels from Julia-1 (144M parameters, on a CPU) as they came out of the
+  model. At the demo's cutoffs it marks 67 of 136 records (49%) for review, and some labels are
+  wrong: 13 of 29 login complaints are routed to the `design` team.
 - Start with a `review` route and a high `min_confidence`, read a sample of what goes to review,
   then lower the cutoffs where the model is reliably right.
-- Not done yet: a small labelled test set from the demo data to report accuracy per question, and
-  a comparison with Clef-Flash, which currently aborts in the CPU build of llama.cpp (a GPU build
-  or Cloudflare Workers AI may work).
+- Clef-Flash currently aborts in the CPU build of llama.cpp (a GPU build or Cloudflare Workers AI
+  may work), so it is not in the benchmark.
 
 ### Egress and air-gapped use
 

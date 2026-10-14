@@ -17,6 +17,7 @@ from obsei.llm.client import LlmError, OpenAICompatibleClient, RequestBudget
 from obsei.llm.decision import URL_HINT, DecisionClient, check_url
 from obsei.llm.egress import EGRESS, EgressPolicy
 from obsei.llm.embed import LOCAL_MODEL, Embedder, HashingEmbedder, LocalEmbedder, RemoteEmbedder
+from obsei.llm.local import LOCAL_CLASSIFIER, LocalDecider
 from obsei.privacy.pseudonym import pseudonymize
 
 __all__ = ["EGRESS", "USER_AGENT", "Context", "LlmEndpoint", "default_http", "origin"]
@@ -27,8 +28,10 @@ USER_AGENT = f"obsei/{__version__} (+https://obsei.com)"
 class LlmEndpoint(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    api: Literal["openai", "decision"] = Field(
-        default="openai", description='"decision" for decision models (set url, not base_url).'
+    api: Literal["openai", "decision", "local"] = Field(
+        default="openai",
+        description='"decision" for decision models (set url, not base_url); "local" for '
+        "zero-shot classifiers run in process (obsei[local]).",
     )
     base_url: str | None = Field(default=None, description="Chat endpoints: the /v1 base URL.")
     url: str | None = Field(
@@ -37,7 +40,16 @@ class LlmEndpoint(BaseModel):
     url_env: str | None = Field(
         default=None, description="Decision endpoints: environment variable holding the URL."
     )
-    model: str | None = Field(default=None, description="Required for openai endpoints.")
+    model: str | None = Field(
+        default=None,
+        description="Required for openai endpoints; local endpoints default to "
+        f"{LOCAL_CLASSIFIER}.",
+    )
+    models: dict[str, str] = Field(
+        default_factory=dict,
+        description="Local endpoints: a model per question, e.g. "
+        "{sentiment: fastino/gliner2-multi-v1}.",
+    )
     api_key_env: str | None = None
     api_key_header: str = Field(
         default="Authorization", description='"api-key" for Azure OpenAI keys.'
@@ -63,6 +75,12 @@ class LlmEndpoint(BaseModel):
 
     @model_validator(mode="after")
     def _shape(self) -> LlmEndpoint:
+        if self.api == "local":
+            if self.base_url or self.url or self.url_env:
+                raise ValueError("a local endpoint takes model (and models), not a URL")
+            return self
+        if self.models:
+            raise ValueError("models is for local endpoints")
         if self.api == "decision":
             if self.base_url is not None or (self.url is None) == (self.url_env is None):
                 raise ValueError(f"a decision endpoint takes one of url or url_env; {URL_HINT}")
@@ -132,7 +150,7 @@ class Context:
     def chat(self, name: str) -> OpenAICompatibleClient:
         endpoint = self._endpoint(name)
         if endpoint.api != "openai" or endpoint.base_url is None or endpoint.model is None:
-            raise KeyError(f"llm endpoint {name!r} is a decision model, not a chat model")
+            raise KeyError(f"llm endpoint {name!r} is a {endpoint.api} model, not a chat model")
         return OpenAICompatibleClient(
             base_url=endpoint.base_url,
             model=endpoint.model,
@@ -147,7 +165,9 @@ class Context:
     def decision(self, name: str) -> DecisionClient:
         endpoint = self._endpoint(name)
         if endpoint.api != "decision":
-            raise KeyError(f"llm endpoint {name!r} is a chat model; decisions need api: decision")
+            raise KeyError(
+                f"llm endpoint {name!r} has api: {endpoint.api}; decisions need api: decision"
+            )
         return DecisionClient(
             url=endpoint.decision_url(),
             model=endpoint.model,
@@ -159,9 +179,26 @@ class Context:
             transport=self.llm_transport,
         )
 
+    def local(self, name: str) -> LocalDecider:
+        endpoint = self._endpoint(name)
+        if endpoint.api != "local":
+            raise KeyError(f"llm endpoint {name!r} has api: {endpoint.api}, not local")
+        return LocalDecider(
+            endpoint.model or LOCAL_CLASSIFIER,
+            models=endpoint.models,
+            offline=self.egress.mode == "air_gapped",
+        )
+
     def embedder(self, name: str) -> Embedder:
         """``hashing`` (built in), ``local`` or ``local:<model>`` (``obsei[embeddings]``, groups
-        by meaning across languages), or an ``llms`` name with ``embedding_model``."""
+        by meaning across languages), ``auto`` (``local`` when installed, else ``hashing``), or an
+        ``llms`` name with ``embedding_model``."""
+        if name == "auto":
+            try:
+                import fastembed  # noqa: F401, PLC0415
+            except ImportError:
+                return HashingEmbedder()
+            name = "local"
         if name == "hashing":
             return HashingEmbedder()
         if name == "local" or name.startswith("local:"):

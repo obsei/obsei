@@ -7,7 +7,8 @@ import pytest
 
 from obsei.core.context import Context
 from obsei.llm import EgressPolicy, LlmError
-from obsei.llm.embed import LOCAL_MODEL, LocalEmbedder
+from obsei.llm.embed import LOCAL_MODEL, HashingEmbedder, LocalEmbedder
+from obsei.themes import ThemesConfig, default_similarity
 
 
 class FakeVector:
@@ -57,6 +58,18 @@ def test_local_embedder_normalises_and_respects_offline(monkeypatch: pytest.Monk
 def test_missing_offline_model_explains_download() -> None:
     with pytest.raises(LlmError, match="obsei models download"):
         LocalEmbedder("missing", offline=True)
+
+
+@pytest.mark.usefixtures("fake_fastembed")
+def test_auto_embedder_is_local_when_installed(monkeypatch: pytest.MonkeyPatch) -> None:
+    assert ThemesConfig().embedder == "auto"
+    embedder = Context(egress=EgressPolicy()).embedder("auto")
+    assert embedder.model == LOCAL_MODEL
+    assert default_similarity(embedder.model) == 0.65
+    monkeypatch.setitem(sys.modules, "fastembed", None)
+    embedder = Context(egress=EgressPolicy()).embedder("auto")
+    assert isinstance(embedder, HashingEmbedder)
+    assert default_similarity(embedder.model) == 0.3
 
 
 def test_extra_not_installed(monkeypatch: pytest.MonkeyPatch) -> None:

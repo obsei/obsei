@@ -12,16 +12,25 @@ privacy:
   # PII detectors to apply: global, north_america, uk, eu, latam, apac, india, africa
   regions: [global, north_america, uk, eu, latam, apac, india, africa]
 
-# Model endpoints (OpenAI-compatible). Local by default; nothing leaves the machine.
+# Models. The default classifier runs in process, so nothing leaves the machine:
+#   pip install 'obsei[local]' && obsei models download
 llms:
   default:
-    base_url: http://localhost:11434/v1
-    model: qwen3:8b
-  # Or a small decision model on a CPU for fast labels with probabilities, e.g. Julia-1 on llama.cpp:
+    api: local
+    model: MoritzLaurer/bge-m3-zeroshot-v2.0
+    # models: {sentiment: fastino/gliner2-multi-v1}   # optional per-question model
+  # A decision model served by llama.cpp (e.g. Julia-1):
   # default:
   #   api: decision
   #   url_env: OBSEI_DECISION_URL
-  # See https://docs.obsei.com/guides/models/#decision-models
+  # A chat model (needed for ask, theme labels and free-text fields), e.g. Ollama:
+  # chat:
+  #   base_url: http://localhost:11434/v1
+  #   model: qwen3:8b
+  # A cloud chat model needs its own llms entry and must pass the egress policy (private mode with
+  # its host allow-listed); use one only with consent to send feedback to that provider.
+  # See https://docs.obsei.com/guides/models/
+# ask_llm: chat
 
 pipelines:
   - name: feedback
@@ -40,10 +49,10 @@ pipelines:
       # - key: issues
       #   type: github_issues
       #   config: {repo: owner/repo}
-    # Classify sentiment, intent and language with your model (start Ollama first).
+    # Classify sentiment and intent with the local classifier (install obsei[local] first).
     # enrichers:
     #   - type: classify
-    #     config: {llm: default}
+    #     config: {llm: default, threshold: 0.4}   # 0.4 suits the local default; tune per question
     sinks:
       - type: parquet
         config: {directory: exports}

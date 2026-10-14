@@ -30,14 +30,14 @@ send that text to another SaaS or a public LLM. obsei runs entirely inside your 
 
 - **Private by design.** PII is redacted (and optionally names) and authors are pseudonymised at
   ingest. Encrypted database, air-gapped by default, no telemetry, erasure and an audit log built in.
-- **Bring your own.** Your sources, your keys and your model: Ollama, vLLM, Azure OpenAI, OpenAI,
-  Bedrock and Vertex through LiteLLM, or a small local decision model such as Julia-1 for fast labels
-  with probabilities.
+- **Bring your own.** Your sources, your keys and your model: a zero-shot classifier that runs
+  in process by default, a decision model such as Julia-1, or Ollama, vLLM, Azure OpenAI, OpenAI,
+  Bedrock and Vertex through LiteLLM.
 - **AI-native.** A read-only MCP server and a Claude plugin, so agents answer questions about
   customers with cited, privacy-filtered evidence.
 - **Every language.** Feedback is classified and quoted in its own language. With
-  `obsei[embeddings]`, a local multilingual model groups the same issue across 50+ languages; the
-  default offline embedder groups by wording, so each language forms its own themes.
+  `obsei[embeddings]`, a local multilingual model groups the same issue across 50+ languages;
+  without it, the offline embedder groups by wording, so each language forms its own themes.
 
 obsei provides controls that *support* compliance with laws such as the GDPR, India's DPDP Act,
 Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain the data controller.
@@ -60,16 +60,18 @@ obsei serve                            # scheduled pipelines, webhooks, MCP and 
 obsei doctor                           # environment, encryption, egress mode, plugins
 ```
 
-Uncomment the `classify` enricher in `obsei.yaml` to label sentiment, intent and language with a
-local model (Ollama by default). Any OpenAI-compatible endpoint works: vLLM, llama.cpp, Azure
-OpenAI, OpenAI, Mistral, or a LiteLLM proxy for Bedrock and Vertex; a [decision
-model](https://docs.obsei.com/guides/models/#decision-models) on llama.cpp labels on a CPU. Public endpoints are refused
-until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`) or `hybrid`.
+Uncomment the `classify` enricher in `obsei.yaml` to label sentiment, intent and language with the
+local classifier: install `obsei[local]` and run `obsei models download` once; it runs on the CPU
+with no model server. A [decision model](https://docs.obsei.com/guides/models/#decision-models) on
+llama.cpp or any OpenAI-compatible endpoint also works: Ollama, vLLM, Azure OpenAI, OpenAI, Mistral,
+or a LiteLLM proxy for Bedrock and Vertex ([benchmark](https://docs.obsei.com/guides/models/#benchmark)).
+Public endpoints are refused until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`)
+or `hybrid`.
 
 | | Built in |
 | --- | --- |
 | Sources | CSV, JSON Lines, declarative REST, webhooks, App Store (any country), App Store Connect, Google Play (official API), GitHub issues, Hacker News, Bluesky, YouTube, RSS/Atom, SQL databases and warehouses, file drops, IMAP mailboxes, any MCP server, Zendesk, Freshdesk, Intercom, Gong; Reddit as an unpublished community plugin (install from Git) |
-| Enrichers | Classification with a decision model (Julia-1, Clef) or an LLM: sentiment, intent, language and custom choice, score and yes/no fields with confidence; low-confidence answers go to a stronger model or human review; `filter` drops or tags spam and off-topic records |
+| Enrichers | Classification with an in-process zero-shot model (default), a decision model (Julia-1, Clef) or an LLM: sentiment, intent, language and custom choice, score and yes/no fields with confidence; low-confidence answers go to a stronger model or human review; `filter` drops or tags spam and off-topic records |
 | Sinks | Signed webhooks (Standard Webhooks, CloudEvents) with retries, Slack, Telegram, Discord, email and Teams via Apprise, GitHub issues, Jira, Linear, Parquet, SQL databases and warehouses; ordered routes on labels, confidence and scores ([routing](https://docs.obsei.com/guides/routing/)) |
 | Analysis | Stable themes (offline, or multilingual with `obsei[embeddings]`) with near-duplicate detection, k-anonymous views, `obsei ask` with cited answers and an optional grounding judge, read-only Studio with a knowledge-graph explorer and privacy, decisions, trends and routes panels ([demo](https://docs.obsei.com/demo/)), Slack `/obsei` command |
 | Privacy | Checksum-validated PII redaction for the Americas, Europe, UK, Asia-Pacific, India and Africa in any script; optional name redaction (`obsei[names]`); salted author pseudonyms; encrypted DuckDB; `obsei forget`, `obsei export` and `obsei audit` |

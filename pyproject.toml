@@ -54,7 +54,7 @@ files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src
 mypy_path = "packages/obsei/src:plugins/template/src"
 
 [[tool.mypy.overrides]]
-module = ["fastembed", "gliner"]
+module = ["fastembed", "gliner", "gliner2", "huggingface_hub", "transformers"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
