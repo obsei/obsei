@@ -59,8 +59,8 @@ class SinkEntry(PluginSpec):
         return self.key or self.type
 
 
-CONDITION_SINKS = frozenset({"slack", "jira", "linear", "github_issues"})
-"""Built-in sinks whose ``when`` is checked on load."""
+CONDITION_SINKS = frozenset({"slack", "jira", "linear", "github_issues", "teams"})
+"""Sinks whose ``when`` is checked on load."""
 
 
 class RouteRule(_Strict):

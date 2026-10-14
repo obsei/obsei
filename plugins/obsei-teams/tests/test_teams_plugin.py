@@ -162,3 +162,32 @@ def test_example_config_validates() -> None:
             registry.enricher(spec.type).config_model.model_validate(spec.config)
         for spec in pipeline.sinks:
             registry.sink(spec.type).config_model.model_validate(spec.config)
+
+
+@pytest.mark.parametrize(
+    "when",
+    [
+        {"classify.intent": {"is": ["bug"], "min_confidence": 0.8}},
+        {"review": True},
+        {"classify.fields.urgency": {"gte": "high"}},
+        {"classify.fields.churn": [True]},
+        {"classify.intent": "bug"},
+    ],
+)
+def test_accepts_routing_conditions(when: JsonValue) -> None:
+    sink(Hook(), when=when)
+
+
+def test_matches_confidence_and_review() -> None:
+    def classified(native_id: str, confidence: float, *, review: bool = False) -> Record:
+        value: JsonValue = {"intent": "bug", "review": review}
+        return record(native_id, native_id).with_enrichment(
+            "classify", Enrichment(value=value, confidence=confidence)
+        )
+
+    batch = [classified("sure", 0.9), classified("unsure", 0.5, review=True)]
+    confident = sink(Hook(), when={"classify.intent": {"is": ["bug"], "min_confidence": 0.8}})
+    assert confident.send(batch).sent == 1
+    hook = Hook()
+    assert sink(hook, when={"review": True}).send(batch).sent == 1
+    assert hook.card()["body"][1]["items"][1]["inlines"][0]["text"] == "unsure"

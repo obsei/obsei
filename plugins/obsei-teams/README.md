@@ -45,7 +45,7 @@ pipelines:
 |---|---|---|
 | `webhook_url_env` | `TEAMS_WEBHOOK_URL` | Environment variable holding the Workflows URL. |
 | `title` | `New customer feedback` | Card heading. |
-| `when` | all records | Enrichment labels to match, as in the `slack` sink. |
+| `when` | all records | Routing conditions to match (values, `is`, `min_confidence`, `gte`/`lte`, `review`), as in the `slack` sink. |
 | `max_rating` | none | Only records rated at or below this. |
 | `max_records` | 10 | Records per card (up to 25); the card counts the rest. |
 | `max_text` | 600 | Characters of feedback shown per record. |

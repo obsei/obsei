@@ -366,6 +366,14 @@ def load(pipeline: Json) -> ObseiConfig:
             "sink 'slack': when.classify.fields.urgency: 'later' is not one of the levels",
         ),
         (
+            {
+                "sinks": [
+                    {"type": "teams", "config": {"when": {"classify.fields.urgency": {"gte": "x"}}}}
+                ]
+            },
+            "sink 'teams': when.classify.fields.urgency: 'x' is not one of the levels",
+        ),
+        (
             {"sinks": [{"type": "slack", "config": {"when": {"classify.intent": {"is": []}}}}]},
             "sink 'slack': when.classify.intent",
         ),
