@@ -9,6 +9,9 @@ updates:
     groups:
       python-dependencies:
         patterns: ["*"]
+    ignore:
+      # pydantic pins pydantic-core exactly; bumping it alone breaks the fuzz build
+      - dependency-name: "pydantic-core"
     commit-message:
       prefix: "chore(deps)"
 

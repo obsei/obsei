@@ -56,7 +56,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-google = ["google-auth[requests]>=2.58.1,<3"]
+google = ["google-auth[requests]>=2.59.1,<3"]
 mcp = [
     "mcp>=2.3,<3",
     # obsei serve imports these directly; mcp also depends on them.
