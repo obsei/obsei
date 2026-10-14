@@ -68,6 +68,7 @@ def test_required_roles() -> None:
     assert required_role("/api/themes/thm_1") == "analyst"
     assert required_role("/mcp") == "analyst"
     assert required_role("/api/runs") == "admin"
+    assert required_role("/api/deliveries") == "admin"
     assert required_role("/anything-else") == "admin"
 
 
@@ -77,6 +78,8 @@ def test_roles_limit_what_each_token_sees(client: TestClient, store: Store) -> N
     assert client.get(f"/api/themes/{theme}", headers=bearer(ANALYST)).status_code == 200
     assert client.get("/api/runs", headers=bearer(ANALYST)).status_code == 403
     assert client.get("/api/runs", headers=bearer(ADMIN)).status_code == 200
+    assert client.get("/api/deliveries", headers=bearer(ANALYST)).status_code == 403
+    assert client.get("/api/deliveries", headers=bearer(ADMIN)).json() == []
     assert client.get("/api/snapshot", headers=bearer("wrong-token-0123456789")).status_code == 401
     log = [json.loads(detail) for _, action, detail in store.audit_log() if action == "access"]
     assert {"user": "voc-team", "role": "analyst", "path": f"/api/themes/{theme}"} in log

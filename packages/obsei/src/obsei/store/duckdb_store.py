@@ -14,7 +14,7 @@ from typing import Literal, Self, TypeAlias
 import duckdb
 from pydantic import BaseModel, ConfigDict, Field
 
-from obsei.core.protocols import Cursor
+from obsei.core.protocols import Cursor, EventDelivery
 from obsei.core.record import Record
 from obsei.store.themes import PEOPLE, ThemeQueries
 
@@ -98,6 +98,20 @@ MIGRATIONS: tuple[str, ...] = (
         source VARCHAR NOT NULL,
         record_id VARCHAR NOT NULL,
         PRIMARY KEY (pipeline, source, record_id)
+    );
+    """,
+    """
+    CREATE TABLE deliveries (
+        event_id VARCHAR PRIMARY KEY,
+        pipeline VARCHAR NOT NULL,
+        sink VARCHAR NOT NULL,
+        host VARCHAR NOT NULL,
+        event_type VARCHAR NOT NULL,
+        attempts INTEGER NOT NULL,
+        status INTEGER,
+        ok BOOLEAN NOT NULL,
+        error VARCHAR,
+        delivered_at TIMESTAMPTZ NOT NULL
     );
     """,
 )
@@ -192,6 +206,12 @@ class StatRow:
     count: int
     avg_rating: float | None
     people: int = 0
+
+
+class LoggedDelivery(EventDelivery):
+    pipeline: str
+    sink: str
+    delivered_at: datetime
 
 
 class StoreError(Exception):
@@ -646,6 +666,48 @@ class Store(ThemeQueries):
             "DO UPDATE SET cursor = excluded.cursor, updated_at = excluded.updated_at",
             [pipeline, source, json.dumps(cursor), datetime.now(UTC)],
         )
+
+    def log_deliveries(self, pipeline: str, sink: str, deliveries: Sequence[EventDelivery]) -> None:
+        now = datetime.now(UTC)
+        self._con.executemany(
+            "INSERT INTO deliveries VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+                [
+                    d.event_id,
+                    pipeline,
+                    sink,
+                    d.host,
+                    d.event_type,
+                    d.attempts,
+                    d.status,
+                    d.error is None,
+                    d.error,
+                    now,
+                ]
+                for d in deliveries
+            ],
+        )
+
+    def deliveries(self, *, limit: int = 100) -> list[LoggedDelivery]:
+        rows = self._con.execute(
+            "SELECT event_id, event_type, host, attempts, status, error, pipeline, sink, "
+            "epoch_us(delivered_at) FROM deliveries ORDER BY delivered_at DESC LIMIT ?",
+            [limit],
+        ).fetchall()
+        return [
+            LoggedDelivery(
+                event_id=r[0],
+                event_type=r[1],
+                host=r[2],
+                attempts=r[3],
+                status=r[4],
+                error=r[5],
+                pipeline=r[6],
+                sink=r[7],
+                delivered_at=datetime.fromtimestamp(r[8] / 1e6, UTC),
+            )
+            for r in rows
+        ]
 
     def search(self, query: Query, *, limit: int = 20, newest_first: bool = True) -> list[Record]:
         where, params = query.where()

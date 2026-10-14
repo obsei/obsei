@@ -11,10 +11,22 @@ CursorValue: TypeAlias = str | int | float | bool | None
 Cursor: TypeAlias = dict[str, CursorValue]
 
 
+class EventDelivery(BaseModel):
+    """The final outcome of one event a sink posted; the pipeline keeps it in the store."""
+
+    event_id: str
+    event_type: str
+    host: str
+    attempts: int
+    status: int | None = None
+    error: str | None = None
+
+
 class SinkResult(BaseModel):
     sent: int = 0
     skipped: int = 0
     errors: list[str] = Field(default_factory=list)
+    deliveries: list[EventDelivery] = Field(default_factory=list)
 
 
 @runtime_checkable
@@ -46,6 +58,13 @@ class Drops(Protocol):
     later enrichers, delivered or stored."""
 
     def keep(self, record: Record) -> bool: ...
+
+
+@runtime_checkable
+class Binds(Protocol):
+    """Optional for sinks: told the pipeline and sink key they deliver for."""
+
+    def bind(self, pipeline: str, key: str) -> None: ...
 
 
 @runtime_checkable

@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import hmac
 import json
@@ -374,21 +375,38 @@ def _sign(message: bytes) -> str:
     return "sha256=" + hmac.new(b"s3cret", message, hashlib.sha256).hexdigest()
 
 
+def _v1(message: bytes) -> str:
+    return "v1," + base64.b64encode(hmac.new(b"s3cret", message, hashlib.sha256).digest()).decode()
+
+
 def test_webhook_signature_window(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("HOOK", "s3cret")
     source = _webhook()
     body = b'{"text": "hi"}'
     headers = {
-        "x-obsei-timestamp": "1800000000",
-        "x-obsei-signature-256": _sign(b"1800000000." + body),
+        "webhook-id": "evt_1",
+        "webhook-timestamp": "1800000000",
+        "webhook-signature": f"v1,b2xk {_v1(b'evt_1.1800000000.' + body)}",
     }
     source.verify(body, headers, now=1800000100)
     with pytest.raises(SignatureError, match="stale"):
         source.verify(body, headers, now=1800000301)
-    with pytest.raises(SignatureError, match="missing"):
-        source.verify(body, {"x-obsei-signature-256": _sign(body)})
-    with pytest.raises(SignatureError, match="invalid X-Obsei-Timestamp"):
-        source.verify(body, {**headers, "x-obsei-timestamp": "soon"})
+    with pytest.raises(SignatureError, match="missing webhook-timestamp"):
+        source.verify(body, {"webhook-signature": _v1(body)})
+    with pytest.raises(SignatureError, match="invalid webhook-timestamp"):
+        source.verify(body, {**headers, "webhook-timestamp": "soon"})
+    with pytest.raises(SignatureError, match="invalid or missing"):
+        source.verify(body, {**headers, "webhook-id": "evt_2"}, now=1800000000)
+
+
+def test_webhook_accepts_standard_webhooks_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HOOK", "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw")
+    headers = {
+        "webhook-id": "msg_p5jXN8AQM9LWM0D4loKWxJek",
+        "webhook-timestamp": "1614265330",
+        "webhook-signature": "v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=",
+    }
+    _webhook().verify(b'{"test": 2432232314}', headers, now=1614265330)
 
 
 def test_webhook_body_only_signatures_need_opt_in(monkeypatch: pytest.MonkeyPatch) -> None:

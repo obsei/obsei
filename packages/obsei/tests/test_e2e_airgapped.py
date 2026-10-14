@@ -138,7 +138,10 @@ def test_air_gapped_pipeline(tmp_path: Path, services: str) -> None:
     sent = json.dumps(LocalServices.hooks, ensure_ascii=False)
     assert not any(secret in sent for secret in leaked)
     assert not any(secret in p for p in LocalServices.prompts for secret in leaked)
-    records = LocalServices.hooks[0]["records"]
+    event = LocalServices.hooks[0]
+    assert (event["type"], event["source"]) == ("obsei.records.routed", "obsei/feedback/webhook")
+    assert isinstance(event["data"], dict)
+    records = event["data"]["records"]
     assert isinstance(records, list)
     assert records[0]["enrichments"]["classify"]["value"]["intent"] == "bug"
     assert "<PHONE>" in records[0]["text"]

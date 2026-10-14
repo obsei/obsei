@@ -5,13 +5,16 @@ from __future__ import annotations
 
 import os
 from collections.abc import Sequence
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import URL
 
 
 class SqlSinkConfig(BaseModel):
@@ -27,6 +30,16 @@ class SqlSinkError(RuntimeError):
     pass
 
 
+def _host(url: URL) -> str | None:
+    """The host a SQLAlchemy URL connects to; None for local files and sockets."""
+    backend = url.get_backend_name()
+    if backend == "bigquery":
+        return "bigquery.googleapis.com"
+    if backend == "snowflake" and url.host and "." not in url.host:
+        return f"{url.host}.snowflakecomputing.com"
+    return url.host
+
+
 class SqlSink:
     name: ClassVar[str] = "sql"
 
@@ -38,6 +51,9 @@ class SqlSink:
         url = os.environ.get(config.url_env)
         if not url:
             raise SqlSinkError(f"{config.url_env} is not set")
+        host = _host(sa.engine.make_url(url))
+        if host:
+            ctx.egress.check(f"sql://{host}")
         self.config = config
         self.engine = sa.create_engine(url)
         self.table = sa.Table(

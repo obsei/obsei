@@ -20,7 +20,7 @@ from datetime import UTC, datetime
 from itertools import islice
 from typing import Protocol, TypeAlias, runtime_checkable
 
-from obsei.core.protocols import Cursor, Drops, Enricher, ReportsErrors, Sink, Source
+from obsei.core.protocols import Binds, Cursor, Drops, Enricher, ReportsErrors, Sink, Source
 from obsei.core.record import Record
 from obsei.routing import Router, routed_to
 from obsei.store import Store
@@ -77,6 +77,9 @@ class Pipeline:
             unknown = self.router.targets - set(names)
             if unknown:
                 raise PipelineError(f"routes name unknown sinks: {sorted(unknown)}")
+        for key, sink in zip(self.keys, self.sinks, strict=True):
+            if isinstance(sink, Binds):
+                sink.bind(self.name, key)
 
     @property
     def keys(self) -> list[str]:
@@ -154,11 +157,18 @@ def _enrich(
     return records, dropped
 
 
-def _deliver(pipeline: Pipeline, records: list[Record], report: RunReport) -> None:
+def _deliver(
+    pipeline: Pipeline, records: list[Record], store: Store, *, guard: Lock, report: RunReport
+) -> None:
     targets = pipeline.router.targets if pipeline.router else frozenset()
     for key, sink in zip(pipeline.keys, pipeline.sinks, strict=True):
         batch = [r for r in records if key in routed_to(r)] if key in targets else records
+        if not batch:
+            continue
         result = sink.send(batch)
+        if result.deliveries:
+            with guard:
+                store.log_deliveries(pipeline.name, key, result.deliveries)
         if result.errors:
             raise PipelineError(f"sink {key!r} failed: {'; '.join(result.errors)}")
         report.sent[key] = report.sent.get(key, 0) + result.sent
@@ -177,7 +187,7 @@ def _process(
     records, dropped = _enrich(pipeline.enrichers, records, report)
     if pipeline.router is not None:
         records = [pipeline.router.apply(r) for r in records]
-    _deliver(pipeline, records, report)
+    _deliver(pipeline, records, store, guard=guard, report=report)
     names = [e.name for e in pipeline.enrichers]
     failed = {r.id for r in records if any(n not in r.enrichments for n in names)}
     with guard:

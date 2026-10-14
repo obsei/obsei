@@ -7,7 +7,7 @@ from typing import ClassVar
 import pytest
 
 from obsei import Enrichment, Record, SourceRef
-from obsei.core.protocols import Cursor, Enricher, SinkResult
+from obsei.core.protocols import Cursor, Enricher, EventDelivery, SinkResult
 from obsei.pipeline import Pipeline, PipelineError, SourceSpec, run
 from obsei.store import Store
 
@@ -163,6 +163,54 @@ def test_sink_failure_stores_nothing_and_keeps_cursor(store: Store) -> None:
     sink = MemorySink()
     run(pipeline(source, sinks=[sink]), store)
     assert len(sink.received) == 2
+
+
+class EventSink(MemorySink):
+    def __init__(self, *, fail: bool = False) -> None:
+        super().__init__(fail=fail)
+        self.bound: tuple[str, str] | None = None
+        self.calls = 0
+
+    def bind(self, pipeline: str, key: str) -> None:
+        self.bound = (pipeline, key)
+
+    def send(self, batch: Sequence[Record]) -> SinkResult:
+        self.calls += 1
+        delivery = EventDelivery(
+            event_id=f"evt_{self.fail}_{self.calls}",
+            event_type="obsei.records.routed",
+            host="hooks.internal",
+            attempts=3 if self.fail else 1,
+            status=503 if self.fail else 204,
+            error="endpoint down" if self.fail else None,
+        )
+        return super().send(batch).model_copy(update={"deliveries": [delivery]})
+
+
+class DropAll(LengthEnricher):
+    def keep(self, record: Record) -> bool:
+        return False
+
+
+def test_deliveries_are_logged_even_when_the_sink_fails(store: Store) -> None:
+    source = ListSource(["a", "b"])
+    failing = EventSink(fail=True)
+    with pytest.raises(PipelineError):
+        run(pipeline(source, sinks=[failing]), store)
+    assert failing.bound == ("daily", "memory")
+    run(pipeline(source, sinks=[EventSink()]), store)
+    logged = [(d.pipeline, d.sink, d.attempts, d.status, d.error) for d in store.deliveries()]
+    assert sorted(logged, key=str) == [
+        ("daily", "memory", 1, 204, None),
+        ("daily", "memory", 3, 503, "endpoint down"),
+    ]
+
+
+def test_empty_batches_are_not_sent(store: Store) -> None:
+    sink = EventSink()
+    run(pipeline(ListSource(["a"]), sinks=[sink], enrichers=[DropAll()]), store)
+    assert sink.calls == 0
+    assert store.deliveries() == []
 
 
 def test_failure_in_later_batch_keeps_earlier_batches(store: Store) -> None:
