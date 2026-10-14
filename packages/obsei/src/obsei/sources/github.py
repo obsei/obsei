@@ -96,6 +96,8 @@ class GitHubIssuesSource:
                 continue
             number = as_text(lookup(issue, "number")) or ""
             updated = as_text(lookup(issue, "updated_at"))
+            if isinstance(since, str) and updated and updated <= since:
+                continue
             if updated and (newest is None or updated > newest):
                 newest = updated
             labels = lookup(issue, "labels")
