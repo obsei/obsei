@@ -14,7 +14,8 @@ from obsei.core.plugin import factory
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.core.registry import Registry
-from obsei.sinks._common import env, label, matches
+from obsei.routing import Conditions, When
+from obsei.sinks._common import env, label
 
 CARD_TYPE = "application/vnd.microsoft.card.adaptive"
 CARD_VERSION = "1.4"
@@ -26,7 +27,7 @@ class TeamsConfig(BaseModel):
 
     webhook_url_env: str = "TEAMS_WEBHOOK_URL"
     title: str = "New customer feedback"
-    when: dict[str, list[str]] = Field(
+    when: Conditions = Field(
         default_factory=dict, description='e.g. {"classify.sentiment": ["negative"]}'
     )
     max_rating: float | None = None
@@ -102,11 +103,12 @@ class TeamsSink:
         self.url = env(config.webhook_url_env)
         ctx.egress.check(self.url)
         self.config = config
+        self.when = When.parse(config.when, max_rating=config.max_rating)
         self.ctx = ctx
 
     def send(self, batch: Sequence[Record]) -> SinkResult:
         c = self.config
-        selected = [r for r in batch if matches(r, c.when, c.max_rating)]
+        selected = [r for r in batch if self.when.matches(r)]
         if not selected:
             return SinkResult(skipped=len(batch))
         posted = selected[: c.max_records]
