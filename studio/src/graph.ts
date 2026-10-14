@@ -138,7 +138,7 @@ function placeLabels(labels: Label[], scale: number): void {
     text.setAttribute("font-size", size.toFixed(1));
     text.removeAttribute("visibility");
     const w = text.getComputedTextLength() || content.length * size * 0.6;
-    const h = size * 1.15;
+    const h = text.getBBox().height || size * 1.3;
     const gap = 3;
     const candidates: Box[] = [
       { x1: p.x - w / 2, y1: p.y + p.r + gap, x2: p.x + w / 2, y2: p.y + p.r + gap + h },
