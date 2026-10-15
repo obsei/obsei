@@ -18,7 +18,7 @@ records; `obsei integrations` lists each one's secrets and where to get them
 | <span class="i i-smartphone"></span> `appstore` | Apple public review feed, any list of countries | none | verified |
 | <span class="i i-smartphone"></span> `appstoreconnect` | Your apps' reviews in every territory (official API) | `.p8` key, `obsei[apple]` | beta |
 | <span class="i i-play"></span> `playstore` | Your apps' reviews (official Android Publisher API) | service account, `obsei[google]` | beta |
-| <span class="i i-github"></span> `github_issues` | Issues and comments, GitHub or GitHub Enterprise | `GITHUB_TOKEN` (optional) | verified |
+| <span class="i i-github"></span> `github_issues` | Issues and comments, GitHub or GitHub Enterprise; issue-template headings, checklists, HTML comments and collapsed attachments are dropped | `GITHUB_TOKEN` (optional) | verified |
 | <span class="i i-ycombinator"></span> `hackernews` | Stories and comments matching a query | none | verified |
 | <span class="i i-bluesky"></span> `bluesky` | Posts matching a query, optionally by language | none or app password | beta |
 | <span class="i i-video"></span> `youtube` | Comments on videos or a whole channel | `YOUTUBE_API_KEY` | beta |
