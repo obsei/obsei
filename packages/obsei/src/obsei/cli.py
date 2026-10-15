@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import getpass
 import json
 import os
 import platform
 import sys
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -19,6 +20,7 @@ import duckdb
 import typer
 
 from obsei import __version__, studio
+from obsei.alerts import Fired, check_alerts
 from obsei.ask import ask as ask_feedback
 from obsei.config import (
     DEFAULT_PATH,
@@ -54,6 +56,7 @@ from obsei.store import (
     EXTENSIONS_ENV_VAR,
     INSTALL_HINT,
     PREINSTALL_HINT,
+    AlertState,
     Store,
     StoreError,
     httpfs_installed,
@@ -388,11 +391,13 @@ def _run_once(config: Path, pipeline: list[str] | None, db: Path | None) -> bool
         _open_store(db or cfg.store.path, cfg.store.unencrypted, egress=ctx.egress) as store,
     ):
         outcomes = run_pipelines(cfg, ctx, store, names)
-    for outcome in outcomes:
-        typer.echo(outcome.summary(), err=not outcome.ok)
-        for warning in outcome.warnings():
-            typer.echo(f"warning: {warning}", err=True)
-    return not all(o.ok for o in outcomes)
+        for outcome in outcomes:
+            typer.echo(outcome.summary(), err=not outcome.ok)
+            for warning in outcome.warnings():
+                typer.echo(f"warning: {warning}", err=True)
+        failures = {o.pipeline: o.error for o in outcomes if o.error}
+        alerted = _alert(lambda: check_alerts(cfg, ctx, store, failures=failures))
+    return not all(o.ok for o in outcomes) or not alerted
 
 
 @app.command("try")
@@ -533,7 +538,10 @@ def themes(
         )
         for theme in store.theme_summaries(min_size=settings.k_anonymity):
             trend = theme.last_7_days - theme.previous_7_days
-            typer.echo(f"{theme.size:>6}  {trend:+5d}  {theme.id}  {theme.label or '-'}")
+            rising = "  rising" if theme.rising else ""
+            typer.echo(f"{theme.size:>6}  {trend:+5d}  {theme.id}  {theme.label or '-'}{rising}")
+        if not _alert(lambda: check_alerts(cfg, ctx, store)):
+            raise typer.Exit(1)
 
 
 def _llm_hint(cfg: ObseiConfig, name: str) -> str:
@@ -663,6 +671,106 @@ def demo(
         snap = demo_snapshot(store, raw, k=settings.k_anonymity, embedder=model.model)
         studio.write(out, snap)
     typer.echo(f"wrote {out}/index.html; serve it with: python -m http.server -d {out}")
+
+
+alerts_app = typer.Typer(help="Theme spikes, new themes, digests, review queue and health alerts.")
+app.add_typer(alerts_app, name="alerts")
+AlertArgument = Annotated[str, typer.Argument(help="Alert name in obsei.yaml.")]
+KeyArgument = Annotated[str, typer.Argument(help="Theme id, digest, review, or a pipeline.")]
+
+
+def _alert(check: Callable[[], list[Fired]], *, dry_run: bool = False) -> bool:
+    """Print what fired; False when an alert could not be delivered or built."""
+    try:
+        fired = check()
+    except (ConfigError, PluginError, OSError, RuntimeError, ValueError) as exc:
+        typer.echo(f"error: alerts: {exc}", err=True)
+        return False
+    for item in fired:
+        prefix = "would fire" if dry_run else "alert"
+        typer.echo(f"{prefix} {item.alert.alert} {item.alert.key}: {item.alert.title}")
+        for line in item.alert.lines if dry_run else ():
+            typer.echo(f"  {line}")
+        for error in item.errors:
+            typer.echo(f"error: alert {item.alert.alert}: {error}", err=True)
+    return not any(item.errors for item in fired)
+
+
+def _alert_state(cfg: ObseiConfig, store: Store, alert: str, key: str) -> AlertState:
+    if alert not in {a.name for a in cfg.alerts}:
+        raise _fail(f"no alert named {alert!r}")
+    found = [s for s in store.alert_states() if (s.alert, s.key) == (alert, key)]
+    return found[0] if found else AlertState(alert=alert, key=key)
+
+
+@alerts_app.command("check")
+def alerts_check(
+    config: ConfigOption = DEFAULT_PATH,
+    db: DbOption = None,
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Print what would fire; send and record nothing.")
+    ] = False,
+) -> None:
+    """Evaluate every alert now and deliver those due."""
+    cfg, path = _themes_context(config, db)
+    with (
+        build_context(cfg) as ctx,
+        _open_store(path, cfg.store.unencrypted, egress=ctx.egress) as store,
+    ):
+        ok = _alert(lambda: check_alerts(cfg, ctx, store, dry_run=dry_run), dry_run=dry_run)
+    if not ok:
+        raise typer.Exit(1)
+
+
+@alerts_app.command("list")
+def alerts_list(config: ConfigOption = DEFAULT_PATH, db: DbOption = None) -> None:
+    """Show when each alert last fired, and snoozes and acks."""
+    cfg, path = _themes_context(config, db)
+    with _open_store(path, cfg.store.unencrypted, read_only=True, must_exist=True) as store:
+        states = store.alert_states()
+    for name in [a.name for a in cfg.alerts if not any(s.alert == a.name for s in states)]:
+        typer.echo(f"{name}  -  never fired")
+    for s in states:
+        parts = [f"fired {s.last_fired_at:%Y-%m-%d %H:%M}" if s.last_fired_at else "not fired"]
+        if s.snoozed_until:
+            parts.append(f"snoozed until {s.snoozed_until:%Y-%m-%d %H:%M}")
+        if s.acked_at:
+            parts.append(f"acked by {s.acked_by} {s.acked_at:%Y-%m-%d %H:%M}")
+        typer.echo(f"{s.alert}  {s.key}  {', '.join(parts)} UTC")
+
+
+@alerts_app.command("snooze")
+def alerts_snooze(
+    alert: AlertArgument,
+    key: KeyArgument,
+    hours: Annotated[int, typer.Option(min=1, help="Snooze for this many hours.")] = 24,
+    config: ConfigOption = DEFAULT_PATH,
+    db: DbOption = None,
+) -> None:
+    """Silence one alert key for a while."""
+    cfg, path = _themes_context(config, db)
+    until = datetime.now(UTC) + timedelta(hours=hours)
+    with _open_store(path, cfg.store.unencrypted, must_exist=True) as store:
+        state = _alert_state(cfg, store, alert, key)
+        store.put_alert_state(state.model_copy(update={"snoozed_until": until}))
+    typer.echo(f"snoozed {alert} {key} until {until:%Y-%m-%d %H:%M} UTC")
+
+
+@alerts_app.command("ack")
+def alerts_ack(
+    alert: AlertArgument,
+    key: KeyArgument,
+    by: Annotated[str | None, typer.Option(help="Who acknowledges (default: your user).")] = None,
+    config: ConfigOption = DEFAULT_PATH,
+    db: DbOption = None,
+) -> None:
+    """Acknowledge one alert key: it does not fire again for 7 days."""
+    cfg, path = _themes_context(config, db)
+    with _open_store(path, cfg.store.unencrypted, must_exist=True) as store:
+        state = _alert_state(cfg, store, alert, key)
+        update = {"acked_by": by or getpass.getuser(), "acked_at": datetime.now(UTC)}
+        store.put_alert_state(state.model_copy(update=update))
+    typer.echo(f"acknowledged {alert} {key}")
 
 
 models_app = typer.Typer(help="Download local models for offline (air-gapped) use.")

@@ -1,16 +1,9 @@
 import { el, number, svg } from "./dom";
-import type { Bucket, Theme } from "./types";
+import type { Bucket } from "./types";
 
 const SPARK_W = 96;
 const SPARK_H = 28;
 const SPARK_PAD = 3;
-
-const RISING_MIN = 3;
-
-/** A theme is rising when its last seven days at least doubled the seven days before. */
-export function isRising(theme: Theme): boolean {
-  return theme.last_7_days >= RISING_MIN && theme.last_7_days >= 2 * Math.max(1, theme.previous_7_days);
-}
 
 export function sparkline(values: number[], rising: boolean): SVGSVGElement {
   const max = Math.max(1, ...values);

@@ -1,4 +1,4 @@
-import { isRising, sparkline, weekColumns } from "./charts";
+import { sparkline, weekColumns } from "./charts";
 import { DataSource, type EvidenceResult, type Mode, type Refusal } from "./data";
 import { clear, el, languageName, number } from "./dom";
 import { type GraphControl, KIND_LABELS, renderGraph } from "./graph";
@@ -228,7 +228,7 @@ function render(data: DataSource): void {
     const owner = Object.entries(snapshot.evidence).find(([, items]) => items.some((e) => e.id === recordId));
     if (owner) void select(owner[0], recordId);
   };
-  const rising = themes.filter((t) => isRising(t));
+  const rising = themes.filter((t) => t.rising);
   for (const theme of themes) {
     const up = rising.includes(theme);
     const item = el(

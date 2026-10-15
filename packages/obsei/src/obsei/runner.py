@@ -11,6 +11,7 @@ from datetime import UTC, datetime, timedelta
 import duckdb
 import httpx
 
+from obsei.alerts import check_alerts
 from obsei.config import ConfigError, ObseiConfig, build_pipeline
 from obsei.core.context import Context
 from obsei.core.registry import PluginError
@@ -140,6 +141,16 @@ class Scheduler:
                 refresh_themes(self.config, self.ctx, self.store, lock=self.lock)
             except RUN_ERRORS as exc:
                 log.warning("theme update failed: %s", exc)
+        try:
+            failures = {o.pipeline: o.error for o in outcomes if o.error}
+            for fired in check_alerts(
+                self.config, self.ctx, self.store, failures=failures, lock=self.lock
+            ):
+                log.info("alert %s %s: %s", fired.alert.alert, fired.alert.key, fired.alert.title)
+                for error in fired.errors:
+                    log.warning("alert %s: %s", fired.alert.alert, error)
+        except RUN_ERRORS as exc:
+            log.warning("alerts failed: %s", exc)
         schedule = self.scheduled()
         for outcome in outcomes:
             self.last[outcome.pipeline] = outcome

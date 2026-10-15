@@ -50,6 +50,9 @@ def test_example_is_valid(path: Path) -> None:
         for sink in pipeline.sinks:
             _validated(registry.sink(sink.type), sink)
         pipeline.router()
+    for alert in config.alerts:
+        for target in alert.to:
+            _validated(registry.sink(target.type), target)
 
     themes = config.themes
     _check_llm(config, themes.labeler, "themes.labeler")

@@ -114,6 +114,17 @@ MIGRATIONS: tuple[str, ...] = (
         delivered_at TIMESTAMPTZ NOT NULL
     );
     """,
+    """
+    CREATE TABLE alert_state (
+        alert VARCHAR NOT NULL,
+        key VARCHAR NOT NULL,
+        last_fired_at TIMESTAMPTZ,
+        snoozed_until TIMESTAMPTZ,
+        acked_by VARCHAR,
+        acked_at TIMESTAMPTZ,
+        PRIMARY KEY (alert, key)
+    );
+    """,
 )
 TombstoneKind: TypeAlias = Literal["record", "author"]
 
@@ -214,6 +225,15 @@ class LoggedDelivery(EventDelivery):
     delivered_at: datetime
 
 
+class AlertState(BaseModel):
+    alert: str
+    key: str
+    last_fired_at: datetime | None = None
+    snoozed_until: datetime | None = None
+    acked_by: str | None = None
+    acked_at: datetime | None = None
+
+
 class StoreError(Exception):
     pass
 
@@ -271,6 +291,10 @@ PREINSTALL_HINT = (
     "'/opt/duckdb/extensions'}); c.execute('INSTALL httpfs')\", then copy that directory to "
     f"this machine (same DuckDB version and platform) and set {EXTENSIONS_ENV_VAR} to it"
 )
+
+
+def _moment(epoch_us: int | None) -> datetime | None:
+    return None if epoch_us is None else datetime.fromtimestamp(epoch_us / 1e6, UTC)
 
 
 def _sql_literal(value: str) -> str:
@@ -667,6 +691,43 @@ class Store(ThemeQueries):
             [pipeline, source, json.dumps(cursor), datetime.now(UTC)],
         )
 
+    def cursor_times(self) -> list[tuple[str, str, datetime]]:
+        """(pipeline, source, when its cursor last moved) for every source that has one."""
+        rows = self._con.execute(
+            "SELECT pipeline, source, epoch_us(updated_at) FROM cursors ORDER BY pipeline, source"
+        ).fetchall()
+        return [(str(r[0]), str(r[1]), datetime.fromtimestamp(r[2] / 1e6, UTC)) for r in rows]
+
+    def alert_states(self) -> list[AlertState]:
+        rows = self._con.execute(
+            "SELECT alert, key, epoch_us(last_fired_at), epoch_us(snoozed_until), acked_by, "
+            "epoch_us(acked_at) FROM alert_state ORDER BY alert, key"
+        ).fetchall()
+        return [
+            AlertState(
+                alert=r[0],
+                key=r[1],
+                last_fired_at=_moment(r[2]),
+                snoozed_until=_moment(r[3]),
+                acked_by=r[4],
+                acked_at=_moment(r[5]),
+            )
+            for r in rows
+        ]
+
+    def put_alert_state(self, state: AlertState) -> None:
+        self._con.execute(
+            "INSERT OR REPLACE INTO alert_state VALUES (?, ?, ?, ?, ?, ?)",
+            [
+                state.alert,
+                state.key,
+                state.last_fired_at,
+                state.snoozed_until,
+                state.acked_by,
+                state.acked_at,
+            ],
+        )
+
     def log_deliveries(self, pipeline: str, sink: str, deliveries: Sequence[EventDelivery]) -> None:
         now = datetime.now(UTC)
         self._con.executemany(
@@ -766,6 +827,15 @@ class Store(ThemeQueries):
         """(records with a review flag, records marked for review, most common classify model)."""
         row = self._con.execute(_REVIEWS).fetchone()
         return (int(row[0]), int(row[1]), row[2]) if row else (0, 0, None)
+
+    def review_count(self, since: datetime) -> int:
+        """Records created at or after ``since`` that a model marked for review."""
+        row = self._con.execute(
+            f"SELECT count(*) FROM records WHERE json_extract_string(data, '{_CLASSIFY}.review') "  # noqa: S608
+            "= 'true' AND created_at >= ?",
+            [since],
+        ).fetchone()
+        return int(row[0]) if row else 0
 
     def author_count(self) -> int:
         """Distinct author pseudonyms; raw handles are never stored."""

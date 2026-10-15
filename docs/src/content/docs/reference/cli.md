@@ -7,8 +7,12 @@ description: obsei command reference.
 | --- | --- |
 | `obsei init [DIR] [--force] [--offline]` | Create `obsei.yaml` and a sample dataset, and install DuckDB's `httpfs` extension for encryption (`--offline` skips it; existing files are kept, so rerun it to install the extension) |
 | `obsei try [-c FILE] [-p NAME] [--limit N] [--enrich]` | Preview redacted records; nothing stored or sent |
-| `obsei run [-c FILE] [-p NAME] [--db PATH] [--every MINUTES]` | Run pipelines |
-| `obsei themes [-c FILE] [--db PATH]` | Embed new feedback and update stable themes |
+| `obsei run [-c FILE] [-p NAME] [--db PATH] [--every MINUTES]` | Run pipelines, then check alerts |
+| `obsei themes [-c FILE] [--db PATH]` | Embed new feedback, update stable themes, then check alerts |
+| `obsei alerts check [-c FILE] [--db PATH] [--dry-run]` | Check every [alert](/guides/alerts/) now and deliver those due (`--dry-run`: print only, send and record nothing) |
+| `obsei alerts list [-c FILE] [--db PATH]` | Show when each alert key last fired, and snoozes and acks |
+| `obsei alerts snooze ALERT KEY [--hours N] [-c FILE] [--db PATH]` | Silence one alert key for N hours (default 24) |
+| `obsei alerts ack ALERT KEY [--by NAME] [-c FILE] [--db PATH]` | Acknowledge one alert key: silent for 7 days |
 | `obsei ask QUESTION [-c FILE] [--db PATH]` | Answer from your feedback with citations; with `ask_judge`, also a grounding score |
 | `obsei studio --out DIR [-c FILE] [--db PATH]` | Export a static Studio snapshot |
 | `obsei demo [--out DIR] [--embedder hashing\|local\|local:MODEL] [--decision-url-env VAR [--decision-model NAME] [--save-labels FILE]]` | Build the synthetic multilingual demo (default: offline `hashing` embedder and the committed decision-model labels) |

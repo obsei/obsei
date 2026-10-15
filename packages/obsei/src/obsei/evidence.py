@@ -97,3 +97,4 @@ class ThemeInfo(BaseModel):
     languages: dict[str, int]
     intents: dict[str, int]
     weekly: list[int] = []
+    rising: bool = False

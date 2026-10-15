@@ -44,6 +44,7 @@ export interface Theme {
   languages: Record<string, number>;
   intents: Record<string, number>;
   weekly?: number[];
+  rising: boolean;
 }
 
 export type NodeKind = "theme" | "source" | "lang" | "intent" | "sentiment";

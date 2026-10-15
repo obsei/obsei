@@ -8,7 +8,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import EGRESS, Context
-from obsei.core.protocols import SinkResult
+from obsei.core.protocols import Alert, SinkResult
 from obsei.core.record import Record
 from obsei.routing import Conditions, When
 from obsei.sinks._common import env, label
@@ -48,6 +48,16 @@ def render(record: Record) -> str:
     return f"{' '.join(head)}\n{quoted}{link}"
 
 
+def render_alert(alert: Alert) -> str:
+    return "\n".join(
+        [
+            f"*{_escape(alert.title)}*",
+            *map(_escape, alert.lines),
+            *(f"> {_escape(quote)}" for quote in alert.quotes),
+        ]
+    )
+
+
 class SlackSink:
     name: ClassVar[str] = "slack"
 
@@ -71,3 +81,11 @@ class SlackSink:
             summary = f"…and {len(selected) - len(posted)} more matching feedback item(s)."
             self.ctx.http.post(self.url, json={"text": summary}, extensions=EGRESS)
         return SinkResult(sent=len(posted), skipped=len(batch) - len(posted))
+
+    def alert(self, alert: Alert) -> SinkResult:
+        response = self.ctx.http.post(
+            self.url, json={"text": render_alert(alert)}, extensions=EGRESS
+        )
+        if response.is_error:
+            return SinkResult(errors=[f"slack returned {response.status_code}"])
+        return SinkResult(sent=1)
