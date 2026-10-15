@@ -1,0 +1,137 @@
+text,lang,intent,sentiment,team
+I can't log in since the update,en,bug,negative,engineering
+Since the latest update I can't log in,en,bug,negative,engineering
+Can't log in after updating the app,en,bug,negative,engineering
+"After the update, login fails every time",en,bug,negative,engineering
+I can't log in to my account since the update,en,bug,negative,engineering
+Can't log in since the update and the reset email never arrives. Reach me at sam.rivera@example.com,en,bug,negative,engineering
+No puedo iniciar sesión desde la actualización,es,bug,negative,engineering
+Desde la última actualización no puedo iniciar sesión,es,bug,negative,engineering
+No puedo iniciar sesión después de actualizar la app,es,bug,negative,engineering
+"Tras la actualización, el inicio de sesión falla siempre",es,bug,negative,engineering
+No puedo iniciar sesión en mi cuenta desde la actualización,es,bug,negative,engineering
+アップデート以降ログインできません,ja,bug,negative,engineering
+最新のアップデートからログインできません,ja,bug,negative,engineering
+アプリを更新したらログインできなくなりました,ja,bug,negative,engineering
+アップデートしてからログインできません,ja,bug,negative,engineering
+アップデート後、毎回ログインに失敗します,ja,bug,negative,engineering
+アップデート以降ログインできません。電話は090-1234-5678です,ja,bug,negative,engineering
+업데이트 이후 로그인이 되지 않습니다,ko,bug,negative,engineering
+최신 업데이트 이후 로그인이 되지 않습니다,ko,bug,negative,engineering
+업데이트 이후 계정에 로그인이 되지 않습니다,ko,bug,negative,engineering
+업데이트 후 로그인이 계속 되지 않습니다,ko,bug,negative,engineering
+앱을 업데이트한 후 로그인이 되지 않습니다,ko,bug,negative,engineering
+업데이트 이후로 로그인이 되지 않습니다,ko,bug,negative,engineering
+لا أستطيع تسجيل الدخول منذ التحديث,ar,bug,negative,engineering
+منذ آخر تحديث لا أستطيع تسجيل الدخول,ar,bug,negative,engineering
+لا يمكنني تسجيل الدخول بعد تحديث التطبيق,ar,bug,negative,engineering
+منذ التحديث لا يمكنني تسجيل الدخول إلى حسابي,ar,bug,negative,engineering
+بعد التحديث يفشل تسجيل الدخول في كل مرة,ar,bug,negative,engineering
+لا أستطيع تسجيل الدخول منذ التحديث. رقمي ٠٥٠١٢٣٤٥٦٧,ar,bug,negative,engineering
+I was charged twice this month,en,complaint,negative,payments
+I was charged twice for my subscription,en,complaint,negative,payments
+I got charged twice for the same plan,en,complaint,negative,payments
+My card was charged twice this month,en,complaint,negative,payments
+I was charged twice on card 4111 1111 1111 1111,en,complaint,negative,payments
+Fui cobrado duas vezes este mês,pt,complaint,negative,payments
+Fui cobrado duas vezes pela assinatura,pt,complaint,negative,payments
+Fui cobrado duas vezes pelo mesmo plano,pt,complaint,negative,payments
+Meu cartão foi cobrado duas vezes este mês,pt,complaint,negative,payments
+"Fui cobrado duas vezes, meu CPF é 482.915.736-46",pt,complaint,negative,payments
+Ich wurde diesen Monat zweimal belastet,de,complaint,negative,payments
+Sie haben mir diesen Monat zweimal berechnet,de,complaint,negative,payments
+Ich wurde für mein Abo zweimal belastet,de,complaint,negative,payments
+Mir wurde zweimal Geld abgebucht,de,complaint,negative,payments
+"Ich wurde zweimal belastet, bitte erstatten Sie auf DE89 3704 0044 0532 0130 00",de,complaint,negative,payments
+Ich wurde zweimal belastet und möchte mein Geld zurück,de,complaint,negative,payments
+The app is very slow to load,en,bug,negative,engineering
+The app is so slow to load,en,bug,negative,engineering
+Very slow to load every time,en,bug,negative,engineering
+The app is slow to load since last month,en,bug,negative,engineering
+The app is really slow to load,en,bug,negative,engineering
+ऐप लोड होने में बहुत धीमा है,hi,bug,negative,engineering
+ऐप बहुत धीमे लोड होता है,hi,bug,negative,engineering
+ऐप हर बार बहुत धीमा लोड होता है,hi,bug,negative,engineering
+पिछले महीने से ऐप लोड होने में धीमा है,hi,bug,negative,engineering
+ऐप लोड होने में सच में बहुत धीमा है,hi,bug,negative,engineering
+L'app è molto lenta a caricarsi,it,bug,negative,engineering
+L'app è lentissima a caricarsi,it,bug,negative,engineering
+L'app è lentissima a caricarsi ogni volta,it,bug,negative,engineering
+L'app è lenta a caricarsi dal mese scorso,it,bug,negative,engineering
+L'app è davvero lenta a caricarsi,it,bug,negative,engineering
+Please add a dark mode,en,feature_request,neutral,design
+I'd really like a dark mode,en,feature_request,neutral,design
+Please add a dark mode for the evening,en,feature_request,neutral,design
+A dark mode would be great,en,feature_request,neutral,design
+Dark mode please,en,feature_request,neutral,design
+Ajoutez un mode sombre s'il vous plaît,fr,feature_request,neutral,design
+J'aimerais beaucoup un mode sombre,fr,feature_request,neutral,design
+Ajoutez un mode sombre pour le soir,fr,feature_request,neutral,design
+"Un mode sombre, ce serait super",fr,feature_request,neutral,design
+Mode sombre s'il vous plaît,fr,feature_request,neutral,design
+"Aggiungete una modalità scura, per favore",it,feature_request,neutral,design
+Vorrei tanto una modalità scura,it,feature_request,neutral,design
+Aggiungete una modalità scura per la sera,it,feature_request,neutral,design
+Una modalità scura sarebbe fantastica,it,feature_request,neutral,design
+"Modalità scura, per favore",it,feature_request,neutral,design
+"Love the new design, it feels so clean",en,praise,positive,design
+The new design looks fantastic,en,praise,positive,design
+I love the new design of the app,en,praise,positive,design
+The new design is much nicer,en,praise,positive,design
+Really like the new design,en,praise,positive,design
+Suka banget sama desain barunya,id,praise,positive,design
+Desain barunya keren sekali,id,praise,positive,design
+Saya suka desain baru aplikasinya,id,praise,positive,design
+Desain barunya jauh lebih bagus,id,praise,positive,design
+Suka sekali dengan desain yang baru,id,praise,positive,design
+"Adoro il nuovo design, è pulitissimo",it,praise,positive,design
+Il nuovo design è fantastico,it,praise,positive,design
+Adoro il nuovo design dell'app,it,praise,positive,design
+Il nuovo design è molto più bello,it,praise,positive,design
+Mi piace tanto il nuovo design,it,praise,positive,design
+Checkout fails when I try to pay,en,bug,negative,payments
+Payment fails at checkout,en,bug,negative,payments
+Checkout keeps failing when I pay,en,bug,negative,payments
+"I can't pay, checkout fails every time",en,bug,negative,payments
+Checkout fails at the payment step,en,bug,negative,payments
+Der Checkout schlägt beim Bezahlen fehl,de,bug,negative,payments
+Die Zahlung im Checkout schlägt fehl,de,bug,negative,payments
+Der Checkout scheitert jedes Mal beim Bezahlen,de,bug,negative,payments
+"Ich kann nicht bezahlen, der Checkout schlägt fehl",de,bug,negative,payments
+Der Checkout schlägt bei der Zahlung fehl,de,bug,negative,payments
+Checkout schlägt fehl. Rufen Sie mich an: +49 151 2345 6789,de,bug,negative,payments
+يفشل الدفع عندما أحاول الدفع,ar,bug,negative,payments
+عملية الدفع تفشل كل مرة أحاول الدفع,ar,bug,negative,payments
+إتمام الطلب يفشل عندما أحاول الدفع,ar,bug,negative,payments
+تفشل عملية الدفع عند محاولة الدفع,ar,bug,negative,payments
+الدفع يفشل عند الخروج,ar,bug,negative,payments
+Support solved my problem quickly,en,praise,positive,support
+The support team fixed my issue fast,en,praise,positive,support
+Support solved my problem in minutes,en,praise,positive,support
+"Great support, my problem was solved quickly",en,praise,positive,support
+Support solved my problem really quickly,en,praise,positive,support
+El soporte resolvió mi problema rápido,es,praise,positive,support
+El equipo de soporte arregló mi problema enseguida,es,praise,positive,support
+El soporte resolvió mi problema en minutos,es,praise,positive,support
+"Gran soporte, resolvieron mi problema rápido",es,praise,positive,support
+El soporte resolvió mi problema muy rápido,es,praise,positive,support
+O suporte resolveu meu problema rápido,pt,praise,positive,support
+A equipe de suporte resolveu meu problema rapidinho,pt,praise,positive,support
+O suporte resolveu meu problema em minutos,pt,praise,positive,support
+"Ótimo suporte, resolveram meu problema rápido",pt,praise,positive,support
+O suporte resolveu meu problema muito rápido,pt,praise,positive,support
+My delivery was late,en,complaint,negative,logistics
+My order arrived a week late,en,complaint,negative,logistics
+Delivery is late again,en,complaint,negative,logistics
+My package is days late,en,complaint,negative,logistics
+Late delivery for the third time this month,en,complaint,negative,logistics
+Ma livraison était en retard,fr,complaint,negative,logistics
+Ma commande est arrivée avec une semaine de retard,fr,complaint,negative,logistics
+Livraison encore en retard,fr,complaint,negative,logistics
+Mon colis a plusieurs jours de retard,fr,complaint,negative,logistics
+Troisième livraison en retard ce mois-ci,fr,complaint,negative,logistics
+मेरी डिलीवरी देर से आई,hi,complaint,negative,logistics
+मेरा ऑर्डर एक हफ़्ते देर से आया,hi,complaint,negative,logistics
+डिलीवरी फिर से देर से आई,hi,complaint,negative,logistics
+मेरा पार्सल कई दिन देर से है,hi,complaint,negative,logistics
+डिलीवरी देर से है। मेरा आधार 7181 9093 7865 है,hi,complaint,negative,logistics

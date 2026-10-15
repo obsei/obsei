@@ -165,6 +165,12 @@ def _resolve(record: Record, path: str) -> _Found | None:
     return _Found(enrichment, root, parent, keys[-1] if keys else enricher, value)
 
 
+def answer(record: Record, path: str) -> tuple[str | None, float | None]:
+    """The value at ``path`` as routes see it, and its confidence."""
+    found = _resolve(record, path)
+    return (None, None) if found is None else (text(found.value), found.confidence())
+
+
 def flagged(record: Record) -> bool:
     """Whether an enricher marked the record for review (e.g. a decision answer below its
     cutoff that no fallback replaced)."""

@@ -16,6 +16,7 @@ from obsei.config import RouteRule
 from obsei.core.record import Author, Enrichment, Record, SourceRef
 from obsei.enrichers.classify import (
     ClassifierConfig,
+    ClassifyPluginConfig,
     DecisionClassifier,
     FieldSpec,
 )
@@ -79,6 +80,14 @@ DECISION_CONFIG = ClassifierConfig(
         ),
     },
 )
+GOLD_FILE = "demo-gold.csv"
+GOLD_CONFIG = ClassifyPluginConfig(
+    sentiments=DECISION_CONFIG.sentiments,
+    intents=DECISION_CONFIG.intents,
+    fields={"team": DECISION_CONFIG.fields["team"]},
+    threshold=0.4,
+)
+"""The questions of ``templates/demo-gold.csv``, whose answers come from each record's issue."""
 DEMO_ROUTES = (
     RouteRule(review=["review"]),
     RouteRule(
