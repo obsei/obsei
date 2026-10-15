@@ -434,7 +434,7 @@ def init(
     ] = False,
 ) -> None:
     """Create obsei.yaml, a sample dataset and local secrets; install DuckDB's encryption
-    extension and, with obsei[local], the classifier model.
+    extension and, with obsei\\[local], the classifier model.
 
     Secrets go to .obsei/secrets.env (owner-only, git-ignored) and are never overwritten."""
     templates = resources.files("obsei") / "templates"
@@ -1099,7 +1099,7 @@ def demo(
         str,
         typer.Option(
             help="'hashing' (offline), or 'local' / 'local:<model>' to group across languages "
-            "(obsei[embeddings]; run 'obsei models download' first)."
+            "(obsei\\[embeddings]; run 'obsei models download' first)."
         ),
     ] = "hashing",
     decision_url_env: Annotated[
@@ -1355,14 +1355,14 @@ def models_download(
     embeddings: Annotated[
         str | None,
         typer.Option(
-            help=f"Embedding model for themes [default: {LOCAL_MODEL} with obsei[embeddings]]."
+            help=f"Embedding model for themes [default: {LOCAL_MODEL} with obsei\\[embeddings]]."
         ),
     ] = None,
     classifier: Annotated[
         list[str] | None,
         typer.Option(
             help=f"Model for 'api: local', repeatable "
-            f"[default: {LOCAL_CLASSIFIER} with obsei[local]]."
+            f"[default: {LOCAL_CLASSIFIER} with obsei\\[local]]."
         ),
     ] = None,
     directory: Annotated[
