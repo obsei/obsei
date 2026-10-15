@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
-from typing import ClassVar, Protocol, TypeAlias, runtime_checkable
+from typing import ClassVar, Literal, Protocol, TypeAlias, runtime_checkable
 
 from pydantic import BaseModel, Field
 
@@ -9,6 +9,9 @@ from obsei.core.record import Enrichment, Record
 
 CursorValue: TypeAlias = str | int | float | bool | None
 Cursor: TypeAlias = dict[str, CursorValue]
+AlertKind: TypeAlias = Literal[
+    "theme_spike", "new_theme", "digest", "review_queue", "pipeline_health"
+]
 
 
 class EventDelivery(BaseModel):
@@ -27,6 +30,21 @@ class SinkResult(BaseModel):
     skipped: int = 0
     errors: list[str] = Field(default_factory=list)
     deliveries: list[EventDelivery] = Field(default_factory=list)
+
+
+class Alert(BaseModel):
+    """One aggregate alert: counts and redacted quotes from a k-anonymous theme, never authors."""
+
+    alert: str
+    kind: AlertKind
+    key: str
+    title: str
+    lines: list[str] = Field(default_factory=list)
+    count: int | None = None
+    baseline: float | None = None
+    theme: str | None = None
+    quotes: list[str] = Field(default_factory=list)
+    owner: str | None = None
 
 
 @runtime_checkable
@@ -74,3 +92,10 @@ class Sink(Protocol):
     name: ClassVar[str]
 
     def send(self, batch: Sequence[Record]) -> SinkResult: ...
+
+
+@runtime_checkable
+class Alerts(Protocol):
+    """Optional for sinks: deliver one aggregate alert as a single message or event."""
+
+    def alert(self, alert: Alert) -> SinkResult: ...

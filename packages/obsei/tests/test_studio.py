@@ -29,7 +29,6 @@ from obsei.demo import (
     redacted_demo_records,
     stored_labels,
 )
-from obsei.evidence import ThemeInfo
 from obsei.llm import EgressPolicy
 from obsei.llm.decision import DecisionClient
 from obsei.llm.embed import LOCAL_MODEL, HashingEmbedder
@@ -51,11 +50,6 @@ RAW_PII = (
     "+49 151",
 )
 DEMO_PLACEHOLDERS = {"EMAIL", "PHONE", "CARD", "IBAN", "IN_AADHAAR", "BR_CPF"}
-
-
-def rising(theme: ThemeInfo) -> bool:
-    """Studio's rule (charts.ts isRising)."""
-    return theme.last_7_days >= 3 and theme.last_7_days >= 2 * max(1, theme.previous_7_days)
 
 
 @pytest.fixture(scope="module")
@@ -207,8 +201,8 @@ def test_demo_labels_are_curated_and_sources_survive_k(store: Store) -> None:
     }
     login = [t for t in snap.themes if t.label and t.label.startswith("Can't log in")]
     assert login
-    assert all(rising(t) for t in login)
-    assert not any(rising(t) for t in snap.themes if t not in login)
+    assert all(t.rising for t in login)
+    assert not any(t.rising for t in snap.themes if t not in login)
 
 
 class _Vector(list[float]):
@@ -256,8 +250,8 @@ def test_demo_with_local_embedder_merges_languages(tmp_path: Path) -> None:
     login = themes["Can't log in"]
     assert login["sources"] == {"appstore": 12, "playstore": 11, "zendesk": 6}
     assert set(login["languages"]) == {"en", "es", "ja", "ko", "ar"}
-    assert rising(ThemeInfo.model_validate(login))
-    assert not any(rising(ThemeInfo.model_validate(t)) for t in data["themes"] if t is not login)
+    assert login["rising"]
+    assert not any(t["rising"] for t in data["themes"] if t is not login)
     assert data["demo"] is True
     assert set(data["privacy"]["placeholders"]) == DEMO_PLACEHOLDERS
     showcase = data["showcase"]

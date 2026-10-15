@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import EGRESS, Context
 from obsei.core.plugin import factory
-from obsei.core.protocols import SinkResult
+from obsei.core.protocols import Alert, SinkResult
 from obsei.core.record import Record
 from obsei.core.registry import Registry
 from obsei.routing import Conditions, When
@@ -44,10 +44,13 @@ def _text(value: str, *, weight: str | None = None, subtle: bool = False) -> dic
     return block
 
 
-def _plain(value: str) -> dict[str, JsonValue]:
+def _plain(value: str, *, weight: str | None = None) -> dict[str, JsonValue]:
     """Feedback goes in a TextRun, which Teams never renders as markdown, so customer text
     cannot add links or formatting."""
-    return {"type": "RichTextBlock", "inlines": [{"type": "TextRun", "text": value}]}
+    run: dict[str, JsonValue] = {"type": "TextRun", "text": value}
+    if weight:
+        run["weight"] = weight
+    return {"type": "RichTextBlock", "inlines": [run]}
 
 
 def element(record: Record, max_text: int) -> dict[str, JsonValue]:
@@ -78,6 +81,18 @@ def card(title: str, records: Sequence[Record], more: int, max_text: int) -> dic
     body.extend(element(r, max_text) for r in records)
     if more:
         body.append(_text(f"…and {more} more matching feedback item(s).", subtle=True))
+    return _message(body)
+
+
+def alert_card(alert: Alert) -> dict[str, JsonValue]:
+    """Theme labels and quotes derive from customer text, so they stay plain text too."""
+    body: list[JsonValue] = [_plain(alert.title, weight="Bolder")]
+    body.extend(_plain(line) for line in alert.lines)
+    body.extend(_plain(f"“{quote}”") for quote in alert.quotes)
+    return _message(body)
+
+
+def _message(body: list[JsonValue]) -> dict[str, JsonValue]:
     return {
         "type": "message",
         "attachments": [
@@ -113,10 +128,17 @@ class TeamsSink:
             return SinkResult(skipped=len(batch))
         posted = selected[: c.max_records]
         message = card(c.title, posted, len(selected) - len(posted), c.max_text)
+        result = self._post(message, len(posted))
+        return result.model_copy(update={"skipped": len(batch) - len(posted)})
+
+    def alert(self, alert: Alert) -> SinkResult:
+        return self._post(alert_card(alert), 1)
+
+    def _post(self, message: dict[str, JsonValue], sent: int) -> SinkResult:
         response = self.ctx.http.post(self.url, json=message, extensions=EGRESS)
         if response.is_error:
             return SinkResult(errors=[f"teams returned {response.status_code}"])
-        return SinkResult(sent=len(posted), skipped=len(batch) - len(posted))
+        return SinkResult(sent=sent)
 
 
 def register(registry: Registry) -> None:

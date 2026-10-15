@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError, m
 
 from obsei.access import AccessConfig
 from obsei.core.context import Context, LlmEndpoint
+from obsei.core.protocols import AlertKind
 from obsei.core.registry import Registry
 from obsei.enrichers import register as register_enrichers
 from obsei.enrichers.classify import ClassifyPluginConfig
@@ -201,6 +202,38 @@ class PipelineConfig(_Strict):
         )
 
 
+class AlertConfig(_Strict):
+    """An aggregate alert. Options only apply to their kind: ``sensitivity`` and ``min_count`` to
+    theme_spike, ``period_days`` and ``top`` to digest, ``min_pending`` to review_queue and
+    ``stale_hours`` to pipeline_health."""
+
+    name: str = Field(pattern=r"^[\w-]+$")
+    kind: AlertKind
+    to: list[SinkEntry] = Field(
+        min_length=1, description="Sinks that deliver it: webhook, slack, notify or teams."
+    )
+    owner: str | None = Field(default=None, description="Shown in the message.")
+    cooldown_hours: int | None = Field(
+        default=None, ge=1, description="Default 168 (a week) for theme_spike, else 24."
+    )
+    sensitivity: float = Field(default=2.0, gt=0, description="Minimum z-score of this week.")
+    min_count: int = Field(default=5, ge=1, description="Minimum records this week.")
+    period_days: int = Field(default=7, ge=1, description="Covered by, and interval of, a digest.")
+    top: int = Field(default=5, ge=1, description="Themes listed in a digest.")
+    min_pending: int = Field(default=10, ge=1)
+    stale_hours: int | None = Field(
+        default=None, ge=1, description="Also alert when a source fetched nothing for this long."
+    )
+    quotes: int = Field(default=3, ge=0, le=5, description="Redacted quotes per theme alert.")
+
+    @model_validator(mode="after")
+    def _unique_targets(self) -> Self:
+        names = [s.name for s in self.to]
+        if len(names) != len(set(names)):
+            raise ValueError(f"alert {self.name!r}: give sinks of the same type a key")
+        return self
+
+
 class ObseiConfig(_Strict):
     version: Literal[1] = 1
     store: StoreConfig = Field(default_factory=StoreConfig)
@@ -222,12 +255,16 @@ class ObseiConfig(_Strict):
         default_factory=list, description="Installed plugin entry points allowed to load."
     )
     pipelines: list[PipelineConfig] = Field(min_length=1)
+    alerts: list[AlertConfig] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _unique_names(self) -> ObseiConfig:
         names = [p.name for p in self.pipelines]
         if len(names) != len(set(names)):
             raise ValueError("pipeline names must be unique")
+        alerts = [a.name for a in self.alerts]
+        if len(alerts) != len(set(alerts)):
+            raise ValueError("alert names must be unique")
         return self
 
     @model_validator(mode="after")

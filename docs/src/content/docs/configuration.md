@@ -55,6 +55,21 @@ pipelines:
 Sinks take an optional `key` (default: their type), and a pipeline can add ordered `route:` rules
 that send each record to the sinks of the first rule it matches; see [Routing](/guides/routing/).
 
+## Alerts
+
+Top-level `alerts:` watch aggregates rather than records: theme spikes, new themes, digests, the
+review queue and pipeline health. Each names the sinks that deliver it in `to`, written like
+pipeline sinks; see [Alerts](/guides/alerts/).
+
+```yaml
+alerts:
+  - name: spikes
+    kind: theme_spike        # new_theme, digest, review_queue or pipeline_health
+    to:
+      - type: slack
+        config: {webhook_url_env: SLACK_ALERTS_URL}
+```
+
 ## Enrichers
 
 Enrichers run in the order listed, on new or changed records only.
@@ -119,8 +134,8 @@ A failing pipeline is reported and the others still run; `obsei run` then exits 
 
 Set `every_minutes` on a pipeline and `obsei serve` runs it on that schedule, sharing the server's
 database. DuckDB allows a single writer, so do not point a separate `obsei run` at a database that
-`obsei serve` holds. `themes.auto: true` updates themes after each scheduled run, and
-`GET /api/runs` reports the last run of each pipeline.
+`obsei serve` holds. `themes.auto: true` updates themes after each scheduled run, alerts are
+checked after that, and `GET /api/runs` reports the last run of each pipeline.
 
 ```yaml
 themes:

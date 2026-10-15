@@ -12,7 +12,7 @@ sidebar:
 | `feedback_stats` | Counts and average rating grouped by source, instance, sentiment, intent, lang (language), rating, route, day, week or month |
 | `search_feedback` | Matching feedback, newest first, as citable evidence |
 | `get_feedback` | One record by id, to verify a citation |
-| `list_themes` | Stable themes with trends, sources, languages and intents (k-anonymous) |
+| `list_themes` | Stable themes with trends (`rising` as Studio shows it), sources, languages and intents (k-anonymous) |
 
 Results contain redacted text, labels, source, time and record id. They never contain author
 pseudonyms. The server also offers a `voc_report` prompt.

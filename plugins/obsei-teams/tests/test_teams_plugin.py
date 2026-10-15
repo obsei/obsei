@@ -9,7 +9,7 @@ from pydantic import JsonValue
 
 from obsei.config import builtin_registry, load_config
 from obsei.core.context import Context
-from obsei.core.protocols import Sink
+from obsei.core.protocols import Alert, Alerts, Sink
 from obsei.core.record import Enrichment, Record, SourceRef
 from obsei.core.registry import Registry
 from obsei.llm.egress import EgressError, EgressPolicy
@@ -191,3 +191,30 @@ def test_matches_confidence_and_review() -> None:
     hook = Hook()
     assert sink(hook, when={"review": True}).send(batch).sent == 1
     assert hook.card()["body"][1]["items"][1]["inlines"][0]["text"] == "unsure"
+
+
+def test_alert_is_one_plain_text_card() -> None:
+    hook = Hook()
+    teams = sink(hook)
+    assert isinstance(teams, Alerts)
+    alert = Alert(
+        alert="queue",
+        kind="theme_spike",
+        key="thm_1",
+        title="Theme spiking: [Login](https://evil.example)",
+        lines=["15 records", "Owner: @ana"],
+        quotes=["I cannot log in"],
+    )
+    assert teams.alert(alert).sent == 1
+    body = hook.card()["body"]
+    assert [b["type"] for b in body] == ["RichTextBlock"] * 4
+    title = body[0]["inlines"][0]
+    assert (title["text"], title["weight"]) == (alert.title, "Bolder")
+    assert [b["inlines"][0]["text"] for b in body[1:]] == [
+        "15 records",
+        "Owner: @ana",
+        "\u201cI cannot log in\u201d",
+    ]
+    failing = sink(Hook(500))
+    assert isinstance(failing, Alerts)
+    assert failing.alert(alert).errors == ["teams returned 500"]

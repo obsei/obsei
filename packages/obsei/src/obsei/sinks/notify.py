@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import Context
-from obsei.core.protocols import SinkResult
+from obsei.core.protocols import Alert, SinkResult
 from obsei.core.record import Record
 from obsei.llm.egress import EgressError
 from obsei.routing import Conditions, When
@@ -84,10 +84,15 @@ class NotifySink:
         if len(selected) > self.config.max_items:
             lines.append(f"…and {len(selected) - self.config.max_items} more.")
         heading = f"obsei: {len(selected)} matching feedback item(s)"
-        body = "\n".join(lines)
-        failed = [
-            str(t.service_name) for t in self.targets if not t.notify(body=body, title=heading)
-        ]
+        result = self._notify(heading, "\n".join(lines), len(selected))
+        return result.model_copy(update={"skipped": len(batch) - len(selected)})
+
+    def alert(self, alert: Alert) -> SinkResult:
+        body = "\n".join([*alert.lines, *(f"> {quote}" for quote in alert.quotes)])
+        return self._notify(alert.title, body, 1)
+
+    def _notify(self, title: str, body: str, sent: int) -> SinkResult:
+        failed = [str(t.service_name) for t in self.targets if not t.notify(body=body, title=title)]
         if failed:
             return SinkResult(errors=[f"notify failed for {', '.join(failed)}"])
-        return SinkResult(sent=len(selected), skipped=len(batch) - len(selected))
+        return SinkResult(sent=sent)

@@ -15,6 +15,7 @@ _PEOPLE = PEOPLE.format(p="r.")
 _RATING = "CAST(json_extract_string(r.data, '$.rating') AS DOUBLE)"
 WEEKS = 8
 """Weekly counts per theme cover this many seven-day windows ending now."""
+RISING_MIN = 3
 
 
 def _vec(vector: list[float]) -> str:
@@ -36,6 +37,13 @@ class ThemeSummary:
     languages: dict[str, int] = field(default_factory=dict)
     intents: dict[str, int] = field(default_factory=dict)
     weekly: list[int] = field(default_factory=list)
+
+    @property
+    def rising(self) -> bool:
+        """The last seven days have at least ``RISING_MIN`` records and double the seven before."""
+        return self.last_7_days >= RISING_MIN and self.last_7_days >= 2 * max(
+            1, self.previous_7_days
+        )
 
 
 @dataclass(frozen=True)
@@ -282,6 +290,15 @@ class ThemeQueries:
             if int(week) < WEEKS:
                 result[str(theme_id)][WEEKS - 1 - int(week)] = int(count)
         return result
+
+    def theme_counts(self, since: datetime) -> dict[str, int]:
+        """Records per theme created at or after ``since``."""
+        rows = self._con.execute(
+            "SELECT t.theme_id, count(*) FROM record_themes t JOIN records r "
+            "ON r.id = t.record_id WHERE r.created_at >= ? GROUP BY t.theme_id",
+            [since],
+        ).fetchall()
+        return {str(r[0]): int(r[1]) for r in rows}
 
     def hidden_themes(self, min_size: int) -> int:
         """Themes withheld by k-anonymity: from fewer than ``min_size`` people."""

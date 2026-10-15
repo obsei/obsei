@@ -17,11 +17,18 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import EGRESS, Context
-from obsei.core.protocols import EventDelivery, SinkResult
+from obsei.core.protocols import Alert, AlertKind, EventDelivery, SinkResult
 from obsei.core.record import Record
 from obsei.sinks._common import env
 
 RECORDS_ROUTED = "obsei.records.routed"
+ALERT_EVENTS: dict[AlertKind, str] = {
+    "theme_spike": "obsei.theme.spiking",
+    "new_theme": "obsei.theme.new",
+    "digest": "obsei.digest",
+    "review_queue": "obsei.review.pending",
+    "pipeline_health": "obsei.pipeline.failed",
+}
 SECRET_PREFIX = "whsec_"  # noqa: S105
 ATTEMPTS = 3
 BACKOFF_SECONDS = 1.0
@@ -50,6 +57,12 @@ class WebhookConfig(BaseModel):
     secret_env: str | None = None
     headers: dict[str, str] = Field(default_factory=dict)
     exclude: list[str] = Field(default_factory=lambda: ["author"])
+
+
+def _result(delivery: EventDelivery, sent: int) -> SinkResult:
+    if delivery.error:
+        return SinkResult(errors=[delivery.error], deliveries=[delivery])
+    return SinkResult(sent=sent, deliveries=[delivery])
 
 
 def _retry_after(response: httpx.Response) -> float | None:
@@ -118,7 +131,7 @@ class WebhookSink:
     def send(self, batch: Sequence[Record]) -> SinkResult:
         exclude = set(self.config.exclude)
         records: list[JsonValue] = [r.model_dump(mode="json", exclude=exclude) for r in batch]
-        delivery = self.emit(RECORDS_ROUTED, {"records": records})
-        if delivery.error:
-            return SinkResult(errors=[delivery.error], deliveries=[delivery])
-        return SinkResult(sent=len(batch), deliveries=[delivery])
+        return _result(self.emit(RECORDS_ROUTED, {"records": records}), len(batch))
+
+    def alert(self, alert: Alert) -> SinkResult:
+        return _result(self.emit(ALERT_EVENTS[alert.kind], alert.model_dump(mode="json")), 1)
