@@ -66,7 +66,8 @@ untrusted content and a way to send messages out together are what a prompt inje
 /plugin install obsei@obsei
 ```
 
-The plugin adds the MCP server and a `voice-of-customer` skill. Codex, Copilot, VS Code, Cursor,
+This installs from obsei's own marketplace in the GitHub repository; obsei isn't in Claude's
+official plugin directory yet. The plugin adds the MCP server and a `voice-of-customer` skill. Codex, Copilot, VS Code, Cursor,
 Gemini and other tools: see [Use obsei from your AI tool](/guides/ai-tools/).
 
 ## Claude Desktop and other clients

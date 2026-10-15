@@ -29,7 +29,7 @@ from 0.0.x, start with the [migration guide](/guides/migrate-from-0-0/). Every c
   100+ services ([Sinks](/guides/sinks/)).
 - **Safer agents.** MCP results mark customer text `untrusted`, and `propose_issue` queues issues
   for `obsei approvals approve` ([MCP](/guides/mcp/)). The MCP server is part of the core package,
-  and plugins for Claude Code, Codex, Copilot, Cursor and Gemini CLI install it in one line
+  and plugins for Claude Code, Codex, the Copilot CLI and Gemini CLI install it from the GitHub repository
   ([AI tools](/guides/ai-tools/)).
 - **Connector status.** Each source and sink is marked `verified` (a live test against the real
   service) or `beta` ([Sources](/guides/sources/)).

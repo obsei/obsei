@@ -102,7 +102,8 @@ docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
 
 ## Use it from your AI tool
 
-The MCP server and `voice-of-customer` skill install in one line:
+The MCP server and `voice-of-customer` skill install straight from this repository (obsei isn't
+in any tool's official plugin directory yet):
 
 | Tool | Install |
 | --- | --- |
