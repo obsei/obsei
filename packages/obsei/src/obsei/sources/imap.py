@@ -15,6 +15,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.sources._common import html_to_text
@@ -25,13 +26,21 @@ Connect = Callable[[str, int], imaplib.IMAP4]
 class ImapConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    host: str
-    port: int = 993
-    username_env: str = "IMAP_USERNAME"
-    password_env: str = "IMAP_PASSWORD"  # noqa: S105
-    folder: str = "INBOX"
-    max_messages: int = Field(default=500, ge=1)
-    include_subject: bool = True
+    host: str = Field(description="IMAP server, e.g. imap.gmail.com.")
+    port: int = Field(default=993, description="IMAP over TLS port.")
+    username_env: str = Field(
+        default="IMAP_USERNAME",
+        description="Environment variable with the mailbox user name.",
+        json_schema_extra=SECRET,
+    )
+    password_env: str = Field(
+        default="IMAP_PASSWORD",
+        description="Environment variable with the password (an app password for Gmail).",
+        json_schema_extra=SECRET,
+    )
+    folder: str = Field(default="INBOX", description="Mailbox folder to read.")
+    max_messages: int = Field(default=500, ge=1, description="Most messages read per run.")
+    include_subject: bool = Field(default=True, description="Put the subject before the body.")
 
 
 class ImapError(RuntimeError):

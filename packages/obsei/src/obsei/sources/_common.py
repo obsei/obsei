@@ -85,14 +85,25 @@ class FieldMap(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    text: str | list[str] = "text"
-    id: str | None = "id"
-    created_at: str | None = "created_at"
-    rating: str | None = None
-    author: str | None = None
-    lang: str | None = None
-    url: str | None = None
-    context: list[str] = Field(default_factory=list)
+    text: str | list[str] = Field(
+        default="text", description="Field with the feedback text; several are joined."
+    )
+    id: str | None = Field(
+        default="id",
+        description="Field with a stable id, so edits update the record instead of adding one.",
+    )
+    created_at: str | None = Field(
+        default="created_at",
+        description="Field with the date: ISO 8601, RFC 2822 or epoch seconds.",
+    )
+    rating: str | None = Field(default=None, description="Field with a numeric rating.")
+    author: str | None = Field(
+        default=None,
+        description="Field with the author handle; pseudonymised, never stored in clear.",
+    )
+    lang: str | None = Field(default=None, description="Field with the language code.")
+    url: str | None = Field(default=None, description="Field with a link to the original.")
+    context: list[str] = Field(default_factory=list, description="Fields kept as string metadata.")
 
 
 def map_item(

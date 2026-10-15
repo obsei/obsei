@@ -21,10 +21,14 @@ ALL_KINDS: list[Kind] = ["story", "comment"]
 class HackerNewsConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    query: str = ""
+    query: str = Field(default="", description="Search terms, e.g. your product name.")
     story_id: int | None = Field(default=None, description="Only this story and its comments.")
-    kinds: list[Kind] = Field(default_factory=lambda: list(ALL_KINDS))
-    max_pages: int = Field(default=5, ge=1, le=50)
+    kinds: list[Kind] = Field(
+        default_factory=lambda: list(ALL_KINDS), description="story, comment or both."
+    )
+    max_pages: int = Field(
+        default=5, ge=1, le=50, description="Most pages of results read per run."
+    )
 
     @model_validator(mode="after")
     def _query_or_story(self) -> HackerNewsConfig:

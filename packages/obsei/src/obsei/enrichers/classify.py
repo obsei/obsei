@@ -68,9 +68,13 @@ class FieldSpec(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    description: str
-    type: Literal["text", "choice", "score", "yesno"] | None = None
-    choices: Labels | None = None
+    description: str = Field(description="What the model is asked; a yes/no question for yesno.")
+    type: Literal["text", "choice", "score", "yesno"] | None = Field(
+        default=None, description="text, choice, score or yesno; default: from choices or levels."
+    )
+    choices: Labels | None = Field(
+        default=None, description="Options of a choice field, optionally mapped to a description."
+    )
     levels: list[str] | None = Field(
         default=None, min_length=2, max_length=10, description="Ordered levels, lowest first."
     )
@@ -102,7 +106,9 @@ class FieldSpec(BaseModel):
 
 class ClassifierConfig(BaseModel):
     sentiments: Labels = Field(
-        default_factory=lambda: ["positive", "negative", "neutral", "mixed"], min_length=2
+        default_factory=lambda: ["positive", "negative", "neutral", "mixed"],
+        min_length=2,
+        description="Sentiment options, optionally mapped to a description.",
     )
     intents: Labels = Field(
         min_length=2,
@@ -115,8 +121,12 @@ class ClassifierConfig(BaseModel):
             "churn_risk",
             "other",
         ],
+        description="Intent options, optionally mapped to a description.",
     )
-    fields: dict[str, FieldSpec] = Field(default_factory=dict)
+    fields: dict[str, FieldSpec] = Field(
+        default_factory=dict,
+        description="Your own questions, by name: choice, score, yes/no or text.",
+    )
 
     @model_validator(mode="after")
     def _field_names(self) -> Self:
@@ -450,9 +460,16 @@ class Cascade:
 class ClassifyPluginConfig(ClassifierConfig):
     model_config = ConfigDict(extra="forbid")
 
-    llm: str = "default"
-    fallback_llm: str | None = None
-    threshold: float = Field(default=0.7, ge=0.0, le=1.0)
+    llm: str = Field(default="default", description="llms entry that answers.")
+    fallback_llm: str | None = Field(
+        default=None, description="llms entry asked when an answer is below its cutoff."
+    )
+    threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="Cutoff below which an answer is flagged for review and asked of fallback_llm.",
+    )
     min_confidence: dict[str, float] = Field(
         default_factory=dict,
         description="Per-field cutoffs for decision and local models (sentiment, intent or a "

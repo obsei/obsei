@@ -15,6 +15,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record
 from obsei.sources._common import FieldMap, as_text, map_item
@@ -23,13 +24,23 @@ from obsei.sources._common import FieldMap, as_text, map_item
 class SqlConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    url_env: str = Field(description="Environment variable holding the SQLAlchemy URL.")
+    url_env: str = Field(
+        description="Environment variable holding the SQLAlchemy URL.", json_schema_extra=SECRET
+    )
     query: str = Field(description="SELECT ... WHERE updated_at > :since ORDER BY updated_at")
-    cursor_column: str = "updated_at"
-    initial_since: str = "1970-01-01T00:00:00+00:00"
-    instance: str = "default"
-    fields: FieldMap = Field(default_factory=FieldMap)
-    fetch_size: int = Field(default=1000, ge=1)
+    cursor_column: str = Field(
+        default="updated_at",
+        description="Column whose newest value is passed as :since on the next run.",
+    )
+    initial_since: str = Field(
+        default="1970-01-01T00:00:00+00:00", description="First run only: the value of :since."
+    )
+    instance: str = Field(default="default", description="Name stored with each record.")
+    fields: FieldMap = Field(
+        default_factory=FieldMap,
+        description="Which columns hold the text, id, date, rating and other values.",
+    )
+    fetch_size: int = Field(default=1000, ge=1, description="Rows fetched at a time.")
 
 
 class SqlError(RuntimeError):

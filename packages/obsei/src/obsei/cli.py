@@ -4,49 +4,63 @@ import getpass
 import json
 import os
 import platform
+import re
 import sys
 import time
 from collections import Counter
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Collection, Iterator
 from contextlib import contextmanager, nullcontext
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
+from difflib import get_close_matches
+from enum import StrEnum
+from functools import partial
 from importlib import resources
+from importlib.resources.abc import Traversable
 from importlib.util import find_spec
-from itertools import islice
+from itertools import chain, count, islice
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, get_args
 
+import click
 import duckdb
 import typer
-from pydantic import ValidationError
+import yaml
+from pydantic import JsonValue, ValidationError
+from pydantic.fields import FieldInfo
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from obsei import __version__, studio
+from obsei import __version__, catalog, studio, yamledit
 from obsei.alerts import Fired, check_alerts
 from obsei.approvals import ApprovalError, approve, issue_body, reject
 from obsei.ask import ask as ask_feedback
 from obsei.config import (
     DEFAULT_PATH,
     SECRETS_PATH,
+    AlertConfig,
     ConfigError,
     ObseiConfig,
     PipelineConfig,
     PluginSpec,
+    SinkEntry,
+    SourceEntry,
     StoreConfig,
     build_context,
     build_pipeline,
     builtin_registry,
     load_config,
     load_secrets,
+    parse_config,
+    save_secrets,
     write_secrets,
 )
 from obsei.core.context import Context, LlmEndpoint
-from obsei.core.protocols import Drops, Enricher, ReportsErrors
+from obsei.core.plugin import Factory
+from obsei.core.protocols import AlertKind, Drops, Enricher, ReportsErrors, Verifies
 from obsei.core.record import Record
-from obsei.core.registry import PluginError
+from obsei.core.registry import PluginError, Registry
 from obsei.demo import (
     DECISION_MODEL,
     GOLD_CONFIG,
@@ -73,6 +87,7 @@ from obsei.evaluate import (
 )
 from obsei.llm import EgressPolicy
 from obsei.llm.client import LlmError, LlmUnreachableError
+from obsei.llm.egress import EgressError
 from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, LocalEmbedder
 from obsei.llm.local import LOCAL_CLASSIFIER, fetch
 from obsei.pipeline import Pipeline
@@ -184,10 +199,28 @@ def _crypto_status(policy: EgressPolicy) -> str:
     return "httpfs extension not installed; it is installed on first encrypted write"
 
 
+class SchemaKind(StrEnum):
+    record = "record"
+    config = "config"
+
+
 @app.command()
-def schema() -> None:
-    """Print the Feedback Record JSON Schema."""
-    typer.echo(json.dumps(Record.model_json_schema(), indent=2, sort_keys=True))
+def schema(
+    kind: Annotated[
+        SchemaKind,
+        typer.Argument(
+            help="record: the Feedback Record; config: obsei.yaml, with the config of every "
+            "installed source, enricher and sink."
+        ),
+    ] = SchemaKind.record,
+) -> None:
+    """Print the Feedback Record or the obsei.yaml JSON Schema."""
+    found = (
+        Record.model_json_schema()
+        if kind is SchemaKind.record
+        else catalog.config_schema(catalog.installed()[0])
+    )
+    typer.echo(json.dumps(found, indent=2, sort_keys=True))
 
 
 DbOption = Annotated[
@@ -624,6 +657,15 @@ def try_(
     names = ["try"] if target else pipeline or [p.name for p in cfg.pipelines]
     if not enrich:
         cfg = _without_enrichers(cfg)
+    rows, found = _preview(cfg, names, limit, target, as_json=as_json)
+    if not as_json:
+        labelled = any("classify" in r.enrichments for _, r in rows)
+        _print_preview(rows, found, hint=enrich and not labelled)
+
+
+def _preview(
+    cfg: ObseiConfig, names: list[str], limit: int, target: str | None, *, as_json: bool = False
+) -> tuple[list[tuple[str, Record]], list[Redaction]]:
     rows: list[tuple[str, Record]] = []
     found: list[Redaction] = []
     with _context(cfg) as ctx:
@@ -648,9 +690,7 @@ def try_(
                     for record in records:
                         typer.echo(record.model_dump_json(include=PREVIEW_FIELDS))
                 rows += [(spec.key, r) for r in records]
-    if not as_json:
-        labelled = any("classify" in r.enrichments for _, r in rows)
-        _print_preview(rows, found, hint=enrich and not labelled)
+    return rows, found
 
 
 @app.command()
@@ -1334,3 +1374,513 @@ def models_download(
         raise _fail(exc) from None
     where = cache or os.environ.get(MODELS_DIR_ENV) or "the default cache"
     typer.echo(f"models are in {where}; set {MODELS_DIR_ENV} to use them offline")
+
+
+@app.command("integrations")
+def integrations_(
+    query: Annotated[
+        str | None, typer.Argument(help="Show only names or titles with this.")
+    ] = None,
+    category: Annotated[
+        str | None,
+        typer.Option(
+            help="reviews, support, social, surveys, data, chat, issues, warehouse, notify or "
+            "enrich."
+        ),
+    ] = None,
+    as_json: Annotated[bool, typer.Option("--json", help="Print JSON.")] = False,
+) -> None:
+    """List sources, enrichers and sinks, with the secrets each needs and where to get them."""
+    needle = (query or "").casefold()
+    found = [
+        i
+        for i in catalog.integrations(*catalog.installed())
+        if (needle in i.name.casefold() or needle in i.title.casefold())
+        and category in (None, i.category)
+    ]
+    if as_json:
+        typer.echo(json.dumps([i.model_dump(mode="json") for i in found], indent=2))
+        return
+    for i in found:
+        plugin = f" (plugin {i.plugin})" if i.plugin else ""
+        typer.echo(f"{i.name:<16} {i.kind:<8} {i.category:<9} {i.status:<8} {i.title}{plugin}")
+        if i.secrets:
+            typer.echo(f"{'':<17}secrets {', '.join(i.secrets)}")
+        if i.help_url:
+            typer.echo(f"{'':<17}keys    {i.help_url}")
+    typer.echo("add one with: obsei add TYPE" if found else f"nothing matches {query!r}")
+
+
+class AddKind(StrEnum):
+    source = "source"
+    sink = "sink"
+
+
+ADD_PREVIEW = 3
+ALERT_SINKS = ("slack", "notify", "webhook", "teams")
+CHECK_ERRORS = (*RUN_ERRORS, SyntaxError)
+SET_HELP = (
+    "FIELD=VALUE, repeatable; nested: fields.text=comment. A secret drops _env: "
+    "webhook_url=https://... stores the value in .obsei/secrets.env."
+)
+
+
+@dataclass
+class _Answers:
+    """Answers from ``--set`` and prompts, and the secret values to store."""
+
+    sets: dict[str, str]
+    every: bool
+    yes: bool
+    secrets: dict[str, str] = field(default_factory=dict)
+
+
+def _sets(values: list[str]) -> dict[str, str]:
+    found = {}
+    for value in values:
+        name, sep, raw = value.partition("=")
+        if not sep or not name.strip():
+            raise _fail(f"--set takes FIELD=VALUE, not {value!r}")
+        found[name.strip()] = raw
+    return found
+
+
+def _shown(value: object) -> str:
+    if isinstance(value, list | tuple):
+        return ", ".join(map(str, value))
+    return "" if value is None else str(value)
+
+
+def _parse(prop: dict[str, JsonValue], raw: str) -> JsonValue:
+    """A value typed at the prompt or in --set: text stays text, lists split on commas, and
+    anything else (numbers, true/false, [..], {..}) is read as YAML."""
+    options = prop.get("anyOf")
+    kinds = (
+        {o.get("type") for o in options if isinstance(o, dict)}
+        if isinstance(options, list)
+        else {prop.get("type")}
+    )
+    flow = raw.lstrip().startswith(("[", "{"))
+    if "array" in kinds and not flow:
+        return [part.strip() for part in raw.split(",") if part.strip()]
+    if "string" in kinds and not flow:
+        return raw
+    try:
+        value: JsonValue = yaml.safe_load(raw)
+    except yaml.YAMLError:
+        return raw
+    return value
+
+
+def _accepts_none(info: FieldInfo) -> bool:
+    return type(None) in get_args(info.annotation)
+
+
+def _secret(answers: _Answers, name: str, info: FieldInfo, prefix: str, custom: bool) -> str | None:
+    """The environment variable for a secret field; its value is asked for (hidden) or taken
+    from --set and the environment, never written to obsei.yaml."""
+    base = name.removesuffix("_env")
+    default = info.default if isinstance(info.default, str) else None
+    env = answers.sets.pop(name, None) or (
+        default if default and not custom else f"{prefix}_{base}".upper().replace("-", "_")
+    )
+    value = answers.sets.pop(base, None)
+    asked = default is not None or info.is_required() or answers.every
+    if value is None and asked and not answers.yes:
+        what = (info.description or base).removeprefix("Environment variable with ").rstrip(".")
+        present = "; blank keeps the one set now" if os.environ.get(env) else ""
+        value = typer.prompt(
+            f"{base}: {what} (hidden, saved as {env} in {SECRETS_PATH}{present})",
+            default="",
+            hide_input=True,
+            show_default=False,
+        )
+    if value:
+        answers.secrets[env] = os.environ[env] = value
+        return env
+    if os.environ.get(env):
+        return env
+    if info.is_required() or (default is not None and not _accepts_none(info)):
+        raise _fail(f"{env} is not set: export it, or pass --set {base}=VALUE")
+    return None
+
+
+def _collect(
+    answers: _Answers, plugin: Factory[object], type_: str, key: str | None
+) -> dict[str, JsonValue]:
+    """The config for one plugin: required fields, secrets and the catalog's suggestions are
+    asked for; ``--all`` asks for every field."""
+    model = plugin.config_model
+    props = model.model_json_schema()["properties"]
+    secrets = set(catalog.secret_fields(model))
+    suggested = set(plugin.catalog.ask if plugin.catalog else ())
+    config: dict[str, JsonValue] = {}
+    for name, info in model.model_fields.items():
+        if name in secrets:
+            if (env := _secret(answers, name, info, key or type_, key is not None)) is not None:
+                config[name] = env
+            continue
+        raw = answers.sets.pop(name, None)
+        if (
+            raw is None
+            and not answers.yes
+            and (info.is_required() or name in suggested or answers.every)
+        ):
+            shown = (
+                None if info.is_required() else _shown(info.get_default(call_default_factory=True))
+            )
+            raw = typer.prompt(f"{name} ({(info.description or name).rstrip('.')})", default=shown)
+            raw = None if raw == shown else raw
+        if raw is not None:
+            config[name] = _parse(props.get(name, {}), raw)
+    for dotted in [k for k in answers.sets if "." in k]:
+        head, _, rest = dotted.partition(".")
+        if head not in model.model_fields:
+            continue
+        nested = config.setdefault(head, {})
+        if not isinstance(nested, dict):
+            continue
+        raw = answers.sets.pop(dotted)
+        nested[rest] = _parse({}, raw) if raw.lstrip().startswith(("[", "{")) else raw
+    if unknown := sorted(answers.sets):
+        raise _fail(
+            f"{type_} has no field {', '.join(unknown)}; fields: {', '.join(model.model_fields)}"
+        )
+    try:
+        model.model_validate(config)
+    except ValidationError as exc:
+        problems = "; ".join(
+            f"{'.'.join(map(str, e['loc'])) or type_}: {e['msg']}" for e in exc.errors()
+        )
+        raise _fail(f"{type_}: {problems}") from None
+    return config
+
+
+def _unique(base: str, taken: Collection[str]) -> str:
+    return next(c for c in chain([base], (f"{base}_{n}" for n in count(2))) if c not in taken)
+
+
+def _allow_host(text: str, cfg: ObseiConfig, host: str) -> str:
+    current = cfg.egress
+    if current is None:
+        hosts: list[JsonValue] = [*sorted({*EgressPolicy.from_env().allowed_hosts, host})]
+        return yamledit.add_mapping(text, "egress", {"mode": "private", "allowed_hosts": hosts})
+    if current.mode == "air_gapped":
+        text = yamledit.set_scalar(text, yamledit.child("egress"), "mode", "private")
+    return yamledit.append(text, yamledit.child("egress"), "allowed_hosts", host)
+
+
+def _verify_sink(cfg: ObseiConfig, registry: Registry, entry: SinkEntry) -> bool:
+    """Whether the sink could check its credentials too, beyond building."""
+    with _context(cfg) as ctx:
+        sink = registry.sink(entry.type).create(entry.config, ctx)
+        if isinstance(sink, Verifies):
+            sink.verify()
+            return True
+    return False
+
+
+def _sink_ready(
+    text: str, cfg: ObseiConfig, registry: Registry, entry: SinkEntry, answers: _Answers
+) -> str:
+    """Build and verify the sink; when egress blocks its host, allow it (with consent)."""
+    help_url = _help(registry.sink(entry.type))
+    try:
+        _verify_sink(cfg, registry, entry)
+        return text
+    except EgressError as exc:
+        if exc.host is None or not (
+            answers.yes
+            or typer.confirm(
+                f"egress blocks {exc.host}, where {entry.type} sends feedback; allow it?",
+                default=True,
+            )
+        ):
+            raise _fail(f"{exc}{help_url}") from None
+        typer.echo(f"allow  egress to {exc.host} (egress.mode private)")
+        text = _allow_host(text, cfg, exc.host)
+        return _sink_ready(text, parse_config(text), registry, entry, answers)
+    except CHECK_ERRORS as exc:
+        raise _fail(f"{entry.type}: {exc}{help_url}") from None
+
+
+def _help(plugin: Factory[object]) -> str:
+    return (
+        f"\nkeys: {plugin.catalog.help_url}" if plugin.catalog and plugin.catalog.help_url else ""
+    )
+
+
+def _save(config: Path, text: str, secrets: dict[str, str]) -> None:
+    try:
+        parse_config(text, str(config))
+    except ConfigError as exc:
+        raise _fail(f"obsei.yaml was left unchanged; the edit would not load: {exc}") from None
+    staged = config.with_name(f".{config.name}.tmp")
+    staged.write_text(text, encoding="utf-8")
+    os.replace(staged, config)
+    if secrets:
+        path = save_secrets(config.parent, secrets)
+        _ignore_secrets(config.parent / ".gitignore")
+        typer.echo(f"secret {', '.join(secrets)} in {path} (not in {config.name})")
+
+
+def _plugin(
+    registry: Registry, name: str, kind: AddKind | None, yes: bool
+) -> tuple[AddKind, Factory[object]]:
+    names = registry.names()
+    registered = {AddKind.source: names["source"], AddKind.sink: names["sink"]}
+    kinds = [k for k, found in registered.items() if name in found and kind in (None, k)]
+    if not kinds:
+        everything = sorted({*names["source"], *names["sink"], "alert"})
+        close = get_close_matches(name, everything, n=3)
+        maybe = f"; did you mean {', '.join(close)}?" if close else ""
+        raise _fail(
+            f"no source or sink named {name!r}{maybe} Run 'obsei integrations' to list them"
+        )
+    if len(kinds) > 1 and yes:
+        raise _fail(f"{name} is both a source and a sink: pass --as source or --as sink")
+    chosen = (
+        kinds[0]
+        if len(kinds) == 1
+        else AddKind(typer.prompt("source or sink", type=click.Choice(["source", "sink"])))
+    )
+    return chosen, registry.source(name) if chosen is AddKind.source else registry.sink(name)
+
+
+def _try_source(cfg: ObseiConfig, spec: PipelineConfig, source: SourceEntry) -> None:
+    """Preview a few records, redacted and labelled like 'obsei try'; nothing is stored."""
+    privacy = cfg.privacy.model_copy(update={"redact": True})
+    preview = PipelineConfig(name="try", sources=[source], enrichers=spec.enrichers)
+    trial = cfg.model_copy(update={"privacy": privacy, "pipelines": [preview]})
+    rows, found = _preview(trial, ["try"], ADD_PREVIEW, None)
+    _print_preview(rows, found, hint=False)
+
+
+@app.command()
+def add(
+    name: Annotated[
+        str, typer.Argument(help="A source or sink type (see obsei integrations), or alert.")
+    ],
+    config: ConfigOption = DEFAULT_PATH,
+    pipeline: Annotated[
+        str | None,
+        typer.Option("--pipeline", "-p", help="Pipeline to add to (default: the first)."),
+    ] = None,
+    key: Annotated[str | None, typer.Option(help="Name of the new source, sink or alert.")] = None,
+    kind: Annotated[
+        AddKind | None, typer.Option("--as", help="source or sink, for types that are both.")
+    ] = None,
+    values: Annotated[list[str] | None, typer.Option("--set", help=SET_HELP)] = None,
+    every: Annotated[bool, typer.Option("--all", help="Also ask for optional fields.")] = False,
+    yes: Annotated[
+        bool,
+        typer.Option("--yes", "-y", help="Ask nothing: use --set, the environment and defaults."),
+    ] = False,
+) -> None:
+    """Add a source, sink or alert to obsei.yaml without editing it: asks for each setting,
+    keeps secrets in .obsei/secrets.env, previews a source or checks a sink first, and keeps
+    your comments."""
+    if not config.exists():
+        raise _fail(f"{config} not found; run 'obsei init' first")
+    cfg = _load(config)
+    text = config.read_text(encoding="utf-8")
+    registry, owners = catalog.installed()
+    answers = _Answers(_sets(values or []), every, yes)
+    if name == "alert":
+        _add_alert(config, cfg, text, registry, answers, key)
+        return
+    chosen, plugin = _plugin(registry, name, kind, yes)
+    try:
+        spec = cfg.pipeline(pipeline) if pipeline else cfg.pipelines[0]
+    except ConfigError as exc:
+        raise _fail(exc) from None
+    about = plugin.catalog
+    typer.echo(
+        f"{chosen.value} {name}: {about.title}, {about.status}"
+        if about
+        else f"{chosen.value} {name}"
+    )
+    if about and about.help_url:
+        typer.echo(f"keys   {about.help_url}")
+    owner = owners.get((chosen.value, name))
+    plugins = [*cfg.plugins, owner] if owner and owner not in cfg.plugins else cfg.plugins
+    if chosen is AddKind.source:
+        key = key or _unique(name, [s.key for s in spec.sources])
+        custom = key if key != name else None
+    else:
+        taken = [s.name for s in spec.sinks]
+        key = custom = key or (_unique(name, taken) if name in taken else None)
+    entry: dict[str, JsonValue] = {"key": key} if key else {}
+    entry |= {"type": name, "config": _collect(answers, plugin, name, custom)}
+    trial = cfg.model_copy(update={"plugins": plugins})
+    if chosen is AddKind.source:
+        _try_source(trial, spec, SourceEntry.model_validate(entry))
+    else:
+        text = _sink_ready(text, trial, registry, SinkEntry.model_validate(entry), answers)
+    try:
+        if owner and owner not in cfg.plugins:
+            text = yamledit.append(text, yamledit.root, "plugins", owner)
+        text = yamledit.append(text, yamledit.pipeline(spec.name), f"{chosen.value}s", entry)
+    except yamledit.EditError as exc:
+        raise _fail(
+            f"cannot edit {config} ({exc}); add this under {spec.name}: {json.dumps(entry)}"
+        ) from None
+    _save(config, text, answers.secrets)
+    typer.echo(f"added  {chosen.value} {key or name} to pipeline {spec.name} in {config}")
+    typer.echo("next   obsei check, then obsei run")
+
+
+def _add_alert(
+    config: Path,
+    cfg: ObseiConfig,
+    text: str,
+    registry: Registry,
+    answers: _Answers,
+    key: str | None,
+) -> None:
+    kinds = list(get_args(AlertKind))
+    kind = answers.sets.pop("kind", None) or (
+        None if answers.yes else typer.prompt("kind", default="digest", type=click.Choice(kinds))
+    )
+    targets = [t for t in ALERT_SINKS if t in registry.names()["sink"]]
+    to = answers.sets.pop("to", None) or (
+        "slack"
+        if answers.yes
+        else typer.prompt("deliver with", default="slack", type=click.Choice(targets))
+    )
+    if kind is None or kind not in kinds or to not in targets:
+        raise _fail(f"alerts take --set kind={'|'.join(kinds)} and --set to={'|'.join(targets)}")
+    name = key or _unique(kind, [a.name for a in cfg.alerts])
+    target: dict[str, JsonValue] = {
+        "type": to,
+        "config": _collect(answers, registry.sink(to), to, None),
+    }
+    alert: dict[str, JsonValue] = {"name": name, "kind": kind, "to": [target]}
+    try:
+        AlertConfig.model_validate(alert)
+    except ValidationError as exc:
+        raise _fail(exc) from None
+    text = _sink_ready(text, cfg, registry, SinkEntry.model_validate(target), answers)
+    text = yamledit.append(text, yamledit.root, "alerts", alert)
+    _save(config, text, answers.secrets)
+    typer.echo(f"added  alert {name} ({kind}) to {config}")
+    typer.echo("next   obsei alerts check --dry-run")
+
+
+def _check_source(cfg: ObseiConfig, registry: Registry, entry: SourceEntry) -> str:
+    with _context(cfg) as ctx:
+        source = registry.source(entry.type).create(entry.config, ctx)
+        first = next(iter(source.fetch(None)), None)
+    return "fetched a record" if first else "reachable, no records yet"
+
+
+def _check_sink(cfg: ObseiConfig, registry: Registry, entry: SinkEntry) -> str:
+    return "credentials work" if _verify_sink(cfg, registry, entry) else "built (nothing sent)"
+
+
+@app.command()
+def check(config: ConfigOption = DEFAULT_PATH, pipeline: PipelineOption = None) -> None:
+    """Check each source and sink: its settings and secrets, egress, a one-record fetch, and the
+    sink's credentials where that sends nothing. Nothing is stored or sent."""
+    cfg = _load(config)
+    try:
+        registry = builtin_registry(cfg.plugins)
+        specs = [cfg.pipeline(p) for p in pipeline] if pipeline else cfg.pipelines
+    except (ConfigError, PluginError) as exc:
+        raise _fail(exc) from None
+    items: list[tuple[str, Callable[[], str], Callable[[], Factory[object]]]] = []
+    for spec in specs:
+        for source in spec.sources:
+            items.append(
+                (
+                    f"{spec.name}/{source.key}  source {source.type}",
+                    partial(_check_source, cfg, registry, source),
+                    partial(registry.source, source.type),
+                )
+            )
+        for sink in spec.sinks:
+            items.append(
+                (
+                    f"{spec.name}/{sink.name}  sink {sink.type}",
+                    partial(_check_sink, cfg, registry, sink),
+                    partial(registry.sink, sink.type),
+                )
+            )
+    for alert in [] if pipeline else cfg.alerts:
+        for sink in alert.to:
+            items.append(
+                (
+                    f"alert {alert.name}  sink {sink.type}",
+                    partial(_check_sink, cfg, registry, sink),
+                    partial(registry.sink, sink.type),
+                )
+            )
+    failed = 0
+    for label, step, plugin in items:
+        try:
+            typer.echo(f"✓ {label}: {step()}")
+        except (*CHECK_ERRORS, PseudonymSaltError) as exc:
+            failed += 1
+            typer.echo(f"✗ {label}: {exc}")
+            if "is not set" in str(exc):
+                typer.echo(f"  fix: set it in {config.parent / SECRETS_PATH} or the environment")
+            try:
+                hint = _help(plugin()).strip()
+            except PluginError:
+                hint = "fix: install the plugin and allow it under plugins: in obsei.yaml"
+            if hint:
+                typer.echo(f"  {hint}")
+    if failed:
+        typer.echo(f"{failed} of {len(items)} failed", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"all {len(items)} ready; next: obsei run")
+
+
+plugin_app = typer.Typer(help="Write your own source, enricher or sink.")
+app.add_typer(plugin_app, name="plugin")
+
+
+def _template(node: Traversable, prefix: str = "") -> Iterator[tuple[str, str]]:
+    for item in sorted(node.iterdir(), key=lambda n: n.name):
+        if item.name == "__pycache__":
+            continue
+        if item.is_dir():
+            yield from _template(item, f"{prefix}{item.name}/")
+        else:
+            yield f"{prefix}{item.name}", item.read_text(encoding="utf-8")
+
+
+@plugin_app.command("new")
+def plugin_new(
+    name: Annotated[str, typer.Argument(help="Plugin and type name, e.g. acme.")],
+    directory: Annotated[
+        Path | None, typer.Option("--dir", help="Where to create it [default: ./obsei-NAME].")
+    ] = None,
+) -> None:
+    """Create a plugin package from the template: a source, its config, a test and the entry
+    point."""
+    if not re.fullmatch(r"[a-z][a-z0-9_]*", name):
+        raise _fail("name it with lowercase letters, digits and _, e.g. acme")
+    dist = f"obsei-{name.replace('_', '-')}"
+    target = directory or Path(dist)
+    if target.exists():
+        raise _fail(f"{target} exists")
+    camel = "".join(part.capitalize() for part in name.split("_"))
+
+    def rename(value: str) -> str:
+        return (
+            value.replace("obsei_example", f"obsei_{name}")
+            .replace("obsei-example", dist)
+            .replace("Example", camel)
+            .replace("example", name)
+        )
+
+    for relative, content in _template(resources.files("obsei") / "templates" / "plugin"):
+        path = target / rename(relative)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(rename(content), encoding="utf-8")
+        typer.echo(f"create {path}")
+    typer.echo(
+        f"next   pip install -e {target}, add 'plugins: [{name}]' to obsei.yaml, "
+        f"then obsei add {name}"
+    )

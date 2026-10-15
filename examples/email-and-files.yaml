@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 # A support mailbox plus a drop folder for exported survey and NPS files.
 #
 # Sources: an IMAP mailbox (one record per message, subject included), and a folder where

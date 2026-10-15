@@ -9,6 +9,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.sources._common import as_text, lookup, oldest_first, parse_time, stamp
@@ -19,15 +20,25 @@ PUBLIC_API = "https://public.api.bsky.app"
 class BlueskyConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    query: str = Field(min_length=1)
+    query: str = Field(min_length=1, description="Search terms, e.g. your product name.")
     lang: str | None = Field(default=None, description="Only posts tagged with this language.")
-    service: str = "https://bsky.social"
-    handle_env: str | None = None
-    app_password_env: str | None = None
+    service: str = Field(default="https://bsky.social", description="Bluesky server to search.")
+    handle_env: str | None = Field(
+        default=None,
+        description="Environment variable with your handle, if anonymous search is refused.",
+        json_schema_extra=SECRET,
+    )
+    app_password_env: str | None = Field(
+        default=None,
+        description="Environment variable with an app password for that handle.",
+        json_schema_extra=SECRET,
+    )
     include_urls: bool = Field(
         default=False, description="Post URLs embed the author's DID, so they are off by default."
     )
-    max_pages: int = Field(default=5, ge=1, le=50)
+    max_pages: int = Field(
+        default=5, ge=1, le=50, description="Most pages of results read per run."
+    )
 
 
 class BlueskyError(RuntimeError):

@@ -23,11 +23,14 @@ from obsei.sources.files import CsvConfig, CsvSource, FileConfig, JsonlSource
 class FileDropConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    directory: Path
-    pattern: str = "*"
-    instance: str = "default"
+    directory: Path = Field(description="Folder to read new and changed files from.")
+    pattern: str = Field(default="*", description="Which files to read, e.g. *.csv.")
+    instance: str = Field(default="default", description="Name stored with each record.")
     items_path: str | None = Field(default=None, description="For .json files holding a list.")
-    fields: FieldMap = Field(default_factory=FieldMap)
+    fields: FieldMap = Field(
+        default_factory=FieldMap,
+        description="Which fields hold the text, id, date, rating and other values.",
+    )
 
 
 class FileDropSource:

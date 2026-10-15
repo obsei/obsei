@@ -10,6 +10,10 @@ when a batch has none for them. Outbound sinks are checked against the egress po
 pipeline starts; `sql` checks the database host in its URL (BigQuery and Snowflake accounts count
 as their cloud hosts, SQLite files as local).
 
+Add one with `obsei add TYPE`: it asks for the settings, keeps the secret in
+`.obsei/secrets.env`, checks the egress policy and, for Slack, GitHub, Jira and Linear, the
+credentials, without sending anything ([Set up without editing YAML](/guides/setup/)).
+
 | Type | What | Idempotency | Status |
 | --- | --- | --- | --- |
 | `webhook` | One CloudEvents JSON event per batch, signed per [Standard Webhooks](https://www.standardwebhooks.com/), retried; authors omitted by default | `webhook-id` per event, record ids in the payload | beta |

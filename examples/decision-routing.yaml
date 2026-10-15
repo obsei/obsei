@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 # Multilingual support tickets routed by a small decision model, with a chat model for hard cases.
 #
 # Sources: Zendesk and Freshdesk tickets in any language; a "sample" pipeline reads a CSV of eight

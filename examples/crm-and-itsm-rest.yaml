@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 # CRM and ITSM tickets through the generic REST source: HubSpot tickets and ServiceNow incidents.
 #
 # Sources: HubSpot CRM v3 tickets (cursor paging on paging.next.after) and the ServiceNow

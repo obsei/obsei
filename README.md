@@ -51,16 +51,20 @@ Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain t
 
 ```bash
 mkdir voc && cd voc
-uvx --from "obsei[local]>=1.0.0rc1" obsei init   # obsei.yaml, secrets, sample data, local model
+uvx --from "obsei[recommended]>=1.0.0rc1" obsei init   # obsei.yaml, secrets, sample data, local model
 obsei try                              # table of redacted, labelled feedback; nothing stored
 obsei try https://apps.apple.com/us/app/whatsapp-messenger/id310633997   # or GitHub, HN, a feed, a CSV
+obsei add appstore                     # add sources and sinks without editing YAML (obsei integrations)
+obsei add slack                        # asks for the webhook, keeps it in .obsei/secrets.env
+obsei check                            # every source and sink: secrets, egress, credentials
 obsei run                              # fetch, redact, label, deliver, store
 obsei serve                            # scheduled pipelines, webhooks, MCP and Studio
 obsei doctor                           # environment, secrets, encryption, egress mode, plugins
 ```
 
-To keep the `obsei` command, install it once: `uv tool install "obsei[local]>=1.0.0rc1"` (or
-`pip install`). `obsei init` writes a random database key and pseudonym salt to
+`obsei[recommended]` is the full local setup (the classifier and multilingual themes); `obsei` alone
+is enough for redaction, sources and sinks. To keep the `obsei` command, install it once:
+`uv tool install "obsei[recommended]>=1.0.0rc1"` (or `pip install`). `obsei init` writes a random database key and pseudonym salt to
 `.obsei/secrets.env` (owner-only, git-ignored), and every command loads it; on servers and in CI,
 set `OBSEI_DB_KEY` and `OBSEI_PSEUDONYM_SALT` instead, or mount the file. With `obsei[local]`, the
 `classify` enricher labels sentiment, intent and language on the CPU with no model server. A

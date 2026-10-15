@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 # Three markets, three local teams: India, Brazil and Japan, each with its own privacy rules,
 # labels and Slack channel, sharing one database and one set of multilingual themes.
 #

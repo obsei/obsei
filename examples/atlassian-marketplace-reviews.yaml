@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
+# Reviews of your Atlassian Marketplace app through the public Marketplace REST API (no key).
+#
+# Source:  GET https://marketplace.atlassian.com/rest/2/addons/{addonKey}/reviews
+#          (https://developer.atlassian.com/platform/marketplace/rest/v2/api-group-reviews/).
+#          Items are _embedded.reviews[] with id, review, stars, date and
+#          _embedded.author.name; _links.next.href is the next page. Ratings without a written
+#          review have no text and are skipped.
+# Model:   the local classifier.
+# Sinks:   Slack for 1-2 star reviews.
+#
+# Extras:  local (optional, for labels)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          SLACK_WEBHOOK_URL    Slack incoming webhook
+# Run:     obsei try -c examples/atlassian-marketplace-reviews.yaml
+#          obsei run -c examples/atlassian-marketplace-reviews.yaml --every 360
+version: 1
+
+store:
+  path: marketplace.duckdb
+
+egress:
+  mode: private
+  allowed_hosts: [hooks.slack.com]
+
+llms:
+  default:
+    api: local
+
+pipelines:
+  - name: marketplace
+    sources:
+      - key: marketplace
+        type: rest
+        config:
+          # Replace with your app's key, as in its Marketplace listing.
+          url: https://marketplace.atlassian.com/rest/2/addons/com.onresolve.jira.groovy.groovyrunner/reviews
+          instance: scriptrunner
+          params: {limit: 50, sort: recent}
+          items_path: _embedded.reviews
+          pagination: next_url
+          next_path: _links.next.href
+          max_pages: 10
+          fields:
+            text: review
+            id: id
+            created_at: date
+            rating: stars                       # 1-5
+            author: _embedded.author.name       # pseudonymised before storage
+            context: [hosting]
+    enrichers:
+      - type: classify
+        config: {llm: default, threshold: 0.4}
+    sinks:
+      - type: slack
+        config:
+          max_rating: 2

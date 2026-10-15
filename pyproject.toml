@@ -52,6 +52,7 @@ strict = true
 plugins = ["pydantic.mypy"]
 files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/obsei-teams/src", "plugins/obsei-teams/tests", "plugins/obsei-typeform/src", "plugins/obsei-typeform/tests", "plugins/template/src", "plugins/template/tests"]
 mypy_path = "packages/obsei/src:plugins/template/src"
+exclude = ["packages/obsei/src/obsei/templates/"]
 
 [[tool.mypy.overrides]]
 module = ["fastembed", "gliner", "gliner2", "huggingface_hub", "transformers"]

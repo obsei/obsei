@@ -4,10 +4,10 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 from typing import ClassVar
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import Context
-from obsei.core.plugin import factory
+from obsei.core.plugin import Catalog, factory
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.core.registry import Registry
@@ -16,7 +16,7 @@ from obsei.core.registry import Registry
 class ExampleConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    greeting: str = "hello"
+    greeting: str = Field(default="hello", description="Text of the one record this source yields.")
 
 
 class ExampleSource:
@@ -36,4 +36,15 @@ class ExampleSource:
 
 
 def register(registry: Registry) -> None:
-    registry.add_source("example", factory(ExampleConfig, ExampleSource))
+    registry.add_source(
+        "example",
+        factory(
+            ExampleConfig,
+            ExampleSource,
+            Catalog(
+                title="Example",
+                category="data",
+                docs_url="https://github.com/obsei/obsei/tree/master/plugins/template",
+            ),
+        ),
+    )

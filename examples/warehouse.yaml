@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 # Warehouse round trip: read feedback from Postgres, Snowflake or BigQuery, write it back enriched.
 #
 # Source:  any SQLAlchemy database, read incrementally by a cursor column (updated_at).

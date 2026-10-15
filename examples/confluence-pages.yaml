@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
+# Confluence Cloud pages, such as a space of customer interview notes or feedback write-ups,
+# through the Confluence REST API v2 with an API token.
+#
+# Source:  GET https://{site}.atlassian.net/wiki/api/v2/pages?space-id=...&body-format=storage
+#          (https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-page/).
+#          Items are results[] with id, title, createdAt and body.storage.value (HTML, converted
+#          to text); the Link header pages through the space.
+# Auth:    basic auth with your Atlassian email and an API token
+#          (https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/):
+#            echo "CONFLUENCE_AUTH=Basic $(printf '%s' 'you@acme.com:API_TOKEN' | base64)" \
+#              >> .obsei/secrets.env
+#          Find the space id with GET /wiki/api/v2/spaces?keys=VOC.
+# Model:   the local classifier.
+# Sinks:   Parquet files.
+#
+# Extras:  local (optional, for labels)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          CONFLUENCE_AUTH      full Authorization header value, "Basic <base64 of email:token>"
+# Run:     obsei try -c examples/confluence-pages.yaml
+#          obsei run -c examples/confluence-pages.yaml --every 1440
+version: 1
+
+store:
+  path: confluence.duckdb
+
+llms:
+  default:
+    api: local
+
+pipelines:
+  - name: confluence
+    sources:
+      - key: interviews
+        type: rest
+        config:
+          url: https://acme.atlassian.net/wiki/api/v2/pages
+          instance: voc-space
+          secret_headers: {Authorization: CONFLUENCE_AUTH}
+          params: {space-id: "123456", body-format: storage, sort: -modified-date, limit: 50}
+          items_path: results
+          pagination: link
+          max_pages: 20
+          text_format: html
+          fields:
+            text: [title, body.storage.value]
+            id: id
+            created_at: createdAt
+            author: authorId                    # an account id; pseudonymised before storage
+    enrichers:
+      - type: classify
+        config: {llm: default, threshold: 0.4}
+    sinks:
+      - type: parquet
+        config: {directory: exports}

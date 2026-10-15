@@ -29,7 +29,9 @@ included, must then pass the egress policy."""
 
 
 class EgressError(PermissionError):
-    pass
+    def __init__(self, message: str, host: str | None = None) -> None:
+        super().__init__(message)
+        self.host = host
 
 
 def _inet_aton(host: str) -> ipaddress.IPv4Address | None:
@@ -108,5 +110,6 @@ class EgressPolicy(BaseModel):
             return
         raise EgressError(
             f"egress to {host!r} is blocked in {self.mode} mode; "
-            f"set {MODE_ENV_VAR}=private and add it to {ALLOW_ENV_VAR}, or use hybrid mode"
+            f"set {MODE_ENV_VAR}=private and add it to {ALLOW_ENV_VAR}, or use hybrid mode",
+            host,
         )

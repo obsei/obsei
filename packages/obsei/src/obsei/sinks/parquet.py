@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import ClassVar
 
 import duckdb
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import Context
 from obsei.core.protocols import SinkResult
@@ -26,8 +26,8 @@ INSERT = "INSERT INTO batch VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 class ParquetConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    directory: Path
-    include_authors: bool = False
+    directory: Path = Field(description="Folder the Parquet files are written to.")
+    include_authors: bool = Field(default=False, description="Also write author pseudonyms.")
 
 
 class ParquetSink:

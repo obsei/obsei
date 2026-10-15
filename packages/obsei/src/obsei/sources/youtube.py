@@ -9,6 +9,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.sources._common import as_float, as_text, lookup, oldest_first, parse_time, stamp
@@ -19,10 +20,18 @@ API_URL = "https://www.googleapis.com/youtube/v3/commentThreads"
 class YouTubeConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    api_key_env: str = "YOUTUBE_API_KEY"
-    video_ids: list[str] = Field(default_factory=list)
-    channel_id: str | None = None
-    max_pages: int = Field(default=5, ge=1, le=100)
+    api_key_env: str = Field(
+        default="YOUTUBE_API_KEY",
+        description="Environment variable with a YouTube Data API v3 key.",
+        json_schema_extra=SECRET,
+    )
+    video_ids: list[str] = Field(default_factory=list, description="Videos whose comments to read.")
+    channel_id: str | None = Field(
+        default=None, description="A channel whose videos' comments to read."
+    )
+    max_pages: int = Field(
+        default=5, ge=1, le=100, description="Most pages of comments read per video and run."
+    )
 
     @model_validator(mode="after")
     def _target(self) -> YouTubeConfig:

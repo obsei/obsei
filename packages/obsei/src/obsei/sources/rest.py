@@ -11,6 +11,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import Context, origin
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record
 from obsei.sources._common import FieldMap, TextFormat, as_text, lookup, map_item
@@ -21,34 +22,53 @@ Pagination = Literal["none", "page", "offset", "link", "next_url", "cursor"]
 class RestConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    url: str
-    instance: str = "default"
-    method: Literal["GET", "POST"] = "GET"
-    params: dict[str, str | int] = Field(default_factory=dict)
-    body: dict[str, JsonValue] | None = None
-    headers: dict[str, str] = Field(default_factory=dict)
+    url: str = Field(description="Endpoint that returns the items.")
+    instance: str = Field(default="default", description="Name stored with each record.")
+    method: Literal["GET", "POST"] = Field(default="GET", description="GET or POST.")
+    params: dict[str, str | int] = Field(default_factory=dict, description="Query parameters.")
+    body: dict[str, JsonValue] | None = Field(default=None, description="JSON body for POST.")
+    headers: dict[str, str] = Field(
+        default_factory=dict, description="Extra headers; put credentials in secret_headers."
+    )
     secret_headers: dict[str, str] = Field(
         default_factory=dict, description="Header name to environment variable holding its value."
     )
-    bearer_token_env: str | None = None
-    items_path: str | None = None
-    fields: FieldMap = Field(default_factory=FieldMap)
+    bearer_token_env: str | None = Field(
+        default=None,
+        description="Environment variable with a bearer token.",
+        json_schema_extra=SECRET,
+    )
+    items_path: str | None = Field(
+        default=None, description="Dotted path to the list of items; default: the response itself."
+    )
+    fields: FieldMap = Field(
+        default_factory=FieldMap,
+        description="Which fields hold the text, id, date, rating and other values.",
+    )
     text_format: TextFormat = Field(
         default="plain", description="'html' converts mapped text from HTML (Mastodon, forums)."
     )
-    pagination: Pagination = "none"
-    page_param: str = "page"
-    page_start: int = 1
-    page_size_param: str | None = None
-    page_size: int = 100
+    pagination: Pagination = Field(
+        default="none", description="none, page, offset, link (Link header), next_url or cursor."
+    )
+    page_param: str = Field(
+        default="page", description="Query parameter for the page number or offset."
+    )
+    page_start: int = Field(default=1, description="First page number.")
+    page_size_param: str | None = Field(
+        default=None, description="Query parameter for the page size."
+    )
+    page_size: int = Field(default=100, description="Items per page.")
     next_path: str | None = Field(
         default=None, description="Path to the next URL (next_url) or token (cursor)."
     )
-    cursor_param: str = "cursor"
+    cursor_param: str = Field(
+        default="cursor", description="Query parameter that receives the cursor token."
+    )
     since_param: str | None = Field(
         default=None, description="Query parameter that receives the newest timestamp seen."
     )
-    max_pages: int = Field(default=50, ge=1)
+    max_pages: int = Field(default=50, ge=1, description="Most pages read per run.")
 
 
 class RestError(RuntimeError):

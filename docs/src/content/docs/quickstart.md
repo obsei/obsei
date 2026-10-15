@@ -7,14 +7,18 @@ Five minutes, no model server and no secrets to export:
 
 ```bash
 mkdir voc && cd voc
-uvx --from "obsei[local]>=1.0.0rc1" obsei init   # project, secrets, sample data, local model
+uvx --from "obsei[recommended]>=1.0.0rc1" obsei init   # project, secrets, sample data, local model
 obsei try                                        # redacted, labelled preview of the sample
 obsei try https://apps.apple.com/us/app/whatsapp-messenger/id310633997   # any public link
 obsei run                                        # fetch, redact, label, deliver, store
 ```
 
-`uvx` runs obsei without installing it; to keep the `obsei` command, install it once with
-`uv tool install "obsei[local]>=1.0.0rc1"` (or `pip install`). obsei 1.0 is in pre-release, so
+Then add your own sources and sinks without editing YAML: `obsei add appstore`, `obsei add slack`,
+`obsei check` (see [Set up without editing YAML](/guides/setup/)).
+
+`obsei[recommended]` is the full local setup: the classifier (`local`) and multilingual themes
+(`embeddings`). `uvx` runs obsei without installing it; to keep the `obsei` command, install it
+once with `uv tool install "obsei[recommended]>=1.0.0rc1"` (or `pip install`). obsei 1.0 is in pre-release, so
 keep the `>=1.0.0rc1` specifier: without it you get 0.0.15.
 
 `obsei init` creates:
@@ -80,6 +84,7 @@ Some features need extra packages. Add them to the same install:
 
 | Extra | Adds |
 | --- | --- |
+| `recommended` | `local` and `embeddings`: everything that runs on this machine |
 | `mcp` | `obsei serve`, `obsei mcp` and Studio over HTTP |
 | `local` | the local classifier for `classify` (PyTorch; no model server) |
 | `embeddings` | the local multilingual model, so themes group across languages |

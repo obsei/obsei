@@ -12,9 +12,11 @@ stable themes, and let your AI agents answer questions with cited evidence.
 > specifier; a plain `pip install obsei` still gives 0.0.15.
 
 ```bash
-uvx --from "obsei[local]>=1.0.0rc1" obsei init   # or: pip install "obsei[local]>=1.0.0rc1"
+uvx --from "obsei[recommended]>=1.0.0rc1" obsei init   # or: pip install "obsei[recommended]>=1.0.0rc1"
 obsei try                                        # redacted, labelled preview; nothing stored
-obsei try https://apps.apple.com/us/app/whatsapp-messenger/id310633997
+obsei add appstore                               # add sources and sinks without editing YAML
+obsei add slack
+obsei check
 obsei run
 ```
 
@@ -22,7 +24,7 @@ obsei run
 git-ignored), which every command loads; on servers and in CI, set `OBSEI_DB_KEY` and
 `OBSEI_PSEUDONYM_SALT` or mount the file.
 
-Optional extras: `local` (in-process classifier), `sql`, `google`, `apple`, `names` (person-name
+Optional extras: `recommended` (`local` and `embeddings`), `local` (in-process classifier), `sql`, `google`, `apple`, `names` (person-name
 redaction), `embeddings` (multilingual themes).
 
 Use it from your AI tool: `/plugin install obsei --marketplace obsei/obsei` in Claude Code,

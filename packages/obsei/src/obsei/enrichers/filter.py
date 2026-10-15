@@ -27,11 +27,15 @@ class FilterConfig(BaseModel):
         description="With no_means: describe both answers to ask a two-option choice, which "
         "small models answer more reliably.",
     )
-    no_means: str | None = None
+    no_means: str | None = Field(
+        default=None, description="What a no looks like; goes with yes_means."
+    )
     threshold: float = Field(
         default=0.5, ge=0.0, le=1.0, description="Probability of yes from which a record matches."
     )
-    action: Literal["drop", "tag"] = "tag"
+    action: Literal["drop", "tag"] = Field(
+        default="tag", description="drop removes matching records; tag only marks them."
+    )
 
     @model_validator(mode="after")
     def _both_or_neither(self) -> Self:
