@@ -1,22 +1,18 @@
-"""Untrusted obsei.yaml must fail with a validation error, never crash."""
+"""Untrusted obsei.yaml must fail with a config error, never crash."""
 
 import sys
 
 import atheris
 
 with atheris.instrument_imports():
-    import yaml
-    from pydantic import ValidationError
-
-    from obsei.config import ObseiConfig
+    from obsei.config import ConfigError, parse_config
 
 
 def test_one_input(data: bytes) -> None:
     text = atheris.FuzzedDataProvider(data).ConsumeUnicodeNoSurrogates(8192)
     try:
-        raw = yaml.safe_load(text)
-        ObseiConfig.model_validate(raw)
-    except (yaml.YAMLError, ValidationError):
+        parse_config(text)
+    except ConfigError:
         return
 
 
