@@ -94,13 +94,13 @@ More complete setups are on the [Examples](/examples/) page.
 
 ## Reddit plugin
 
-`reddit` is an unpublished community plugin. Install it from the repository, then allow it in
+`reddit` is a first-party plugin, not on PyPI yet. Install it from Git, then allow it in
 `obsei.yaml` with `plugins: [reddit]`:
 
 ```bash
 pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 # or, with uv tool:
-uv tool install "obsei>=1.0.0rc1" \
+uv tool install obsei \
   --with "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 ```
 

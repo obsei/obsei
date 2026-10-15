@@ -21,22 +21,14 @@ directory and are tested with obsei in CI.
 | [`obsei-typeform`](https://github.com/obsei/obsei/tree/master/plugins/obsei-typeform) | `typeform` | source | Completed Typeform survey responses through the Responses API with your token, incremental; picks text, rating, language and an optional pseudonymised respondent id from chosen fields. |
 | [`obsei-teams`](https://github.com/obsei/obsei/tree/master/plugins/obsei-teams) | `teams` | sink | Posts matching, redacted feedback to a Microsoft Teams channel as an Adaptive Card through a Power Automate Workflows webhook. |
 
-Install a plugin from PyPI once it is published, for example:
-
-```bash
-pip install obsei-typeform
-# uv tool: add it with --with, and keep your extras
-uv tool install --force "obsei>=1.0.0rc1" --with obsei-typeform
-```
-
-Until then, install it from Git:
+Install a plugin from Git (PyPI packages are coming):
 
 ```bash
 pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 pip install "obsei-typeform @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-typeform"
 pip install "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"
-# uv tool: repeat --with for each plugin
-uv tool install --force "obsei>=1.0.0rc1" \
+# uv tool: repeat --with for each plugin, and keep your extras
+uv tool install --force obsei \
   --with "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"
 ```
 
@@ -64,7 +56,7 @@ A plugin exposes a `register(registry)` hook through the `obsei.plugins` entry p
 ```toml
 [project]
 name = "obsei-example"
-dependencies = ["obsei>=1.0.0rc1,<2"]
+dependencies = ["obsei>=1.0,<2"]
 
 [project.entry-points."obsei.plugins"]
 example = "obsei_example:register"

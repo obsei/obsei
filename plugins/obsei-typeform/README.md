@@ -3,13 +3,7 @@
 Survey responses from Typeform's [Responses API](https://www.typeform.com/developers/responses/),
 fetched incrementally with your own personal access token.
 
-Install it from PyPI once published:
-
-```bash
-pip install obsei-typeform
-```
-
-Until then, install it from Git:
+Install it from Git (a PyPI package is coming):
 
 ```bash
 pip install "obsei-typeform @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-typeform"

@@ -376,8 +376,11 @@ def audit(
 ) -> None:
     """Show the erasure and export log (newest first)."""
     with _open_existing(_store_settings(config, db, unencrypted), read_only=True) as store:
-        for at, action, detail in store.audit_log(limit=limit):
-            typer.echo(f"{at.isoformat()}  {action:<7} {detail}")
+        entries = store.audit_log(limit=limit)
+    if not entries:
+        typer.echo("no audit entries yet")
+    for at, action, detail in entries:
+        typer.echo(f"{at.isoformat()}  {action:<7} {detail}")
 
 
 @app.command()
@@ -1201,6 +1204,10 @@ def alerts_list(config: ConfigOption = DEFAULT_PATH, db: DbOption = None) -> Non
     cfg, path = _themes_context(config, db)
     with _open_store(path, cfg.store.unencrypted, read_only=True, must_exist=True) as store:
         states = store.alert_states()
+    if not cfg.alerts and not states:
+        typer.echo(
+            f"no alerts configured in {config.name} (see https://docs.obsei.com/guides/alerts/)"
+        )
     for name in [a.name for a in cfg.alerts if not any(s.alert == a.name for s in states)]:
         typer.echo(f"{name}  -  never fired")
     for s in states:
@@ -1266,11 +1273,18 @@ def approvals_list(
 ) -> None:
     """List proposals, newest first."""
     with _open_existing(_store_settings(config, db, unencrypted), read_only=True) as store:
-        for a in store.approvals(status=status):
-            typer.echo(
-                f"{a.id}  {a.status:<8} {a.proposed_at:%Y-%m-%d %H:%M}  {a.payload.target}  "
-                f"{a.payload.title}"
-            )
+        found = store.approvals(status=status)
+    if not found:
+        typer.echo(
+            f"no {status} approvals"
+            if status
+            else "no approvals (agents propose issues through MCP's propose_issue)"
+        )
+    for a in found:
+        typer.echo(
+            f"{a.id}  {a.status:<8} {a.proposed_at:%Y-%m-%d %H:%M}  {a.payload.target}  "
+            f"{a.payload.title}"
+        )
 
 
 @approvals_app.command("show")

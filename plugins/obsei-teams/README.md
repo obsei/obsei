@@ -3,13 +3,7 @@
 Posts matching feedback to a Microsoft Teams channel as an Adaptive Card, through a Power
 Automate **Workflows** webhook (Microsoft retired the Office 365 connector incoming webhooks).
 
-Install it from PyPI once published:
-
-```bash
-pip install obsei-teams
-```
-
-Until then, install it from Git:
+Install it from Git (a PyPI package is coming):
 
 ```bash
 pip install "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"

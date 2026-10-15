@@ -7,7 +7,7 @@ Five minutes, no model server and no secrets to export:
 
 ```bash
 mkdir voc && cd voc
-uvx --from "obsei[recommended]>=1.0.0rc1" obsei init   # project, secrets, sample data, local model
+uvx --from "obsei[recommended]>=1.0" obsei init   # project, secrets, sample data, local model
 obsei try                                        # redacted, labelled preview of the sample
 obsei try https://apps.apple.com/us/app/whatsapp-messenger/id310633997   # any public link
 obsei run                                        # fetch, redact, label, deliver, store
@@ -18,8 +18,7 @@ Then add your own sources and sinks without editing YAML: `obsei add appstore`, 
 
 `obsei[recommended]` is the full local setup: the classifier (`local`) and multilingual themes
 (`embeddings`). `uvx` runs obsei without installing it; to keep the `obsei` command, install it
-once with `uv tool install "obsei[recommended]>=1.0.0rc1"` (or `pip install`). obsei 1.0 is in pre-release, so
-keep the `>=1.0.0rc1` specifier: without it you get 0.0.15.
+once with `uv tool install "obsei[recommended]"` (or `pip install`).
 
 `obsei init` creates:
 
@@ -95,13 +94,13 @@ Some features need extra packages. Add them to the same install:
 
 ```bash
 # uv tool: --force replaces the install, so list every extra you want to keep
-uv tool install --force "obsei[mcp,embeddings]>=1.0.0rc1"
+uv tool install --force "obsei[mcp,embeddings]"
 # pip, in the environment where obsei is installed
-pip install "obsei[mcp,embeddings]>=1.0.0rc1"
+pip install "obsei[mcp,embeddings]"
 ```
 
 `uv run --extra ...` only works inside a project checkout; outside one it ignores the extra.
-Plugins install the same way: `uv tool install --force "obsei[mcp]>=1.0.0rc1" --with obsei-teams`
+Plugins install the same way: `uv tool install --force obsei --with "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"`
 (see [Plugins](/reference/plugins/)).
 
 ## Add a model
@@ -110,8 +109,8 @@ The default classifier runs inside obsei on the CPU, so there is no model server
 ran `obsei init` without `obsei[local]`, add it and fetch the model:
 
 ```bash
-uv tool install --force "obsei[local]>=1.0.0rc1"   # or: pip install "obsei[local]>=1.0.0rc1"
-obsei models download                                 # once, with network (about 2.2 GB)
+uv tool install --force "obsei[local]"   # or: pip install "obsei[local]"
+obsei models download                   # once, with network (about 2.2 GB)
 ```
 
 Then uncomment the `classify` enricher in `obsei.yaml`. Every record gets sentiment, intent and

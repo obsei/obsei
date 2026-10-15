@@ -57,6 +57,5 @@ Pin below 1.0:
 pip install "obsei<1"
 ```
 
-Until 1.0.0 is released, a plain `pip install obsei` still gives 0.0.15, but that changes at the
-launch, so pin now. The 0.0.x code lives on the
+A plain `pip install obsei` gives 1.0, so keep the pin. The 0.0.x code lives on the
 [`legacy/0.0.x`](https://github.com/obsei/obsei/tree/legacy/0.0.x) branch.

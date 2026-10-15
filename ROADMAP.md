@@ -26,8 +26,8 @@ not listed below ships only when a contributor builds and maintains it.
 | 0.3 Enterprise BYO | Done | SQL, MCP-client, file-drop, IMAP, Zendesk, Freshdesk, Intercom; Jira, Linear and SQL sinks; role-based access and SSO proxy |
 | 0.4 Themes and Studio | Done | Embeddings (offline and multilingual), dedupe, stable themes, k-anonymous views, `ask`, Gong, Studio with a knowledge graph, Slack command, static demo, name redaction |
 | 0.5 Decisions and routing | Done | Decision models (Julia-1, Clef) with probabilities, confidence fallback to a chat model or a human, `filter` enricher, grounding judge for `ask`, ordered routes on model confidence, Studio privacy, decisions, trends and routes panels |
-| Release candidates | Done | rc1 to rc5: in-process classifier as the default, `obsei eval`, `reprocess` and corrections, theme spike, digest, review and health alerts, signed event webhooks and the Apprise `notify` sink, approval queue for agent writes, untrusted-text marking in MCP, a first run with generated secrets and `obsei try <link>`, guided setup (`obsei add`, `check`, `integrations`, editor schema), plugins for Claude, Codex, Copilot, Cursor and Gemini, MCP Registry listing |
-| 1.0 | Releasing | First stable release. Stable within 1.x, changing only by addition: the record schema, `obsei.yaml` (version 1), the CLI, MCP tools and the approval queue, the plugin protocol, alert config and the webhook event format |
+| 1.0 work | Done | In-process classifier as the default, `obsei eval`, `reprocess` and corrections, theme spike, digest, review and health alerts, signed event webhooks and the Apprise `notify` sink, approval queue for agent writes, untrusted-text marking in MCP, a first run with generated secrets and `obsei try <link>`, guided setup (`obsei add`, `check`, `integrations`, editor schema), plugins for Claude, Codex, Copilot, Cursor and Gemini, MCP Registry listing |
+| 1.0 | Released (2026-10-15) | First stable release. Stable within 1.x, changing only by addition: the record schema, `obsei.yaml` (version 1), the CLI, MCP tools and the approval queue, the plugin protocol, alert config and the webhook event format |
 
 ## Next
 
@@ -46,9 +46,8 @@ Open for contributors; not started.
 
 ## Releases
 
-1.0.0 is the first stable release: `pip install obsei` installs it. The 1.0 work shipped first as
-PyPI pre-releases (`1.0.0a1`, `1.0.0rc1` to `1.0.0rc5`). From 1.0.0 on, releases follow semantic
-versioning.
+`pip install obsei` installs the latest release. Releases follow semantic versioning: fixes ship as
+patch releases (1.0.1, 1.0.2, ...) and additions as minor releases.
 
 ## Not planned (contributor-gated)
 

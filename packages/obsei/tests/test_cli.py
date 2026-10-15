@@ -105,6 +105,15 @@ def test_forget_author_and_retention(db: Path) -> None:
     assert '"deleted": 1' in log
 
 
+def test_empty_audit_and_approvals_say_so(db: Path) -> None:
+    args = ["--db", str(db), "--unencrypted"]
+    audit = runner.invoke(app, ["audit", *args])
+    assert (audit.exit_code, audit.output) == (0, "no audit entries yet\n")
+    approvals = runner.invoke(app, ["approvals", "list", *args])
+    assert approvals.exit_code == 0
+    assert approvals.output.startswith("no approvals")
+
+
 def test_forget_requires_a_filter_and_a_key(db: Path) -> None:
     assert runner.invoke(app, ["forget", "--db", str(db), "--unencrypted"]).exit_code == 2
     result = runner.invoke(app, ["forget", "--source", "csv", "--db", str(db)])

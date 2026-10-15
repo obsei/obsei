@@ -16,9 +16,11 @@ sidebar:
 | `propose_issue` | Queue an issue for a person to approve (only when a GitHub, Jira or Linear sink is configured) |
 
 Results contain redacted text, labels, source, time and record id. They never contain author
-pseudonyms. The server also offers a `voc_report` prompt. The server supports MCP spec
-2026-07-28, and every tool declares `readOnlyHint`, `destructiveHint` and `openWorldHint`: the
-four read tools are read-only, and `propose_issue` writes only to obsei's own queue.
+pseudonyms. The server also offers a `voc_report` prompt. Its `initialize` handshake negotiates
+MCP protocol 2024-11-05 to 2025-11-25 (a client offering 2026-07-28 gets 2025-11-25); the
+bundled MCP SDK also answers 2026-07-28 requests that carry their version in `_meta`. Every tool
+declares `readOnlyHint`, `destructiveHint` and `openWorldHint`: the four read tools are
+read-only, and `propose_issue` writes only to obsei's own queue.
 
 ## Untrusted text
 
@@ -74,7 +76,7 @@ Gemini and other tools: see [Use obsei from your AI tool](/guides/ai-tools/).
   "mcpServers": {
     "obsei": {
       "command": "uvx",
-      "args": ["--from", "obsei>=1.0.0rc1", "obsei", "mcp"],
+      "args": ["--from", "obsei>=1.0", "obsei", "mcp"],
       "env": { "OBSEI_DB": "/path/to/obsei.duckdb", "OBSEI_DB_KEY": "..." }
     }
   }

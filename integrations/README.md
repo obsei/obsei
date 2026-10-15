@@ -4,7 +4,7 @@
 | --- | --- | --- |
 | Claude Code plugin (MCP server and `voice-of-customer` skill) | [`claude/obsei`](claude/obsei), listed in [`../.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json) | `/plugin marketplace add obsei/obsei`, then `/plugin install obsei@obsei` |
 | Codex, Copilot CLI, VS Code, Cursor, Gemini CLI plugins (same plugin folder and skill) | [`claude/obsei`](claude/obsei), [`../.agents/plugins`](../.agents/plugins), [`../.cursor-plugin`](../.cursor-plugin), [`../gemini-extension.json`](../gemini-extension.json) | [Use obsei from your AI tool](https://docs.obsei.com/guides/ai-tools/) |
-| Any MCP client over stdio (Claude Desktop, Cline, Zed, JetBrains, Goose, your agents) | `obsei mcp`, published to the MCP Registry on release as `io.github.obsei/obsei` ([`../server.json`](../server.json)) | command: `uvx --from 'obsei>=1.0.0rc1' obsei mcp` (config below) |
+| Any MCP client over stdio (Claude Desktop, Cline, Zed, JetBrains, Goose, your agents) | `obsei mcp`, published to the MCP Registry on release as `io.github.obsei/obsei` ([`../server.json`](../server.json)) | command: `uvx --from "obsei>=1.0" obsei mcp` (config below) |
 | Remote MCP over HTTP | `obsei serve` | `https://your-host:8765/mcp` with `Authorization: Bearer <token>` (analyst role), or behind your SSO proxy |
 | GitHub Action | [`../action.yml`](../action.yml) | `uses: obsei/obsei@<tag or SHA>`; daily recipe in [`../examples/github-actions`](../examples/github-actions) |
 | Slack `/obsei` command | `obsei serve` | slash command URL `https://your-host/slack/commands`, `SLACK_SIGNING_SECRET` set, `hooks.slack.com` allowed by the egress policy |
@@ -23,7 +23,7 @@ Claude Desktop (`claude_desktop_config.json`):
   "mcpServers": {
     "obsei": {
       "command": "uvx",
-      "args": ["--from", "obsei>=1.0.0rc1", "obsei", "mcp"],
+      "args": ["--from", "obsei>=1.0", "obsei", "mcp"],
       "env": { "OBSEI_DB": "/path/to/obsei.duckdb", "OBSEI_DB_KEY": "..." }
     }
   }

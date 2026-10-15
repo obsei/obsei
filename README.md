@@ -17,7 +17,7 @@ The self-hosted, open source alternative to Enterpret and Unwrap that strips PII
 
 <p align="center">
   <a href="https://github.com/obsei/obsei/actions/workflows/ci.yml"><img src="https://github.com/obsei/obsei/actions/workflows/ci.yml/badge.svg?branch=master&event=push" alt="CI"></a>
-  <a href="https://pypi.org/project/obsei/"><img src="https://img.shields.io/pypi/v/obsei?include_prereleases&color=238a91" alt="PyPI"></a>
+  <a href="https://pypi.org/project/obsei/"><img src="https://img.shields.io/pypi/v/obsei?color=238a91" alt="PyPI"></a>
   <a href="https://github.com/obsei/obsei/pkgs/container/obsei"><img src="https://img.shields.io/badge/container-ghcr.io-1a6d9d" alt="Container"></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/obsei/obsei"><img src="https://api.scorecard.dev/projects/github.com/obsei/obsei/badge" alt="OpenSSF Scorecard"></a>
   <a href="https://github.com/obsei/obsei/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-238a91" alt="License"></a>
@@ -43,15 +43,14 @@ obsei provides controls that *support* compliance with laws such as the GDPR, In
 Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain the data controller.
 
 > [!NOTE]
-> 1.0 is a new codebase, not compatible with 0.0.x, and is in pre-release: install it with the `>=1.0.0rc1` specifier.
-> A plain `pip install obsei` still gives 0.0.15, whose code lives on the `legacy/0.0.x` branch.
-> See [Migrate from 0.0.x](https://docs.obsei.com/guides/migrate-from-0-0/).
+> 1.0 is a new codebase, not compatible with 0.0.x. The legacy 0.0.x toolkit lives on the `legacy/0.0.x`
+> branch (`pip install "obsei<1"`); see [Migrate from 0.0.x](https://docs.obsei.com/guides/migrate-from-0-0/).
 
 ## Quickstart
 
 ```bash
 mkdir voc && cd voc
-uvx --from "obsei[recommended]>=1.0.0rc1" obsei init   # obsei.yaml, secrets, sample data, local model
+uvx --from "obsei[recommended]>=1.0" obsei init   # obsei.yaml, secrets, sample data, local model
 obsei try                              # table of redacted, labelled feedback; nothing stored
 obsei try https://apps.apple.com/us/app/whatsapp-messenger/id310633997   # or GitHub, HN, a feed, a CSV
 obsei add appstore                     # add sources and sinks without editing YAML (obsei integrations)
@@ -64,7 +63,7 @@ obsei doctor                           # environment, secrets, encryption, egres
 
 `obsei[recommended]` is the full local setup (the classifier and multilingual themes); `obsei` alone
 is enough for redaction, sources and sinks. To keep the `obsei` command, install it once:
-`uv tool install "obsei[recommended]>=1.0.0rc1"` (or `pip install`). `obsei init` writes a random database key and pseudonym salt to
+`uv tool install "obsei[recommended]"` (or `pip install`). `obsei init` writes a random database key and pseudonym salt to
 `.obsei/secrets.env` (owner-only, git-ignored), and every command loads it; on servers and in CI,
 set `OBSEI_DB_KEY` and `OBSEI_PSEUDONYM_SALT` instead, or mount the file. With `obsei[local]`, the
 `classify` enricher labels sentiment, intent and language on the CPU with no model server. A
@@ -111,10 +110,10 @@ The MCP server and `voice-of-customer` skill install in one line:
 | Codex | `codex plugin marketplace add obsei/obsei`, then `codex plugin add obsei@obsei` |
 | GitHub Copilot CLI | `copilot plugin install obsei/obsei:integrations/claude/obsei` |
 | Gemini CLI | `gemini extensions install https://github.com/obsei/obsei` |
-| Any MCP client | `uvx --from "obsei>=1.0.0rc1" obsei mcp` |
+| Any MCP client | `uvx --from "obsei>=1.0" obsei mcp` |
 
-[![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=obsei&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJvYnNlaT49MS4wLjByYzEiLCJvYnNlaSIsIm1jcCJdfQ%3D%3D)
-[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_obsei-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=obsei&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22obsei%3E%3D1.0.0rc1%22%2C%22obsei%22%2C%22mcp%22%5D%7D)
+[![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=obsei&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJvYnNlaT49MS4wIiwib2JzZWkiLCJtY3AiXX0%3D)
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_obsei-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=obsei&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22obsei%3E%3D1.0%22%2C%22obsei%22%2C%22mcp%22%5D%7D)
 
 VS Code, Devin Desktop, Zed, JetBrains, Kiro, Goose, Cline and ChatGPT: see
 [AI tools](https://docs.obsei.com/guides/ai-tools/).
@@ -122,8 +121,7 @@ VS Code, Devin Desktop, Zed, JetBrains, Kiro, Goose, Cline and ChatGPT: see
 ## Roadmap
 
 Phases 0.1 to 0.5 (private core, MCP and Claude plugin, enterprise bring-your-own, themes and
-Studio, decision models and routing) are in the 1.0 release candidates. Next:
-live-connector validation, further release candidates as needed, then the 1.0.0 launch. See [ROADMAP.md](ROADMAP.md).
+Studio, decision models and routing) shipped in 1.0. See [ROADMAP.md](ROADMAP.md) for what is next.
 
 ## Contributing
 

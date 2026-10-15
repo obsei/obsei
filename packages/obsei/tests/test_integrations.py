@@ -22,7 +22,7 @@ MANIFESTS = [
     ROOT / "gemini-extension.json",
     ROOT / "server.json",
 ]
-MCP_SERVER = {"command": "uvx", "args": ["--from", "obsei>=1.0.0rc1", "obsei", "mcp"]}
+MCP_SERVER = {"command": "uvx", "args": ["--from", "obsei>=1.0", "obsei", "mcp"]}
 
 
 def load(path: Path) -> dict[str, object]:
