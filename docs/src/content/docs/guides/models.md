@@ -88,6 +88,10 @@ at 0.7 is the share of records with at least one answer below 0.7. The mixed row
   with the demo.
 - mDeBERTa and gliner2-base missed whole languages (0% in Japanese, Korean, Hindi or Arabic on some
   questions). Qwen3-0.6B was the best calibrated on team routing (ECE .05) but the slowest.
+- The benchmark covers choice questions only. On the demo's yes/no and score questions, bge-m3
+  was weak: it answered `angry` yes for 2 of 136 records and put 110 at one urgency level. Check
+  those questions with [`obsei eval`](#choose-a-cutoff-per-question) before routing on them, and
+  try another local model for them with `models:`.
 
 Caveats: the records are synthetic, 5 to 41 per language (41 in English), and expected answers come from the demo's
 issue definitions, not from human review of each message. Timings are PyTorch on one CPU, one record
