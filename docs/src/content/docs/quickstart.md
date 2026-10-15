@@ -100,7 +100,7 @@ pip install "obsei[mcp,embeddings]"
 ```
 
 `uv run --extra ...` only works inside a project checkout; outside one it ignores the extra.
-Plugins install the same way: `uv tool install --force obsei --with "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"`
+Plugins install the same way: `uv tool install --force obsei --with obsei-teams`
 (see [Plugins](/reference/plugins/)).
 
 ## Add a model

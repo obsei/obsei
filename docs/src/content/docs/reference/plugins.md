@@ -21,15 +21,14 @@ directory and are tested with obsei in CI.
 | [`obsei-typeform`](https://github.com/obsei/obsei/tree/master/plugins/obsei-typeform) | `typeform` | source | Completed Typeform survey responses through the Responses API with your token, incremental; picks text, rating, language and an optional pseudonymised respondent id from chosen fields. |
 | [`obsei-teams`](https://github.com/obsei/obsei/tree/master/plugins/obsei-teams) | `teams` | sink | Posts matching, redacted feedback to a Microsoft Teams channel as an Adaptive Card through a Power Automate Workflows webhook. |
 
-Install a plugin from Git (`obsei-teams` is coming to PyPI; `obsei-typeform` stays Git-only):
+`obsei-teams` is on PyPI; `obsei-reddit` and `obsei-typeform` install from Git:
 
 ```bash
+pip install obsei-teams
 pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 pip install "obsei-typeform @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-typeform"
-pip install "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"
 # uv tool: repeat --with for each plugin, and keep your extras
-uv tool install --force obsei \
-  --with "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"
+uv tool install --force obsei --with obsei-teams
 ```
 
 Each plugin's README lists its configuration. The `teams` sink posts to public Microsoft hosts,
