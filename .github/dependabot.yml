@@ -14,6 +14,9 @@ updates:
     ignore:
       # pydantic pins pydantic-core exactly; bumping it alone breaks the fuzz build
       - dependency-name: "pydantic-core"
+      # gliner (name redaction) requires transformers<5.17; drop once it allows newer
+      - dependency-name: "transformers"
+        versions: [">=5.17"]
     commit-message:
       prefix: "chore(deps)"
 

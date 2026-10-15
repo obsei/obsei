@@ -57,10 +57,8 @@
           "type": "generic",
           "path": "/blog/src/content/posts/obsei-is-back.mdx"
         }
-      ]
+      ],
+      "release-as": "1.0.0"
     }
-  },
-  "versioning": "prerelease",
-  "prerelease": true,
-  "prerelease-type": "rc"
+  }
 }
