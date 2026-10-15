@@ -153,9 +153,16 @@ def test_local_endpoint_shape_and_config_errors(models: Models) -> None:
 def test_nli_and_gliner2_adapters(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[dict[str, Any]] = []
 
-    def pipeline(task: str, model: str, device: int) -> Any:
+    class AutoTokenizer:
+        @staticmethod
+        def from_pretrained(path: str, model_max_length: int) -> tuple[str, int]:
+            return (path, model_max_length)
+
+    def pipeline(task: str, model: str, tokenizer: tuple[str, int]) -> Any:
         def classify(text: str, labels: list[str], **kw: Any) -> dict[str, list[Any]]:
-            calls.append({"task": task, "model": model, "labels": labels, **kw})
+            calls.append(
+                {"task": task, "model": model, "tokenizer": tokenizer, "labels": labels, **kw}
+            )
             return {"labels": labels[::-1], "scores": [0.3, 0.7]}
 
         return classify
@@ -169,13 +176,18 @@ def test_nli_and_gliner2_adapters(monkeypatch: pytest.MonkeyPatch) -> None:
             calls.append({"tasks": tasks, **kw})
             return {"q": [{"label": "yes", "confidence": 0.9}, {"label": "no", "confidence": 0.1}]}
 
-    monkeypatch.setitem(sys.modules, "transformers", _module("transformers", pipeline=pipeline))
+    monkeypatch.setitem(
+        sys.modules,
+        "transformers",
+        _module("transformers", pipeline=pipeline, AutoTokenizer=AutoTokenizer),
+    )
     monkeypatch.setitem(sys.modules, "gliner2", _module("gliner2", GLiNER2=GLiNER2))
     options = {"yes": "angry", "no": None}
     assert local._nli("/models/nli")("text", options) == {"yes": 0.7, "no": 0.3}
     assert calls[-1] == {
         "task": "zero-shot-classification",
         "model": "/models/nli",
+        "tokenizer": ("/models/nli", 512),
         "labels": ["yes: angry", "no"],
         "hypothesis_template": "This customer message is {}",
         "multi_label": False,
