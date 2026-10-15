@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/obsei/obsei/compare/v1.0.0...v1.0.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* **cli:** say when audit, approvals and alerts are empty, and drop pre-release install pins ([#449](https://github.com/obsei/obsei/issues/449)) ([c2a92aa](https://github.com/obsei/obsei/commit/c2a92aa7f604d20eadb1980c2edfb34f7d7763c4))
+* **cli:** show the extra names in init, demo and models download help ([#458](https://github.com/obsei/obsei/issues/458)) ([36a6760](https://github.com/obsei/obsei/commit/36a6760092d2197e809a1c0c516b551bc26fcc4a))
+
 ## [1.0.0](https://github.com/obsei/obsei/compare/v1.0.0-rc.5...v1.0.0) (2026-10-15)
 
 
