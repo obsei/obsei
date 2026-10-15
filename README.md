@@ -59,7 +59,7 @@ obsei serve                            # scheduled pipelines, webhooks, MCP and 
 obsei doctor                           # environment, secrets, encryption, egress mode, plugins
 ```
 
-To keep the `obsei` command, install it once: `uv tool install "obsei[mcp,local]>=1.0.0rc1"` (or
+To keep the `obsei` command, install it once: `uv tool install "obsei[local]>=1.0.0rc1"` (or
 `pip install`). `obsei init` writes a random database key and pseudonym salt to
 `.obsei/secrets.env` (owner-only, git-ignored), and every command loads it; on servers and in CI,
 set `OBSEI_DB_KEY` and `OBSEI_PSEUDONYM_SALT` instead, or mount the file. With `obsei[local]`, the

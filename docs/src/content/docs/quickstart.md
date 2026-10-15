@@ -14,7 +14,7 @@ obsei run                                        # fetch, redact, label, deliver
 ```
 
 `uvx` runs obsei without installing it; to keep the `obsei` command, install it once with
-`uv tool install "obsei[mcp,local]>=1.0.0rc1"` (or `pip install`). obsei 1.0 is in pre-release, so
+`uv tool install "obsei[local]>=1.0.0rc1"` (or `pip install`). obsei 1.0 is in pre-release, so
 keep the `>=1.0.0rc1` specifier: without it you get 0.0.15.
 
 `obsei init` creates:
@@ -105,7 +105,7 @@ The default classifier runs inside obsei on the CPU, so there is no model server
 ran `obsei init` without `obsei[local]`, add it and fetch the model:
 
 ```bash
-uv tool install --force "obsei[mcp,local]>=1.0.0rc1"   # or: pip install "obsei[local]>=1.0.0rc1"
+uv tool install --force "obsei[local]>=1.0.0rc1"   # or: pip install "obsei[local]>=1.0.0rc1"
 obsei models download                                 # once, with network (about 2.2 GB)
 ```
 
