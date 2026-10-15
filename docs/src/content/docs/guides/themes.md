@@ -28,6 +28,10 @@ themes:
   batch_size: 64           # records per embedding call
 ```
 
+Without a `labeler`, a theme is named by up to three words that several of its records share and
+that are rare in the rest of the store, so words most feedback uses (stopwords, an issue template's
+headings) are left out. Labels are set once, when a theme first reaches `k_anonymity` people.
+
 The built-in `hashing` embedder needs no model and works in every script, but it groups by
 wording, so the same issue in two languages forms two themes. To group by meaning across 50+
 languages, use the local multilingual model (CPU only, about 220 MB, no PyTorch):

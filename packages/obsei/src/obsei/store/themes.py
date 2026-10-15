@@ -214,6 +214,17 @@ class ThemeQueries:
         ).fetchall()
         return [str(r[0]) for r in rows]
 
+    def label_background(self, limit: int = 1000) -> list[str]:
+        """Texts of up to ``limit`` themed records, the same ones each time, to tell words common
+        to all feedback from words that mark one theme."""
+        rows = self._con.execute(
+            "SELECT json_extract_string(r.data, '$.text') FROM record_themes t "
+            "JOIN records r ON r.id = t.record_id WHERE t.duplicate_of IS NULL "
+            "ORDER BY r.id LIMIT ?",
+            [limit],
+        ).fetchall()
+        return [str(r[0]) for r in rows]
+
     def label_theme(self, theme_id: str, label: str, description: str | None) -> None:
         self._con.execute(
             "UPDATE themes SET label = ?, description = ? WHERE id = ?",
