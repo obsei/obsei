@@ -93,6 +93,24 @@ h1 { font-size: clamp(2.3rem, 4.6vw, 3.5rem); line-height: 1.04; letter-spacing:
 .pills { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .pills li { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 0.85rem; white-space: nowrap; }
 .pills.out li { border-color: var(--blue); color: var(--blue); font-weight: 600; }
+.i { display: inline-flex; align-items: center; gap: 6px; }
+.i::before { content: ""; width: 14px; height: 14px; flex: none; background: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
+.i-bluesky { --icon: url("/icons/bluesky.svg"); }
+.i-database { --icon: url("/icons/database.svg"); }
+.i-github { --icon: url("/icons/github.svg"); }
+.i-intercom { --icon: url("/icons/intercom.svg"); }
+.i-jira { --icon: url("/icons/jira.svg"); }
+.i-layout-dashboard { --icon: url("/icons/layout-dashboard.svg"); }
+.i-linear { --icon: url("/icons/linear.svg"); }
+.i-message-square { --icon: url("/icons/message-square.svg"); }
+.i-modelcontextprotocol { --icon: url("/icons/modelcontextprotocol.svg"); }
+.i-phone-call { --icon: url("/icons/phone-call.svg"); }
+.i-play { --icon: url("/icons/play.svg"); }
+.i-plug { --icon: url("/icons/plug.svg"); }
+.i-smartphone { --icon: url("/icons/smartphone.svg"); }
+.i-warehouse { --icon: url("/icons/warehouse.svg"); }
+.i-webhook { --icon: url("/icons/webhook.svg"); }
+.i-zendesk { --icon: url("/icons/zendesk.svg"); }
 .boundary { border: 2px dashed var(--teal); border-radius: 22px; padding: 20px 18px 22px; background: var(--tint); }
 .boundary-title { color: var(--teal-ink); }
 .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; counter-reset: step; }
