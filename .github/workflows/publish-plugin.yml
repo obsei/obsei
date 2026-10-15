@@ -9,7 +9,7 @@ on:
       plugin:
         description: Plugin package to publish.
         type: choice
-        options: [obsei-reddit, obsei-typeform, obsei-teams]
+        options: [obsei-reddit, obsei-teams]
 
 permissions: {}
 

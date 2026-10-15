@@ -21,7 +21,7 @@ directory and are tested with obsei in CI.
 | [`obsei-typeform`](https://github.com/obsei/obsei/tree/master/plugins/obsei-typeform) | `typeform` | source | Completed Typeform survey responses through the Responses API with your token, incremental; picks text, rating, language and an optional pseudonymised respondent id from chosen fields. |
 | [`obsei-teams`](https://github.com/obsei/obsei/tree/master/plugins/obsei-teams) | `teams` | sink | Posts matching, redacted feedback to a Microsoft Teams channel as an Adaptive Card through a Power Automate Workflows webhook. |
 
-Install a plugin from Git (PyPI packages are coming):
+Install a plugin from Git (`obsei-teams` is coming to PyPI; `obsei-typeform` stays Git-only):
 
 ```bash
 pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
