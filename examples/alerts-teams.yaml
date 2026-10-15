@@ -4,7 +4,7 @@
 #
 #   pip install "obsei[google]" obsei-teams
 #   export TEAMS_WEBHOOK_URL=...     # from the channel's Workflows "webhook request" template
-#   export OBSEI_DB_KEY=...          # encrypts the local store (16+ characters)
+#   obsei init                       # once: writes the store key to .obsei/secrets.env
 #   obsei serve --config alerts-teams.yaml
 #
 # Reviews are redacted before they reach Teams. Spike alerts need themes, so themes.auto updates

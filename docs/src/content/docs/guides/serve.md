@@ -64,9 +64,6 @@ curl -X POST https://obsei.internal/ingest/support/tickets --data-binary @body.j
   -H "webhook-id: $id" -H "webhook-timestamp: $ts" -H "webhook-signature: v1,$sig"
 ```
 
-Earlier release candidates expected `X-Obsei-Timestamp` and `X-Obsei-Signature-256`; senders now
-use the headers above.
-
 A request is accepted as a whole or not at all: an invalid item returns `400` naming the item.
 Items without text are skipped, and the reply counts them:
 `{"received": 3, "skipped": 1, "stored": 2}`.

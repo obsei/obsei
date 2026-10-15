@@ -56,7 +56,7 @@ export default defineConfig({
       ],
       editLink: { baseUrl: "https://github.com/obsei/obsei/edit/master/docs/" },
       sidebar: [
-        { label: "Start", items: ["quickstart", "how-it-works", "configuration", "examples"] },
+        { label: "Start", items: ["quickstart", "how-it-works", "configuration", "examples", "whats-new"] },
         { label: "Guides", items: [{ autogenerate: { directory: "guides" } }] },
         { label: "Privacy", items: [{ autogenerate: { directory: "privacy" } }] },
         { label: "Reference", items: [{ autogenerate: { directory: "reference" } }] },

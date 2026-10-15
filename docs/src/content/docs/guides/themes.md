@@ -24,6 +24,8 @@ themes:
   labeler: ollama          # llms name; without it, keyword labels
   label_language: English  # labels in your team's language; feedback stays as written
   k_anonymity: 5
+  max_records: 10000       # records embedded and assigned per refresh
+  batch_size: 64           # records per embedding call
 ```
 
 The built-in `hashing` embedder needs no model and works in every script, but it groups by

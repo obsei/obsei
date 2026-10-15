@@ -11,6 +11,19 @@ variable that holds the value.
 editor completes and checks every key, including each plugin's `config`
 ([Set up without editing YAML](/guides/setup/)).
 
+| Key | What it sets | Details |
+| --- | --- | --- |
+| `store` | Database path and encryption | [At rest and in use](/privacy/overview/#at-rest-and-in-use) |
+| `privacy` | Redaction regions, names, pseudonyms | [Privacy controls](/privacy/overview/) |
+| `egress` | Hosts feedback may be sent to | [Privacy controls](/privacy/overview/) |
+| `llms` | Classifier, embedding and chat models | [Models](/guides/models/) |
+| `themes` | Embedder, similarity, labels, k-anonymity | [Themes](/guides/themes/) |
+| `access` | Tokens and roles for `obsei serve` | [Serve](/guides/serve/#access) |
+| `ask_llm`, `ask_judge`, `ask_judge_threshold` | Model and judge for `obsei ask` | [Ask](#ask) |
+| `plugins` | Installed plugins allowed to load | [Plugins](/reference/plugins/) |
+| `pipelines` | Sources, enrichers, routes and sinks | [Sources](/guides/sources/), [Routing](/guides/routing/), [Sinks](/guides/sinks/) |
+| `alerts` | Theme spikes, new themes, digests, health | [Alerts](/guides/alerts/) |
+
 ```yaml
 # yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 version: 1

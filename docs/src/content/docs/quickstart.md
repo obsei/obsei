@@ -65,16 +65,15 @@ contacted.
 
 :::caution[If `obsei run` says "writing an encrypted store needs DuckDB's httpfs extension"]
 Encryption uses DuckDB's `httpfs` extension, and the default air-gapped mode never downloads it.
-Up to 1.0.0rc2, install it once yourself; this fetches DuckDB's own extension and sends none of
-your data:
+`obsei init` installs it, except with `--offline`. Otherwise install it once yourself; this
+fetches DuckDB's own extension and sends none of your data:
 
 ```bash
 "$(uv tool dir)/obsei/bin/python" -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"
 # installed with pip: run python -c "..." with the same command, in the environment that has obsei
 ```
 
-Then `obsei doctor` reports `encryption: ready`. From 1.0.0rc3, `obsei init` installs it for you.
-For machines without network access, see [At rest and in use](/privacy/overview/#at-rest-and-in-use).
+Then `obsei doctor` reports `encryption: ready`. For machines without network access, see [At rest and in use](/privacy/overview/#at-rest-and-in-use).
 :::
 
 ## Optional extras

@@ -24,6 +24,7 @@ credentials, without sending anything ([Set up without editing YAML](/guides/set
 | `linear` | One issue per matching record | marker in the description | verified |
 | `parquet` | Parquet files for notebooks and lakes | file named by batch content | beta |
 | `sql` | Upsert into a table in any SQLAlchemy database or warehouse | delete and insert by id | beta |
+| `teams` ([plugin](/reference/plugins/), `pip install obsei-teams`) | An Adaptive Card per matching record in a Microsoft Teams channel | at-least-once | beta |
 
 `verified` means a live test in
 [`packages/obsei/tests/live`](https://github.com/obsei/obsei/tree/master/packages/obsei/tests/live)
@@ -130,9 +131,6 @@ event with a new `webhook-id`, so receivers should also deduplicate by record `i
 Each event's final outcome (event id, pipeline, sink, host, type, attempts, status, error) is kept
 in the store's `deliveries` table; admins read the latest 100 at `GET /api/deliveries` on
 [`obsei serve`](/guides/serve/).
-
-Earlier release candidates posted `{"records": [...]}` signed with `X-Obsei-Timestamp` and
-`X-Obsei-Signature-256`. Receivers now read `data.records` and verify the headers above.
 
 ## Notifications
 
