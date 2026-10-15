@@ -1,0 +1,140 @@
+---
+title: "obsei 1.0: private customer feedback in five minutes"
+description: "obsei 1.0 is out. pip install obsei now gives a self-hosted Voice of Customer pipeline that strips PII before any model sees it, runs its classifier on your machine, and plugs into your AI tools."
+pubDate: 2026-10-15
+author: Lalit Pagaria
+tags: [release, voice-of-customer, privacy, open-source]
+cover: ./obsei-1-0/cover.svg
+aiAssisted: true
+coverAlt: "obsei logo with the words: obsei 1.0, private customer feedback in five minutes"
+---
+
+Ten days ago I wrote that [obsei is back](/obsei-is-back/). Today obsei 1.0 is on
+[PyPI](https://pypi.org/project/obsei/), and a plain `pip install obsei` gives you the new obsei
+instead of the 2023 library.
+
+obsei is the self-hosted, open source alternative to Enterpret and Unwrap that strips PII before
+any LLM sees it. It collects reviews, tickets, surveys and community posts; redacts personal data
+on the way in; labels and groups everything into themes across languages; and sends what matters
+to Slack, Jira, Linear or your warehouse. It runs on your machine or your servers. Nothing leaves
+unless you allow it.
+
+## Try it
+
+You need [uv](https://docs.astral.sh/uv/). No model server, no API key, nothing to export:
+
+```bash
+mkdir voc && cd voc
+uvx --from "obsei[recommended]>=1.0" obsei init
+obsei try
+```
+
+`obsei init` creates a project with sample feedback in ten languages, generates the encryption key
+for you, and downloads a small multilingual model once. `obsei try` shows what obsei would store,
+without storing anything:
+
+```text
+┏━━━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ source ┃ lang ┃ labels                       ┃ text                          ┃
+┡━━━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ sample │ en   │ bug 0.85 · negative 0.93     │ The app crashes every time I  │
+│        │      │                              │ open the camera. Please fix!  │
+│ sample │ es   │ praise 0.41 · positive 0.87  │ Me encanta la nueva función   │
+│        │      │                              │ de búsqueda.                  │
+│ sample │ en   │ complaint 0.39 · neutral     │ Support never replied. Reach  │
+│        │      │ 0.75 · review                │ me at <EMAIL>, or I am        │
+│        │      │                              │ cancelling.                   │
+```
+
+The email address is gone before the model reads the message. The low-confidence answer is marked
+`review`, so a person decides instead of the model guessing.
+
+Then point it at something real. Any public App Store app, GitHub repository, Hacker News thread,
+WordPress plugin or RSS feed works without a key:
+
+```bash
+obsei try https://apps.apple.com/us/app/whatsapp-messenger/id310633997
+obsei try https://github.com/astral-sh/uv
+```
+
+## What's new since the release candidates
+
+**A classifier that runs on your machine.** The default model is now
+[bge-m3-zeroshot-v2.0](https://huggingface.co/MoritzLaurer/bge-m3-zeroshot-v2.0), running inside
+obsei. I benchmarked six small models on the demo's 136 records in 11 languages. It was the most
+accurate: .82 on intent, .90 on sentiment and .91 on team routing. The decision model I had
+recommended before, Julia-1, came last at a mean of .69. The
+[full table and its caveats](https://docs.obsei.com/guides/models/#benchmark) are in the docs. You
+can still use Ollama, any OpenAI-compatible model or a decision model instead.
+
+**Measure it on your own data.** `obsei eval gold.csv` scores the classifier against a labelled
+sample. For each question it reports accuracy, calibration and how much goes to review, and it
+suggests a confidence cutoff. `obsei correct` stores human fixes, and `obsei reprocess` relabels
+stored feedback after you change a question or a model.
+
+**Set up without editing YAML.** `obsei add appstore` or `obsei add slack` asks for each field,
+links to the page where you get the key, keeps secrets out of `obsei.yaml`, and previews three
+records. `obsei check` tests every connection and says how to fix what fails. `obsei integrations`
+lists every source and sink: 22 and 9, counting the first-party plugins. The published JSON Schema gives you autocomplete in VS Code.
+
+**Alerts on themes, not just messages.** obsei can tell you when a theme spikes against its
+eight-week baseline, when a new theme appears, when the review queue grows, or when a pipeline
+fails. It can also send a weekly digest. Each alert carries counts, the baseline and a few
+redacted quotes, and each has a cooldown, snooze and acknowledge.
+
+**Signed webhooks and 100+ notification services.** The webhook sink sends CloudEvents signed
+with [Standard Webhooks](https://www.standardwebhooks.com/), retries failed deliveries and logs
+them. So n8n, Zapier or your own service can trust what arrives. The new `notify` sink reaches
+Telegram, Discord, email and about 100 other services through [Apprise](https://github.com/caronc/apprise).
+
+**Agents can read, and propose, but not act alone.** The MCP server marks customer text as
+untrusted, so an agent quotes it instead of following instructions hidden inside a review. Agents
+can now propose a Jira, Linear or GitHub issue. Nothing is created until a person runs
+`obsei approvals approve`, and the audit log records who approved it.
+
+**One-line installs for your AI tools.** obsei ships as a plugin for Claude Code, Codex, Cursor,
+the Copilot CLI and Gemini CLI. It is also listed in the [MCP Registry](https://registry.modelcontextprotocol.io)
+for VS Code and other clients:
+
+```bash
+/plugin install obsei --marketplace obsei/obsei      # in Claude Code
+gemini extensions install https://github.com/obsei/obsei
+```
+
+The [AI tools guide](https://docs.obsei.com/guides/ai-tools/) covers the rest, including Cline,
+Zed, JetBrains and Goose.
+
+## What isn't perfect yet
+
+- **The model makes predictable mistakes.** On the demo set its most common errors are praise read
+  as a bug report and negative messages read as neutral. Run `obsei eval` on a sample of your own
+  feedback before trusting it for routing.
+- **Most connectors are beta.** Seven sources and sinks are marked verified, which means they have
+  a live test against the real service. The rest are tested against recorded responses only.
+  The [sources](https://docs.obsei.com/guides/sources/) and
+  [sinks](https://docs.obsei.com/guides/sinks/) pages show which is which.
+- **Apple's public review feed is unreliable.** It has returned empty pages for many apps since
+  mid-2026. obsei tries several URL forms, and App Store Connect is the reliable route for your own
+  apps.
+- **There is no hosted version.** That is deliberate, but it means you run it yourself.
+
+## Coming from 0.0.x?
+
+1.0 is a rewrite, and old configurations won't load. The
+[migration guide](https://docs.obsei.com/guides/migrate-from-0-0/) maps the old observers,
+analyzers and informers to the new sources, enrichers and sinks. The 0.0.x code stays on the
+[`legacy/0.0.x`](https://github.com/obsei/obsei/tree/legacy/0.0.x) branch.
+
+## What's next
+
+The [roadmap](https://github.com/obsei/obsei/blob/master/ROADMAP.md) for 1.x starts with model
+quality on the mistakes above, then adapters that put obsei inside tools people already use: a dlt
+source and a LangChain document loader. I would rather build what you ask for than guess, so tell
+me what's missing.
+
+- Star or watch the [repository](https://github.com/obsei/obsei)
+- [Open an issue](https://github.com/obsei/obsei/issues/new/choose) or
+  [start a discussion](https://github.com/obsei/obsei/discussions)
+- Try the [live demo](https://docs.obsei.com/demo/) without installing anything
+
+*Lalit Pagaria · [LinkedIn](https://www.linkedin.com/in/lalitpagaria/) · [GitHub](https://github.com/lalitpagaria)*
