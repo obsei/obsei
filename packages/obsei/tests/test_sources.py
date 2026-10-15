@@ -292,6 +292,77 @@ def test_github_issues_skip_the_issue_at_the_cursor() -> None:
     assert drain(source.fetch({"since": "2026-09-03T00:00:00Z"}))[0] == []
 
 
+ISSUE_FORM = """### Check for existing issues
+
+- [X] Completed
+
+### Describe the bug / provide steps to reproduce it
+
+Vim mode: pressing `o` on the last line of a JSON object does not add a comma.
+
+### Zed version and system specs
+
+Zed: v1.24.2
+
+### Attach Zed log file
+
+<details><summary>Zed.log</summary>
+
+<!-- Paste your log inside the code block. -->
+```log
+2026-10-01 ERROR something
+```
+
+</details>
+
+### If applicable, add mockups / screenshots to help present your vision of the feature
+
+_No response_
+"""
+
+MARKDOWN_TEMPLATE = """<!-- Thanks for reporting! Please search existing issues first. -->
+## Summary
+
+Login fails after the update.
+
+<img width="929" alt="Image" src="https://github.com/user-attachments/assets/1" />
+
+## Logs
+
+```
+```
+
+- [ ] I have read the docs
+- [x] I searched existing issues
+"""
+
+
+def test_github_issues_drop_template_boilerplate() -> None:
+    issue = {
+        "number": 4,
+        "title": "Comma on new line in JSON",
+        "body": ISSUE_FORM.replace("\n", "\r\n"),
+        "state": "open",
+        "created_at": "2026-09-01T00:00:00Z",
+        "updated_at": "2026-09-02T00:00:00Z",
+        "comments": 1,
+        "comments_url": "https://api.github.com/repos/o/r/issues/4/comments",
+    }
+    comment = {"id": 9, "body": MARKDOWN_TEMPLATE, "created_at": "2026-09-02T00:00:00Z"}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=[comment] if "comments" in request.url.path else [issue])
+
+    config = {"repo": "o/r", "include_comments": True}
+    records, _ = drain(build("github_issues", config, ctx(handler)).fetch(None))
+    assert [r.text for r in records] == [
+        "Comma on new line in JSON\n\n"
+        "Vim mode: pressing `o` on the last line of a JSON object does not add a comma.\n\n"
+        "Zed: v1.24.2",
+        "Login fails after the update.",
+    ]
+
+
 RSS = b"""<?xml version="1.0"?>
 <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel>
 <item><guid>a</guid><title>Bonjour</title>

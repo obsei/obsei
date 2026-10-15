@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 from collections.abc import Iterator
 from typing import ClassVar
 
@@ -40,6 +41,19 @@ class GitHubIssuesConfig(BaseModel):
 
 class GitHubError(RuntimeError):
     pass
+
+
+_BLOCKS = re.compile(r"<!--.*?-->|<details\b.*?</details>|<img\b[^>]*>", re.S | re.I)
+_EMPTY_FENCE = re.compile(r"^```[^\n`]*\n\s*```$", re.M)
+_TEMPLATE_LINES = re.compile(r"^(?:#{1,6} .*|\s*[-*] \[[ xX]\] .*|_No response_)[ \t]*$", re.M)
+
+
+def clean_body(text: str) -> str:
+    """Issue-template structure removed (comments, collapsed attachments, headings, checklists,
+    unanswered form fields), so the text is what the person wrote."""
+    text = _BLOCKS.sub("", text.replace("\r\n", "\n"))
+    text = _TEMPLATE_LINES.sub("", _EMPTY_FENCE.sub("", text))
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
 
 
 class GitHubIssuesSource:
@@ -122,7 +136,7 @@ class GitHubIssuesSource:
             if label_text := ", ".join(n for n in names if n):
                 context["labels"] = label_text
             title = as_text(lookup(issue, "title")) or ""
-            body = as_text(lookup(issue, "body")) or ""
+            body = clean_body(as_text(lookup(issue, "body")) or "")
             state: Cursor = {"since": newest}
             record = self._record(issue, number, f"{title}\n\n{body}", context)
             if record is not None:
@@ -134,7 +148,7 @@ class GitHubIssuesSource:
                     note = self._record(
                         comment,
                         f"{number}#comment-{comment_id}",
-                        as_text(lookup(comment, "body")) or "",
+                        clean_body(as_text(lookup(comment, "body")) or ""),
                         {"kind": "comment", "issue": number},
                     )
                     if note is not None and (not isinstance(since, str) or stamp(note) > since):
