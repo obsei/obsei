@@ -89,10 +89,11 @@ that the PyPI README of that version contains `mcp-name: io.github.obsei/obsei`.
 The plugin lives in `integrations/claude/obsei` and every manifest points at it (see
 [AI tools](https://docs.obsei.com/guides/ai-tools/)). Submissions, once per directory:
 
-- [ ] Cursor Marketplace: submit the repository at https://cursor.com/marketplace/publish.
+- [ ] Cursor: submit the repository at https://cursor.directory/plugins/new (community directory,
+  auto-reviewed) and https://cursor.com/marketplace/publish (official marketplace, manual review).
 - [ ] Cline MCP Marketplace: open an issue in
   [cline/mcp-marketplace](https://github.com/cline/mcp-marketplace) with the repository URL and a
-  400x400 PNG logo (render `docs/public/brand/obsei-mark.svg`); Cline follows `llms-install.md`.
+  400x400 PNG logo (`docs/public/brand/obsei-mark-400.png`); Cline follows `llms-install.md`.
 - [ ] OpenAI plugin directory: submit a "Skills only" ZIP of `skills/voice-of-customer` (local
   stdio plugins are limited to allowlisted partners), with the
   [privacy policy](https://docs.obsei.com/privacy/policy/), an icon, test cases and a demo video.
