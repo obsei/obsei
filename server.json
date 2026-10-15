@@ -9,12 +9,12 @@
     "subfolder": "packages/obsei"
   },
   "websiteUrl": "https://obsei.com",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "obsei",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
