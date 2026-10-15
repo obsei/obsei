@@ -1,0 +1,20 @@
+# obsei
+
+> obsei is the self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it.
+
+obsei collects customer feedback from reviews, tickets, survey exports and communities, redacts personal data and pseudonymizes authors at ingest, labels it with a local multilingual model by default, groups it into themes across languages, routes it to sinks such as Slack, Jira, Linear or a signed webhook, and serves it to AI agents through an MCP server whose only write, a proposed issue, waits for human approval. It is a Python package (`pip install obsei`, or `uv tool install "obsei[recommended]"`) configured with `obsei.yaml` and run with the `obsei` CLI. Apache-2.0, free, no hosted version.
+
+## Docs
+
+- [Docs index for LLMs](https://docs.obsei.com/llms.txt)
+- [Full docs for LLMs](https://docs.obsei.com/llms-full.txt): every docs page in one file
+- [Quickstart](https://docs.obsei.com/quickstart/): install, sample data, first run, Docker
+- [What's new in 1.0](https://docs.obsei.com/whats-new/)
+- [AI tools](https://docs.obsei.com/guides/ai-tools/): Claude Code, Codex, Cursor, Copilot, Gemini CLI and other MCP clients
+- [Privacy controls](https://docs.obsei.com/privacy/overview/)
+
+## Links
+
+- [Source code](https://github.com/obsei/obsei)
+- [PyPI](https://pypi.org/project/obsei/)
+- [Blog](https://blog.obsei.com/)
