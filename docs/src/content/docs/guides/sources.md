@@ -11,28 +11,28 @@ records; `obsei integrations` lists each one's secrets and where to get them
 
 | Type | What | Auth | Status |
 | --- | --- | --- | --- |
-| `csv` | Survey exports, ticket dumps, NPS verbatims | none | verified |
-| `jsonl` | Ticket dumps and other JSON Lines exports | none | beta |
-| `rest` | Any JSON API, with page, offset, link, next-URL or cursor pagination | bearer or headers from env | beta |
-| `webhook` | Pushed feedback via `obsei serve` (`POST /ingest/{pipeline}/{key}`) | Standard Webhooks signature | beta |
-| `appstore` | Apple public review feed, any list of countries | none | verified |
-| `appstoreconnect` | Your apps' reviews in every territory (official API) | `.p8` key, `obsei[apple]` | beta |
-| `playstore` | Your apps' reviews (official Android Publisher API) | service account, `obsei[google]` | beta |
-| `github_issues` | Issues and comments, GitHub or GitHub Enterprise | `GITHUB_TOKEN` (optional) | verified |
-| `hackernews` | Stories and comments matching a query | none | verified |
-| `bluesky` | Posts matching a query, optionally by language | none or app password | beta |
-| `youtube` | Comments on videos or a whole channel | `YOUTUBE_API_KEY` | beta |
-| `rss` | RSS 2.0 and Atom: forums, status pages, review sites | none | verified |
-| `reddit` ([plugin](#reddit-plugin), from Git) | Subreddit posts, comments and searches via RSS | none | beta |
-| `typeform` ([plugin](/reference/plugins/), from Git) | Completed survey responses, incremental | personal access token | beta |
-| `sql` | Any SQLAlchemy database or warehouse, incremental by a cursor column | URL in env, `obsei[sql]` | beta |
-| `filedrop` | New or changed CSV, JSON Lines and JSON files in a folder (SFTP drop, mounted bucket) | none | beta |
-| `imap` | Feedback mailboxes | username and password in env | beta |
-| `mcp` | A tool on any MCP server (stdio command or HTTP URL) | none | beta |
-| `zendesk` | Tickets, incremental export | email and API token | beta |
-| `freshdesk` | Tickets updated since the last run | API key | beta |
-| `intercom` | Conversations, in the US, EU or AU data region | access token | beta |
-| `gong` | Call transcripts, customer speech only | access key and secret | beta |
+| <span class="i i-file-spreadsheet"></span> `csv` | Survey exports, ticket dumps, NPS verbatims | none | verified |
+| <span class="i i-file-json"></span> `jsonl` | Ticket dumps and other JSON Lines exports | none | beta |
+| <span class="i i-globe"></span> `rest` | Any JSON API, with page, offset, link, next-URL or cursor pagination | bearer or headers from env | beta |
+| <span class="i i-webhook"></span> `webhook` | Pushed feedback via `obsei serve` (`POST /ingest/{pipeline}/{key}`) | Standard Webhooks signature | beta |
+| <span class="i i-smartphone"></span> `appstore` | Apple public review feed, any list of countries | none | verified |
+| <span class="i i-smartphone"></span> `appstoreconnect` | Your apps' reviews in every territory (official API) | `.p8` key, `obsei[apple]` | beta |
+| <span class="i i-play"></span> `playstore` | Your apps' reviews (official Android Publisher API) | service account, `obsei[google]` | beta |
+| <span class="i i-github"></span> `github_issues` | Issues and comments, GitHub or GitHub Enterprise | `GITHUB_TOKEN` (optional) | verified |
+| <span class="i i-ycombinator"></span> `hackernews` | Stories and comments matching a query | none | verified |
+| <span class="i i-bluesky"></span> `bluesky` | Posts matching a query, optionally by language | none or app password | beta |
+| <span class="i i-video"></span> `youtube` | Comments on videos or a whole channel | `YOUTUBE_API_KEY` | beta |
+| <span class="i i-rss"></span> `rss` | RSS 2.0 and Atom: forums, status pages, review sites | none | verified |
+| <span class="i i-reddit"></span> `reddit` ([plugin](#reddit-plugin), from Git) | Subreddit posts, comments and searches via RSS | none | beta |
+| <span class="i i-clipboard-list"></span> `typeform` ([plugin](/reference/plugins/), from Git) | Completed survey responses, incremental | personal access token | beta |
+| <span class="i i-database"></span> `sql` | Any SQLAlchemy database or warehouse, incremental by a cursor column | URL in env, `obsei[sql]` | beta |
+| <span class="i i-folder-input"></span> `filedrop` | New or changed CSV, JSON Lines and JSON files in a folder (SFTP drop, mounted bucket) | none | beta |
+| <span class="i i-mail"></span> `imap` | Feedback mailboxes | username and password in env | beta |
+| <span class="i i-modelcontextprotocol"></span> `mcp` | A tool on any MCP server (stdio command or HTTP URL) | none | beta |
+| <span class="i i-zendesk"></span> `zendesk` | Tickets, incremental export | email and API token | beta |
+| <span class="i i-headset"></span> `freshdesk` | Tickets updated since the last run | API key | beta |
+| <span class="i i-intercom"></span> `intercom` | Conversations, in the US, EU or AU data region | access token | beta |
+| <span class="i i-phone-call"></span> `gong` | Call transcripts, customer speech only | access key and secret | beta |
 
 `verified` means a live test in
 [`packages/obsei/tests/live`](https://github.com/obsei/obsei/tree/master/packages/obsei/tests/live)
