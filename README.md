@@ -50,19 +50,21 @@ Brazil's LGPD and California's CCPA. It makes no compliance claims; you remain t
 ## Quickstart
 
 ```bash
-uv tool install "obsei[mcp]>=1.0.0rc1"   # or: pip install "obsei[mcp]>=1.0.0rc1"
 mkdir voc && cd voc
-obsei init                             # obsei.yaml plus a 10-language sample dataset
-export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
-obsei try                              # preview redacted records; nothing stored or sent
-obsei run                              # fetch, redact, enrich, deliver, store
+uvx --from "obsei[local]>=1.0.0rc1" obsei init   # obsei.yaml, secrets, sample data, local model
+obsei try                              # table of redacted, labelled feedback; nothing stored
+obsei try https://apps.apple.com/us/app/whatsapp-messenger/id310633997   # or GitHub, HN, a feed, a CSV
+obsei run                              # fetch, redact, label, deliver, store
 obsei serve                            # scheduled pipelines, webhooks, MCP and Studio
-obsei doctor                           # environment, encryption, egress mode, plugins
+obsei doctor                           # environment, secrets, encryption, egress mode, plugins
 ```
 
-Uncomment the `classify` enricher in `obsei.yaml` to label sentiment, intent and language with the
-local classifier: install `obsei[local]` and run `obsei models download` once; it runs on the CPU
-with no model server. A [decision model](https://docs.obsei.com/guides/models/#decision-models) on
+To keep the `obsei` command, install it once: `uv tool install "obsei[local]>=1.0.0rc1"` (or
+`pip install`). `obsei init` writes a random database key and pseudonym salt to
+`.obsei/secrets.env` (owner-only, git-ignored), and every command loads it; on servers and in CI,
+set `OBSEI_DB_KEY` and `OBSEI_PSEUDONYM_SALT` instead, or mount the file. With `obsei[local]`, the
+`classify` enricher labels sentiment, intent and language on the CPU with no model server. A
+[decision model](https://docs.obsei.com/guides/models/#decision-models) on
 llama.cpp or any OpenAI-compatible endpoint also works: Ollama, vLLM, Azure OpenAI, OpenAI, Mistral,
 or a LiteLLM proxy for Bedrock and Vertex ([benchmark](https://docs.obsei.com/guides/models/#benchmark)).
 Public endpoints are refused until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`)
@@ -91,7 +93,7 @@ Docker (run in the project directory; images are tagged by release):
 <!-- x-release-please-start-version -->
 ```bash
 docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
-  -e OBSEI_DB_KEY -e OBSEI_PSEUDONYM_SALT ghcr.io/obsei/obsei:1.0.0-rc.4 run
+  ghcr.io/obsei/obsei:1.0.0-rc.4 run   # reads .obsei/secrets.env, or pass -e OBSEI_DB_KEY ...
 ```
 <!-- x-release-please-end -->
 

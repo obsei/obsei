@@ -124,6 +124,8 @@ def static_site(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
         store.upsert(demo_records())
         update_themes(store, HashingEmbedder(), ThemesConfig(k_anonymity=5))
         studio.export(store, root / "export", k=5)
+    with Store(allow_unencrypted=True) as empty:
+        studio.export(empty, root / "empty", k=5)
     server = ThreadingHTTPServer(("127.0.0.1", 0), partial(QuietHandler, directory=str(root)))
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -302,6 +304,21 @@ def test_static_export_of_real_data_is_not_labelled_demo(
     assert_studio_renders(w.page, "Snapshot")
     for selector in DEMO_ONLY:
         assert w.page.locator(selector).count() == 0
+    assert w.errors == []
+
+
+def test_empty_store_shows_the_next_commands(
+    static_site: str, open_page: Callable[..., Watched]
+) -> None:
+    w = open_page(viewport=NARROW)
+    w.page.goto(f"{static_site}/empty/")
+    panel = w.page.locator(".first-run")
+    expect(panel).to_be_visible()
+    assert panel.locator("code").all_text_contents() == ["obsei try", "obsei run", "obsei themes"]
+    demo = panel.get_by_role("link", name="See the demo")
+    assert demo.get_attribute("href") == "https://docs.obsei.com/demo/"
+    assert w.page.locator(".kpis, .themes, .graph").count() == 0
+    no_horizontal_overflow(w.page)
     assert w.errors == []
 
 

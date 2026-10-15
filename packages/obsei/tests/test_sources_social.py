@@ -49,6 +49,19 @@ def test_hackernews_stories_and_comments() -> None:
     assert result[1].context == {"kind": "comment", "story_id": "1"}
 
 
+def test_hackernews_one_story_and_its_comments() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.params["tags"] == "(story,comment),story_7"
+        assert request.url.params["query"] == ""
+        hit = {"objectID": "8", "comment_text": "Same here", "story_id": 7, "created_at_i": 1}
+        return httpx.Response(200, json={"hits": [hit], "nbPages": 1})
+
+    (record,) = records(build("hackernews", {"story_id": 7}, handler))
+    assert record.source.instance == "story_7"
+    with pytest.raises(ValueError, match="query, story_id"):
+        build("hackernews", {}, handler)
+
+
 def test_bluesky_hides_urls_by_default() -> None:
     post = {
         "uri": "at://did:plc:abc/app.bsky.feed.post/3k",

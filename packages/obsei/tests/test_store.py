@@ -195,9 +195,10 @@ def test_encrypted_store_hides_plaintext_and_needs_the_key(tmp_path: Path) -> No
         store.upsert([rec("1", sensitive_text)])
     assert sensitive_text.encode() not in path.read_bytes()
 
-    with pytest.raises(StoreError):
-        Store(path, encryption_key="wrong-key-wrong-key")
-    with pytest.raises(StoreError):
+    for read_only in (False, True):
+        with pytest.raises(StoreError, match=r"^wrong encryption key for .*OBSEI_DB_KEY"):
+            Store(path, encryption_key="wrong-key-wrong-key", read_only=read_only)
+    with pytest.raises(StoreError, match="cannot open store"):
         Store(path, allow_unencrypted=True)
     with Store(path, encryption_key=KEY, read_only=True) as store:
         stored = store.get(rec("1").id)

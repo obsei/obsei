@@ -8,6 +8,7 @@ import type { Bucket, Evidence, Snapshot, Theme } from "./types";
 const app = document.getElementById("app")!;
 const EVIDENCE_SHOWN = 6;
 const WEBSITE = "https://obsei.com";
+const DEMO = "https://docs.obsei.com/demo/";
 
 function bars(title: string, buckets: Bucket[], label: (key: string) => string = (k) => k): HTMLElement {
   const max = Math.max(1, ...buckets.map((b) => b.count));
@@ -170,6 +171,29 @@ function demoSummary(snapshot: Snapshot): string {
   );
 }
 
+function firstRun(): HTMLElement {
+  return el(
+    "section",
+    { class: "panel intro first-run", "aria-labelledby": "first-run-title" },
+    el("h2", { id: "first-run-title" }, "No feedback yet"),
+    el("p", {}, "Fetch, redact and label your feedback, then group it into themes:"),
+    el(
+      "ol",
+      { class: "hints" },
+      el("li", {}, el("span", {}, "Preview what will be stored, with PII redacted"), el("code", {}, "obsei try")),
+      el("li", {}, el("span", {}, "Fetch and store your sources"), el("code", {}, "obsei run")),
+      el("li", {}, el("span", {}, "Group feedback into stable themes"), el("code", {}, "obsei themes")),
+    ),
+    el(
+      "p",
+      { class: "muted hint" },
+      "Then reload this page. ",
+      el("a", { href: DEMO, rel: "noopener" }, "See the demo"),
+      " for what Studio shows.",
+    ),
+  );
+}
+
 function render(data: DataSource): void {
   const snapshot = data.snapshot;
   const { overview, themes, graph, privacy } = snapshot;
@@ -187,6 +211,16 @@ function render(data: DataSource): void {
       `Updated ${new Date(overview.generated_at).toLocaleString()} · groups under ${overview.k_anonymity} people hidden`,
     ),
   );
+  const footer = el(
+    "footer",
+    { class: "muted" },
+    `obsei ${overview.version} · text is redacted at ingest; authors are never shown · `,
+    el("a", { href: WEBSITE, rel: "noopener" }, "obsei.com"),
+  );
+  if (overview.total === 0) {
+    app.append(header, firstRun(), footer);
+    return;
+  }
   const kpis = el(
     "section",
     { class: "kpis" },
@@ -362,12 +396,7 @@ function render(data: DataSource): void {
         bars("Languages", overview.by_lang, languageName),
         bars("Intents", overview.by_intent),
       ),
-      el(
-        "footer",
-        { class: "muted" },
-        `obsei ${overview.version} · text is redacted at ingest; authors are never shown · `,
-        el("a", { href: WEBSITE, rel: "noopener" }, "obsei.com"),
-      ),
+      footer,
     ].filter((node): node is HTMLElement => node !== null),
   );
   const nodes = graph.nodes.map((n) => (n.kind === "lang" ? { ...n, label: languageName(n.label) } : n));

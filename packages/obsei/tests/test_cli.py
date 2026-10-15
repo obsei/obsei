@@ -1,11 +1,15 @@
 import json
+import os
 import subprocess
 import sys
+from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from importlib import metadata
 from pathlib import Path
+from unittest import mock
 
 import duckdb
+import httpx
 import pytest
 from packaging.version import Version
 from typer.testing import CliRunner
@@ -13,11 +17,22 @@ from typer.testing import CliRunner
 from obsei import Author, Record, SourceRef, __version__, cli
 from obsei._version import RELEASE_VERSION, pep440
 from obsei.cli import app
-from obsei.core.context import USER_AGENT
+from obsei.config import ObseiConfig, load_config
+from obsei.core.context import USER_AGENT, Context
+from obsei.preview import SOURCES_DOCS
 from obsei.privacy import pseudonymize
 from obsei.store import Store
 
 runner = CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def _environ(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Commands load .obsei/secrets.env into os.environ; undo it after each test. Tests run as
+    without obsei[local], whatever is installed."""
+    monkeypatch.setattr(cli, "find_spec", lambda name: None)
+    with mock.patch.dict(os.environ):
+        yield
 
 
 def test_version_command_and_flag() -> None:
@@ -103,10 +118,78 @@ def test_init_then_try(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert created.exit_code == 0
     assert (tmp_path / "obsei.yaml").exists()
     assert "skip" in runner.invoke(app, ["init", "--offline"]).output
-    preview = runner.invoke(app, ["try", "--limit", "2"])
+    preview = runner.invoke(app, ["try", "--limit", "2", "--json"])
     assert preview.exit_code == 0, preview.output
-    lines = [json.loads(line) for line in preview.output.splitlines()]
+    lines = [json.loads(line) for line in preview.stdout.splitlines()]
     assert [line["lang"] for line in lines] == ["en", "es"]
+
+    table = runner.invoke(app, ["try", "--limit", "20"], env={"COLUMNS": "200"})
+    assert table.exit_code == 0, table.output
+    out = table.stdout
+    for lang in ("en", "es", "de", "ja", "pt", "fr", "hi", "ar", "id", "zh"):
+        assert f" {lang} " in out
+    assert "<EMAIL>" in out
+    assert "redacted 4 value(s) in 4 record(s): CARD 1, EMAIL 1, IBAN 1, PHONE 1" in out
+    assert out.count("sam.rivera@example.com") == 1
+    assert "  before  Support never replied. Reach me at sam.rivera@example.com" in out
+    assert "  after   Support never replied. Reach me at <EMAIL>" in out
+    assert "nothing was stored or sent" in out
+
+
+def test_init_writes_secrets_once_and_commands_load_them(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("OBSEI_DB_KEY", raising=False)
+    monkeypatch.delenv("OBSEI_PSEUDONYM_SALT", raising=False)
+    (tmp_path / ".gitignore").write_text("*.duckdb", encoding="utf-8")
+    assert runner.invoke(app, ["init", str(tmp_path), "--offline"]).exit_code == 0
+    secrets_env = tmp_path / ".obsei" / "secrets.env"
+    values = dict(
+        line.split("=", 1)
+        for line in secrets_env.read_text(encoding="utf-8").splitlines()
+        if not line.startswith("#")
+    )
+    assert set(values) == {"OBSEI_DB_KEY", "OBSEI_PSEUDONYM_SALT"}
+    assert all(len(v) == 48 for v in values.values())
+    assert (tmp_path / ".gitignore").read_text(encoding="utf-8") == "*.duckdb\n.obsei/\n"
+    if os.name == "posix":
+        assert secrets_env.stat().st_mode & 0o777 == 0o600
+        assert secrets_env.parent.stat().st_mode & 0o777 == 0o700
+
+    again = runner.invoke(app, ["init", str(tmp_path), "--offline", "--force"])
+    assert "skip" in again.output
+    assert "secrets.env (exists)" in again.output
+    assert secrets_env.read_text(encoding="utf-8").count(values["OBSEI_DB_KEY"]) == 1
+    assert (tmp_path / ".gitignore").read_text(encoding="utf-8").count(".obsei/") == 1
+
+    monkeypatch.setenv("OBSEI_PSEUDONYM_SALT", "s" * 32)
+    doctor = runner.invoke(app, ["doctor", "-c", str(tmp_path / "obsei.yaml")])
+    assert "salt      configured (from the environment)" in doctor.output
+    assert f"db key    configured (from {secrets_env})" in doctor.output
+    assert os.environ["OBSEI_DB_KEY"] == values["OBSEI_DB_KEY"]
+    assert os.environ["OBSEI_PSEUDONYM_SALT"] == "s" * 32
+
+
+def test_init_enables_the_classifier_with_obsei_local(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cli, "find_spec", lambda name: object())
+    result = runner.invoke(app, ["init", str(tmp_path), "--offline"])
+    assert result.exit_code == 0
+    assert "hint" not in result.output
+    pipeline = load_config(tmp_path / "obsei.yaml").pipelines[0]
+    assert [e.type for e in pipeline.enrichers] == ["classify"]
+
+
+def test_short_salt_is_a_clear_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OBSEI_PSEUDONYM_SALT", "short")
+    config = offline_project(tmp_path)
+    for command in ("run", "try"):
+        result = runner.invoke(app, [command, "-c", str(config)])
+        assert result.exit_code == 2, command
+        assert result.output == (
+            "error: OBSEI_PSEUDONYM_SALT must be set to a secret of at least 16 bytes\n"
+        )
 
 
 def test_init_installs_the_encryption_extension_once(
@@ -259,6 +342,80 @@ def test_run_warns_when_the_classifier_model_is_unreachable(
     assert "retried on the next run" in result.output
     with Store(tmp_path / "obsei.duckdb", allow_unencrypted=True) as store:
         assert len(store.retry_records("reviews", "csv", 10)) == 1
+
+
+def test_try_warns_when_the_classifier_model_is_unreachable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("OBSEI_PSEUDONYM_SALT", SALT)
+    result = runner.invoke(app, ["try", "-c", str(offline_project(tmp_path))])
+    assert result.exit_code == 0, result.output
+    assert "App crashes" in result.stdout
+    assert "warning: reviews/csv: classify gave no answer for 1 record(s)" in result.stderr
+    assert "cannot reach the model at http://127.0.0.1:9/v1" in result.stderr
+    assert "pip install 'obsei[local]'" in result.stderr
+    quiet = runner.invoke(app, ["try", "--no-enrich", "-c", str(offline_project(tmp_path))])
+    assert quiet.exit_code == 0
+    assert quiet.stderr == ""
+
+
+def _apple(request: httpx.Request) -> httpx.Response:
+    if "page=1" not in request.url.path:
+        return httpx.Response(200, json={"feed": {}})
+    entry = {
+        "id": {"label": "r1"},
+        "author": {"name": {"label": "Kenji"}},
+        "im:rating": {"label": "1"},
+        "title": {"label": "Login broken"},
+        "content": {"label": "Call me on 090-1234-5678, I cannot log in."},
+        "updated": {"label": "2026-09-02T10:00:00-07:00"},
+    }
+    return httpx.Response(200, json={"feed": {"entry": [entry]}})
+
+
+def test_try_a_link_without_a_project(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    requested: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requested.append(str(request.url))
+        return _apple(request)
+
+    def context(cfg: ObseiConfig) -> Context:
+        return Context(http=httpx.Client(transport=httpx.MockTransport(handler)))
+
+    monkeypatch.setattr(cli, "build_context", context)
+    url = "https://apps.apple.com/jp/app/example/id284882215?l=en"
+    result = runner.invoke(app, ["try", url], env={"COLUMNS": "200"})
+    assert result.exit_code == 0, result.output
+    assert requested[0].startswith("https://itunes.apple.com/jp/rss/customerreviews/page=1/")
+    assert "id=284882215" in requested[0]
+    assert "Call me on <PHONE>, I cannot log in." in result.stdout
+    assert "redacted 1 value(s) in 1 record(s): PHONE 1" in result.stdout
+    assert "hint: to label feedback on this machine" in result.stdout
+    assert not list(tmp_path.iterdir())
+
+    jsonl = runner.invoke(app, ["try", url, "--json"])
+    (line,) = jsonl.stdout.splitlines()
+    assert json.loads(line)["source"]["type"] == "appstore"
+
+
+def test_try_a_file_and_links_that_need_setup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    data = tmp_path / "export.csv"
+    data.write_text("Review,lang\nMail me: sam.rivera@example.com\n", encoding="utf-8")
+    result = runner.invoke(app, ["try", str(data), "--json"])
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.stdout)["text"] == "Mail me: <EMAIL>"
+    play = runner.invoke(app, ["try", "https://play.google.com/store/apps/details?id=x.y"])
+    assert play.exit_code == 2
+    assert "configure the playstore source" in play.output
+    assert SOURCES_DOCS in play.output
+    missing = runner.invoke(app, ["try", "nope.csv"])
+    assert missing.exit_code == 2
+    assert "not a link or a file" in missing.output
 
 
 def test_ask_names_the_unreachable_endpoint(

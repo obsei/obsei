@@ -6,6 +6,7 @@ import os
 import platform
 import sys
 import time
+from collections import Counter
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -18,22 +19,30 @@ from typing import Annotated
 
 import duckdb
 import typer
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
 
 from obsei import __version__, studio
 from obsei.alerts import Fired, check_alerts
 from obsei.ask import ask as ask_feedback
 from obsei.config import (
     DEFAULT_PATH,
+    SECRETS_PATH,
     ConfigError,
     ObseiConfig,
+    PipelineConfig,
+    PluginSpec,
     StoreConfig,
     build_context,
     build_pipeline,
     builtin_registry,
     load_config,
+    load_secrets,
+    write_secrets,
 )
 from obsei.core.context import Context, LlmEndpoint
-from obsei.core.protocols import Drops
+from obsei.core.protocols import Drops, ReportsErrors
 from obsei.core.record import Record
 from obsei.core.registry import PluginError
 from obsei.demo import (
@@ -49,8 +58,10 @@ from obsei.llm import EgressPolicy
 from obsei.llm.client import LlmError, LlmUnreachableError
 from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, LocalEmbedder
 from obsei.llm.local import LOCAL_CLASSIFIER, fetch
-from obsei.privacy.pseudonym import PseudonymSaltError, load_salt, pseudonymize
-from obsei.runner import run_pipelines
+from obsei.pipeline import Pipeline
+from obsei.preview import PreviewError, Redaction, labels, redactions, resolve
+from obsei.privacy.pseudonym import SALT_ENV_VAR, PseudonymSaltError, load_salt, pseudonymize
+from obsei.runner import RUN_ERRORS, run_pipelines
 from obsei.store import (
     DB_KEY_ENV_VAR,
     EXTENSIONS_ENV_VAR,
@@ -91,6 +102,11 @@ def main(
     pass
 
 
+ConfigOption = Annotated[
+    Path, typer.Option("--config", "-c", envvar="OBSEI_CONFIG", help="Path to obsei.yaml.")
+]
+
+
 @app.command()
 def version() -> None:
     """Show the obsei version."""
@@ -98,18 +114,27 @@ def version() -> None:
 
 
 @app.command()
-def doctor() -> None:
+def doctor(config: ConfigOption = DEFAULT_PATH) -> None:
     """Check the local environment and list discovered plugins."""
+    loaded = load_secrets(config)
+
+    def origin(name: str) -> str:
+        return f"from {config.parent / SECRETS_PATH}" if name in loaded else "from the environment"
+
     typer.echo(f"obsei     {__version__}")
     typer.echo(f"python    {platform.python_version()} ({sys.platform})")
     try:
         load_salt()
-        salt_status = "configured"
+        salt_status = f"configured ({origin(SALT_ENV_VAR)})"
     except PseudonymSaltError:
         salt_status = "not set (OBSEI_PSEUDONYM_SALT is required before ingesting authors)"
     typer.echo(f"salt      {salt_status}")
     try:
-        key_status = "configured" if load_db_key() else f"not set ({DB_KEY_ENV_VAR})"
+        key_status = (
+            f"configured ({origin(DB_KEY_ENV_VAR)})"
+            if load_db_key()
+            else f"not set ({DB_KEY_ENV_VAR})"
+        )
     except StoreError as exc:
         key_status = f"invalid ({exc})"
     typer.echo(f"db key    {key_status}")
@@ -148,9 +173,6 @@ DbOption = Annotated[
     Path | None,
     typer.Option("--db", envvar="OBSEI_DB", help="DuckDB file (default: store.path in config)."),
 ]
-ConfigOption = Annotated[
-    Path, typer.Option("--config", "-c", envvar="OBSEI_CONFIG", help="Path to obsei.yaml.")
-]
 API_TOKEN_ENV_VAR = "OBSEI_API_TOKEN"  # noqa: S105
 
 UnencryptedOption = Annotated[
@@ -165,9 +187,17 @@ def _fail(message: object) -> typer.Exit:
 
 
 def _load(config: Path) -> ObseiConfig:
+    load_secrets(config)
     try:
         return load_config(config)
     except ConfigError as exc:
+        raise _fail(exc) from None
+
+
+def _context(cfg: ObseiConfig) -> Context:
+    try:
+        return build_context(cfg)
+    except PseudonymSaltError as exc:
         raise _fail(exc) from None
 
 
@@ -214,6 +244,7 @@ def _store_settings(config: Path, db: Path | None, unencrypted: bool = False) ->
             cfg.egress or EgressPolicy.from_env(),
             cfg.themes.k_anonymity,
         )
+    load_secrets(config)
     return StoreSettings(
         db or StoreConfig().path, unencrypted, EgressPolicy.from_env(), ThemesConfig().k_anonymity
     )
@@ -304,8 +335,9 @@ def export(
     unencrypted: UnencryptedOption = False,
 ) -> None:
     """Export one author's records as JSON Lines (access requests)."""
+    settings = _store_settings(config, db, unencrypted)
     pseudonym = _author_pseudonym(author)
-    with _open_existing(_store_settings(config, db, unencrypted)) as store:
+    with _open_existing(settings) as store:
         lines = [r.model_dump_json() for r in store.iter_records(author_pseudonym=pseudonym)]
         store.audit("export", {"author_pseudonym": pseudonym, "records": len(lines)})
     if out is None:
@@ -321,29 +353,72 @@ PipelineOption = Annotated[
 ]
 
 
+CLASSIFY_OFF = "    # enrichers:\n    #   - type: classify\n    #     config:"
+CLASSIFY_ON = "    enrichers:\n      - type: classify\n        config:"
+LOCAL_HINT = (
+    "to label feedback on this machine: pip install 'obsei[local]', run 'obsei models download' "
+    "and uncomment the classify enricher in obsei.yaml"
+)
+MODEL_HINT = (
+    "hint: for the local classifier, pip install 'obsei[local]' and run 'obsei models download'; "
+    "for a model server, start it or point llms in obsei.yaml at a reachable endpoint"
+)
+
+
 @app.command()
 def init(
     directory: Annotated[Path, typer.Argument(help="Where to create the project.")] = Path(),
-    force: Annotated[bool, typer.Option(help="Overwrite existing files.")] = False,
+    force: Annotated[bool, typer.Option(help="Overwrite obsei.yaml and feedback.csv.")] = False,
     offline: Annotated[
-        bool, typer.Option(help="Skip downloading DuckDB's httpfs extension (for encryption).")
+        bool,
+        typer.Option(help="Skip downloading DuckDB's httpfs extension and the classifier model."),
     ] = False,
 ) -> None:
-    """Create obsei.yaml and a sample dataset, and install DuckDB's encryption extension."""
+    """Create obsei.yaml, a sample dataset and local secrets; install DuckDB's encryption
+    extension and, with obsei[local], the classifier model.
+
+    Secrets go to .obsei/secrets.env (owner-only, git-ignored) and are never overwritten."""
     templates = resources.files("obsei") / "templates"
+    local = find_spec("gliner2") is not None
     directory.mkdir(parents=True, exist_ok=True)
     for name in ("obsei.yaml", "feedback.csv"):
         target = directory / name
         if target.exists() and not force:
             typer.echo(f"skip   {target} (exists)")
             continue
-        target.write_text((templates / name).read_text(encoding="utf-8"), encoding="utf-8")
+        text = (templates / name).read_text(encoding="utf-8")
+        target.write_text(text.replace(CLASSIFY_OFF, CLASSIFY_ON) if local else text, "utf-8")
         typer.echo(f"create {target}")
+    created = write_secrets(directory)
+    if created is None:
+        typer.echo(f"skip   {directory / SECRETS_PATH} (exists)")
+    else:
+        typer.echo(f"create {created} (database key and pseudonym salt: back it up)")
+    _ignore_secrets(directory / ".gitignore")
     if not offline:
         _install_encryption()
-    typer.echo(
-        "next: export OBSEI_DB_KEY=... OBSEI_PSEUDONYM_SALT=... then 'obsei try' and 'obsei run'"
-    )
+        if local:
+            _download_classifier()
+    if not local:
+        typer.echo(f"hint   {LOCAL_HINT}")
+    typer.echo("next   obsei try  (redacted, labelled preview; nothing stored), then obsei run")
+
+
+def _ignore_secrets(gitignore: Path) -> None:
+    text = gitignore.read_text(encoding="utf-8") if gitignore.exists() else ""
+    if {".obsei", ".obsei/"} & {line.strip() for line in text.splitlines()}:
+        return
+    separator = "\n" if text and not text.endswith("\n") else ""
+    gitignore.write_text(f"{text}{separator}.obsei/\n", encoding="utf-8")
+    typer.echo(f"ignore .obsei/ in {gitignore}")
+
+
+def _download_classifier() -> None:
+    typer.echo(f"download {LOCAL_CLASSIFIER} (once, about 2.2 GB; it runs on this machine)")
+    try:
+        fetch(LOCAL_CLASSIFIER, offline=False)
+    except LlmError as exc:
+        typer.echo(f"warn   {exc}; run 'obsei models download' later", err=True)
 
 
 def _install_encryption() -> None:
@@ -387,7 +462,7 @@ def _run_once(config: Path, pipeline: list[str] | None, db: Path | None) -> bool
     cfg = _load(config)
     names = pipeline or [p.name for p in cfg.pipelines]
     with (
-        build_context(cfg) as ctx,
+        _context(cfg) as ctx,
         _open_store(db or cfg.store.path, cfg.store.unencrypted, egress=ctx.egress) as store,
     ):
         outcomes = run_pipelines(cfg, ctx, store, names)
@@ -400,55 +475,159 @@ def _run_once(config: Path, pipeline: list[str] | None, db: Path | None) -> bool
     return not all(o.ok for o in outcomes) or not alerted
 
 
+TARGET_HELP = (
+    "An App Store, GitHub repo, Hacker News or RSS/Atom link, or a .csv, .jsonl or .json file "
+    "(default: the sources in obsei.yaml)."
+)
+PREVIEW_FIELDS = {"source", "text", "created_at", "rating", "lang", "context", "enrichments"}
+PREVIEW_CHARS = 160
+
+
+def _without_enrichers(cfg: ObseiConfig) -> ObseiConfig:
+    pipelines = [p.model_copy(update={"enrichers": []}) for p in cfg.pipelines]
+    return cfg.model_copy(update={"pipelines": pipelines})
+
+
+def _preview_config(config: Path, target: str, pipeline: list[str] | None) -> ObseiConfig:
+    """One pipeline reading ``target``, with redaction on and the configured enrichers (else the
+    local classifier when obsei[local] is installed)."""
+    try:
+        entry = resolve(target)
+    except PreviewError as exc:
+        raise _fail(exc) from None
+    if config.exists() or config != DEFAULT_PATH:
+        cfg = _load(config)
+        try:
+            source = cfg.pipeline(pipeline[0]) if pipeline else cfg.pipelines[0]
+        except ConfigError as exc:
+            raise _fail(exc) from None
+        privacy = cfg.privacy.model_copy(update={"redact": True})
+        preview = PipelineConfig(name="try", sources=[entry], enrichers=source.enrichers)
+        return cfg.model_copy(update={"privacy": privacy, "pipelines": [preview]})
+    load_secrets(config)
+    local = find_spec("gliner2") is not None
+    classify = PluginSpec(type="classify", config={"llm": "default", "threshold": 0.4})
+    return ObseiConfig(
+        llms={"default": LlmEndpoint(api="local")} if local else {},
+        pipelines=[
+            PipelineConfig(name="try", sources=[entry], enrichers=[classify] if local else [])
+        ],
+    )
+
+
+def _preview_pipeline(cfg: ObseiConfig, name: str, ctx: Context) -> Pipeline:
+    """Without a usable model the preview still shows redaction, with a warning."""
+    try:
+        return build_pipeline(cfg, name, ctx, with_sinks=False)
+    except LlmError as exc:
+        typer.echo(f"warning: no labels: {exc}\n{MODEL_HINT}", err=True)
+        return _preview_pipeline(_without_enrichers(cfg), name, ctx)
+    except (ConfigError, PluginError, OSError, RuntimeError, ValueError) as exc:
+        raise _fail(exc) from None
+
+
+def _enrich_preview(built: Pipeline, where: str, records: list[Record]) -> list[Record]:
+    for enricher in built.enrichers:
+        results = enricher.enrich(records)
+        records = [
+            r if e is None else r.with_enrichment(enricher.name, e)
+            for r, e in zip(records, results, strict=True)
+        ]
+        missing = sum(e is None for e in results)
+        if missing:
+            reason = enricher.last_error if isinstance(enricher, ReportsErrors) else None
+            typer.echo(
+                f"warning: {where}: {enricher.name} gave no answer for {missing} record(s)"
+                f"{f': {reason}' if reason else ''}\n{MODEL_HINT}",
+                err=True,
+            )
+        if isinstance(enricher, Drops):
+            kept = [r for r in records if enricher.keep(r)]
+            if len(kept) < len(records):
+                typer.echo(
+                    f"{where}: {enricher.name} dropped {len(records) - len(kept)} record(s)",
+                    err=True,
+                )
+            records = kept
+    return records
+
+
+def _line(text: str, width: int = PREVIEW_CHARS) -> str:
+    flat = " ".join(text.split())
+    return flat if len(flat) <= width else f"{flat[: width - 1]}…"
+
+
+def _print_preview(rows: list[tuple[str, Record]], found: list[Redaction], hint: bool) -> None:
+    console = Console(highlight=False)
+    if not rows:
+        console.print("no records")
+        return
+    table = Table("source", "lang", "labels", "text", show_lines=True)
+    for key, record in rows:
+        table.add_row(
+            Text(key),
+            Text(record.lang or "-"),
+            Text(labels(record) or "-"),
+            Text(_line(record.text)),
+        )
+    console.print(table)
+    if found:
+        counts = sum((r.counts for r in found), Counter[str]())
+        summary = ", ".join(f"{label} {n}" for label, n in sorted(counts.items()))
+        console.print(
+            Text(f"redacted {counts.total()} value(s) in {len(found)} record(s): {summary}")
+        )
+        for redaction in found[:3]:
+            console.print(Text(f"  before  {_line(redaction.before, 100)}"))
+            console.print(Text(f"  after   {_line(redaction.after, 100)}"))
+    console.print("nothing was stored or sent; the original text exists only in this preview")
+    if hint:
+        console.print(Text(f"hint: {LOCAL_HINT}"))
+
+
 @app.command("try")
 def try_(
+    target: Annotated[str | None, typer.Argument(help=TARGET_HELP, show_default=False)] = None,
     config: ConfigOption = DEFAULT_PATH,
     pipeline: PipelineOption = None,
-    limit: Annotated[int, typer.Option(min=1, help="Records per source.")] = 3,
-    enrich: Annotated[bool, typer.Option(help="Also run enrichers.")] = False,
+    limit: Annotated[int, typer.Option(min=1, help="Records per source.")] = 10,
+    enrich: Annotated[bool, typer.Option(help="Run the configured enrichers (classify).")] = True,
+    as_json: Annotated[bool, typer.Option("--json", help="One JSON object per record.")] = False,
 ) -> None:
-    """Preview redacted records from each source. Nothing is stored or sent."""
-    cfg = _load(config)
-    names = pipeline or [p.name for p in cfg.pipelines]
-    with build_context(cfg) as ctx:
+    """Preview feedback with PII redacted and labels, from your sources or a link or file.
+
+    Nothing is stored or sent: records are fetched, redacted and labelled in memory."""
+    cfg = _preview_config(config, target, pipeline) if target else _load(config)
+    names = ["try"] if target else pipeline or [p.name for p in cfg.pipelines]
+    if not enrich:
+        cfg = _without_enrichers(cfg)
+    rows: list[tuple[str, Record]] = []
+    found: list[Redaction] = []
+    with _context(cfg) as ctx:
         for name in names:
-            try:
-                built = build_pipeline(cfg, name, ctx, with_sinks=False)
-            except (ConfigError, PluginError, OSError, RuntimeError) as exc:
-                raise _fail(exc) from None
+            built = _preview_pipeline(cfg, name, ctx)
             for spec in built.sources:
-                records = [r for r, _ in islice(spec.source.fetch(None), limit)]
+                try:
+                    raw = [r for r, _ in islice(spec.source.fetch(None), limit)]
+                except SyntaxError as exc:
+                    raise _fail(
+                        f"{target or spec.key} is not an RSS or Atom feed ({exc}); obsei try "
+                        "reads App Store, GitHub, Hacker News and feed links"
+                    ) from None
+                except RUN_ERRORS as exc:
+                    raise _fail(f"{name}/{spec.key}: {exc}") from None
+                records = raw
                 if built.redactor is not None:
-                    records = list(built.redactor.redact(records))
-                for enricher in built.enrichers if enrich else ():
-                    results = enricher.enrich(records)
-                    records = [
-                        r if e is None else r.with_enrichment(enricher.name, e)
-                        for r, e in zip(records, results, strict=True)
-                    ]
-                    if isinstance(enricher, Drops):
-                        kept = [r for r in records if enricher.keep(r)]
-                        if len(kept) < len(records):
-                            typer.echo(
-                                f"{name}/{spec.key}: {enricher.name} dropped "
-                                f"{len(records) - len(kept)} record(s)",
-                                err=True,
-                            )
-                        records = kept
-                for record in records:
-                    typer.echo(
-                        record.model_dump_json(
-                            include={
-                                "source",
-                                "text",
-                                "created_at",
-                                "rating",
-                                "lang",
-                                "context",
-                                "enrichments",
-                            }
-                        )
-                    )
+                    records = list(built.redactor.redact(raw))
+                    found += redactions(spec.key, raw, records)
+                records = _enrich_preview(built, f"{name}/{spec.key}", records)
+                if as_json:
+                    for record in records:
+                        typer.echo(record.model_dump_json(include=PREVIEW_FIELDS))
+                rows += [(spec.key, r) for r in records]
+    if not as_json:
+        labelled = any("classify" in r.enrichments for _, r in rows)
+        _print_preview(rows, found, hint=enrich and not labelled)
 
 
 @app.command()
@@ -487,7 +666,7 @@ def serve(
     if not has_access and host not in ("127.0.0.1", "::1", "localhost"):
         raise _fail(f"set {API_TOKEN_ENV_VAR} or configure access before binding to {host}")
     with (
-        build_context(cfg) as ctx,
+        _context(cfg) as ctx,
         _open_store(db or cfg.store.path, cfg.store.unencrypted, egress=ctx.egress) as store,
     ):
         try:
@@ -520,7 +699,7 @@ def themes(
     cfg, path = _themes_context(config, db)
     settings = cfg.themes
     with (
-        build_context(cfg) as ctx,
+        _context(cfg) as ctx,
         _open_store(path, cfg.store.unencrypted, egress=ctx.egress) as store,
     ):
         try:
@@ -563,7 +742,7 @@ def ask(
     """Answer a question from your feedback with your model, citing record ids."""
     cfg, path = _themes_context(config, db)
     with (
-        build_context(cfg) as ctx,
+        _context(cfg) as ctx,
         _open_store(path, cfg.store.unencrypted, read_only=True) as store,
     ):
         try:
