@@ -120,7 +120,8 @@ class PrivacyConfig(_Strict):
 
 
 class StoreConfig(_Strict):
-    path: Path = Path("obsei.duckdb")
+    # pydantic omits a WindowsPath default from the JSON schema; pin it so every OS agrees.
+    path: Path = Field(Path("obsei.duckdb"), json_schema_extra={"default": "obsei.duckdb"})
     unencrypted: bool = False
 
 
