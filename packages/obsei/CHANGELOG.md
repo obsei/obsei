@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.0](https://github.com/obsei/obsei/compare/v1.0.0-rc.5...v1.0.0) (2026-10-15)
+
+
+### Features
+
+* **config:** guided setup with obsei add, obsei check and an integration catalog ([#444](https://github.com/obsei/obsei/issues/444)) ([8e2dbf4](https://github.com/obsei/obsei/commit/8e2dbf49758bfe09fe6b628e0590029a89776265))
+
+
+### Bug Fixes
+
+* **appstore:** read Apple's XML review feed, since the JSON feed comes back empty ([#443](https://github.com/obsei/obsei/issues/443)) ([ee4c6e3](https://github.com/obsei/obsei/commit/ee4c6e35095d8c6a45d33caaa0716b13cd5abea2))
+* **appstore:** try other spellings of Apple's review feed, and skip the live check during outages ([#448](https://github.com/obsei/obsei/issues/448)) ([1f19195](https://github.com/obsei/obsei/commit/1f1919599835feb4232604126c8798e1107ecd3c))
+
 ## [1.0.0-rc.5](https://github.com/obsei/obsei/compare/v1.0.0-rc.4...v1.0.0-rc.5) (2026-10-15)
 
 
