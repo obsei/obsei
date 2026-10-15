@@ -360,17 +360,17 @@ def test_try_warns_when_the_classifier_model_is_unreachable(
 
 
 def _apple(request: httpx.Request) -> httpx.Response:
-    if "page=1" not in request.url.path:
-        return httpx.Response(200, json={"feed": {}})
-    entry = {
-        "id": {"label": "r1"},
-        "author": {"name": {"label": "Kenji"}},
-        "im:rating": {"label": "1"},
-        "title": {"label": "Login broken"},
-        "content": {"label": "Call me on 090-1234-5678, I cannot log in."},
-        "updated": {"label": "2026-09-02T10:00:00-07:00"},
-    }
-    return httpx.Response(200, json={"feed": {"entry": [entry]}})
+    entry = (
+        "<entry><id>r1</id><title>Login broken</title>"
+        '<content type="text">Call me on 090-1234-5678, I cannot log in.</content>'
+        "<im:rating>1</im:rating><updated>2026-09-02T10:00:00-07:00</updated>"
+        "<author><name>Kenji</name></author></entry>"
+    )
+    body = (
+        '<feed xmlns:im="http://itunes.apple.com/rss" xmlns="http://www.w3.org/2005/Atom">'
+        f"{entry if 'page=1' in request.url.path else ''}</feed>"
+    )
+    return httpx.Response(200, content=body.encode())
 
 
 def test_try_a_link_without_a_project(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

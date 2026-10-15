@@ -143,28 +143,33 @@ def test_rest_cursor_pagination_and_since() -> None:
     assert cursor == {"since": "2026-09-02T00:00:00+00:00"}
 
 
-def _apple_entry(review_id: str, updated: str, text: str) -> dict[str, object]:
-    return {
-        "id": {"label": review_id},
-        "author": {"name": {"label": "Tanaka"}},
-        "im:rating": {"label": "4"},
-        "im:version": {"label": "3.2"},
-        "title": {"label": "良い"},
-        "content": {"label": text},
-        "updated": {"label": updated},
-    }
+def _apple_entry(review_id: str, updated: str, text: str) -> str:
+    return (
+        f"<entry><id>{review_id}</id><title>良い</title>"
+        f'<content type="text">{text}</content><content type="html">&lt;p&gt;{text}</content>'
+        "<im:rating>4</im:rating><im:version>3.2</im:version>"
+        f"<updated>{updated}</updated><author><name>Tanaka</name></author></entry>"
+    )
+
+
+def apple_feed(*entries: str) -> httpx.Response:
+    body = (
+        '<?xml version="1.0" encoding="utf-8"?><feed xmlns:im="http://itunes.apple.com/rss" '
+        'xmlns="http://www.w3.org/2005/Atom"><title>Customer Reviews</title>'
+        f"{''.join(entries)}</feed>"
+    )
+    return httpx.Response(200, content=body.encode())
 
 
 def test_appstore_multi_country_incremental() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         country = request.url.path.split("/")[1]
         if "page=1" not in request.url.path:
-            return httpx.Response(200, json={"feed": {}})
-        entries = [
+            return apple_feed()
+        return apple_feed(
             _apple_entry(f"{country}2", "2026-09-02T10:00:00-07:00", "new"),
             _apple_entry(f"{country}1", "2026-09-01T10:00:00-07:00", "old"),
-        ]
-        return httpx.Response(200, json={"feed": {"entry": entries}})
+        )
 
     source = build("appstore", {"app_id": "123", "countries": ["jp", "br"]}, ctx(handler))
     records, cursor = drain(source.fetch({"br": "2026-09-01T17:00:00+00:00"}))
