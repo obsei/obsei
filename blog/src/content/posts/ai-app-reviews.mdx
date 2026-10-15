@@ -1,0 +1,172 @@
+---
+title: "2,400 App Store reviews of ChatGPT, Claude and Gemini, read on a laptop"
+description: "What a local model found in recent App Store reviews of the three AI assistants across eight countries, how often it agreed with the star ratings, and where obsei fell short."
+pubDate: 2026-10-15
+author: Lalit Pagaria
+tags: [case-study, app-reviews, multilingual, local-models]
+cover: ./ai-app-reviews/cover.svg
+aiAssisted: true
+coverAlt: "obsei logo with the words: 2,400 App Store reviews of ChatGPT, Claude and Gemini, read on a laptop"
+draft: true
+---
+
+I pointed obsei 1.1 at the App Store reviews of ChatGPT, Claude and Gemini in eight countries:
+the US, UK, India, Brazil, Germany, France, Japan and Korea. It pulled the 100 most recent reviews
+for each app and country, 2,400 in all, in English, Portuguese, German, French, Japanese, Korean
+and a few others. Every review was redacted as it
+arrived, then labelled by a model running on my laptop. Nothing was sent to an LLM, and the run
+cost nothing.
+
+This post covers what came out, how far to trust it, and what didn't work.
+
+## Read this first
+
+- **This is not a ranking of the apps.** Apple's public feed returns only the newest reviews. Busy
+  apps fill 100 reviews in days, quieter ones take weeks: the ChatGPT reviews span 9 to
+  14 October, Gemini's 10 to 14 October, and Claude's 9 August to 14 October. Recent reviews also
+  skew more negative than an app's lifetime rating. Star mixes from different time windows don't
+  compare.
+- **The labels come from a small zero-shot model**, [bge-m3-zeroshot-v2.0](https://huggingface.co/MoritzLaurer/bge-m3-zeroshot-v2.0),
+  obsei's default. Below I check it against the stars and by reading samples.
+- **Every quote is from the stored, redacted text.** Translations are mine.
+
+## The run
+
+The whole configuration is three App Store sources and one classifier with my own questions:
+intent, sentiment, and what the review is mainly about (answers, limits, pricing, account, speech,
+images, reliability, refusals or other). It's [at the end](#reproduce-it).
+
+On an Apple M2, labelling the 2,400 reviews took 26.5 minutes on the GPU, and grouping them into
+themes took 83 seconds.
+
+| App | Reviews | 1–2 stars | Dates covered |
+| --- | --- | --- | --- |
+| ChatGPT | 800 | 158 (20%) | 9–14 Oct |
+| Claude | 800 | 339 (42%) | 9 Aug–14 Oct |
+| Gemini | 800 | 87 (11%) | 10–14 Oct |
+
+## What the critical reviews are about
+
+For each 1–2 star review, the model picks the area it is mainly about. I count only answers it
+gave with at least 0.4 confidence, the cutoff `obsei init` uses for this model. That leaves about
+a third of the reviews; the rest go to a person to read.
+
+| App | Most common confident areas (1–2 stars) |
+| --- | --- |
+| ChatGPT | reliability 18, limits 11, answers 10, refusals 8 |
+| Claude | refusals 27, limits 22, reliability 20, answers 16, account 14 |
+| Gemini | answers 5, reliability 3 (82% fell below the cutoff) |
+
+A few of them, as stored:
+
+- ChatGPT, Germany: *"die App ist fürchterlich unzuverlässig. Ständig Verbindungsprobleme"* (the
+  app is terribly unreliable, constant connection problems).
+- Claude, Germany: *"Man stellt eine aufwendige Frage und gleich ist das Limit erreicht"* (you ask
+  one involved question and the limit is reached).
+- Gemini, Germany: *"Anfangs fand ich Gemini wirklich top und die Antwort waren eindeutig
+  präziser"* (at first I found Gemini really good and the answers were clearly more precise).
+
+### One issue in six countries
+
+Reading the Claude reviews, one complaint kept coming back: adults locked out by age checks. I
+counted 12 of the 339 critical Claude reviews, from France, Korea, India, Japan, Brazil and
+Germany, in six languages. None of the ChatGPT or Gemini reviews mention it.
+
+- France: *"j'ai 19 ans et mes deux comptes on était bloqué pour être suspecté d'être utilisé par
+  un utilisateur mineur"* (I'm 19 and both my accounts were blocked, suspected of being used by a
+  minor).
+- Korea: *"27살에 클로드 사용 중인데요 갑자기 미성년자 의심된다고 계정 잠금 당하고"* (I'm 27, and my account
+  was suddenly locked as a suspected minor).
+- India: *"My account is on hold for more than 4 months. I am 18+ still it's not working."*
+
+This is exactly what a feedback pipeline should surface on its own, and obsei didn't. The model
+filed these reviews under account, limits and refusals, and the themes kept them apart by
+language. I found the pattern by reading.
+
+## How far to trust the labels
+
+The star ratings make a rough check possible. Treating 1–2 stars as negative and 4–5 as positive:
+
+- **When the model said positive or negative, it agreed with the stars 96% of the time**
+  (1,784 of 1,863 reviews).
+- **It hedged a lot.** It called 427 of the 2,290 one-, two-, four- and five-star reviews neutral
+  or mixed (19%).
+- **Sarcasm fools it.** 9 one- and two-star reviews came out positive, including *"A box of rocks
+  is more useful."* Going the other way, 70 four- and five-star reviews came out negative; many
+  praise the app while complaining about one thing.
+- **The area labels were right about four times in five.** I read 28 confident ones: 23 were
+  right. Answers, pricing and account were the most reliable. Refusals and speech were the
+  weakest, catching bans and comparisons that were about something else.
+
+Stars aren't ground truth: people give five stars with a complaint and one star for things the app
+can't fix. But a model that agrees with the stars this often, and says when it isn't sure, is
+useful for sorting thousands of reviews. It isn't good enough to act on a single label unreviewed.
+Run [`obsei eval`](https://docs.obsei.com/guides/classify/) on a sample of your own labelled feedback before routing on it.
+
+## What didn't work
+
+- **Short reviews grouped by language, not topic.** The largest theme, 165 reviews, is Korean
+  reviews about everything: affection, limits, the age checks. Longer complaints with a clear
+  topic did cross languages; one theme holds "wrong answers" reviews in Korean, Japanese, German
+  and French.
+- **Korean, Japanese and Chinese themes got no keyword labels.** The labeller skips words shorter
+  than four characters, which drops most words in those languages. Other labels came out in the
+  language of the reviews, such as *fausses* (French for "wrong").
+- **No language detection.** The App Store feed gives a country, not a language, and the local
+  classifier doesn't detect one, so these reviews have no language in Studio.
+
+Each of these is now an issue for obsei 1.x. The age-check pattern is the test: next time, obsei
+should find it before I do.
+
+## Reproduce it
+
+```bash
+mkdir ai-apps && cd ai-apps
+uvx --from "obsei[recommended]>=1.1" obsei init
+# replace llms and pipelines in obsei.yaml with the ones below
+obsei try               # check your questions on a few records first
+obsei run && obsei themes
+obsei studio --out studio   # a static, read-only Studio to open in a browser
+```
+
+```yaml
+llms:
+  default: {api: local, model: MoritzLaurer/bge-m3-zeroshot-v2.0}
+pipelines:
+  - name: ai-apps
+    sources:
+      - {key: chatgpt, type: appstore, config: {app_id: "6448311069", countries: [us, gb, in, br, de, fr, jp, kr], max_pages: 2}}
+      - {key: claude, type: appstore, config: {app_id: "6473753684", countries: [us, gb, in, br, de, fr, jp, kr], max_pages: 2}}
+      - {key: gemini, type: appstore, config: {app_id: "6477489729", countries: [us, gb, in, br, de, fr, jp, kr], max_pages: 2}}
+    enrichers:
+      - type: classify
+        config:
+          llm: default
+          threshold: 0.4
+          intents:
+            bug: something is broken, crashes or shows errors
+            feature_request: asks for a new feature or improvement
+            complaint: unhappy, without a specific bug or request
+            praise: likes or recommends the app
+          fields:
+            area:
+              description: What is the review mainly about?
+              choices:
+                answers: quality, accuracy or usefulness of the answers
+                limits: usage limits or message caps
+                pricing: subscription price, billing or refunds
+                account: login, sign-up or account problems
+                speech: talking to the app out loud, voice chat or dictation
+                images: creating or reading images and files
+                reliability: slowness, crashes, errors or not loading
+                refusals: refusing requests, censorship or restrictions
+                other: none of the above
+    sinks:
+      - {type: parquet, config: {directory: exports}}
+```
+
+My first version had `voice: voice mode or speech`, and the model put "you are smart" and "Love"
+under it. Rewording an option is often the biggest fix: try your questions on a few records with
+`obsei try` before a full run.
+
+*Lalit Pagaria · [LinkedIn](https://www.linkedin.com/in/lalitpagaria/) · [GitHub](https://github.com/lalitpagaria)*
