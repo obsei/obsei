@@ -10,7 +10,7 @@ from 0.0.x, start with the [migration guide](/guides/migrate-from-0-0/). Every c
 
 ## Highlights
 
-- **A five-minute first run.** `obsei init` writes the project, sample data with synthetic PII and
+- **A short first run.** `obsei init` writes the project, sample data with synthetic PII and
   `.obsei/secrets.env`. `obsei try` previews redacted, labelled records from the project or from
   any public link or file, without storing anything ([Quickstart](/quickstart/)).
 - **An in-process classifier by default.** `api: local` runs bge-m3-zeroshot-v2.0 on your machine
@@ -29,7 +29,7 @@ from 0.0.x, start with the [migration guide](/guides/migrate-from-0-0/). Every c
   100+ services ([Sinks](/guides/sinks/)).
 - **Safer agents.** MCP results mark customer text `untrusted`, and `propose_issue` queues issues
   for `obsei approvals approve` ([MCP](/guides/mcp/)). The MCP server is part of the core package,
-  and plugins for Claude Code, Codex, Copilot, Cursor and Gemini CLI install it in one line
+  and plugins for Claude Code, Codex, the Copilot CLI and Gemini CLI install it from the GitHub repository
   ([AI tools](/guides/ai-tools/)).
 - **Connector status.** Each source and sink is marked `verified` (a live test against the real
   service) or `beta` ([Sources](/guides/sources/)).

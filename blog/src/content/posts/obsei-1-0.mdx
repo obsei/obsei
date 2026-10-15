@@ -1,6 +1,6 @@
 ---
 title: "obsei 1.0: private customer feedback in five minutes"
-description: "obsei 1.0 is out. pip install obsei now gives a self-hosted Voice of Customer pipeline that strips PII before any model sees it, runs its classifier on your machine, and plugs into your AI tools."
+description: "obsei 1.0 is out: a self-hosted Voice of Customer pipeline that strips PII before any model sees it, can run its classifier on your machine, and plugs into your AI tools."
 pubDate: 2026-10-15
 author: Lalit Pagaria
 tags: [release, voice-of-customer, privacy, open-source]
@@ -30,7 +30,7 @@ obsei try
 ```
 
 `obsei init` creates a project with sample feedback in ten languages, generates the encryption key
-for you, and downloads a small multilingual model once. `obsei try` shows what obsei would store,
+for you, and downloads a multilingual model once (about 2.2 GB). `obsei try` shows what obsei would store,
 without storing anything:
 
 ```text
@@ -61,7 +61,7 @@ obsei try https://github.com/astral-sh/uv
 
 **A classifier that runs on your machine.** The default model is now
 [bge-m3-zeroshot-v2.0](https://huggingface.co/MoritzLaurer/bge-m3-zeroshot-v2.0), running inside
-obsei. I benchmarked six small models on the demo's 136 records in 11 languages. It was the most
+obsei. I benchmarked six small models on the demo's 136 synthetic records in 11 languages. It was the most
 accurate: .82 on intent, .90 on sentiment and .91 on team routing. The decision model I had
 recommended before, Julia-1, came last at a mean of .69. The
 [full table and its caveats](https://docs.obsei.com/guides/models/#benchmark) are in the docs. You
@@ -74,11 +74,12 @@ stored feedback after you change a question or a model.
 
 **Set up without editing YAML.** `obsei add appstore` or `obsei add slack` asks for each field,
 links to the page where you get the key, keeps secrets out of `obsei.yaml`, and previews three
-records. `obsei check` tests every connection and says how to fix what fails. `obsei integrations`
+records. `obsei check` fetches one record from each source, checks sink credentials where that
+sends nothing, and says how to fix what fails. `obsei integrations`
 lists every source and sink: 22 and 9, counting the first-party plugins. The published JSON Schema gives you autocomplete in VS Code.
 
 **Alerts on themes, not just messages.** obsei can tell you when a theme spikes against its
-eight-week baseline, when a new theme appears, when the review queue grows, or when a pipeline
+seven-week baseline, when a new theme appears, when the review queue grows, or when a pipeline
 fails. It can also send a weekly digest. Each alert carries counts, the baseline and a few
 redacted quotes, and each has a cooldown, snooze and acknowledge.
 
@@ -92,9 +93,10 @@ untrusted, so an agent quotes it instead of following instructions hidden inside
 can now propose a Jira, Linear or GitHub issue. Nothing is created until a person runs
 `obsei approvals approve`, and the audit log records who approved it.
 
-**One-line installs for your AI tools.** obsei ships as a plugin for Claude Code, Codex, Cursor,
-the Copilot CLI and Gemini CLI. It is also listed in the [MCP Registry](https://registry.modelcontextprotocol.io)
-for VS Code and other clients:
+**Installs for your AI tools.** obsei ships as a plugin for Claude Code, Codex, the Copilot CLI and
+Gemini CLI, installed straight from the GitHub repository; it isn't in those tools' official
+directories yet. Cursor and VS Code get the MCP server from an install button, and the server is
+listed in the [MCP Registry](https://registry.modelcontextprotocol.io) for other clients:
 
 ```bash
 /plugin install obsei --marketplace obsei/obsei      # in Claude Code

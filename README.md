@@ -29,13 +29,13 @@ Teams want to understand what customers say in reviews, tickets, calls and surve
 send that text to another SaaS or a public LLM. obsei runs entirely inside your own infrastructure:
 
 - **Private by design.** PII is redacted (and optionally names) and authors are pseudonymised at
-  ingest. Encrypted database, air-gapped by default, no telemetry, erasure and an audit log built in.
+  ingest. Encrypted database, model and sink traffic air-gapped by default, no telemetry, erasure and an audit log built in.
 - **Bring your own.** Your sources, your keys and your model: a zero-shot classifier that runs
   in process by default, a decision model such as Julia-1, or Ollama, vLLM, Azure OpenAI, OpenAI,
   Bedrock and Vertex through LiteLLM.
 - **AI-native.** An MCP server and a Claude plugin, so agents answer questions about
   customers with cited, privacy-filtered evidence and propose issues that you approve.
-- **Every language.** Feedback is classified and quoted in its own language. With
+- **Many languages.** Feedback is classified and quoted in its own language. With
   `obsei[embeddings]`, a local multilingual model groups the same issue across 50+ languages;
   without it, the offline embedder groups by wording, so each language forms its own themes.
 
@@ -77,9 +77,9 @@ or `hybrid`.
 | --- | --- |
 | Sources | CSV, JSON Lines, declarative REST, webhooks, App Store (any country), App Store Connect, Google Play (official API), GitHub issues, Hacker News, Bluesky, YouTube, RSS/Atom, SQL databases and warehouses, file drops, IMAP mailboxes, any MCP server, Zendesk, Freshdesk, Intercom, Gong; Reddit as an unpublished community plugin (install from Git) |
 | Enrichers | Classification with an in-process zero-shot model (default), a decision model (Julia-1, Clef) or an LLM: sentiment, intent, language and custom choice, score and yes/no fields with confidence; low-confidence answers go to a stronger model or human review; `filter` drops or tags spam and off-topic records |
-| Sinks | Signed webhooks (Standard Webhooks, CloudEvents) with retries, Slack, Telegram, Discord, email and Teams via Apprise, GitHub issues, Jira, Linear, Parquet, SQL databases and warehouses; ordered routes on labels, confidence and scores ([routing](https://docs.obsei.com/guides/routing/)) |
-| Analysis | Stable themes (offline, or multilingual with `obsei[embeddings]`) with near-duplicate detection, k-anonymous views, `obsei ask` with cited answers and an optional grounding judge, read-only Studio with a knowledge-graph explorer and privacy, decisions, trends and routes panels ([demo](https://docs.obsei.com/demo/)), Slack `/obsei` command, [alerts](https://docs.obsei.com/guides/alerts/) on theme spikes, new themes, digests, the review queue and pipeline health |
-| Privacy | Checksum-validated PII redaction for the Americas, Europe, UK, Asia-Pacific, India and Africa in any script; optional name redaction (`obsei[names]`); salted author pseudonyms; encrypted DuckDB; `obsei forget`, `obsei export` and `obsei audit` |
+| Sinks | Signed webhooks (Standard Webhooks, CloudEvents) with retries, Slack, Telegram, Discord, email and Teams via Apprise (`obsei[notify]`), GitHub issues, Jira, Linear, Parquet, SQL databases and warehouses; ordered routes on labels, confidence and scores ([routing](https://docs.obsei.com/guides/routing/)) |
+| Analysis | Stable themes (offline, or multilingual with `obsei[embeddings]`) with near-duplicate detection, k-anonymous themes, `obsei ask` with cited answers and an optional grounding judge, read-only Studio with a knowledge-graph explorer and privacy, decisions, trends and routes panels ([demo](https://docs.obsei.com/demo/)), Slack `/obsei` command, [alerts](https://docs.obsei.com/guides/alerts/) on theme spikes, new themes, digests, the review queue and pipeline health |
+| Privacy | Redaction of emails, phones, cards and IBANs, plus national IDs for 16 countries in the Americas, Europe, Asia-Pacific and Africa, checksum-validated where the format has one, in any script; optional name redaction (`obsei[names]`); salted author pseudonyms; encrypted DuckDB; `obsei forget`, `obsei export` and `obsei audit` |
 | Server | `obsei serve`: scheduled pipelines, signed webhook intake, MCP over HTTP, Studio, role-based access and SSO-proxy support |
 
 Agents: `obsei mcp` serves MCP tools (read-only, plus proposals you approve); the Claude Code plugin is
@@ -102,7 +102,8 @@ docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
 
 ## Use it from your AI tool
 
-The MCP server and `voice-of-customer` skill install in one line:
+The MCP server and `voice-of-customer` skill install straight from this repository (obsei isn't
+in any tool's official plugin directory yet):
 
 | Tool | Install |
 | --- | --- |

@@ -18,12 +18,21 @@ server a startup timeout of about 60 seconds where the tool has one.
 
 The server reads `obsei.yaml` in the working directory, or the file named by `OBSEI_CONFIG`. Set
 `OBSEI_DB` for a database somewhere else and `OBSEI_DB_KEY` when it is encrypted. It opens the
-store read-only, except to queue agent proposals for approval ([MCP](/guides/mcp/)). The plugins for Claude Code, Codex, Copilot, VS Code, Cursor and Gemini also add
+store read-only, except to queue agent proposals for approval ([MCP](/guides/mcp/)). The plugins for Claude Code, Codex, Copilot, VS Code and Gemini also add
 the `voice-of-customer` skill: one [`SKILL.md`](https://github.com/obsei/obsei/blob/master/integrations/claude/obsei/skills/voice-of-customer/SKILL.md)
 shared by all of them.
 
 [![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=obsei&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJvYnNlaT49MS4wIiwib2JzZWkiLCJtY3AiXX0%3D)
 [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_obsei-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=obsei&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22obsei%3E%3D1.0%22%2C%22obsei%22%2C%22mcp%22%5D%7D)
+
+obsei isn't listed in any tool's official plugin directory yet. The plugin installs below
+come straight from this GitHub repository, which each tool accepts as a custom marketplace or
+source.
+
+Checked on 15 October 2026 with Claude Code 2.1.300, Codex 0.146.0, the Copilot CLI 1.0.3 and
+Gemini CLI 0.64.0. The other rows follow each tool's documented MCP setup and have not been
+tested by the maintainers; [report an issue](https://github.com/obsei/obsei/issues/new/choose) if one
+doesn't work.
 
 | Tool | Install | Notes |
 | --- | --- | --- |
@@ -31,11 +40,11 @@ shared by all of them.
 | Codex | `codex plugin marketplace add obsei/obsei`, then `codex plugin add obsei@obsei` | MCP server and skill. MCP only: [below](#codex) |
 | GitHub Copilot CLI | `copilot plugin install obsei/obsei:integrations/claude/obsei` | MCP server and skill |
 | VS Code (Copilot agent mode) | button above, or `code --add-mcp '{"name":"obsei","command":"uvx","args":["--from","obsei>=1.0","obsei","mcp"]}'` | MCP server. For the skill too, run **Chat: Install Plugin From Source** with `https://github.com/obsei/obsei` |
-| Cursor | button above | MCP server. The plugin with the skill is awaiting Cursor Marketplace review |
+| Cursor | button above | MCP server only. The plugin with the skill has been submitted to the Cursor Marketplace and is not available there yet |
 | Gemini CLI | `gemini extensions install https://github.com/obsei/obsei` | Asks for `OBSEI_CONFIG`, `OBSEI_DB` and `OBSEI_DB_KEY`; Gemini passes only these to the server |
 | Antigravity | `agy plugin import gemini` | Imports the Gemini CLI extension above |
 | Claude Desktop | [JSON config](#json-config) in `claude_desktop_config.json` | |
-| Cline | ask Cline to install `https://github.com/obsei/obsei` | It follows [`llms-install.md`](https://github.com/obsei/obsei/blob/master/llms-install.md) |
+| Cline | ask Cline to install `https://github.com/obsei/obsei` | It follows [`llms-install.md`](https://github.com/obsei/obsei/blob/master/llms-install.md). Not in the Cline MCP Marketplace yet |
 | Devin Desktop (formerly Windsurf) | [JSON config](#json-config) in `~/.config/devin/mcp_config.json` | |
 | Zed | [Zed settings](#zed) | |
 | JetBrains AI Assistant | **Settings > Tools > AI Assistant > Model Context Protocol (MCP)**, **Add**, paste the [JSON config](#json-config) | |

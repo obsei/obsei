@@ -27,7 +27,7 @@ your machines; data only leaves it for endpoints you configure and allow.
    redacted text, and the egress policy blocks public endpoints unless you allow them.
 
 4. **Theme.** Records are embedded and grouped into stable [themes](/guides/themes/) with trends
-   and near-duplicate detection. Groups smaller than k (default 5) are hidden.
+   and near-duplicate detection. Themes from fewer than k people (default 5) are hidden.
 
 5. **Store.** Everything lands in an encrypted DuckDB file. `obsei forget`, `obsei export` and
    the audit log cover access, erasure and retention.
@@ -49,7 +49,8 @@ your machines; data only leaves it for endpoints you configure and allow.
 | Sinks | | ✓ | opt-in | |
 | `obsei export` (CLI) | | ✓ | ✓ | |
 
-Raw text with personal data is never stored. Roles are set per token or through your SSO proxy;
+Text is stored only after redaction; personal data the detectors miss (names without
+`obsei[names]`, addresses) is stored as written. Roles are set per token or through your SSO proxy;
 see [Server and access](/guides/serve/).
 
 ## Run modes

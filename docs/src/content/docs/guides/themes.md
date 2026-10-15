@@ -64,8 +64,9 @@ themes:
 
 ## k-anonymity
 
-Themes and aggregate groups smaller than `k_anonymity` records are never labelled, listed,
-exported or shown in Studio, so small groups cannot single out a customer.
+Themes from fewer than `k_anonymity` people are never labelled, listed, exported or shown in
+Studio, so a small theme cannot single out a customer. Record counts from `feedback_stats` and
+search results are not filtered by k.
 
 ## Ask
 

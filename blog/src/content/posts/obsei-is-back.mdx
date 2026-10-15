@@ -92,13 +92,13 @@ So obsei 1.0 is not a polish of the old library. It is a new product built aroun
 - **Private by design.** Personal data is redacted at ingest (national IDs for seven regions,
   checksum-validated where the format allows; names optional), authors become pseudonyms, the database is encrypted, and nothing
   leaves your network unless you allow it ([privacy controls](https://docs.obsei.com/privacy/overview/)). Air-gapped is the default.
-- **Bring your own sources and models.** 20+ sources, from App Store to Zendesk to SQL, plus
+- **Bring your own sources and models.** 20 sources, from App Store to Zendesk to SQL, plus
   plugins. Any OpenAI-compatible model, from Ollama to Azure, and [decision models](https://docs.obsei.com/guides/models/#decision-models) such as Julia-1
   for fast labels with real probabilities.
 - **Themes across languages.** The same issue raised in English, Japanese and Portuguese becomes
   one theme, with trends, near-duplicate detection and k-anonymous views: groups from fewer than k
   people are hidden.
-- **Built for agents.** A read-only [MCP](https://modelcontextprotocol.io) server lets Claude, Cursor, VS Code and your own agents
+- **Built for agents.** An [MCP](https://modelcontextprotocol.io) server lets Claude, Cursor, VS Code and your own agents
   query feedback with redacted quotes and record ids, never identities.
 - **Act on it.** Route urgent bugs to Jira, billing to Slack and unsure cases to a human, based on
   model confidence ([routing](https://docs.obsei.com/guides/routing/)).
