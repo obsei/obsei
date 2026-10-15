@@ -12,8 +12,9 @@
 | Docker | [`../Dockerfile`](../Dockerfile), `ghcr.io/obsei/obsei` | `docker run --rm -v "$PWD:/data" -w /data ghcr.io/obsei/obsei:<version> run` (entrypoint is `obsei`) |
 | Plugins (sources, enrichers, sinks) | [`../plugins`](../plugins): [`template`](../plugins/template), [`obsei-reddit`](../plugins/obsei-reddit) | install the package, then allow it by entry-point name: `plugins: [reddit]` |
 
-The MCP tools are read-only: `search_feedback`, `feedback_stats`, `get_feedback` and `list_themes`.
+The MCP tools `search_feedback`, `feedback_stats`, `get_feedback` and `list_themes` are read-only.
 They return redacted text and labels with record ids for citation, never author pseudonyms.
+`propose_issue` only queues an issue for a person to approve (`obsei approvals`).
 
 Claude Desktop (`claude_desktop_config.json`):
 

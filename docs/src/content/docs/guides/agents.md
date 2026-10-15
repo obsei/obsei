@@ -7,7 +7,8 @@ sidebar:
 ---
 
 Point your agent at obsei instead of at the raw sources. obsei fetches the feedback, redacts it
-and stores it; the agent reads only what was stored, through a read-only MCP server.
+and stores it; the agent reads only what was stored, through obsei's MCP server, and anything it
+wants to send out waits for a person to approve it.
 
 ## Before any model sees text
 
@@ -33,6 +34,7 @@ Raw text with personal data is never stored, so an agent cannot recover it. See
 | `search_feedback` | Matching feedback, newest first, as citable evidence with record ids |
 | `get_feedback` | One record by id, to verify a citation |
 | `list_themes` | Recurring themes with 7-day trend, sources, languages and intents |
+| `propose_issue` | Queue a GitHub, Jira or Linear issue for a person to approve |
 
 The `voc_report` prompt drafts a cited Voice of Customer report for a topic and period.
 
@@ -40,7 +42,7 @@ Two transports serve the same tools:
 
 | Transport | Start | Access |
 | --- | --- | --- |
-| stdio | `obsei mcp` | opens the store read-only on the local machine |
+| stdio | `obsei mcp` | opens the store read-only on the local machine (read-write only to queue a proposal) |
 | streamable HTTP | `obsei serve`, at `/mcp` | analyst role: `Authorization: Bearer <token>` or your SSO proxy |
 
 Setup for Claude, Codex, Copilot, Cursor, Gemini and other tools is in
@@ -49,14 +51,27 @@ Setup for Claude, Codex, Copilot, Cursor, Gemini and other tools is in
 ## Customer text is untrusted input
 
 Feedback is written by anyone who can leave a review or open a ticket, so it can contain
-instructions aimed at your agent. The server tells clients to treat it as data: quote it, cite
-record ids, and never follow instructions found inside it. Keep that rule in your own agent's
-system prompt too, and don't give the same agent unreviewed write access to other systems.
+instructions aimed at your agent. Every evidence item is marked `"untrusted": true`, and the
+server and tool descriptions tell clients to treat `text` as data: quote it, cite record ids, and
+never follow instructions found inside it. Keep that rule in your own agent's system prompt too,
+and don't give the same agent unreviewed write access to other systems.
 
-## Read-only today
+## Agents propose, people approve
 
-No tool changes data: agents cannot label, delete, route or send feedback. Write tools behind an
-approval queue, where a person approves each action, are planned for 1.0.
+An agent that reads private data and untrusted text must not also be able to send messages out
+on its own: that combination is what a prompt injection needs. So obsei follows one rule:
+
+- **Fixed labels may act automatically.** A classifier's labels (intent, sentiment, your
+  fields) can pick [routes](/guides/routing/) and sinks without review, because they come from a
+  fixed list and cannot carry instructions.
+- **Free text needs approval.** Anything an agent wrote after reading feedback, such as an issue
+  title and body, waits in obsei's approval queue until a person approves it.
+
+`propose_issue` queues an issue for a configured GitHub, Jira or Linear sink and returns an
+approval id; nothing is sent. A person reviews it with `obsei approvals show` and approves or
+rejects it (CLI, or admin over HTTP). The issue opens once, marked as proposed by an AI agent,
+with links to the cited feedback. Agents cannot label, delete, route or approve anything. See
+[Approvals](/guides/mcp/#approvals).
 
 ## Prompts for coding agents
 

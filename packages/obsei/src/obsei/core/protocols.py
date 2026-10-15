@@ -86,6 +86,14 @@ class Binds(Protocol):
 
 
 @runtime_checkable
+class OpensIssues(Protocol):
+    """Optional for sinks: open an issue tagged ``key`` unless one exists. Returns whether it
+    opened one; raises ``RuntimeError`` when the tracker refuses."""
+
+    def open_issue(self, title: str, body: str, key: str) -> bool: ...
+
+
+@runtime_checkable
 class Sink(Protocol):
     """Must be idempotent by ``Record.id``."""
 

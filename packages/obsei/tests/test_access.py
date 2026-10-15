@@ -69,6 +69,7 @@ def test_required_roles() -> None:
     assert required_role("/mcp") == "analyst"
     assert required_role("/api/runs") == "admin"
     assert required_role("/api/deliveries") == "admin"
+    assert required_role("/api/approvals/apr_1/approve") == "admin"
     assert required_role("/anything-else") == "admin"
 
 

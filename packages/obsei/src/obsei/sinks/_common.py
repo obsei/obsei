@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 
 from pydantic import JsonValue
 
+from obsei.core.protocols import OpensIssues, SinkResult
 from obsei.core.record import Record
 from obsei.routing import When, text
 
@@ -46,8 +47,9 @@ def intents(*names: str) -> dict[str, JsonValue]:
 TITLE_LENGTH = 80
 
 
-def marker(record: Record) -> str:
-    return f"obsei:{record.id}"
+def marker(key: str) -> str:
+    """Tags an issue so it is opened once per record or approval id."""
+    return f"obsei:{key}"
 
 
 def title(record: Record) -> str:
@@ -64,4 +66,23 @@ def body(record: Record) -> str:
         meta.append(f"rating: {record.rating:g}")
     if record.source.url:
         meta.append(f"[original]({record.source.url})")
-    return "\n".join([*lines, "", " · ".join(meta), "", f"<!-- {marker(record)} -->"])
+    return "\n".join([*lines, "", " · ".join(meta)])
+
+
+def open_issues(
+    sink: OpensIssues, batch: Sequence[Record], when: When, max_issues: int
+) -> SinkResult:
+    selected = [r for r in batch if when.matches(r)]
+    result = SinkResult(skipped=len(batch) - len(selected))
+    for record in selected[:max_issues]:
+        try:
+            opened = sink.open_issue(title(record), body(record), record.id)
+        except RuntimeError as exc:
+            result.errors.append(str(exc))
+            break
+        if opened:
+            result.sent += 1
+        else:
+            result.skipped += 1
+    result.skipped += max(0, len(selected) - max_issues)
+    return result

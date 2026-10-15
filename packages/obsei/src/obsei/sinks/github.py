@@ -11,7 +11,7 @@ from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.routing import Conditions, When
-from obsei.sinks._common import body, env, intents, marker, title
+from obsei.sinks._common import env, intents, marker, open_issues
 
 
 class GitHubIssueSinkConfig(BaseModel):
@@ -40,8 +40,8 @@ class GitHubIssueSink:
             "X-GitHub-Api-Version": "2022-11-28",
         }
 
-    def _exists(self, record: Record) -> bool:
-        query = f'repo:{self.config.repo} is:issue in:body "{marker(record)}"'
+    def _exists(self, key: str) -> bool:
+        query = f'repo:{self.config.repo} is:issue in:body "{marker(key)}"'
         response = self.ctx.http.get(
             f"{self.config.api_url}/search/issues",
             params={"q": query},
@@ -52,25 +52,25 @@ class GitHubIssueSink:
         count = response.json().get("total_count", 0)
         return isinstance(count, int) and count > 0
 
+    def open_issue(self, title: str, body: str, key: str) -> bool:
+        if self._exists(key):
+            return False
+        response = self.ctx.http.post(
+            f"{self.config.api_url}/repos/{self.config.repo}/issues",
+            json={
+                "title": title,
+                "body": f"{body}\n\n<!-- {marker(key)} -->",
+                "labels": self.config.labels,
+            },
+            headers=self.headers,
+            extensions=EGRESS,
+        )
+        if response.is_error:
+            raise RuntimeError(f"GitHub returned {response.status_code}")
+        return True
+
     def send(self, batch: Sequence[Record]) -> SinkResult:
-        selected = [r for r in batch if self.when.matches(r)]
-        result = SinkResult(skipped=len(batch) - len(selected))
-        for record in selected[: self.config.max_issues]:
-            if self._exists(record):
-                result.skipped += 1
-                continue
-            response = self.ctx.http.post(
-                f"{self.config.api_url}/repos/{self.config.repo}/issues",
-                json={"title": title(record), "body": body(record), "labels": self.config.labels},
-                headers=self.headers,
-                extensions=EGRESS,
-            )
-            if response.is_error:
-                result.errors.append(f"GitHub returned {response.status_code}")
-                break
-            result.sent += 1
-        result.skipped += max(0, len(selected) - self.config.max_issues)
-        return result
+        return open_issues(self, batch, self.when, self.config.max_issues)
 
 
 __all__ = ["GitHubIssueSink", "GitHubIssueSinkConfig"]
