@@ -493,7 +493,7 @@ def test_mcp_uses_the_configured_k_anonymity(
         def run(self, transport: str) -> None:
             captured["transport"] = transport
 
-    def fake_create_server(opener: object, *, k_anonymity: int = 5) -> FakeServer:
+    def fake_create_server(opener: object, *, k_anonymity: int = 5, **_: object) -> FakeServer:
         captured["k"] = k_anonymity
         return FakeServer()
 

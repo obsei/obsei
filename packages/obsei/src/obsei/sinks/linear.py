@@ -11,7 +11,7 @@ from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.routing import Conditions, When
-from obsei.sinks._common import body, env, intents, marker, title
+from obsei.sinks._common import env, intents, marker, open_issues
 from obsei.sources._common import lookup
 
 API_URL = "https://api.linear.app/graphql"
@@ -58,27 +58,18 @@ class LinearSink:
             raise RuntimeError(f"Linear error: {payload['errors']}")
         return payload
 
+    def open_issue(self, title: str, body: str, key: str) -> bool:
+        if lookup(self._graphql(FIND, {"m": marker(key)}), "data.issues.nodes"):
+            return False
+        issue: dict[str, JsonValue] = {
+            "teamId": self.config.team_id,
+            "title": title,
+            "description": f"{body}\n\n<!-- {marker(key)} -->",
+        }
+        if self.config.label_ids:
+            issue["labelIds"] = list(self.config.label_ids)
+        self._graphql(CREATE, {"input": issue})
+        return True
+
     def send(self, batch: Sequence[Record]) -> SinkResult:
-        selected = [r for r in batch if self.when.matches(r)]
-        result = SinkResult(skipped=len(batch) - len(selected))
-        for record in selected[: self.config.max_issues]:
-            found = self._graphql(FIND, {"m": marker(record)})
-            nodes = lookup(found, "data.issues.nodes")
-            if nodes:
-                result.skipped += 1
-                continue
-            issue: dict[str, JsonValue] = {
-                "teamId": self.config.team_id,
-                "title": title(record),
-                "description": body(record),
-            }
-            if self.config.label_ids:
-                issue["labelIds"] = list(self.config.label_ids)
-            try:
-                self._graphql(CREATE, {"input": issue})
-            except RuntimeError as exc:
-                result.errors.append(str(exc))
-                break
-            result.sent += 1
-        result.skipped += max(0, len(selected) - self.config.max_issues)
-        return result
+        return open_issues(self, batch, self.when, self.config.max_issues)

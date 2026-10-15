@@ -23,6 +23,9 @@ obsei serve --host 0.0.0.0 --port 8765
 | `/mcp` | analyst | MCP over streamable HTTP |
 | `GET /api/runs` | admin | schedule and last run of each scheduled pipeline, with errors and warnings |
 | `GET /api/deliveries` | admin | the latest 100 [webhook deliveries](/guides/sinks/#webhooks): event id, sink, host, attempts, status, error |
+| `GET /api/approvals` | admin | the latest 100 [agent proposals](/guides/mcp/#approvals) and their status |
+| `POST /api/approvals/{id}/approve` | admin | open the proposed issue (once) and return the approval |
+| `POST /api/approvals/{id}/reject` | admin | optional `{"reason": "..."}`; nothing is sent |
 
 Any other path needs admin. Roles are checked only when `OBSEI_API_TOKEN` or `access` is
 configured; without either, every path is open, which `obsei serve` allows only on a loopback
@@ -77,7 +80,7 @@ obsei behind your SSO proxy (oauth2-proxy, Pomerium, Cloudflare Access) and map 
 | --- | --- |
 | viewer | Studio aggregates and themes (`/api/snapshot`) |
 | analyst | also redacted evidence, Ask and MCP (`/api/themes/*`, `/api/ask`, `/mcp`) |
-| admin | also pipeline run status and webhook deliveries (`/api/runs`, `/api/deliveries`) |
+| admin | also pipeline run status, webhook deliveries and approvals (`/api/runs`, `/api/deliveries`, `/api/approvals`) |
 
 ```yaml
 access:
@@ -92,7 +95,10 @@ access:
     default_role: viewer
 ```
 
-Requests without the proxy secret are refused, so the proxy cannot be bypassed.
+Requests without the proxy secret are refused, so the proxy cannot be bypassed. Every evidence,
+Ask, MCP and admin request is written to the audit log (`obsei audit`) with the user and path.
+Approvals over HTTP need a token or SSO proxy, even on a loopback address; without one, use
+`obsei approvals`. Give agents analyst tokens, never admin ones.
 
 ## Allowed hosts
 
@@ -104,5 +110,4 @@ is required then), so list your public names there:
 ```yaml
 access:
   allowed_hosts: [voc.example.com, "*.corp.example"]
-``` Every evidence,
-Ask and MCP request is written to the audit log (`obsei audit`) with the user and path.
+```

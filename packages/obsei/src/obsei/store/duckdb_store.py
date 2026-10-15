@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
-from typing import Literal, Self, TypeAlias
+from typing import Any, Literal, Self, TypeAlias
 
 import duckdb
 from pydantic import BaseModel, ConfigDict, Field
@@ -125,6 +125,19 @@ MIGRATIONS: tuple[str, ...] = (
         PRIMARY KEY (alert, key)
     );
     """,
+    """
+    CREATE TABLE approvals (
+        id VARCHAR PRIMARY KEY,
+        kind VARCHAR NOT NULL,
+        payload JSON NOT NULL,
+        proposed_by VARCHAR NOT NULL,
+        proposed_at TIMESTAMPTZ NOT NULL,
+        status VARCHAR NOT NULL,
+        decided_by VARCHAR,
+        decided_at TIMESTAMPTZ,
+        result JSON
+    );
+    """,
 )
 TombstoneKind: TypeAlias = Literal["record", "author"]
 
@@ -234,6 +247,40 @@ class AlertState(BaseModel):
     acked_at: datetime | None = None
 
 
+ApprovalStatus: TypeAlias = Literal["pending", "approved", "rejected", "failed"]
+
+
+class IssueProposal(BaseModel):
+    """An issue an agent wants opened. ``title`` and ``body`` are agent-written free text."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    target: str
+    title: str = Field(min_length=1, max_length=200)
+    body: str = Field(max_length=20_000)
+    record_ids: list[str] = Field(default_factory=list, max_length=50)
+
+
+class ApprovalResult(BaseModel):
+    created: bool | None = Field(
+        default=None, description="False when an issue for this approval already existed."
+    )
+    error: str | None = None
+    reason: str | None = None
+
+
+class Approval(BaseModel):
+    id: str
+    kind: Literal["issue"] = "issue"
+    payload: IssueProposal
+    proposed_by: str
+    proposed_at: datetime
+    status: ApprovalStatus = "pending"
+    decided_by: str | None = None
+    decided_at: datetime | None = None
+    result: ApprovalResult | None = None
+
+
 class StoreError(Exception):
     pass
 
@@ -336,6 +383,31 @@ def _filters(
             clauses.append(f"created_at {op} ?")
             params.append(moment)
     return clauses, params
+
+
+_APPROVAL = (
+    "id, kind, payload, proposed_by, epoch_us(proposed_at), status, decided_by, "
+    "epoch_us(decided_at), result"
+)
+
+
+def _approval(row: tuple[Any, ...]) -> Approval:
+    def at(us: int | None) -> datetime | None:
+        return None if us is None else datetime.fromtimestamp(us / 1e6, UTC)
+
+    return Approval.model_validate(
+        {
+            "id": row[0],
+            "kind": row[1],
+            "payload": json.loads(row[2]),
+            "proposed_by": row[3],
+            "proposed_at": at(row[4]),
+            "status": row[5],
+            "decided_by": row[6],
+            "decided_at": at(row[7]),
+            "result": None if row[8] is None else json.loads(row[8]),
+        }
+    )
 
 
 class Store(ThemeQueries):
@@ -777,6 +849,58 @@ class Store(ThemeQueries):
             )
             for r in rows
         ]
+
+    def add_approval(self, approval: Approval) -> None:
+        self._con.execute(
+            "INSERT INTO approvals VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, NULL)",
+            [
+                approval.id,
+                approval.kind,
+                approval.payload.model_dump_json(),
+                approval.proposed_by,
+                approval.proposed_at,
+                approval.status,
+            ],
+        )
+
+    def approvals(
+        self,
+        *,
+        status: ApprovalStatus | None = None,
+        approval_id: str | None = None,
+        limit: int = 100,
+    ) -> list[Approval]:
+        rows = self._con.execute(
+            f"SELECT {_APPROVAL} FROM approvals WHERE coalesce(status = ?, true) "  # noqa: S608
+            "AND coalesce(id = ?, true) ORDER BY proposed_at DESC LIMIT ?",
+            [status, approval_id, limit],
+        ).fetchall()
+        return [_approval(r) for r in rows]
+
+    def decide_approval(
+        self,
+        approval_id: str,
+        status: ApprovalStatus,
+        by: str,
+        *,
+        was: Sequence[ApprovalStatus],
+        result: ApprovalResult | None = None,
+    ) -> Approval | None:
+        """Moves an approval that is in one of the ``was`` states; None when it is not, so two
+        deciders can never both act on it."""
+        row = self._con.execute(
+            "UPDATE approvals SET status = ?, decided_by = ?, decided_at = ?, result = ? "  # noqa: S608
+            f"WHERE id = ? AND list_contains(?, status) RETURNING {_APPROVAL}",
+            [
+                status,
+                by,
+                datetime.now(UTC),
+                result.model_dump_json(exclude_none=True) if result else None,
+                approval_id,
+                list(was),
+            ],
+        ).fetchone()
+        return _approval(row) if row else None
 
     def search(self, query: Query, *, limit: int = 20, newest_first: bool = True) -> list[Record]:
         where, params = query.where()

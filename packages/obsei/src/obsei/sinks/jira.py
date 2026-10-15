@@ -12,7 +12,7 @@ from obsei.core.context import EGRESS, Context
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.routing import Conditions, When
-from obsei.sinks._common import body, env, intents, title
+from obsei.sinks._common import env, intents, open_issues
 
 
 class JiraConfig(BaseModel):
@@ -31,8 +31,8 @@ class JiraConfig(BaseModel):
     max_issues: int = Field(default=10, ge=1)
 
 
-def dedupe_label(record: Record) -> str:
-    return f"obsei-{record.id}"
+def dedupe_label(key: str) -> str:
+    return f"obsei-{key}"
 
 
 def adf(text: str) -> dict[str, JsonValue]:
@@ -61,8 +61,8 @@ class JiraSink:
         else:
             self.headers["Authorization"] = f"Bearer {token}"
 
-    def _exists(self, record: Record) -> bool:
-        jql = f'project = "{self.config.project_key}" AND labels = "{dedupe_label(record)}"'
+    def _exists(self, key: str) -> bool:
+        jql = f'project = "{self.config.project_key}" AND labels = "{dedupe_label(key)}"'
         path = "/search/jql" if self.config.api_version == "3" else "/search"
         response = self.ctx.http.get(
             self.api + path,
@@ -75,33 +75,26 @@ class JiraSink:
         issues = response.json().get("issues", [])
         return isinstance(issues, list) and bool(issues)
 
-    def _fields(self, record: Record) -> dict[str, JsonValue]:
-        text = body(record)
-        return {
+    def open_issue(self, title: str, body: str, key: str) -> bool:
+        if self._exists(key):
+            return False
+        fields: dict[str, JsonValue] = {
             "project": {"key": self.config.project_key},
             "issuetype": {"name": self.config.issue_type},
-            "summary": title(record),
-            "description": adf(text) if self.config.api_version == "3" else text,
-            "labels": [*self.config.labels, dedupe_label(record)],
+            "summary": title,
+            "description": adf(body) if self.config.api_version == "3" else body,
+            "labels": [*self.config.labels, dedupe_label(key)],
         }
+        response = self.ctx.http.post(
+            f"{self.api}/issue",
+            json={"fields": fields},
+            headers=self.headers,
+            auth=self.auth or httpx.USE_CLIENT_DEFAULT,
+            extensions=EGRESS,
+        )
+        if response.is_error:
+            raise RuntimeError(f"Jira returned {response.status_code}")
+        return True
 
     def send(self, batch: Sequence[Record]) -> SinkResult:
-        selected = [r for r in batch if self.when.matches(r)]
-        result = SinkResult(skipped=len(batch) - len(selected))
-        for record in selected[: self.config.max_issues]:
-            if self._exists(record):
-                result.skipped += 1
-                continue
-            response = self.ctx.http.post(
-                f"{self.api}/issue",
-                json={"fields": self._fields(record)},
-                headers=self.headers,
-                auth=self.auth or httpx.USE_CLIENT_DEFAULT,
-                extensions=EGRESS,
-            )
-            if response.is_error:
-                result.errors.append(f"Jira returned {response.status_code}")
-                break
-            result.sent += 1
-        result.skipped += max(0, len(selected) - self.config.max_issues)
-        return result
+        return open_issues(self, batch, self.when, self.config.max_issues)

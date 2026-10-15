@@ -20,11 +20,15 @@ description: obsei command reference.
 | `obsei studio --out DIR [-c FILE] [--db PATH]` | Export a static Studio snapshot |
 | `obsei demo [--out DIR] [--embedder hashing\|local\|local:MODEL] [--decision-url-env VAR [--decision-model NAME] [--save-labels FILE]]` | Build the synthetic multilingual demo (default: offline `hashing` embedder and the committed decision-model labels) |
 | `obsei models download [--embeddings MODEL] [--classifier MODEL ...] [--dir DIR]` | Fetch the local embedding model (`obsei[embeddings]`) and classifier models (`obsei[local]`) for offline use; by default, those of the installed extras |
-| `obsei mcp [-c FILE] [--db PATH]` | MCP server over stdio (read-only) |
+| `obsei mcp [-c FILE] [--db PATH]` | MCP server over stdio (read-only, except to queue a proposal) |
+| `obsei approvals list [--status pending\|approved\|rejected\|failed] [-c FILE] [--db PATH] [--unencrypted]` | List what agents proposed, newest first |
+| `obsei approvals show ID [-c FILE] [--db PATH] [--unencrypted]` | Show a proposal and the exact issue text approving it sends |
+| `obsei approvals approve ID [--by NAME] [-c FILE] [--db PATH]` | Open the proposed issue with the configured sink, once (a failed one can be approved again) |
+| `obsei approvals reject ID [--by NAME] [--reason TEXT] [-c FILE] [--db PATH] [--unencrypted]` | Reject a proposal; nothing is sent |
 | `obsei serve [-c FILE] [--db PATH] [--host] [--port]` | Scheduled pipelines, webhook intake, MCP over HTTP, Studio (see [Server](/guides/serve/)) |
 | `obsei export --author HANDLE [--out FILE] [-c FILE] [--db PATH] [--unencrypted]` | Export one author's records |
 | `obsei forget --author / --source [--instance] / --older-than-days [-c FILE] [--db PATH] [--unencrypted]` | Erase records (tombstoned so they are never stored again) |
-| `obsei audit [--limit N] [-c FILE] [--db PATH] [--unencrypted]` | Show the erasure, export and access log |
+| `obsei audit [--limit N] [-c FILE] [--db PATH] [--unencrypted]` | Show the erasure, export, access and approval log |
 | `obsei doctor [-c FILE]` | Check environment, where the secrets came from, encryption, egress mode and plugins |
 | `obsei schema` | Print the Feedback Record JSON Schema |
 | `obsei version` (or `--version`) | Print the version |

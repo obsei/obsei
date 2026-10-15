@@ -65,7 +65,7 @@ which is not an open source license. Check that it fits how you plan to use it.
 
 ## Calling obsei's MCP server
 
-`obsei serve` exposes the read-only MCP tools at `/mcp` over streamable HTTP, for tokens with the
+`obsei serve` exposes the MCP tools at `/mcp` over streamable HTTP, for tokens with the
 analyst role (see [Server and webhooks](/guides/serve/#access)). In n8n, add an **MCP Client**
 node:
 

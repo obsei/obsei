@@ -33,8 +33,8 @@ send that text to another SaaS or a public LLM. obsei runs entirely inside your 
 - **Bring your own.** Your sources, your keys and your model: a zero-shot classifier that runs
   in process by default, a decision model such as Julia-1, or Ollama, vLLM, Azure OpenAI, OpenAI,
   Bedrock and Vertex through LiteLLM.
-- **AI-native.** A read-only MCP server and a Claude plugin, so agents answer questions about
-  customers with cited, privacy-filtered evidence.
+- **AI-native.** An MCP server and a Claude plugin, so agents answer questions about
+  customers with cited, privacy-filtered evidence and propose issues that you approve.
 - **Every language.** Feedback is classified and quoted in its own language. With
   `obsei[embeddings]`, a local multilingual model groups the same issue across 50+ languages;
   without it, the offline embedder groups by wording, so each language forms its own themes.
@@ -79,7 +79,7 @@ or `hybrid`.
 | Privacy | Checksum-validated PII redaction for the Americas, Europe, UK, Asia-Pacific, India and Africa in any script; optional name redaction (`obsei[names]`); salted author pseudonyms; encrypted DuckDB; `obsei forget`, `obsei export` and `obsei audit` |
 | Server | `obsei serve`: scheduled pipelines, signed webhook intake, MCP over HTTP, Studio, role-based access and SSO-proxy support |
 
-Agents: `obsei mcp` serves read-only MCP tools; the Claude Code plugin is
+Agents: `obsei mcp` serves MCP tools (read-only, plus proposals you approve); the Claude Code plugin is
 `/plugin marketplace add obsei/obsei`. See the [docs](https://docs.obsei.com/) and
 [integrations](integrations/README.md).
 

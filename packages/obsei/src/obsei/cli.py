@@ -8,7 +8,7 @@ import sys
 import time
 from collections import Counter
 from collections.abc import Callable, Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from importlib import resources
@@ -26,6 +26,7 @@ from rich.text import Text
 
 from obsei import __version__, studio
 from obsei.alerts import Fired, check_alerts
+from obsei.approvals import ApprovalError, approve, issue_body, reject
 from obsei.ask import ask as ask_feedback
 from obsei.config import (
     DEFAULT_PATH,
@@ -87,6 +88,7 @@ from obsei.store import (
     INSTALL_HINT,
     PREINSTALL_HINT,
     AlertState,
+    ApprovalStatus,
     Store,
     StoreError,
     httpfs_installed,
@@ -250,6 +252,7 @@ class StoreSettings:
     unencrypted: bool
     egress: EgressPolicy
     k_anonymity: int
+    config: ObseiConfig | None = None
 
 
 def _store_settings(config: Path, db: Path | None, unencrypted: bool = False) -> StoreSettings:
@@ -262,6 +265,7 @@ def _store_settings(config: Path, db: Path | None, unencrypted: bool = False) ->
             unencrypted or cfg.store.unencrypted,
             cfg.egress or EgressPolicy.from_env(),
             cfg.themes.k_anonymity,
+            cfg,
         )
     load_secrets(config)
     return StoreSettings(
@@ -654,7 +658,9 @@ def mcp(
     config: ConfigOption = DEFAULT_PATH,
     db: Annotated[Path | None, typer.Option("--db", envvar="OBSEI_DB")] = None,
 ) -> None:
-    """Serve read-only MCP tools over stdio (Claude, ChatGPT, Cursor, your agents)."""
+    """Serve MCP tools over stdio (Claude, ChatGPT, Cursor, your agents).
+
+    The store is opened read-only, except briefly to queue an issue an agent proposes."""
     from obsei.mcp_server import create_server  # noqa: PLC0415
 
     settings = _store_settings(config, db)
@@ -664,7 +670,14 @@ def mcp(
         with _open_store(settings.path, settings.unencrypted, read_only=True) as store:
             yield store
 
-    create_server(read_only, k_anonymity=settings.k_anonymity).run("stdio")
+    @contextmanager
+    def writable() -> Iterator[Store]:
+        with _open_store(settings.path, settings.unencrypted, egress=settings.egress) as store:
+            yield store
+
+    create_server(
+        read_only, k_anonymity=settings.k_anonymity, config=settings.config, writable=writable
+    ).run("stdio")
 
 
 @app.command()
@@ -1191,6 +1204,92 @@ def alerts_ack(
         update = {"acked_by": by or getpass.getuser(), "acked_at": datetime.now(UTC)}
         store.put_alert_state(state.model_copy(update=update))
     typer.echo(f"acknowledged {alert} {key}")
+
+
+approvals_app = typer.Typer(help="Review what agents proposed; nothing is sent until approved.")
+app.add_typer(approvals_app, name="approvals")
+ByOption = Annotated[
+    str | None, typer.Option("--by", help="Who decides (default: your login name).")
+]
+
+
+def _decider(by: str | None) -> str:
+    return by or os.environ.get("USER") or os.environ.get("USERNAME") or "cli"
+
+
+@approvals_app.command("list")
+def approvals_list(
+    config: ConfigOption = DEFAULT_PATH,
+    db: DbOption = None,
+    status: Annotated[ApprovalStatus | None, typer.Option(help="Only this status.")] = None,
+    unencrypted: UnencryptedOption = False,
+) -> None:
+    """List proposals, newest first."""
+    with _open_existing(_store_settings(config, db, unencrypted), read_only=True) as store:
+        for a in store.approvals(status=status):
+            typer.echo(
+                f"{a.id}  {a.status:<8} {a.proposed_at:%Y-%m-%d %H:%M}  {a.payload.target}  "
+                f"{a.payload.title}"
+            )
+
+
+@approvals_app.command("show")
+def approvals_show(
+    approval_id: Annotated[str, typer.Argument(help="Approval id (apr_...).")],
+    config: ConfigOption = DEFAULT_PATH,
+    db: DbOption = None,
+    unencrypted: UnencryptedOption = False,
+) -> None:
+    """Show one proposal and the issue text approving it would send."""
+    with _open_existing(_store_settings(config, db, unencrypted), read_only=True) as store:
+        found = store.approvals(approval_id=approval_id)
+        if not found:
+            raise _fail(f"no approval {approval_id}")
+        records = [store.get(r) for r in found[0].payload.record_ids]
+    typer.echo(found[0].model_dump_json(indent=2))
+    typer.echo(f"\n--- issue: {found[0].payload.title}\n")
+    typer.echo(issue_body(found[0].payload, records))
+
+
+@approvals_app.command("approve")
+def approvals_approve(
+    approval_id: Annotated[str, typer.Argument(help="Approval id (apr_...).")],
+    config: ConfigOption = DEFAULT_PATH,
+    db: DbOption = None,
+    by: ByOption = None,
+) -> None:
+    """Approve a proposal and open its issue with the configured sink (once)."""
+    cfg = _load(config)
+    with (
+        build_context(cfg) as ctx,
+        _open_store(db or cfg.store.path, cfg.store.unencrypted, egress=ctx.egress) as store,
+    ):
+        try:
+            done = approve(lambda: nullcontext(store), cfg, ctx, approval_id, _decider(by))
+        except ApprovalError as exc:
+            raise _fail(exc) from None
+    if done.result and done.result.error:
+        raise _fail(f"{approval_id} failed: {done.result.error}; approve it again to retry")
+    opened = "opened" if done.result and done.result.created else "already open"
+    typer.echo(f"approved {approval_id}: issue {opened} in {done.payload.target}")
+
+
+@approvals_app.command("reject")
+def approvals_reject(
+    approval_id: Annotated[str, typer.Argument(help="Approval id (apr_...).")],
+    config: ConfigOption = DEFAULT_PATH,
+    db: DbOption = None,
+    by: ByOption = None,
+    reason: Annotated[str | None, typer.Option(help="Why, for the record.")] = None,
+    unencrypted: UnencryptedOption = False,
+) -> None:
+    """Reject a proposal; nothing is sent."""
+    with _open_existing(_store_settings(config, db, unencrypted)) as store:
+        try:
+            reject(store, approval_id, _decider(by), reason)
+        except ApprovalError as exc:
+            raise _fail(exc) from None
+    typer.echo(f"rejected {approval_id}")
 
 
 models_app = typer.Typer(help="Download local models for offline (air-gapped) use.")

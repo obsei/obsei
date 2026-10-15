@@ -1,7 +1,8 @@
 """Who may use ``obsei serve``: named tokens with roles, or users vouched for by an SSO proxy.
 
 viewer: Studio aggregates and themes. analyst: also redacted evidence, Ask and MCP.
-admin: also pipeline run status. Every evidence, Ask and MCP request is written to the audit log.
+admin: also run status, deliveries and deciding what agents proposed. Every evidence, Ask, MCP
+and admin request is written to the audit log.
 """
 
 from __future__ import annotations
@@ -20,6 +21,7 @@ PUBLIC_PATHS = ("/healthz", "/ingest/", "/studio", "/slack/")
 RULES: tuple[tuple[str, Role], ...] = (
     ("/api/runs", "admin"),
     ("/api/deliveries", "admin"),
+    ("/api/approvals", "admin"),
     ("/api/themes/", "analyst"),
     ("/api/ask", "analyst"),
     ("/mcp", "analyst"),

@@ -15,6 +15,7 @@ from contextlib import contextmanager
 
 import anyio
 from mcp.server.transport_security import TransportSecuritySettings
+from pydantic import BaseModel, ValidationError
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -24,7 +25,7 @@ from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from obsei import slackbot, studio
+from obsei import approvals, slackbot, studio
 from obsei.access import (
     AUDITED,
     RANK,
@@ -43,7 +44,7 @@ from obsei.mcp_server import create_server
 from obsei.pipeline import Pipeline, PipelineError, SourceSpec, run
 from obsei.runner import Scheduler
 from obsei.sources.webhook import PayloadError, SignatureError, WebhookSource
-from obsei.store import Store
+from obsei.store import Approval, Store
 
 MAX_BODY = 4 * 1024 * 1024
 SECURITY_HEADERS: tuple[tuple[bytes, bytes], ...] = (
@@ -59,6 +60,10 @@ SECURITY_HEADERS: tuple[tuple[bytes, bytes], ...] = (
 
 
 AuditHook = Callable[[Principal, str], Awaitable[None]]
+
+
+class Rejection(BaseModel):
+    reason: str | None = None
 
 
 class AccessControl(BaseHTTPMiddleware):
@@ -272,6 +277,54 @@ class Handlers:
         body = await anyio.to_thread.run_sync(self._deliveries)
         return Response(body, media_type="application/json")
 
+    def _approvals(self) -> str:
+        with self.shared_store() as s:
+            rows = s.approvals()
+        return "[" + ",".join(a.model_dump_json() for a in rows) + "]"
+
+    async def api_approvals(self, request: Request) -> Response:
+        if _decider(request) is None:
+            return _no_decider()
+        body = await anyio.to_thread.run_sync(self._approvals)
+        return Response(body, media_type="application/json")
+
+    async def api_approve(self, request: Request) -> Response:
+        principal = _decider(request)
+        if principal is None:
+            return _no_decider()
+        try:
+            done = await anyio.to_thread.run_sync(
+                approvals.approve,
+                self.shared_store,
+                self.config,
+                self.ctx,
+                request.path_params["id"],
+                principal.name,
+            )
+        except approvals.ApprovalError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=409)
+        return Response(done.model_dump_json(), media_type="application/json")
+
+    def _reject(self, approval_id: str, by: str, reason: str | None) -> Approval:
+        with self.shared_store() as s:
+            return approvals.reject(s, approval_id, by, reason)
+
+    async def api_reject(self, request: Request) -> Response:
+        principal = _decider(request)
+        if principal is None:
+            return _no_decider()
+        body = await request.body()
+        try:
+            reason = Rejection.model_validate_json(body).reason if body else None
+            done = await anyio.to_thread.run_sync(
+                self._reject, request.path_params["id"], principal.name, reason
+            )
+        except ValidationError:
+            return JSONResponse({"error": 'body must be {"reason": "..."}'}, status_code=400)
+        except approvals.ApprovalError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=409)
+        return Response(done.model_dump_json(), media_type="application/json")
+
     async def api_ask(self, request: Request) -> Response:
         question = str((await request.json()).get("question", "")).strip()
         if not question:
@@ -332,6 +385,21 @@ class Handlers:
         )
 
 
+def _decider(request: Request) -> Principal | None:
+    principal: Principal | None = getattr(request.state, "principal", None)
+    return principal
+
+
+def _no_decider() -> Response:
+    return JSONResponse(
+        {
+            "error": "approvals over HTTP need access control (tokens or an SSO proxy); "
+            "use 'obsei approvals' instead"
+        },
+        status_code=403,
+    )
+
+
 async def _to_studio(request: Request) -> Response:
     return RedirectResponse("/studio/")
 
@@ -340,7 +408,7 @@ def create_app(
     config: ObseiConfig, ctx: Context, store: Store, *, token: str | None, host: str = "127.0.0.1"
 ) -> Starlette:
     h = Handlers(config, ctx, store)
-    app = create_server(h.shared_store, k_anonymity=h.k).streamable_http_app(
+    app = create_server(h.shared_store, k_anonymity=h.k, config=config).streamable_http_app(
         streamable_http_path="/mcp",
         host=host,
         transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False)
@@ -357,6 +425,9 @@ def create_app(
             Route("/api/ask", h.api_ask, methods=["POST"]),
             Route("/api/runs", h.api_runs, methods=["GET"]),
             Route("/api/deliveries", h.api_deliveries, methods=["GET"]),
+            Route("/api/approvals", h.api_approvals, methods=["GET"]),
+            Route("/api/approvals/{id}/approve", h.api_approve, methods=["POST"]),
+            Route("/api/approvals/{id}/reject", h.api_reject, methods=["POST"]),
             Route("/slack/commands", h.slack, methods=["POST"]),
             Mount("/studio", StaticFiles(directory=studio.static_dir(), html=True), name="studio"),
         ]
