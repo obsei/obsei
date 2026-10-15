@@ -374,6 +374,14 @@ class Store(ThemeQueries):
             try:
                 self._con.execute(f"ATTACH {_sql_literal(self.path)} AS {_ALIAS}{opts}")
             except duckdb.Error as exc:
+                if (
+                    isinstance(exc, duckdb.InvalidInputException)
+                    and "wrong encryption key" in str(exc).lower()
+                ):
+                    raise StoreError(
+                        f"wrong encryption key for {self.path} "
+                        f"({DB_KEY_ENV_VAR} or .obsei/secrets.env)"
+                    ) from None
                 raise StoreError(f"cannot open store at {self.path}: {exc}") from None
             self._con.execute(f"USE {_ALIAS}")
             self._migrate()

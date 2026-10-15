@@ -132,6 +132,7 @@ footer { text-align: center; }
 .hints li { display: grid; gap: 8px; align-content: space-between; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; counter-increment: hint; }
 .hints li span::before { content: counter(hint) ". "; color: var(--brand); font-weight: 600; }
 .hints button { justify-self: start; }
+.first-run code { justify-self: start; font: 0.9rem ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; }
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 12px; }
 .stat { display: grid; gap: 2px; }
 .stat strong { font-size: 1.4rem; }

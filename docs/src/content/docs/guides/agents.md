@@ -71,9 +71,8 @@ the agent should run, so you can check its work. Agents can read the whole docs 
 > https://docs.obsei.com/llms-full.txt first. Don't put secrets in obsei.yaml.
 
 ```bash
-uv tool install "obsei>=1.0.0rc1"
-mkdir voc && cd voc && obsei init
-export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
+uv tool install "obsei[local]>=1.0.0rc1"
+mkdir voc && cd voc && obsei init   # secrets go to .obsei/secrets.env
 export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."   # from you, not invented
 ```
 
@@ -100,7 +99,7 @@ pipelines:
 ```
 
 ```bash
-obsei try --enrich   # redacted, labelled preview; nothing stored or sent
+obsei try   # redacted, labelled preview; nothing stored or sent
 obsei run
 ```
 

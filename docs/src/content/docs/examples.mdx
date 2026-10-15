@@ -13,13 +13,13 @@ is loaded with the real config loader in CI, so the keys match the current relea
 
 ```bash
 git clone https://github.com/obsei/obsei && cd obsei
-export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl rand -hex 24)"
+obsei init examples --offline                      # secrets in examples/.obsei/secrets.env
 obsei try -c examples/social-listening.yaml        # preview redacted records; nothing stored or sent
 obsei run -c examples/social-listening.yaml
 ```
 
 Copy a file to `obsei.yaml` in your project and replace the placeholder ids, hosts and names.
-Secrets are always read from environment variables.
+Secrets are read from environment variables, or from `.obsei/secrets.env` next to the config.
 
 ## App reviews in six countries
 

@@ -2,6 +2,7 @@
 # Secrets never go in this file: set the environment variables named by *_env fields.
 #   OBSEI_DB_KEY          encrypts the local database (16+ characters)
 #   OBSEI_PSEUDONYM_SALT  pseudonymises author handles (16+ characters); unset = authors dropped
+# 'obsei init' generates both in .obsei/secrets.env; variables set in the environment win.
 version: 1
 
 store:
@@ -49,7 +50,8 @@ pipelines:
       # - key: issues
       #   type: github_issues
       #   config: {repo: owner/repo}
-    # Classify sentiment and intent with the local classifier (install obsei[local] first).
+    # Classify sentiment and intent with the local classifier ('obsei init' enables it when
+    # obsei[local] is installed).
     # enrichers:
     #   - type: classify
     #     config: {llm: default, threshold: 0.4}   # 0.4 suits the local default; tune per question

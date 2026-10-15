@@ -53,6 +53,7 @@ dependencies = [
     "mcp>=2.3,<3",
     "pydantic>=2.9,<3",
     "pyyaml>=6.0.2,<7",
+    "rich>=13.7,<16",
     "typer>=0.15,<1",
     # obsei serve imports these directly; mcp also depends on them.
     "anyio>=4.9,<5",

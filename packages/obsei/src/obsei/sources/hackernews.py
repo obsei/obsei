@@ -6,7 +6,7 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 from typing import ClassVar, Literal, TypeAlias
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 from obsei.core.context import Context
 from obsei.core.protocols import Cursor
@@ -21,9 +21,20 @@ ALL_KINDS: list[Kind] = ["story", "comment"]
 class HackerNewsConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    query: str = Field(min_length=1)
+    query: str = ""
+    story_id: int | None = Field(default=None, description="Only this story and its comments.")
     kinds: list[Kind] = Field(default_factory=lambda: list(ALL_KINDS))
     max_pages: int = Field(default=5, ge=1, le=50)
+
+    @model_validator(mode="after")
+    def _query_or_story(self) -> HackerNewsConfig:
+        if not self.query and self.story_id is None:
+            raise ValueError("set query, story_id or both")
+        return self
+
+    @property
+    def instance(self) -> str:
+        return self.query or f"story_{self.story_id}"
 
 
 class HackerNewsSource:
@@ -34,13 +45,15 @@ class HackerNewsSource:
         self.ctx = ctx
 
     def _hits(self, since: int) -> Iterator[JsonValue]:
-        tags = ",".join(self.config.kinds)
+        tags = f"({','.join(self.config.kinds)})"
+        if self.config.story_id is not None:
+            tags += f",story_{self.config.story_id}"
         for page in range(self.config.max_pages):
             response = self.ctx.http.get(
                 API_URL,
                 params={
                     "query": self.config.query,
-                    "tags": f"({tags})",
+                    "tags": tags,
                     "numericFilters": f"created_at_i>{since}",
                     "hitsPerPage": 100,
                     "page": page,
@@ -71,7 +84,7 @@ class HackerNewsSource:
         return Record(
             source=SourceRef(
                 type=self.name,
-                instance=self.config.query,
+                instance=self.config.instance,
                 native_id=object_id,
                 url=f"https://news.ycombinator.com/item?id={object_id}",
             ),
