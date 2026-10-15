@@ -4,6 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    # Update uv.lock only; minimum versions in pyproject.toml stay as wide as users need.
+    versioning-strategy: lockfile-only
     cooldown:
       default-days: 7
     groups:
