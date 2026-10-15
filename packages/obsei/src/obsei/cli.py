@@ -19,6 +19,7 @@ from typing import Annotated
 
 import duckdb
 import typer
+from pydantic import ValidationError
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
@@ -42,11 +43,13 @@ from obsei.config import (
     write_secrets,
 )
 from obsei.core.context import Context, LlmEndpoint
-from obsei.core.protocols import Drops, ReportsErrors
+from obsei.core.protocols import Drops, Enricher, ReportsErrors
 from obsei.core.record import Record
 from obsei.core.registry import PluginError
 from obsei.demo import (
     DECISION_MODEL,
+    GOLD_CONFIG,
+    GOLD_FILE,
     decision_labels,
     demo_records,
     demo_snapshot,
@@ -54,13 +57,29 @@ from obsei.demo import (
     redacted_demo_records,
     write_labels,
 )
+from obsei.enrichers.classify import ClassifyPluginConfig, build_classifier
+from obsei.evaluate import (
+    CLASSIFY,
+    EvalReport,
+    correct,
+    corrected_examples,
+    corrections,
+    evaluate,
+    gold_examples,
+    path,
+    questions,
+    read_labels,
+)
 from obsei.llm import EgressPolicy
 from obsei.llm.client import LlmError, LlmUnreachableError
 from obsei.llm.embed import LOCAL_MODEL, MODELS_DIR_ENV, LocalEmbedder
 from obsei.llm.local import LOCAL_CLASSIFIER, fetch
 from obsei.pipeline import Pipeline
 from obsei.preview import PreviewError, Redaction, labels, redactions, resolve
+from obsei.privacy.names import redactor_for
 from obsei.privacy.pseudonym import SALT_ENV_VAR, PseudonymSaltError, load_salt, pseudonymize
+from obsei.privacy.redact import RegexRedactor
+from obsei.routing import answer
 from obsei.runner import RUN_ERRORS, run_pipelines
 from obsei.store import (
     DB_KEY_ENV_VAR,
@@ -776,6 +795,232 @@ def ask(
         )
     if answer.judge_error:
         typer.echo(f"warning: grounding check failed: {answer.judge_error}", err=True)
+
+
+ClassifyPipelineOption = Annotated[
+    str | None,
+    typer.Option(
+        "--pipeline", "-p", help="Pipeline whose classify enricher to use (default: the first)."
+    ),
+]
+
+
+def _classify_config(cfg: ObseiConfig, pipeline: str | None) -> ClassifyPluginConfig:
+    try:
+        candidates = [cfg.pipeline(pipeline)] if pipeline else cfg.pipelines
+        spec = next((e for p in candidates for e in p.enrichers if e.type == CLASSIFY), None)
+        if spec is None:
+            raise _fail(f"no classify enricher in {pipeline or 'any pipeline'}")
+        return ClassifyPluginConfig.model_validate(spec.config)
+    except (ConfigError, ValidationError) as exc:
+        raise _fail(exc) from None
+
+
+def _classifier(config: ClassifyPluginConfig, ctx: Context) -> Enricher:
+    try:
+        return build_classifier(config, ctx)
+    except (KeyError, ValueError, OSError, RuntimeError, LlmError) as exc:
+        raise _fail(exc) from None
+
+
+@app.command("eval")
+def eval_(
+    gold: Annotated[
+        Path | None,
+        typer.Argument(
+            help="CSV with text, optional lang and a column per question: sentiment, intent or "
+            "a field name."
+        ),
+    ] = None,
+    config: ConfigOption = DEFAULT_PATH,
+    pipeline: ClassifyPipelineOption = None,
+    demo: Annotated[
+        bool, typer.Option("--demo", help="The demo gold set with the local default classifier.")
+    ] = False,
+    from_store: Annotated[
+        bool, typer.Option("--from-store", help="Use the human-corrected records as gold.")
+    ] = False,
+    db: DbOption = None,
+    target_precision: Annotated[
+        float, typer.Option(min=0.0, max=1.0, help="Accuracy the suggested cutoffs keep.")
+    ] = 0.9,
+    min_accuracy: Annotated[
+        float | None,
+        typer.Option(min=0.0, max=1.0, help="Exit 1 when a question's accuracy is lower."),
+    ] = None,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the report as JSON.")] = False,
+) -> None:
+    """Measure the classifier on labelled feedback and suggest a cutoff per question."""
+    if (gold is not None) + demo + from_store != 1:
+        raise _fail("pass a gold CSV, --demo or --from-store")
+    if demo:
+        classify = GOLD_CONFIG
+        ctx = Context(egress=EgressPolicy.from_env(), llms={"default": LlmEndpoint(api="local")})
+        with resources.as_file(resources.files("obsei") / "templates" / GOLD_FILE) as file:
+            examples = gold_examples(file, questions(classify), RegexRedactor())
+    else:
+        cfg = _load(config)
+        classify = _classify_config(cfg, pipeline)
+        ctx = build_context(cfg)
+        if gold is None:
+            path = db or cfg.store.path
+            with _open_store(
+                path, cfg.store.unencrypted, read_only=True, egress=ctx.egress, must_exist=True
+            ) as store:
+                examples = corrected_examples(store.iter_records())
+            if not examples:
+                raise _fail(f"no corrected records in {path}; add labels with 'obsei correct'")
+        else:
+            redactor = (
+                redactor_for(cfg.privacy.regions, cfg.privacy.names, ctx.egress)
+                if cfg.privacy.redact
+                else None
+            )
+            try:
+                examples = gold_examples(gold, questions(classify), redactor)
+            except (OSError, ValueError) as exc:
+                raise _fail(exc) from None
+    with ctx:
+        classifier = _classifier(classify, ctx)
+        report = evaluate(classifier, examples, classify, target_precision=target_precision)
+    if report.records and report.failed == report.records:
+        reason = classifier.last_error if isinstance(classifier, ReportsErrors) else None
+        raise _fail(f"the classifier labelled no record: {reason or 'no answer'}")
+    if as_json:
+        typer.echo(report.model_dump_json(indent=2))
+    else:
+        _print_report(report)
+    if min_accuracy is not None and any(q.accuracy < min_accuracy for q in report.questions):
+        raise typer.Exit(1)
+
+
+def _print_report(report: EvalReport) -> None:
+    failed = f", {report.failed} not labelled" if report.failed else ""
+    typer.echo(
+        f"{report.records} records, model {report.model or '-'}, "
+        f"{report.review_rate:.0%} marked for review{failed}\n"
+    )
+    typer.echo(
+        f"{'question':<12}{'n':>5}{'accuracy':>10}{'macro F1':>10}{'ECE':>6}{'Brier':>7}"
+        f"{'cutoff':>8}{'review':>8}{'kept':>6}{'suggest':>9}{'review':>8}  worst language"
+    )
+    for q in report.questions:
+        s, worst = q.suggested, q.worst_language
+        typer.echo(
+            f"{q.question:<12}{q.n:>5}{q.accuracy:>10.2f}{q.macro_f1:>10.2f}{q.ece:>6.2f}"
+            f"{q.brier:>7.2f}{q.current.cutoff:>8.2f}{q.current.review_rate:>8.0%}"
+            f"{q.current.accuracy:>6.2f}"
+            + (f"{s.cutoff:>9.2f}{s.review_rate:>8.0%}" if s else f"{'-':>9}{'-':>8}")
+            + (f"  {worst.lang} {worst.accuracy:.2f}" if worst else "  -")
+        )
+    typer.echo("\nmost common mistakes (expected -> answered):")
+    for q in report.questions:
+        mistakes = ", ".join(f"{c.gold} -> {c.predicted or '-'} ({c.count})" for c in q.confusions)
+        typer.echo(f"{q.question:<12}{mistakes or 'none'}")
+    typer.echo(
+        f"\nkept: accuracy of answers at or above the cutoff; suggest: the lowest cutoff whose "
+        f"kept answers are {report.target_precision:.0%} right (set it under min_confidence)"
+    )
+
+
+REPROCESS_BATCH = 100
+
+
+@app.command()
+def reprocess(
+    config: ConfigOption = DEFAULT_PATH,
+    pipeline: ClassifyPipelineOption = None,
+    db: DbOption = None,
+    since: Annotated[
+        datetime | None, typer.Option(help="Only records created on or after this date (UTC).")
+    ] = None,
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Report the changes without writing them.")
+    ] = False,
+) -> None:
+    """Relabel stored records with the current classify config; human corrections are kept."""
+    cfg = _load(config)
+    classify = _classify_config(cfg, pipeline)
+    options = questions(classify)
+    changes: Counter[tuple[str, str | None, str | None]] = Counter()
+    relabelled = 0
+    with (
+        build_context(cfg) as ctx,
+        _open_store(
+            db or cfg.store.path,
+            cfg.store.unencrypted,
+            read_only=dry_run,
+            egress=ctx.egress,
+            must_exist=True,
+        ) as store,
+    ):
+        classifier = _classifier(classify, ctx)
+        start = since.replace(tzinfo=UTC) if since else None
+        records = [r for r in store.iter_records(since=start) if CLASSIFY in r.enrichments]
+        for first in range(0, len(records), REPROCESS_BATCH):
+            batch = records[first : first + REPROCESS_BATCH]
+            updated = []
+            for record, result in zip(batch, classifier.enrich(batch), strict=True):
+                if result is None:
+                    continue
+                kept = corrections(record)
+                new = record.with_enrichment(CLASSIFY, correct(result, kept) if kept else result)
+                for q in options:
+                    before, after = answer(record, path(q))[0], answer(new, path(q))[0]
+                    if before != after:
+                        changes[q, before, after] += 1
+                updated.append(new)
+            relabelled += len(updated)
+            if not dry_run:
+                store.upsert(updated)
+        if not dry_run:
+            store.audit(
+                "reprocess",
+                {"pipeline": pipeline, "records": relabelled, "changed": sum(changes.values())},
+            )
+    failed = len(records) - relabelled
+    typer.echo(
+        f"relabelled {relabelled} record(s)"
+        + (f", {failed} not labelled" if failed else "")
+        + (" (dry run: nothing written)" if dry_run else "")
+    )
+    for q in options:
+        moves = [(k, n) for k, n in changes.most_common() if k[0] == q]
+        top = ", ".join(f"{a or '-'} -> {b or '-'} ({n})" for (_, a, b), n in moves[:3])
+        typer.echo(f"{q:<12}{sum(n for _, n in moves):>5} changed" + (f": {top}" if top else ""))
+
+
+@app.command("correct")
+def correct_(
+    file: Annotated[
+        Path, typer.Argument(help="CSV with id (the record id) and a column per question.")
+    ],
+    config: ConfigOption = DEFAULT_PATH,
+    pipeline: ClassifyPipelineOption = None,
+    db: DbOption = None,
+) -> None:
+    """Store human labels: they replace the model's answers and are kept by reprocess."""
+    cfg = _load(config)
+    try:
+        rows = read_labels(file, questions(_classify_config(cfg, pipeline)), "id")
+    except (OSError, ValueError) as exc:
+        raise _fail(exc) from None
+    updated, missing = [], []
+    with _open_store(
+        db or cfg.store.path, cfg.store.unencrypted, egress=cfg.egress, must_exist=True
+    ) as store:
+        for row, labels in rows:
+            record = store.get(row["id"])
+            if record is None:
+                missing.append(row["id"])
+            elif labels:
+                fixed = correct(record.enrichments.get(CLASSIFY), labels)
+                updated.append(record.with_enrichment(CLASSIFY, fixed))
+        store.upsert(updated)
+        store.audit("correct", {"records": len(updated)})
+    typer.echo(f"corrected {len(updated)} record(s)")
+    if missing:
+        typer.echo(f"warning: no record with id {', '.join(missing)}", err=True)
 
 
 @app.command("studio")

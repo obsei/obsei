@@ -83,8 +83,9 @@ at 0.7 is the share of records with at least one answer below 0.7. The mixed row
 Caveats: the records are synthetic, about 12 per language, and expected answers come from the demo's
 issue definitions, not from human review of each message. Timings are PyTorch on one CPU, one record
 at a time. Qwen3 1.7B and 4B, larger decision models (Kev-4B, Clef-Flash) and GPUs were not tested.
-Your options and your feedback differ, so measure on a labelled sample of your own before a route
-acts on labels.
+Your options and your feedback differ, so [measure on a labelled sample of your
+own](#measure-on-your-own-data) before a route acts on labels. `obsei eval --demo` reruns the
+default's row: the gold set ships with obsei as `templates/demo-gold.csv`.
 
 ## Chat endpoints
 
@@ -272,8 +273,8 @@ Each answer has a confidence. For a local model it is the top probability. For a
 it is the server's confidence, which is 0 when every option is equally likely. For a yes/no it is
 the larger of p and 1 - p. These probabilities are not calibrated for your data: in the
 [benchmark](#benchmark) one model was overconfident and another underconfident on the same
-question. Check cutoffs on a sample of your own feedback (`obsei try --enrich` prints every
-probability) and set them per question:
+question. Check cutoffs on a labelled sample of your own feedback
+([`obsei eval`](#measure-on-your-own-data) suggests one per question) and set them per question:
 
 ```yaml
 - type: classify
@@ -301,8 +302,8 @@ records:
 
 `obsei init` sets `threshold: 0.4` for the local classifier; the built-in default stays 0.7, which
 suits decision models such as Julia-1. These numbers hold for this model and these options only:
-cutoffs depend on the model, so tune them per question on labelled feedback of your own (the
-upcoming `obsei eval` will suggest them).
+cutoffs depend on the model, so tune them per question on labelled feedback of your own:
+`obsei eval` suggests them ([Measure on your own data](#measure-on-your-own-data)).
 
 ### Known limits
 
@@ -323,3 +324,83 @@ A decision endpoint follows the same egress policy as chat endpoints: the URL is
 request, and every request is checked again on the wire. Julia-1 and the other GGUF models run
 under llama.cpp inside your network, so a decision pipeline works fully `air_gapped`; only hosted
 APIs (Jev, Workers AI) need `private` mode with their host allow-listed.
+
+## Measure on your own data
+
+Label a few hundred messages of your own feedback in a CSV: a `text` column, an optional `lang`
+column, and one column per question, named as in `min_confidence`: `sentiment`, `intent`, or the
+field name (`team`, `urgency`; yes/no fields take `true` or `false`). Answers must be options of
+your `classify` config; empty cells are not scored.
+
+```csv
+text,lang,intent,sentiment,team
+I can't log in since the update,en,bug,negative,engineering
+Fui cobrado duas vezes este mês,pt,complaint,negative,payments
+```
+
+`obsei eval gold.csv` redacts each row as at ingest, runs the `classify` enricher of the first
+pipeline that has one (`-p` picks another) and compares its answers with yours. Nothing is stored
+or delivered; a model endpoint sees the redacted text as in a run. On the demo gold set with the local default (`obsei eval --demo`, about 3.5 minutes
+on a laptop CPU):
+
+```text
+136 records, model MoritzLaurer/bge-m3-zeroshot-v2.0, 13% marked for review
+
+question        n  accuracy  macro F1   ECE  Brier  cutoff  review  kept  suggest  review  worst language
+sentiment     136      0.90      0.87  0.06   0.07    0.40      0%  0.90     0.44      1%  ko 0.50
+intent        136      0.82      0.81  0.13   0.11    0.40      1%  0.83     0.51     12%  es 0.60
+team          136      0.91      0.92  0.26   0.15    0.40     13%  0.95     0.00      0%  de 0.75
+
+most common mistakes (expected -> answered):
+sentiment   negative -> neutral (12), negative -> positive (2)
+intent      praise -> bug (12), bug -> complaint (6), feature_request -> bug (6)
+team        payments -> engineering (6), design -> engineering (3), engineering -> logistics (2)
+```
+
+- **cutoff, review, kept:** the configured cutoff of each question, the share of answers below it,
+  and the accuracy of the answers at or above it.
+- **suggest:** the lowest cutoff whose kept answers are right at least 90% of the time
+  (`--target-precision`), and the share of answers it sends to review. Set it under
+  `min_confidence`; `-` means no cutoff reaches the target.
+- **ECE and Brier** measure how well the confidence matches how often answers are right (0 is
+  perfect). The top line counts records with any answer below its cutoff.
+
+`--json` prints the full report. `obsei eval` exits non-zero only on errors, or with
+`--min-accuracy 0.8` when a question scores lower, so it can gate a model or config change in CI.
+The demo gold set ships with obsei as `templates/demo-gold.csv`; its expected answers come from
+the demo issue each record was written for.
+
+### Correct labels
+
+Fix wrong answers with a CSV of record ids (from Studio, MCP or `obsei export`) and a column per
+question:
+
+```bash
+obsei correct labels.csv      # id,intent,team
+```
+
+A correction replaces the model's answer inside the record's `classify` labels, with confidence 1,
+removes it from `uncertain` (so `review` clears once every uncertain answer is corrected), and lists
+the question under `corrected`. Routes, MCP tools and Studio read corrected labels like any other;
+records already delivered are not sent again. Each run is recorded in `obsei audit`.
+
+`obsei eval --from-store` uses every corrected record as the gold set, so the labels your
+reviewers fix become the test set for the next model or cutoff.
+
+### Relabel stored feedback
+
+After changing the model, options, fields or cutoffs, relabel what is already stored:
+
+```bash
+obsei reprocess --dry-run                 # count what would change
+obsei reprocess --since 2026-09-01        # relabel records created since then
+```
+
+Every stored record with `classify` labels is labelled again by the current config; human
+corrections are kept. The report counts changed answers per question with the most common changes
+(`intent  14 changed: praise -> bug (9), ...`). Records are updated in place and the run is
+audited; sinks are not called and routes are not re-run. DuckDB allows one writer, so stop
+`obsei serve` before `reprocess` or `correct`.
+
+A practical loop: start with a `review` route, correct what lands there, run
+`obsei eval --from-store`, adjust options and cutoffs, then `obsei reprocess`.

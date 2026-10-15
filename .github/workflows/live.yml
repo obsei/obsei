@@ -32,7 +32,7 @@ jobs:
           OBSEI_LIVE_LINEAR_TEAM_ID: ${{ secrets.OBSEI_LIVE_LINEAR_TEAM_ID }}
 
   models:
-    name: Local models (GLiNER names, multilingual embeddings)
+    name: Local models (GLiNER names, multilingual embeddings, classifier)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -46,3 +46,5 @@ jobs:
       - run: uv run pytest packages/obsei/tests/test_names.py packages/obsei/tests/test_local_embed.py -v -rs
         env:
           OBSEI_LIVE: "1"
+      - run: uv run obsei models download --classifier MoritzLaurer/bge-m3-zeroshot-v2.0
+      - run: uv run obsei eval --demo --min-accuracy 0.75

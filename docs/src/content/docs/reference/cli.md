@@ -14,6 +14,9 @@ description: obsei command reference.
 | `obsei alerts snooze ALERT KEY [--hours N] [-c FILE] [--db PATH]` | Silence one alert key for N hours (default 24) |
 | `obsei alerts ack ALERT KEY [--by NAME] [-c FILE] [--db PATH]` | Acknowledge one alert key: silent for 7 days |
 | `obsei ask QUESTION [-c FILE] [--db PATH]` | Answer from your feedback with citations; with `ask_judge`, also a grounding score |
+| `obsei eval GOLD.csv \| --demo \| --from-store [-c FILE] [-p NAME] [--db PATH] [--json] [--target-precision P] [--min-accuracy A]` | Measure the `classify` enricher on labelled feedback and suggest a cutoff per question; exits 1 only when `--min-accuracy` is not met ([Models](/guides/models/#measure-on-your-own-data)) |
+| `obsei correct FILE.csv [-c FILE] [-p NAME] [--db PATH]` | Store human labels (`id` and a column per question) in place of the model's answers |
+| `obsei reprocess [-c FILE] [-p NAME] [--db PATH] [--since DATE] [--dry-run]` | Relabel stored records with the current `classify` config, keeping human labels, and report what changed |
 | `obsei studio --out DIR [-c FILE] [--db PATH]` | Export a static Studio snapshot |
 | `obsei demo [--out DIR] [--embedder hashing\|local\|local:MODEL] [--decision-url-env VAR [--decision-model NAME] [--save-labels FILE]]` | Build the synthetic multilingual demo (default: offline `hashing` embedder and the committed decision-model labels) |
 | `obsei models download [--embeddings MODEL] [--classifier MODEL ...] [--dir DIR]` | Fetch the local embedding model (`obsei[embeddings]`) and classifier models (`obsei[local]`) for offline use; by default, those of the installed extras |

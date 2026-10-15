@@ -33,10 +33,9 @@ not listed below ships only when a contributor builds and maintains it.
 
 Open for contributors; not started.
 
-- **Classifier quality:** commit the demo [benchmark](https://docs.obsei.com/guides/models/#benchmark)
-  as a labelled test set, and add Clef-Flash and Qwen3 1.7B and 4B to it.
+- **More benchmarked models:** Clef-Flash and Qwen3 1.7B and 4B on the demo
+  [benchmark](https://docs.obsei.com/guides/models/#benchmark) (`obsei eval --demo`).
 - **Cloudflare Workers AI** for chat and embeddings (decision models already work through its URL).
-- **`obsei reprocess`:** relabel stored records with a new model or new questions.
 
 ## Releases
 
