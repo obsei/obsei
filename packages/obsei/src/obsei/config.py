@@ -248,15 +248,24 @@ class ObseiConfig(_Strict):
 
 def load_config(path: Path = DEFAULT_PATH) -> ObseiConfig:
     try:
-        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        text = path.read_text(encoding="utf-8")
     except FileNotFoundError:
         raise ConfigError(f"{path} not found; run 'obsei init' to create one") from None
-    except yaml.YAMLError as exc:
-        raise ConfigError(f"{path}: invalid YAML: {exc}") from None
+    except UnicodeDecodeError as exc:
+        raise ConfigError(f"{path}: not UTF-8: {exc}") from None
+    return parse_config(text, str(path))
+
+
+def parse_config(text: str, source: str = "obsei.yaml") -> ObseiConfig:
+    try:
+        raw = yaml.safe_load(text)
+    # PyYAML raises a bare ValueError for out-of-range escapes such as "\U7fffffff".
+    except (yaml.YAMLError, ValueError) as exc:
+        raise ConfigError(f"{source}: invalid YAML: {exc}") from None
     try:
         return ObseiConfig.model_validate(raw)
     except ValidationError as exc:
-        raise ConfigError(f"{path}: {exc}") from None
+        raise ConfigError(f"{source}: {exc}") from None
 
 
 def builtin_registry(allow: Collection[str] = ()) -> Registry:

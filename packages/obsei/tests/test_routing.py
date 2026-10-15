@@ -10,7 +10,7 @@ import pytest
 from pydantic import BaseModel, JsonValue, ValidationError
 
 from obsei import Enrichment, Record, SourceRef
-from obsei.config import ConfigError, ObseiConfig, build_pipeline, load_config
+from obsei.config import ConfigError, ObseiConfig, build_pipeline, load_config, parse_config
 from obsei.core.context import Context, LlmEndpoint
 from obsei.core.protocols import Cursor, SinkResult
 from obsei.llm import EgressPolicy
@@ -598,3 +598,16 @@ def test_classify_results_store_score_levels() -> None:
     assert result is not None
     assert _Levels.model_validate(result.value).levels == {"urgency": LEVELS}
     assert when({"classify.fields.urgency": {"gte": "today"}}).matches(rec(result))
+
+
+@pytest.mark.parametrize("text", ['x: "\\U7fffffff"', "a: [b", "- 1\n- 2"])
+def test_parse_config_turns_bad_yaml_into_config_errors(text: str) -> None:
+    with pytest.raises(ConfigError, match=r"obsei\.yaml"):
+        parse_config(text)
+
+
+def test_load_config_rejects_non_utf8(tmp_path: Path) -> None:
+    path = tmp_path / "obsei.yaml"
+    path.write_bytes(b"version: 1\nname: \xff\n")
+    with pytest.raises(ConfigError, match="not UTF-8"):
+        load_config(path)
