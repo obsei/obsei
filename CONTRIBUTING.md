@@ -78,9 +78,33 @@ ignores unless the requirement names one (`obsei>=1.0.0rc1`). In `release-please
 Release-please also bumps exact versions on lines marked `x-release-please-version` (or between
 `x-release-please-start-version` and `x-release-please-end`) in the files listed under
 `extra-files`: the image tags in both READMEs, the docs quickstart, `docker-compose.yml` and the blog post, and the
-release link on the website. Install specifiers such as `>=1.0.0rc1` are minimums and need no
-change: they already install the newest release. Prefer a minimum or a link to
-[Releases](https://github.com/obsei/obsei/releases) over an exact version in new text.
+release link on the website. It sets `version` in the Claude and Cursor `plugin.json`,
+`gemini-extension.json` and both versions in `server.json` by JSON path. Install specifiers such
+as `>=1.0.0rc1` are minimums and need no change: they already install the newest release. Prefer
+a minimum or a link to [Releases](https://github.com/obsei/obsei/releases) over an exact version
+in new text.
+
+After PyPI, the release workflow publishes `server.json` to the
+[MCP Registry](https://registry.modelcontextprotocol.io) with GitHub OIDC. The registry checks
+that the PyPI README of that version contains `mcp-name: io.github.obsei/obsei`.
+
+## For maintainers: AI tool directories
+
+The plugin lives in `integrations/claude/obsei` and every manifest points at it (see
+[AI tools](https://docs.obsei.com/guides/ai-tools/)). Submissions, once per directory:
+
+- [ ] Cursor Marketplace: submit the repository at https://cursor.com/marketplace/publish.
+- [ ] Cline MCP Marketplace: open an issue in
+  [cline/mcp-marketplace](https://github.com/cline/mcp-marketplace) with the repository URL and a
+  400x400 PNG logo (render `docs/public/brand/obsei-mark.svg`); Cline follows `llms-install.md`.
+- [ ] OpenAI plugin directory: submit a "Skills only" ZIP of `skills/voice-of-customer` (local
+  stdio plugins are limited to allowlisted partners), with the
+  [privacy policy](https://docs.obsei.com/privacy/policy/), an icon, test cases and a demo video.
+- [ ] Claude plugin directory: submit `obsei/obsei` with the plugin at `integrations/claude/obsei`.
+- [ ] Goose: open a pull request adding obsei to `documentation/static/servers.json` in
+  [block/goose](https://github.com/block/goose).
+- [ ] Gemini CLI gallery: add the GitHub topic `gemini-cli-extension` to the repository; the
+  gallery crawls repositories with that topic and a root `gemini-extension.json`.
 
 ## For maintainers: websites
 

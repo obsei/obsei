@@ -95,6 +95,24 @@ docker run --rm -v "$PWD:/data" -w /data --user "$(id -u):$(id -g)" \
 ```
 <!-- x-release-please-end -->
 
+## Use it from your AI tool
+
+The MCP server and `voice-of-customer` skill install in one line:
+
+| Tool | Install |
+| --- | --- |
+| Claude Code | `/plugin install obsei --marketplace obsei/obsei` |
+| Codex | `codex plugin marketplace add obsei/obsei`, then `codex plugin add obsei@obsei` |
+| GitHub Copilot CLI | `copilot plugin install obsei/obsei:integrations/claude/obsei` |
+| Gemini CLI | `gemini extensions install https://github.com/obsei/obsei` |
+| Any MCP client | `uvx --from "obsei>=1.0.0rc1" obsei mcp` |
+
+[![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=obsei&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJvYnNlaT49MS4wLjByYzEiLCJvYnNlaSIsIm1jcCJdfQ%3D%3D)
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_obsei-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=obsei&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22obsei%3E%3D1.0.0rc1%22%2C%22obsei%22%2C%22mcp%22%5D%7D)
+
+VS Code, Devin Desktop, Zed, JetBrains, Kiro, Goose, Cline and ChatGPT: see
+[AI tools](https://docs.obsei.com/guides/ai-tools/).
+
 ## Roadmap
 
 Phases 0.1 to 0.5 (private core, MCP and Claude plugin, enterprise bring-your-own, themes and

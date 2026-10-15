@@ -1,0 +1,35 @@
+{
+  "name": "obsei",
+  "version": "1.0.0-rc.4",
+  "description": "Query your self-hosted customer feedback with cited, privacy-filtered evidence.",
+  "contextFileName": "integrations/claude/obsei/skills/voice-of-customer/SKILL.md",
+  "mcpServers": {
+    "obsei": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "obsei>=1.0.0rc1",
+        "obsei",
+        "mcp"
+      ]
+    }
+  },
+  "settings": [
+    {
+      "name": "Config file",
+      "description": "Absolute path to obsei.yaml.",
+      "envVar": "OBSEI_CONFIG"
+    },
+    {
+      "name": "Database",
+      "description": "Absolute path to obsei.duckdb, when obsei.yaml does not give one.",
+      "envVar": "OBSEI_DB"
+    },
+    {
+      "name": "Database key",
+      "description": "The key that encrypts the database.",
+      "envVar": "OBSEI_DB_KEY",
+      "sensitive": true
+    }
+  ]
+}

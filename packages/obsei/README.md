@@ -18,8 +18,14 @@ export OBSEI_DB_KEY="$(openssl rand -hex 24)" OBSEI_PSEUDONYM_SALT="$(openssl ra
 obsei try && obsei run
 ```
 
-Optional extras: `mcp` (MCP server, `obsei serve`), `sql`, `google`, `apple`, `names` (person-name
+Optional extras: `sql`, `google`, `apple`, `names` (person-name
 redaction), `embeddings` (multilingual themes).
+
+Use it from your AI tool: `/plugin install obsei --marketplace obsei/obsei` in Claude Code,
+`gemini extensions install https://github.com/obsei/obsei`, or `uvx --from "obsei>=1.0.0rc1" obsei mcp`
+in any MCP client. Codex, Copilot, VS Code, Cursor and others: https://docs.obsei.com/guides/ai-tools/
+
+<!-- mcp-name: io.github.obsei/obsei -->
 
 - Docs: https://docs.obsei.com
 - Live demo: https://docs.obsei.com/demo/

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.obsei/obsei",
+  "title": "obsei",
+  "description": "Self-hosted customer feedback with PII stripped at ingest: search, stats and themes with citations.",
+  "repository": {
+    "url": "https://github.com/obsei/obsei",
+    "source": "github",
+    "subfolder": "packages/obsei"
+  },
+  "websiteUrl": "https://obsei.com",
+  "version": "1.0.0-rc.4",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "obsei",
+      "version": "1.0.0-rc.4",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "OBSEI_CONFIG",
+          "description": "Path to obsei.yaml (default ./obsei.yaml).",
+          "format": "filepath"
+        },
+        {
+          "name": "OBSEI_DB",
+          "description": "Path to the database, overriding store.path.",
+          "format": "filepath"
+        },
+        {
+          "name": "OBSEI_DB_KEY",
+          "description": "The key that encrypts the database.",
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

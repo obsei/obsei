@@ -559,7 +559,6 @@ def test_ask_judge_must_be_a_decision_endpoint() -> None:
 
 
 def test_slack_and_api_text_flag_unsupported_answers() -> None:
-    pytest.importorskip("mcp")
     from obsei.ask import Answer  # noqa: PLC0415
     from obsei.serve import Handlers  # noqa: PLC0415
 

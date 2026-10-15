@@ -14,6 +14,26 @@
           "jsonpath": "$.version"
         },
         {
+          "type": "json",
+          "path": "/integrations/claude/obsei/.cursor-plugin/plugin.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "/gemini-extension.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "/server.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "/server.json",
+          "jsonpath": "$.packages[0].version"
+        },
+        {
           "type": "generic",
           "path": "README.md"
         },

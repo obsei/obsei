@@ -452,10 +452,8 @@ def mcp(
     db: Annotated[Path | None, typer.Option("--db", envvar="OBSEI_DB")] = None,
 ) -> None:
     """Serve read-only MCP tools over stdio (Claude, ChatGPT, Cursor, your agents)."""
-    try:
-        from obsei.mcp_server import create_server  # noqa: PLC0415
-    except ImportError:
-        raise _fail("MCP support needs: pip install 'obsei[mcp]'") from None
+    from obsei.mcp_server import create_server  # noqa: PLC0415
+
     settings = _store_settings(config, db)
 
     @contextmanager
@@ -474,12 +472,10 @@ def serve(
     db: Annotated[Path | None, typer.Option("--db", envvar="OBSEI_DB")] = None,
 ) -> None:
     """Serve webhook intake (/ingest), MCP over HTTP (/mcp) and /healthz."""
-    try:
-        import uvicorn  # noqa: PLC0415
+    import uvicorn  # noqa: PLC0415
 
-        from obsei.serve import create_app  # noqa: PLC0415
-    except ImportError:
-        raise _fail("serve needs: pip install 'obsei[mcp]'") from None
+    from obsei.serve import create_app  # noqa: PLC0415
+
     token = os.environ.get(API_TOKEN_ENV_VAR) or None
     cfg = _load(config)
     has_access = token or cfg.access.users or cfg.access.trusted_proxy
