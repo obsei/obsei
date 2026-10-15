@@ -18,9 +18,12 @@ text, labels and record ids, never author pseudonyms) go to that tool and the mo
 uses, under their terms. You choose the tool and its provider.
 
 **Websites.** obsei.com, docs.obsei.com and blog.obsei.com are static sites hosted on Cloudflare
-Pages. They set no cookies and include no analytics or tracking scripts. Cloudflare processes
-request data such as IP addresses to deliver and protect the sites, under the
-[Cloudflare privacy policy](https://www.cloudflare.com/privacypolicy/).
+Pages. They set no cookies and use no advertising or cross-site tracking. They use
+[Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/) to count page views: its
+script stores nothing in your browser, does not fingerprint you or follow you across sites, and
+reports only aggregate figures such as the page, referrer, country, browser and load time.
+Cloudflare also processes request data such as IP addresses to deliver and protect the sites,
+under the [Cloudflare privacy policy](https://www.cloudflare.com/privacypolicy/).
 
 **Contact.** Questions go to [GitHub Discussions](https://github.com/obsei/obsei/discussions);
 security issues are handled as described in
