@@ -80,7 +80,7 @@ at 0.7 is the share of records with at least one answer below 0.7. The mixed row
 - mDeBERTa and gliner2-base missed whole languages (0% in Japanese, Korean, Hindi or Arabic on some
   questions). Qwen3-0.6B was the best calibrated on team routing (ECE .05) but the slowest.
 
-Caveats: the records are synthetic, about 12 per language, and expected answers come from the demo's
+Caveats: the records are synthetic, 5 to 41 per language (41 in English), and expected answers come from the demo's
 issue definitions, not from human review of each message. Timings are PyTorch on one CPU, one record
 at a time. Qwen3 1.7B and 4B, larger decision models (Kev-4B, Clef-Flash) and GPUs were not tested.
 Your options and your feedback differ, so [measure on a labelled sample of your

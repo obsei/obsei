@@ -24,7 +24,7 @@ git-ignored), which every command loads; on servers and in CI, set `OBSEI_DB_KEY
 `OBSEI_PSEUDONYM_SALT` or mount the file.
 
 Optional extras: `recommended` (`local` and `embeddings`), `local` (in-process classifier), `sql`, `google`, `apple`, `names` (person-name
-redaction), `embeddings` (multilingual themes).
+redaction), `embeddings` (multilingual themes), `notify` (Telegram, Discord, email and more via Apprise).
 
 Use it from your AI tool: `/plugin install obsei --marketplace obsei/obsei` in Claude Code,
 `gemini extensions install https://github.com/obsei/obsei`, or `uvx --from "obsei>=1.0" obsei mcp`

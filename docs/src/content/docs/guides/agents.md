@@ -23,7 +23,8 @@ endpoint or an agent over MCP, it has already been through:
   them, not even the pseudonym.
 - **k-anonymity.** `list_themes` hides themes from fewer than `k_anonymity` people.
 
-Raw text with personal data is never stored, so an agent cannot recover it. See
+Text is stored only after redaction, so an agent cannot recover what was redacted. Personal data
+the detectors miss (names without `obsei[names]`, addresses) stays in the text. See
 [Privacy controls](/privacy/overview/) for the detectors and their limits.
 
 ## What the MCP server exposes
