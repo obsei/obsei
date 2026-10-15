@@ -346,7 +346,7 @@ def test_cli_lists_shows_approves_and_rejects(
     no = runner.invoke(app, ["approvals", "reject", second.id, "-c", str(path), "--reason", "dup"])
     assert no.exit_code == 0, no.output
     left = runner.invoke(app, ["approvals", "list", "-c", str(path), "--status", "pending"])
-    assert left.output == ""
+    assert left.output == "no pending approvals\n"
     with Store(db, allow_unencrypted=True, read_only=True) as file_store:
         statuses = {a.id: (a.status, a.decided_by) for a in file_store.approvals()}
     assert statuses[first.id] == ("approved", "ana")

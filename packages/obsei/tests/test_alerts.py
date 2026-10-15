@@ -349,6 +349,14 @@ def write_config(tmp_path: Path, alerts: list[dict[str, object]]) -> Path:
     return path
 
 
+def test_cli_list_without_alerts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("OBSEI_DB_KEY", raising=False)
+    Store(tmp_path / "obsei.duckdb", allow_unencrypted=True).close()
+    result = CliRunner().invoke(app, ["alerts", "list", "-c", str(write_config(tmp_path, []))])
+    assert result.exit_code == 0
+    assert result.output.startswith("no alerts configured in obsei.yaml")
+
+
 def test_cli_check_list_snooze_and_ack(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OBSEI_DB_KEY", raising=False)
     with Store(tmp_path / "obsei.duckdb", allow_unencrypted=True) as store:

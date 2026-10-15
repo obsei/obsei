@@ -66,21 +66,17 @@ Releases are automated. Merging to `master` updates a release PR opened by relea
 that PR tags the release, publishes to PyPI via Trusted Publishing and pushes a signed image to
 `ghcr.io/obsei/obsei`.
 
-Until 1.0.0, releases are PyPI pre-releases (`1.0.0a1`, `1.0.0rc1`, ...), which `pip install obsei`
-ignores unless the requirement names one (`obsei>=1.0.0rc1`). In `release-please-config.json`:
-
-- next releases bump the pre-release number automatically (`1.0.0-rc.2`, ...); nothing to change;
-- to start betas or release candidates, set `release-as` to `1.0.0-beta.1` or `1.0.0-rc.1` and
-  `prerelease-type` to `beta` or `rc`, then remove `release-as` after that release;
-- for the launch, set `release-as` to `1.0.0` and remove `versioning`, `prerelease` and
-  `prerelease-type`, then remove `release-as` after the release.
+Versions follow semantic versioning from the conventional commits since the last release: `fix:`
+bumps the patch, `feat:` the minor, and `!` or a `BREAKING CHANGE:` footer the major. To cut a
+pre-release, set `"release-as": "1.1.0-rc.1"` on `packages/obsei` in `release-please-config.json`
+and remove it after that release; `pip install obsei` skips pre-releases unless asked for one.
 
 Release-please also bumps exact versions on lines marked `x-release-please-version` (or between
 `x-release-please-start-version` and `x-release-please-end`) in the files listed under
 `extra-files`: the image tags in both READMEs, the docs quickstart, `docker-compose.yml` and the blog post, and the
 release link on the website. It sets `version` in the Claude and Cursor `plugin.json`,
 `gemini-extension.json` and both versions in `server.json` by JSON path. Install specifiers such
-as `>=1.0.0rc1` are minimums and need no change: they already install the newest release. Prefer
+as `>=1.0` are minimums and need no change: they already install the newest release. Prefer
 a minimum or a link to [Releases](https://github.com/obsei/obsei/releases) over an exact version
 in new text.
 

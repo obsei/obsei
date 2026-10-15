@@ -8,7 +8,7 @@
       "command": "uvx",
       "args": [
         "--from",
-        "obsei>=1.0.0rc1",
+        "obsei>=1.0",
         "obsei",
         "mcp"
       ]
