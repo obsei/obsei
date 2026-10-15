@@ -583,7 +583,7 @@ def _line(text: str, width: int = PREVIEW_CHARS) -> str:
 def _print_preview(rows: list[tuple[str, Record]], found: list[Redaction], hint: bool) -> None:
     console = Console(highlight=False)
     if not rows:
-        console.print("no records")
+        console.print("no records: the source returned nothing new (check the link, or try later)")
         return
     table = Table("source", "lang", "labels", "text", show_lines=True)
     for key, record in rows:
