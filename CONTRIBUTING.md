@@ -98,8 +98,6 @@ The plugin lives in `integrations/claude/obsei` and every manifest points at it 
   stdio plugins are limited to allowlisted partners), with the
   [privacy policy](https://docs.obsei.com/privacy/policy/), an icon, test cases and a demo video.
 - [ ] Claude plugin directory: submit `obsei/obsei` with the plugin at `integrations/claude/obsei`.
-- [ ] Goose: open a pull request adding obsei to `documentation/static/servers.json` in
-  [block/goose](https://github.com/block/goose).
 - [ ] Gemini CLI gallery: add the GitHub topic `gemini-cli-extension` to the repository; the
   gallery crawls repositories with that topic and a root `gemini-extension.json`.
 
