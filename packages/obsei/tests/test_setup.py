@@ -52,6 +52,8 @@ def _slack(request: httpx.Request) -> httpx.Response:
 
 
 def _apple(request: httpx.Request) -> httpx.Response:
+    if request.url.path.endswith("/json"):
+        return httpx.Response(200, json={"feed": {}})
     entry = (
         "<entry><id>r1</id><title>Login broken</title>"
         '<content type="text">Call me on 090-1234-5678, I cannot log in.</content>'

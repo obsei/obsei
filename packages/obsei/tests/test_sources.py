@@ -164,6 +164,8 @@ def apple_feed(*entries: str) -> httpx.Response:
 def test_appstore_multi_country_incremental() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         country = request.url.path.split("/")[1]
+        if request.url.path.endswith("/json"):
+            return httpx.Response(200, json={"feed": {}})
         if "page=1" not in request.url.path:
             return apple_feed()
         return apple_feed(
@@ -177,6 +179,41 @@ def test_appstore_multi_country_incremental() -> None:
     assert records[0].text == "良い\n\nold"
     assert records[0].context == {"country": "jp", "app_version": "3.2", "title": "良い"}
     assert cursor == {"jp": "2026-09-02T17:00:00+00:00", "br": "2026-09-02T17:00:00+00:00"}
+
+
+def test_appstore_tries_other_spellings_and_json_when_the_feed_is_empty() -> None:
+    requested: list[str] = []
+    entry = {
+        "id": {"label": "r9"},
+        "im:rating": {"label": "2"},
+        "content": {"label": "Crashes on start"},
+        "updated": {"label": "2026-09-02T10:00:00-07:00"},
+    }
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        path = request.url.path
+        requested.append(path.split("customerreviews/")[1])
+        if path.endswith("/id=123/sortBy=mostRecent/json"):
+            return httpx.Response(200, json={"feed": {"entry": entry}})
+        if path.endswith("/json"):
+            return httpx.Response(200, json={"feed": {}})
+        return apple_feed()
+
+    source = build("appstore", {"app_id": "123", "max_pages": 2}, ctx(handler))
+    records, _ = drain(source.fetch(None))
+    assert [(r.source.native_id, r.text) for r in records] == [("r9", "Crashes on start")]
+    assert requested[:6] == [
+        "page=1/id=123/sortby=mostrecent/xml",
+        "page=1/id=123/sortby=mostrecent/json",
+        "id=123/sortby=mostrecent/xml",
+        "id=123/sortby=mostrecent/json",
+        "id=123/sortBy=mostRecent/xml",
+        "id=123/sortBy=mostRecent/json",
+    ]
+    assert requested[6:] == [
+        "page=2/id=123/sortby=mostrecent/xml",
+        "page=2/id=123/sortby=mostrecent/json",
+    ]
 
 
 def test_playstore_reviews(monkeypatch: pytest.MonkeyPatch) -> None:

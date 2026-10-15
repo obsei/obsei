@@ -106,10 +106,12 @@ uv tool install "obsei>=1.0.0rc1" \
 
 ## App Store feeds
 
-`appstore` reads Apple's public review feed, which needs no key but is unofficial: Apple sometimes
-serves it empty for hours, for any app. Runs then store nothing new and pick up the missed reviews
-once the feed returns (it holds the latest ~500 per country). For your own apps, `appstoreconnect`
-uses the official API and covers every review.
+`appstore` reads Apple's public review feed, which needs no key but is unofficial. Since mid-2026
+Apple's CDN often serves one spelling of the feed empty while another has the reviews, so obsei
+tries four spellings, as XML and then JSON, before it treats a country as empty. Apple now returns
+only the latest 50 reviews per country (later pages are empty), so run it often enough that new
+reviews don't scroll past. For your own apps, `appstoreconnect` uses the official API and covers
+every review.
 
 ## Global coverage
 
