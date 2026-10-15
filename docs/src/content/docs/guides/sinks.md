@@ -24,7 +24,7 @@ credentials, without sending anything ([Set up without editing YAML](/guides/set
 | <span class="i i-linear"></span> `linear` | One issue per matching record | marker in the description | verified |
 | <span class="i i-apacheparquet"></span> `parquet` | Parquet files for notebooks and lakes | file named by batch content | beta |
 | <span class="i i-database"></span> `sql` | Upsert into a table in any SQLAlchemy database or warehouse | delete and insert by id | beta |
-| <span class="i i-users"></span> `teams` ([plugin](/reference/plugins/), `pip install obsei-teams`) | An Adaptive Card per matching record in a Microsoft Teams channel | at-least-once | beta |
+| <span class="i i-users"></span> `teams` ([plugin](/reference/plugins/)) | An Adaptive Card per matching record in a Microsoft Teams channel (`pip install obsei-teams`) | at-least-once | beta |
 
 `verified` means a live test in
 [`packages/obsei/tests/live`](https://github.com/obsei/obsei/tree/master/packages/obsei/tests/live)

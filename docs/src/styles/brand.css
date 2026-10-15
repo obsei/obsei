@@ -73,29 +73,70 @@
 }
 
 .i-apacheparquet { --icon: url("/icons/apacheparquet.svg"); }
+.i-atlassian { --icon: url("/icons/atlassian.svg"); }
 .i-bell { --icon: url("/icons/bell.svg"); }
 .i-bluesky { --icon: url("/icons/bluesky.svg"); }
+.i-bot { --icon: url("/icons/bot.svg"); }
+.i-claude { --icon: url("/icons/claude.svg"); }
+.i-cline { --icon: url("/icons/cline.svg"); }
 .i-clipboard-list { --icon: url("/icons/clipboard-list.svg"); }
+.i-code-xml { --icon: url("/icons/code-xml.svg"); }
+.i-confluence { --icon: url("/icons/confluence.svg"); }
+.i-cursor { --icon: url("/icons/cursor.svg"); }
 .i-database { --icon: url("/icons/database.svg"); }
 .i-file-json { --icon: url("/icons/file-json.svg"); }
 .i-file-spreadsheet { --icon: url("/icons/file-spreadsheet.svg"); }
 .i-folder-input { --icon: url("/icons/folder-input.svg"); }
 .i-github { --icon: url("/icons/github.svg"); }
+.i-githubcopilot { --icon: url("/icons/githubcopilot.svg"); }
 .i-globe { --icon: url("/icons/globe.svg"); }
+.i-googlegemini { --icon: url("/icons/googlegemini.svg"); }
 .i-headset { --icon: url("/icons/headset.svg"); }
+.i-hubspot { --icon: url("/icons/hubspot.svg"); }
 .i-intercom { --icon: url("/icons/intercom.svg"); }
+.i-jetbrains { --icon: url("/icons/jetbrains.svg"); }
 .i-jira { --icon: url("/icons/jira.svg"); }
+.i-layout-dashboard { --icon: url("/icons/layout-dashboard.svg"); }
 .i-linear { --icon: url("/icons/linear.svg"); }
 .i-mail { --icon: url("/icons/mail.svg"); }
+.i-map-pin { --icon: url("/icons/map-pin.svg"); }
+.i-mastodon { --icon: url("/icons/mastodon.svg"); }
+.i-message-circle { --icon: url("/icons/message-circle.svg"); }
 .i-message-square { --icon: url("/icons/message-square.svg"); }
 .i-modelcontextprotocol { --icon: url("/icons/modelcontextprotocol.svg"); }
+.i-monitor { --icon: url("/icons/monitor.svg"); }
 .i-phone-call { --icon: url("/icons/phone-call.svg"); }
 .i-play { --icon: url("/icons/play.svg"); }
+.i-plug { --icon: url("/icons/plug.svg"); }
 .i-reddit { --icon: url("/icons/reddit.svg"); }
 .i-rss { --icon: url("/icons/rss.svg"); }
 .i-smartphone { --icon: url("/icons/smartphone.svg"); }
+.i-sparkles { --icon: url("/icons/sparkles.svg"); }
+.i-star { --icon: url("/icons/star.svg"); }
+.i-terminal { --icon: url("/icons/terminal.svg"); }
+.i-ticket { --icon: url("/icons/ticket.svg"); }
 .i-users { --icon: url("/icons/users.svg"); }
 .i-video { --icon: url("/icons/video.svg"); }
+.i-warehouse { --icon: url("/icons/warehouse.svg"); }
 .i-webhook { --icon: url("/icons/webhook.svg"); }
+.i-wordpress { --icon: url("/icons/wordpress.svg"); }
 .i-ycombinator { --icon: url("/icons/ycombinator.svg"); }
+.i-zedindustries { --icon: url("/icons/zedindustries.svg"); }
 .i-zendesk { --icon: url("/icons/zendesk.svg"); }
+
+#claude-code::before,
+#claude-desktop-and-other-clients::before {
+  content: "";
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-right: 0.35em;
+  vertical-align: -0.05em;
+  background: currentColor;
+  -webkit-mask: url("/icons/claude.svg") center / contain no-repeat;
+  mask: url("/icons/claude.svg") center / contain no-repeat;
+}
+
+td:has(> .i:first-child) {
+  white-space: nowrap;
+}

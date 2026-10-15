@@ -17,9 +17,9 @@ directory and are tested with obsei in CI.
 
 | Plugin | Type | Kind | What it does |
 |---|---|---|---|
-| [`obsei-reddit`](https://github.com/obsei/obsei/tree/master/plugins/obsei-reddit) | `reddit` | source | Subreddit posts, comments and searches from Reddit's public RSS feeds, no API key. |
-| [`obsei-typeform`](https://github.com/obsei/obsei/tree/master/plugins/obsei-typeform) | `typeform` | source | Completed Typeform survey responses through the Responses API with your token, incremental; picks text, rating, language and an optional pseudonymised respondent id from chosen fields. |
-| [`obsei-teams`](https://github.com/obsei/obsei/tree/master/plugins/obsei-teams) | `teams` | sink | Posts matching, redacted feedback to a Microsoft Teams channel as an Adaptive Card through a Power Automate Workflows webhook. |
+| <span class="i i-reddit"></span> [`obsei-reddit`](https://github.com/obsei/obsei/tree/master/plugins/obsei-reddit) | `reddit` | source | Subreddit posts, comments and searches from Reddit's public RSS feeds, no API key. |
+| <span class="i i-clipboard-list"></span> [`obsei-typeform`](https://github.com/obsei/obsei/tree/master/plugins/obsei-typeform) | `typeform` | source | Completed Typeform survey responses through the Responses API with your token, incremental; picks text, rating, language and an optional pseudonymised respondent id from chosen fields. |
+| <span class="i i-users"></span> [`obsei-teams`](https://github.com/obsei/obsei/tree/master/plugins/obsei-teams) | `teams` | sink | Posts matching, redacted feedback to a Microsoft Teams channel as an Adaptive Card through a Power Automate Workflows webhook. |
 
 `obsei-teams` is on PyPI; `obsei-reddit` and `obsei-typeform` install from Git:
 
