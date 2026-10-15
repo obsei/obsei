@@ -26,21 +26,29 @@ not listed below ships only when a contributor builds and maintains it.
 | 0.3 Enterprise BYO | Done | SQL, MCP-client, file-drop, IMAP, Zendesk, Freshdesk, Intercom; Jira, Linear and SQL sinks; role-based access and SSO proxy |
 | 0.4 Themes and Studio | Done | Embeddings (offline and multilingual), dedupe, stable themes, k-anonymous views, `ask`, Gong, Studio with a knowledge graph, Slack command, static demo, name redaction |
 | 0.5 Decisions and routing | Done | Decision models (Julia-1, Clef) with probabilities, confidence fallback to a chat model or a human, `filter` enricher, grounding judge for `ask`, ordered routes on model confidence, Studio privacy, decisions, trends and routes panels |
-| Release candidate | In progress | [Release candidates](https://github.com/obsei/obsei/releases) published. Before 1.0: weekly live-connector checks green, one design partner in production, listed in the MCP Registry and Claude plugin directory |
-| 1.0 | Planned | Stable API and schema; write tools behind an approval queue (done: `propose_issue` and `obsei approvals`); ChatGPT connector; fuller knowledge graph; Show HN launch |
+| Release candidates | Done | rc1 to rc5: in-process classifier as the default, `obsei eval`, `reprocess` and corrections, theme spike, digest, review and health alerts, signed event webhooks and the Apprise `notify` sink, approval queue for agent writes, untrusted-text marking in MCP, a first run with generated secrets and `obsei try <link>`, guided setup (`obsei add`, `check`, `integrations`, editor schema), plugins for Claude, Codex, Copilot, Cursor and Gemini, MCP Registry listing |
+| 1.0 | Releasing | First stable release. Stable within 1.x, changing only by addition: the record schema, `obsei.yaml` (version 1), the CLI, MCP tools and the approval queue, the plugin protocol, alert config and the webhook event format |
 
 ## Next
 
 Open for contributors; not started.
 
+- **Design partner case study:** one organization running 1.x in production, written up.
+- **ChatGPT connector:** a public MCP endpoint with OAuth 2.1 (ChatGPT rejects static tokens);
+  until then the [tunnel recipe](https://docs.obsei.com/guides/ai-tools/) covers private use.
+- **Hierarchical labels:** a taxonomy file with facets and parent labels for `classify`, building
+  on `obsei eval` and corrections.
+- **Fuller knowledge graph** in Studio.
+- **Framework adapters:** a dlt source and a LangChain document loader.
 - **More benchmarked models:** Clef-Flash and Qwen3 1.7B and 4B on the demo
   [benchmark](https://docs.obsei.com/guides/models/#benchmark) (`obsei eval --demo`).
 - **Cloudflare Workers AI** for chat and embeddings (decision models already work through its URL).
 
 ## Releases
 
-Everything above ships as PyPI pre-releases (`1.0.0a1`, then `1.0.0rc1`, `1.0.0rc2`, ...), which `pip install obsei`
-ignores unless `--pre` is passed or the requirement names one (`obsei>=1.0.0rc1`). The first stable release and public launch is **1.0.0**.
+1.0.0 is the first stable release: `pip install obsei` installs it. The 1.0 work shipped first as
+PyPI pre-releases (`1.0.0a1`, `1.0.0rc1` to `1.0.0rc5`). From 1.0.0 on, releases follow semantic
+versioning.
 
 ## Not planned (contributor-gated)
 
