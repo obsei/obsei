@@ -19,6 +19,7 @@ from obsei._version import RELEASE_VERSION, pep440
 from obsei.cli import app
 from obsei.config import ObseiConfig, load_config
 from obsei.core.context import USER_AGENT, Context
+from obsei.preview import SOURCES_DOCS
 from obsei.privacy import pseudonymize
 from obsei.store import Store
 
@@ -411,7 +412,7 @@ def test_try_a_file_and_links_that_need_setup(
     play = runner.invoke(app, ["try", "https://play.google.com/store/apps/details?id=x.y"])
     assert play.exit_code == 2
     assert "configure the playstore source" in play.output
-    assert "docs.obsei.com" in play.output
+    assert SOURCES_DOCS in play.output
     missing = runner.invoke(app, ["try", "nope.csv"])
     assert missing.exit_code == 2
     assert "not a link or a file" in missing.output
