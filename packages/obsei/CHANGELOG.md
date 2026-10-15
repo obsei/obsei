@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.0-rc.5](https://github.com/obsei/obsei/compare/v1.0.0-rc.4...v1.0.0-rc.5) (2026-10-15)
+
+
+### Features
+
+* **alerts:** theme spikes, new themes, digests and health alerts ([#433](https://github.com/obsei/obsei/issues/433)) ([ddcd970](https://github.com/obsei/obsei/commit/ddcd970628ec27f4a7c27528104476cdaaba071f))
+* **cli:** a first five minutes that shows value ([#434](https://github.com/obsei/obsei/issues/434)) ([98a10a1](https://github.com/obsei/obsei/commit/98a10a1907908e155002d79834d9dda94e2b1141))
+* **eval:** obsei eval, reprocess and corrections ([#436](https://github.com/obsei/obsei/issues/436)) ([ad1baa3](https://github.com/obsei/obsei/commit/ad1baa31ee182c5393ff4a76ffba6388db044a2d))
+* **integrations:** obsei for Claude, Codex, Copilot, Cursor, Gemini and other AI tools ([#431](https://github.com/obsei/obsei/issues/431)) ([c9044c7](https://github.com/obsei/obsei/commit/c9044c780b573b98a791dfdfc4b5f2d9271701e5))
+* **mcp:** mark customer text as untrusted and queue agent writes for approval ([#437](https://github.com/obsei/obsei/issues/437)) ([7e66d34](https://github.com/obsei/obsei/commit/7e66d346fb660daac003027130829f424920715c))
+
+
+### Bug Fixes
+
+* **config:** report YAML that PyYAML cannot decode as a config error ([#432](https://github.com/obsei/obsei/issues/432)) ([468de17](https://github.com/obsei/obsei/commit/468de17ed14625195dc87f2e0a1d4891b6145e9d))
+
 ## [1.0.0-rc.4](https://github.com/obsei/obsei/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2026-10-14)
 
 
