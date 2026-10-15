@@ -36,22 +36,22 @@ doesn't work.
 
 | Tool | Install | Notes |
 | --- | --- | --- |
-| Claude Code | `/plugin install obsei --marketplace obsei/obsei` | MCP server and skill. Older versions: `/plugin marketplace add obsei/obsei`, then `/plugin install obsei@obsei` |
-| Codex | `codex plugin marketplace add obsei/obsei`, then `codex plugin add obsei@obsei` | MCP server and skill. MCP only: [below](#codex) |
-| GitHub Copilot CLI | `copilot plugin install obsei/obsei:integrations/claude/obsei` | MCP server and skill |
-| VS Code (Copilot agent mode) | button above, or `code --add-mcp '{"name":"obsei","command":"uvx","args":["--from","obsei>=1.0","obsei","mcp"]}'` | MCP server. For the skill too, run **Chat: Install Plugin From Source** with `https://github.com/obsei/obsei` |
-| Cursor | button above | MCP server only. The plugin with the skill has been submitted to the Cursor Marketplace and is not available there yet |
-| Gemini CLI | `gemini extensions install https://github.com/obsei/obsei` | Asks for `OBSEI_CONFIG`, `OBSEI_DB` and `OBSEI_DB_KEY`; Gemini passes only these to the server |
-| Antigravity | `agy plugin import gemini` | Imports the Gemini CLI extension above |
-| Claude Desktop | [JSON config](#json-config) in `claude_desktop_config.json` | |
-| Cline | ask Cline to install `https://github.com/obsei/obsei` | It follows [`llms-install.md`](https://github.com/obsei/obsei/blob/master/llms-install.md). Not in the Cline MCP Marketplace yet |
-| Devin Desktop (formerly Windsurf) | [JSON config](#json-config) in `~/.config/devin/mcp_config.json` | |
-| Zed | [Zed settings](#zed) | |
-| JetBrains AI Assistant | **Settings > Tools > AI Assistant > Model Context Protocol (MCP)**, **Add**, paste the [JSON config](#json-config) | |
-| Junie | [JSON config](#json-config) in `.junie/mcp/mcp.json` | |
-| Kiro | [JSON config](#json-config) in `.kiro/settings/mcp.json` | |
-| Goose | [Install in Goose](goose://extension?cmd=uvx&arg=--from&arg=obsei%3E%3D1.0&arg=obsei&arg=mcp&id=obsei&name=obsei&description=Privacy-first%20Voice%20of%20Customer) | Or `goose configure`, **Add Extension**, **Command-line Extension** with the command above |
-| ChatGPT | [Secure MCP Tunnel](#chatgpt) | Private use only |
+| <span class="i i-claude"></span> Claude Code | `/plugin install obsei --marketplace obsei/obsei` | MCP server and skill. Older versions: `/plugin marketplace add obsei/obsei`, then `/plugin install obsei@obsei` |
+| <span class="i i-terminal"></span> Codex | `codex plugin marketplace add obsei/obsei`, then `codex plugin add obsei@obsei` | MCP server and skill. MCP only: [below](#codex) |
+| <span class="i i-githubcopilot"></span> GitHub Copilot CLI | `copilot plugin install obsei/obsei:integrations/claude/obsei` | MCP server and skill |
+| <span class="i i-code-xml"></span> VS Code | button above, or `code --add-mcp '{"name":"obsei","command":"uvx","args":["--from","obsei>=1.0","obsei","mcp"]}'` | Copilot agent mode. MCP server. For the skill too, run **Chat: Install Plugin From Source** with `https://github.com/obsei/obsei` |
+| <span class="i i-cursor"></span> Cursor | button above | MCP server only. The plugin with the skill has been submitted to the Cursor Marketplace and is not available there yet |
+| <span class="i i-googlegemini"></span> Gemini CLI | `gemini extensions install https://github.com/obsei/obsei` | Asks for `OBSEI_CONFIG`, `OBSEI_DB` and `OBSEI_DB_KEY`; Gemini passes only these to the server |
+| <span class="i i-sparkles"></span> Antigravity | `agy plugin import gemini` | Imports the Gemini CLI extension above |
+| <span class="i i-claude"></span> Claude Desktop | [JSON config](#json-config) in `claude_desktop_config.json` | |
+| <span class="i i-cline"></span> Cline | ask Cline to install `https://github.com/obsei/obsei` | It follows [`llms-install.md`](https://github.com/obsei/obsei/blob/master/llms-install.md). Not in the Cline MCP Marketplace yet |
+| <span class="i i-monitor"></span> Devin Desktop | [JSON config](#json-config) in `~/.config/devin/mcp_config.json` | Formerly Windsurf |
+| <span class="i i-zedindustries"></span> Zed | [Zed settings](#zed) | |
+| <span class="i i-jetbrains"></span> JetBrains AI Assistant | **Settings > Tools > AI Assistant > Model Context Protocol (MCP)**, **Add**, paste the [JSON config](#json-config) | |
+| <span class="i i-jetbrains"></span> Junie | [JSON config](#json-config) in `.junie/mcp/mcp.json` | |
+| <span class="i i-bot"></span> Kiro | [JSON config](#json-config) in `.kiro/settings/mcp.json` | |
+| <span class="i i-bot"></span> Goose | [Install in Goose](goose://extension?cmd=uvx&arg=--from&arg=obsei%3E%3D1.0&arg=obsei&arg=mcp&id=obsei&name=obsei&description=Privacy-first%20Voice%20of%20Customer) | Or `goose configure`, **Add Extension**, **Command-line Extension** with the command above |
+| <span class="i i-message-circle"></span> ChatGPT | [Secure MCP Tunnel](#chatgpt) | Private use only |
 
 ## JSON config
 

@@ -10,7 +10,7 @@ const allSteps = [
   },
   {
     name: "Classify",
-    note: "decision model or LLM",
+    note: "local model or any LLM",
     href: "/guides/models/",
     icon: '<path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="15" r="3"/>',
   },
@@ -28,6 +28,19 @@ const allSteps = [
   },
 ];
 
+const icons: [string, string][] = [
+  ["App Store", "smartphone"], ["Google Play", "play"], ["Google Business", "map-pin"], ["Zendesk", "zendesk"],
+  ["Freshdesk", "headset"], ["Intercom", "intercom"], ["Gong", "phone-call"], ["GitHub", "github"],
+  ["Bluesky", "bluesky"], ["Hacker News", "ycombinator"], ["YouTube", "video"], ["RSS", "rss"],
+  ["Mastodon", "mastodon"], ["Trustpilot", "star"], ["HubSpot", "hubspot"], ["ServiceNow", "ticket"],
+  ["Atlassian", "atlassian"], ["Confluence", "confluence"], ["WordPress", "wordpress"], ["Typeform", "clipboard-list"],
+  ["NPS CSV", "file-spreadsheet"], ["IMAP", "mail"], ["File drop", "folder-input"], ["SQL", "database"],
+  ["Webhook", "webhook"], ["Signed webhook", "webhook"], ["+ any REST", "plug"], ["Studio", "layout-dashboard"],
+  ["AI agents", "modelcontextprotocol"], ["Slack", "message-square"], ["Jira", "jira"], ["Linear", "linear"],
+  ["Warehouse", "warehouse"], ["Parquet", "apacheparquet"], ["Microsoft Teams", "users"],
+];
+const icon = (label: string) => icons.find(([prefix]) => label.startsWith(prefix))?.[1];
+
 type StepName = "Redact" | "Classify" | "Theme" | "Store";
 interface Props {
   sources?: string[];
@@ -44,7 +57,7 @@ const label = `obsei pipeline: ${sources.join(", ")} flow into your infrastructu
   <div class="flow">
   <div class="lane">
     <p class="title"><a href="/guides/sources/">{compact ? "Sources" : "Collect"}</a></p>
-    <ul class="pills">{sources.map((s) => <li>{s}</li>)}</ul>
+    <ul class="pills">{sources.map((s) => <li>{icon(s) && <span class={`i i-${icon(s)}`} />}{s}</li>)}</ul>
   </div>
   <div class="link" aria-hidden="true"><span></span></div>
   <div class="boundary">
@@ -65,7 +78,7 @@ const label = `obsei pipeline: ${sources.join(", ")} flow into your infrastructu
   <div class="link" aria-hidden="true"><span></span></div>
   <div class="lane">
     <p class="title"><a href="/guides/sinks/">{compact ? "Sinks" : "Act"}</a></p>
-    <ul class="pills out">{outputs.map((s) => <li>{s}</li>)}</ul>
+    <ul class="pills out">{outputs.map((s) => <li>{icon(s) && <span class={`i i-${icon(s)}`} />}{s}</li>)}</ul>
   </div>
   </div>
 </figure>
