@@ -11,6 +11,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.sources._common import as_float, as_text, html_to_text, lookup, parse_time
@@ -72,11 +73,22 @@ def _ticket(
 class ZendeskConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    subdomain: str = Field(pattern=r"^[a-z0-9-]+$")
-    email_env: str = "ZENDESK_EMAIL"
-    token_env: str = "ZENDESK_API_TOKEN"  # noqa: S105
-    start_time: datetime = datetime(2020, 1, 1, tzinfo=UTC)
-    max_pages: int = Field(default=50, ge=1)
+    subdomain: str = Field(pattern=r"^[a-z0-9-]+$", description="<subdomain>.zendesk.com")
+    email_env: str = Field(
+        default="ZENDESK_EMAIL",
+        description="Environment variable with the email of the agent the token belongs to.",
+        json_schema_extra=SECRET,
+    )
+    token_env: str = Field(
+        default="ZENDESK_API_TOKEN",
+        description="Environment variable with the API token.",
+        json_schema_extra=SECRET,
+    )
+    start_time: datetime = Field(
+        default=datetime(2020, 1, 1, tzinfo=UTC),
+        description="First run only: oldest ticket update to read.",
+    )
+    max_pages: int = Field(default=50, ge=1, description="Most pages of tickets read per run.")
 
 
 class ZendeskSource:
@@ -136,9 +148,18 @@ class FreshdeskConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     domain: str = Field(pattern=r"^[a-z0-9-]+$", description="<domain>.freshdesk.com")
-    api_key_env: str = "FRESHDESK_API_KEY"
-    since: datetime = datetime(2020, 1, 1, tzinfo=UTC)
-    max_pages: int = Field(default=300, ge=1, le=300)
+    api_key_env: str = Field(
+        default="FRESHDESK_API_KEY",
+        description="Environment variable with your Freshdesk API key.",
+        json_schema_extra=SECRET,
+    )
+    since: datetime = Field(
+        default=datetime(2020, 1, 1, tzinfo=UTC),
+        description="First run only: oldest ticket update to read.",
+    )
+    max_pages: int = Field(
+        default=300, ge=1, le=300, description="Most pages of tickets read per run."
+    )
 
 
 class FreshdeskSource:
@@ -204,10 +225,18 @@ INTERCOM_HOSTS: dict[IntercomRegion, str] = {
 class IntercomConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    region: IntercomRegion = "us"
-    token_env: str = "INTERCOM_TOKEN"  # noqa: S105
-    workspace: str = "default"
-    max_pages: int = Field(default=50, ge=1)
+    region: IntercomRegion = Field(
+        default="us", description="Data region of your workspace: us, eu or au."
+    )
+    token_env: str = Field(
+        default="INTERCOM_TOKEN",
+        description="Environment variable with an access token.",
+        json_schema_extra=SECRET,
+    )
+    workspace: str = Field(default="default", description="Name stored with each record.")
+    max_pages: int = Field(
+        default=50, ge=1, description="Most pages of conversations read per run."
+    )
 
 
 class IntercomSource:

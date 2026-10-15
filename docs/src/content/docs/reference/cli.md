@@ -6,6 +6,9 @@ description: obsei command reference.
 | Command | Purpose |
 | --- | --- |
 | `obsei init [DIR] [--force] [--offline]` | Create `obsei.yaml`, a sample dataset and `.obsei/secrets.env` (a random `OBSEI_DB_KEY` and `OBSEI_PSEUDONYM_SALT`, owner-only, added to `.gitignore`, never overwritten), and install DuckDB's `httpfs` extension for encryption and, with `obsei[local]`, the classifier model, enabling the `classify` enricher (`--offline` skips the downloads; `--force` replaces only `obsei.yaml` and `feedback.csv`) |
+| `obsei integrations [QUERY] [--category C] [--json]` | List every source, enricher and sink, built in or from an installed plugin, with its status, the secrets it needs and where to get them ([Setup](/guides/setup/#find-an-integration)) |
+| `obsei add TYPE\|alert [-c FILE] [-p NAME] [--key KEY] [--as source\|sink] [--set FIELD=VALUE ...] [--all] [--yes]` | Add a source, sink or alert to `obsei.yaml`: asks for its settings, stores secrets in `.obsei/secrets.env`, previews a source or checks a sink, allows the sink's host in `egress:` with consent, and keeps comments; `--yes` asks nothing ([Setup](/guides/setup/#add-a-source-or-sink)) |
+| `obsei check [-c FILE] [-p NAME]` | Build every source, sink and alert target, fetch one record per source and check sink credentials where that sends nothing; exits 1 if any failed |
 | `obsei try [LINK\|FILE] [-c FILE] [-p NAME] [--limit N] [--no-enrich] [--json]` | Preview up to N (default 10) records per source as a table of redacted text and labels, with a redaction summary; from the configured sources, or an App Store, GitHub, Hacker News or RSS/Atom link or a `.csv`/`.jsonl`/`.json` file (see [Quickstart](/quickstart/#preview-with-obsei-try)). Nothing stored or sent; `--json` prints JSON Lines |
 | `obsei run [-c FILE] [-p NAME] [--db PATH] [--every MINUTES]` | Run pipelines, then check alerts |
 | `obsei themes [-c FILE] [--db PATH]` | Embed new feedback, update stable themes, then check alerts |
@@ -30,7 +33,8 @@ description: obsei command reference.
 | `obsei forget --author / --source [--instance] / --older-than-days [-c FILE] [--db PATH] [--unencrypted]` | Erase records (tombstoned so they are never stored again) |
 | `obsei audit [--limit N] [-c FILE] [--db PATH] [--unencrypted]` | Show the erasure, export, access and approval log |
 | `obsei doctor [-c FILE]` | Check environment, where the secrets came from, encryption, egress mode and plugins |
-| `obsei schema` | Print the Feedback Record JSON Schema |
+| `obsei schema [record\|config]` | Print the Feedback Record JSON Schema, or `obsei.yaml`'s with the config of every installed integration ([editor autocomplete](/guides/setup/#editor-autocomplete)) |
+| `obsei plugin new NAME [--dir DIR]` | Create a plugin package from the template ([Plugins](/reference/plugins/#writing-a-plugin)) |
 | `obsei version` (or `--version`) | Print the version |
 
 `-c/--config` defaults to `obsei.yaml` (`OBSEI_CONFIG`). `--db` overrides the database path

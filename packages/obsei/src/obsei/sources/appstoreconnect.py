@@ -14,6 +14,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.sources._common import as_float, as_text, lookup, oldest_first, parse_time, stamp
@@ -25,15 +26,31 @@ TOKEN_TTL = 15 * 60
 class AppStoreConnectConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    app_id: str = Field(pattern=r"^\d+$")
-    issuer_id_env: str = "ASC_ISSUER_ID"
-    key_id_env: str = "ASC_KEY_ID"
-    private_key_file: Path | None = None
-    private_key_env: str | None = None
+    app_id: str = Field(
+        pattern=r"^\d+$", description="Your app's Apple ID (digits) from App Store Connect."
+    )
+    issuer_id_env: str = Field(
+        default="ASC_ISSUER_ID",
+        description="Environment variable with the API key's issuer id.",
+        json_schema_extra=SECRET,
+    )
+    key_id_env: str = Field(
+        default="ASC_KEY_ID",
+        description="Environment variable with the API key id.",
+        json_schema_extra=SECRET,
+    )
+    private_key_file: Path | None = Field(
+        default=None, description="Path to the downloaded .p8 key; or set private_key_env."
+    )
+    private_key_env: str | None = Field(
+        default=None,
+        description="Environment variable with the .p8 key's contents.",
+        json_schema_extra=SECRET,
+    )
     territories: list[str] = Field(
         default_factory=list, description="ISO 3166 alpha-3 codes, e.g. USA, DEU, JPN, BRA, IND."
     )
-    max_pages: int = Field(default=20, ge=1)
+    max_pages: int = Field(default=20, ge=1, description="Most pages of reviews read per run.")
 
     @model_validator(mode="after")
     def _one_key(self) -> AppStoreConnectConfig:

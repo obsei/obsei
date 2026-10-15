@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 # Trustpilot reviews of your business through the generic REST source.
 #
 # Verify against your account's API version: field names and paging below follow the

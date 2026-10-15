@@ -5,6 +5,10 @@ sidebar:
   order: 1
 ---
 
+Add any of these with `obsei add TYPE`, which asks for the settings and keys and previews a few
+records; `obsei integrations` lists each one's secrets and where to get them
+([Set up without editing YAML](/guides/setup/)).
+
 | Type | What | Auth | Status |
 | --- | --- | --- | --- |
 | `csv` | Survey exports, ticket dumps, NPS verbatims | none | verified |
@@ -81,6 +85,10 @@ Complete recipes:
 | Trustpilot business reviews (API key header, page paging) | [`trustpilot-rest.yaml`](https://github.com/obsei/obsei/blob/master/examples/trustpilot-rest.yaml) |
 | HubSpot tickets (cursor on `paging.next.after`) and ServiceNow incidents (`sysparm_offset`) | [`crm-and-itsm-rest.yaml`](https://github.com/obsei/obsei/blob/master/examples/crm-and-itsm-rest.yaml) |
 | Mastodon hashtag timeline (`Link` header, HTML) | [`social-listening.yaml`](https://github.com/obsei/obsei/blob/master/examples/social-listening.yaml) |
+| Atlassian Marketplace app reviews (public API, `next_url` on `_links.next.href`) | [`atlassian-marketplace-reviews.yaml`](https://github.com/obsei/obsei/blob/master/examples/atlassian-marketplace-reviews.yaml) |
+| Google Business Profile reviews of your locations (OAuth bearer token, `cursor` on `nextPageToken`; beta) | [`google-business-reviews.yaml`](https://github.com/obsei/obsei/blob/master/examples/google-business-reviews.yaml) |
+| Confluence Cloud pages of a space (basic auth header, `Link` header, HTML) | [`confluence-pages.yaml`](https://github.com/obsei/obsei/blob/master/examples/confluence-pages.yaml) |
+| WordPress.org plugin reviews (the `rss` source on the plugin's review feed) | [`wordpress-plugin-reviews.yaml`](https://github.com/obsei/obsei/blob/master/examples/wordpress-plugin-reviews.yaml) |
 
 More complete setups are on the [Examples](/examples/) page.
 

@@ -15,6 +15,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.sources._common import as_float, as_text, lookup, oldest_first, stamp
@@ -28,11 +29,24 @@ SCOPE = "https://www.googleapis.com/auth/androidpublisher"
 class PlayStoreConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    package_name: str = Field(pattern=r"^[A-Za-z][\w]*(\.[A-Za-z][\w]*)+$")
-    credentials_file: Path | None = None
-    access_token_env: str | None = None
-    translation_language: str | None = None
-    max_pages: int = Field(default=100, ge=1)
+    package_name: str = Field(
+        pattern=r"^[A-Za-z][\w]*(\.[A-Za-z][\w]*)+$",
+        description="Your app's package name, e.g. com.example.app.",
+    )
+    credentials_file: Path | None = Field(
+        default=None,
+        description="Service account JSON key with access to your app (needs obsei[google]).",
+    )
+    access_token_env: str | None = Field(
+        default=None,
+        description="Environment variable with an OAuth access token, instead of credentials_file.",
+        json_schema_extra=SECRET,
+    )
+    translation_language: str | None = Field(
+        default=None,
+        description="Have Google translate reviews to this language, e.g. en; see context.",
+    )
+    max_pages: int = Field(default=100, ge=1, description="Most pages of reviews read per run.")
 
     @model_validator(mode="after")
     def _one_auth(self) -> PlayStoreConfig:

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 # Support tickets from three helpdesks, triaged by a small model with a larger one for hard cases.
 #
 # Sources: Zendesk (incremental export), Freshdesk, Intercom (EU data region).

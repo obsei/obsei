@@ -7,7 +7,12 @@ description: The obsei.yaml file.
 import arbitrary code. Secrets never go in the file: fields ending in `_env` name the environment
 variable that holds the value.
 
+`obsei add` writes sources, sinks and alerts into it for you, and with the schema line below your
+editor completes and checks every key, including each plugin's `config`
+([Set up without editing YAML](/guides/setup/)).
+
 ```yaml
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 version: 1
 
 store:

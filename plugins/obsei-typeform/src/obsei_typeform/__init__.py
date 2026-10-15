@@ -10,7 +10,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import Context
-from obsei.core.plugin import factory
+from obsei.core.plugin import SECRET, Catalog, factory
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.core.registry import Registry
@@ -27,9 +27,16 @@ class TypeformError(RuntimeError):
 class TypeformConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    form_id: str = Field(pattern=r"^[A-Za-z0-9]+$")
+    form_id: str = Field(
+        pattern=r"^[A-Za-z0-9]+$",
+        description="The id in your form's link: form.typeform.com/to/<id>.",
+    )
     instance: str | None = Field(default=None, description="Defaults to form_id.")
-    token_env: str = "TYPEFORM_TOKEN"  # noqa: S105
+    token_env: str = Field(
+        default="TYPEFORM_TOKEN",
+        description="Environment variable with a personal access token (responses:read).",
+        json_schema_extra=SECRET,
+    )
     api_base: str = Field(
         default="https://api.typeform.com",
         pattern=r"^https://",
@@ -42,13 +49,15 @@ class TypeformConfig(BaseModel):
     rating_field: str | None = Field(
         default=None, description="Ref or id of a number, rating, opinion scale or NPS field."
     )
-    lang_hidden_field: str | None = None
+    lang_hidden_field: str | None = Field(
+        default=None, description="Hidden field holding the respondent's language."
+    )
     author_hidden_field: str | None = Field(
         default=None, description="Hidden field holding a respondent id; pseudonymised."
     )
     since: datetime | None = Field(default=None, description="First run only: oldest response.")
-    page_size: int = Field(default=200, ge=1, le=1000)
-    max_pages: int = Field(default=50, ge=1)
+    page_size: int = Field(default=200, ge=1, le=1000, description="Responses per request.")
+    max_pages: int = Field(default=50, ge=1, description="Most pages read per run.")
 
 
 def _matches(answer: JsonValue, key: str) -> bool:
@@ -184,4 +193,16 @@ class TypeformSource:
 
 
 def register(registry: Registry) -> None:
-    registry.add_source("typeform", factory(TypeformConfig, TypeformSource))
+    registry.add_source(
+        "typeform",
+        factory(
+            TypeformConfig,
+            TypeformSource,
+            Catalog(
+                title="Typeform responses",
+                category="surveys",
+                docs_url="https://github.com/obsei/obsei/tree/master/plugins/obsei-typeform",
+                help_url="https://www.typeform.com/developers/get-started/personal-access-token/",
+            ),
+        ),
+    )

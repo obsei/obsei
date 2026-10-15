@@ -103,6 +103,14 @@ class Sink(Protocol):
 
 
 @runtime_checkable
+class Verifies(Protocol):
+    """Optional for sinks: check credentials and target without delivering anything; raise on
+    failure. ``obsei add`` and ``obsei check`` call it."""
+
+    def verify(self) -> None: ...
+
+
+@runtime_checkable
 class Alerts(Protocol):
     """Optional for sinks: deliver one aggregate alert as a single message or event."""
 

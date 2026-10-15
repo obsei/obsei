@@ -76,6 +76,8 @@ local = [
     "torch>=2.4,<3",
     "transformers>=4.51,<6",
 ]
+# The full local setup: the classifier and multilingual themes on this machine.
+recommended = ["obsei[local,embeddings]"]
 
 [project.urls]
 Homepage = "https://obsei.com"

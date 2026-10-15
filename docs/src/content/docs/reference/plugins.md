@@ -48,8 +48,16 @@ and [`examples/alerts-teams.yaml`](https://github.com/obsei/obsei/blob/master/ex
 
 ## Writing a plugin
 
-Start from [`plugins/template`](https://github.com/obsei/obsei/tree/master/plugins/template):
-copy it to `plugins/obsei-<name>`, rename the `obsei_example` package and edit `pyproject.toml`.
+Start from the template:
+
+```bash
+obsei plugin new acme            # creates ./obsei-acme: package obsei_acme, type acme, a test
+pip install -e obsei-acme        # then allow it in obsei.yaml: plugins: [acme]
+obsei add acme                   # asks for its settings and previews a record
+```
+
+In this repository, the template is [`plugins/template`](https://github.com/obsei/obsei/tree/master/plugins/template);
+`obsei plugin new acme --dir plugins/obsei-acme` creates a first-party plugin from it.
 
 A plugin exposes a `register(registry)` hook through the `obsei.plugins` entry point:
 
@@ -70,10 +78,10 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 from typing import ClassVar
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import Context
-from obsei.core.plugin import factory
+from obsei.core.plugin import Catalog, factory
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.core.registry import Registry
@@ -82,7 +90,7 @@ from obsei.core.registry import Registry
 class ExampleConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    greeting: str = "hello"
+    greeting: str = Field(default="hello", description="Text of the one record this source yields.")
 
 
 class ExampleSource:
@@ -102,8 +110,33 @@ class ExampleSource:
 
 
 def register(registry: Registry) -> None:
-    registry.add_source("example", factory(ExampleConfig, ExampleSource))
+    registry.add_source(
+        "example",
+        factory(
+            ExampleConfig,
+            ExampleSource,
+            Catalog(title="Example", category="data", docs_url="https://github.com/you/obsei-example"),
+        ),
+    )
 ```
+
+The `Catalog` is what `obsei integrations` and `obsei add` show: a `title`, a `category`
+(reviews, support, social, surveys, data, chat, issues, warehouse or notify), a `status` (`beta`
+until a live test covers it), `docs_url`, and `help_url`, the provider's page on getting the
+credential. Give every config field a `description`: `obsei add` shows it at each prompt and
+editors show it on hover. Mark each `*_env` field that names a secret with
+`json_schema_extra=SECRET` (from `obsei.core.plugin`), so `obsei add` asks for the value hidden and
+stores it in `.obsei/secrets.env`:
+
+```python
+token_env: str = Field(
+    default="ACME_TOKEN", description="Environment variable with an Acme API token.",
+    json_schema_extra=SECRET,
+)
+```
+
+Sinks can also implement `verify()`, which checks credentials and the target without delivering
+anything; `obsei add` and `obsei check` call it.
 
 The protocols live in `obsei.core.protocols`:
 

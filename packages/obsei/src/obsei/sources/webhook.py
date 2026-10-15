@@ -24,6 +24,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError, model_validator
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record
 from obsei.sinks.webhook import signature, signing_key
@@ -35,13 +36,30 @@ GITHUB_SIGNATURE_HEADER = "x-hub-signature-256"
 class WebhookSourceConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    secret_env: str | None = None
-    allow_unsigned: bool = False
-    require_timestamp: bool = True
-    max_age_seconds: int = Field(default=300, ge=1)
-    instance: str = "default"
-    items_path: str | None = None
-    fields: FieldMap = Field(default_factory=FieldMap)
+    secret_env: str | None = Field(
+        default=None,
+        description="Environment variable with the signing secret senders use.",
+        json_schema_extra=SECRET,
+    )
+    allow_unsigned: bool = Field(
+        default=False,
+        description="Accept requests without a signature (only on a trusted network).",
+    )
+    require_timestamp: bool = Field(
+        default=True,
+        description="Refuse body-only signatures; false accepts GitHub's X-Hub-Signature-256.",
+    )
+    max_age_seconds: int = Field(
+        default=300, ge=1, description="Refuse signed requests older than this."
+    )
+    instance: str = Field(default="default", description="Name stored with each record.")
+    items_path: str | None = Field(
+        default=None, description="Path to the list of items in the body; default: the body."
+    )
+    fields: FieldMap = Field(
+        default_factory=FieldMap,
+        description="Which fields hold the text, id, date, rating and other values.",
+    )
 
     @model_validator(mode="after")
     def _signed(self) -> WebhookSourceConfig:

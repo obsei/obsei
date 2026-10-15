@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import os
 import secrets
-from collections.abc import Collection, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from pathlib import Path
 from typing import Literal, Self
 
@@ -51,11 +51,13 @@ class _Strict(BaseModel):
 
 class PluginSpec(_Strict):
     type: str
-    config: dict[str, JsonValue] = Field(default_factory=dict)
+    config: dict[str, JsonValue] = Field(
+        default_factory=dict, description="Settings of this type; secrets only as *_env names."
+    )
 
 
 class SourceEntry(PluginSpec):
-    key: str = Field(pattern=r"^[\w-]+$")
+    key: str = Field(pattern=r"^[\w-]+$", description="Unique name of this source in the pipeline.")
 
 
 class SinkEntry(PluginSpec):
@@ -118,7 +120,8 @@ class PrivacyConfig(_Strict):
 
 
 class StoreConfig(_Strict):
-    path: Path = Path("obsei.duckdb")
+    # pydantic omits a WindowsPath default from the JSON schema; pin it so every OS agrees.
+    path: Path = Field(Path("obsei.duckdb"), json_schema_extra={"default": "obsei.duckdb"})
     unencrypted: bool = False
 
 
@@ -325,6 +328,19 @@ def write_secrets(directory: Path) -> Path | None:
         handle.write(SECRETS_HEADER)
         for name in (DB_KEY_ENV_VAR, SALT_ENV_VAR):
             handle.write(f"{name}={secrets.token_hex(24)}\n")
+    return path
+
+
+def save_secrets(directory: Path, values: Mapping[str, str]) -> Path:
+    """Set ``values`` in ``.obsei/secrets.env``, replacing earlier lines for the same names."""
+    path = directory / SECRETS_PATH
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+    kept = [line for line in lines if line.partition("=")[0].strip() not in values]
+    text = "".join(f"{line}\n" for line in [*kept, *(f"{k}={v}" for k, v in values.items())])
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(text)
     return path
 
 

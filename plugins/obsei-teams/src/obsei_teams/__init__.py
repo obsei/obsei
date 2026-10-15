@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import EGRESS, Context
-from obsei.core.plugin import factory
+from obsei.core.plugin import SECRET, Catalog, factory
 from obsei.core.protocols import Alert, SinkResult
 from obsei.core.record import Record
 from obsei.core.registry import Registry
@@ -25,14 +25,20 @@ MAX_STARS = 5
 class TeamsConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    webhook_url_env: str = "TEAMS_WEBHOOK_URL"
-    title: str = "New customer feedback"
+    webhook_url_env: str = Field(
+        default="TEAMS_WEBHOOK_URL",
+        description="Environment variable with the Workflows webhook URL.",
+        json_schema_extra=SECRET,
+    )
+    title: str = Field(default="New customer feedback", description="Heading of each card.")
     when: Conditions = Field(
         default_factory=dict, description='e.g. {"classify.sentiment": ["negative"]}'
     )
-    max_rating: float | None = None
+    max_rating: float | None = Field(default=None, description="Only records rated at most this.")
     max_records: int = Field(default=10, ge=1, le=25, description="Records per card.")
-    max_text: int = Field(default=600, ge=50, le=4000)
+    max_text: int = Field(
+        default=600, ge=50, le=4000, description="Characters of each record's text shown."
+    )
 
 
 def _text(value: str, *, weight: str | None = None, subtle: bool = False) -> dict[str, JsonValue]:
@@ -142,4 +148,16 @@ class TeamsSink:
 
 
 def register(registry: Registry) -> None:
-    registry.add_sink("teams", factory(TeamsConfig, TeamsSink))
+    registry.add_sink(
+        "teams",
+        factory(
+            TeamsConfig,
+            TeamsSink,
+            Catalog(
+                title="Microsoft Teams channel",
+                category="chat",
+                docs_url="https://github.com/obsei/obsei/tree/master/plugins/obsei-teams",
+                help_url="https://support.microsoft.com/en-us/workflows/send-messages-in-teams-using-incoming-webhooks",
+            ),
+        ),
+    )

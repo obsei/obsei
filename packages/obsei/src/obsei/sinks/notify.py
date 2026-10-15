@@ -10,6 +10,7 @@ from urllib.parse import urlsplit
 from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Alert, SinkResult
 from obsei.core.record import Record
 from obsei.llm.egress import EgressError
@@ -24,13 +25,15 @@ class NotifyConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     urls_env: str = Field(
-        default="APPRISE_URLS", description="Environment variable with Apprise URLs."
+        default="APPRISE_URLS",
+        description="Environment variable with Apprise URLs.",
+        json_schema_extra=SECRET,
     )
     when: Conditions = Field(
         default_factory=dict, description='e.g. {"classify.intent": ["bug", "churn_risk"]}'
     )
-    max_rating: float | None = None
-    max_items: int = Field(default=5, ge=1)
+    max_rating: float | None = Field(default=None, description="Only records rated at most this.")
+    max_items: int = Field(default=5, ge=1, description="Records listed per message.")
 
 
 def hosts(plugin: NotifyBase) -> list[str]:

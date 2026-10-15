@@ -8,22 +8,37 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import EGRESS, Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.routing import Conditions, When
-from obsei.sinks._common import env, intents, marker, open_issues
+from obsei.sinks._common import SinkConfigError, env, intents, marker, open_issues
 
 
 class GitHubIssueSinkConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    repo: str = Field(pattern=r"^[\w.-]+/[\w.-]+$")
-    api_url: str = "https://api.github.com"
-    token_env: str = "GITHUB_TOKEN"  # noqa: S105
-    labels: list[str] = Field(default_factory=lambda: ["feedback"])
-    when: Conditions = Field(default_factory=lambda: intents("bug", "feature_request"))
-    max_rating: float | None = None
-    max_issues: int = Field(default=10, ge=1)
+    repo: str = Field(
+        pattern=r"^[\w.-]+/[\w.-]+$", description="owner/name of the repository to open issues in."
+    )
+    api_url: str = Field(
+        default="https://api.github.com",
+        description="API URL; change it for GitHub Enterprise Server.",
+    )
+    token_env: str = Field(
+        default="GITHUB_TOKEN",
+        description="Environment variable with a token that can create issues.",
+        json_schema_extra=SECRET,
+    )
+    labels: list[str] = Field(
+        default_factory=lambda: ["feedback"], description="Labels added to each issue."
+    )
+    when: Conditions = Field(
+        default_factory=lambda: intents("bug", "feature_request"),
+        description='Which records open an issue, e.g. {"classify.intent": ["bug"]}.',
+    )
+    max_rating: float | None = Field(default=None, description="Only records rated at most this.")
+    max_issues: int = Field(default=10, ge=1, description="Most issues opened per run.")
 
 
 class GitHubIssueSink:
@@ -71,6 +86,12 @@ class GitHubIssueSink:
 
     def send(self, batch: Sequence[Record]) -> SinkResult:
         return open_issues(self, batch, self.when, self.config.max_issues)
+
+    def verify(self) -> None:
+        url = f"{self.config.api_url}/repos/{self.config.repo}"
+        response = self.ctx.http.get(url, headers=self.headers, extensions=EGRESS)
+        if response.is_error:
+            raise SinkConfigError(f"GitHub returned {response.status_code} for {url}")
 
 
 __all__ = ["GitHubIssueSink", "GitHubIssueSinkConfig"]

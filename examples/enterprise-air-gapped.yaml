@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 # Enterprise deployment: private models, name redaction, SSO, roles and retention.
 #
 # Network: egress is "private": models and sinks may reach internal hosts plus the allowlist

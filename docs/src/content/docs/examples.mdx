@@ -103,6 +103,39 @@ HubSpot tickets (cursor paging on `paging.next.after`) and ServiceNow incidents 
   href="https://github.com/obsei/obsei/blob/master/examples/crm-and-itsm-rest.yaml"
 />
 
+## More review sites and wikis
+
+Four smaller recipes, each one source with the local classifier:
+
+- **Atlassian Marketplace** reviews of your app through the public Marketplace API, no key; 1-2
+  star reviews go to Slack.
+- **Google Business Profile** reviews of the locations you manage, with an OAuth token (beta: the
+  API needs approved access, and the token lasts an hour).
+- **Confluence Cloud** pages of a space, such as customer interview notes, with an API token.
+- **WordPress.org** reviews of your plugin from its public review feed.
+
+<Pipeline compact sources={["Atlassian Marketplace", "Google Business Profile", "Confluence", "WordPress.org"]} steps={["Redact", "Classify", "Store"]} outputs={["Slack", "Parquet"]} />
+
+<LinkCard
+  title="atlassian-marketplace-reviews.yaml"
+  href="https://github.com/obsei/obsei/blob/master/examples/atlassian-marketplace-reviews.yaml"
+/>
+<LinkCard
+  title="google-business-reviews.yaml"
+  href="https://github.com/obsei/obsei/blob/master/examples/google-business-reviews.yaml"
+/>
+<LinkCard
+  title="confluence-pages.yaml"
+  href="https://github.com/obsei/obsei/blob/master/examples/confluence-pages.yaml"
+/>
+<LinkCard
+  title="wordpress-plugin-reviews.yaml"
+  href="https://github.com/obsei/obsei/blob/master/examples/wordpress-plugin-reviews.yaml"
+/>
+
+Telegram, Discord and email notifications need no recipe: the
+[`notify` sink](/guides/sinks/#notifications) sends to them and 100+ other services.
+
 ## Warehouse round trip
 
 NPS responses read incrementally from Postgres, Snowflake or BigQuery, classified, and written

@@ -20,14 +20,19 @@ from obsei.sources._common import FieldMap, map_item
 class FileConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    path: Path
-    instance: str = "default"
-    fields: FieldMap = Field(default_factory=FieldMap)
-    encoding: str = "utf-8-sig"
+    path: Path = Field(description="Path to the file, relative to where obsei runs.")
+    instance: str = Field(
+        default="default", description="Name stored with each record, to tell several files apart."
+    )
+    fields: FieldMap = Field(
+        default_factory=FieldMap,
+        description="Which columns hold the text, id, date, rating and other values.",
+    )
+    encoding: str = Field(default="utf-8-sig", description="Text encoding of the file.")
 
 
 class CsvConfig(FileConfig):
-    delimiter: str = Field(default=",", min_length=1, max_length=1)
+    delimiter: str = Field(default=",", min_length=1, max_length=1, description="Column separator.")
 
 
 class _FileSource:

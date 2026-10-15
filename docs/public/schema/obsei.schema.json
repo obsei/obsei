@@ -1,0 +1,3788 @@
+{
+  "$defs": {
+    "AccessConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_hosts": {
+          "description": "Extra Host names 'obsei serve' answers to, besides localhost and the bind address (DNS-rebinding protection); '*.example.com' matches subdomains.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Hosts",
+          "type": "array"
+        },
+        "trusted_proxy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrustedProxy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "users": {
+          "items": {
+            "$ref": "#/$defs/UserToken"
+          },
+          "title": "Users",
+          "type": "array"
+        }
+      },
+      "title": "AccessConfig",
+      "type": "object"
+    },
+    "AlertConfig": {
+      "additionalProperties": false,
+      "description": "An aggregate alert. Options only apply to their kind: ``sensitivity`` and ``min_count`` to\ntheme_spike, ``period_days`` and ``top`` to digest, ``min_pending`` to review_queue and\n``stale_hours`` to pipeline_health.",
+      "properties": {
+        "cooldown_hours": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default 168 (a week) for theme_spike, else 24.",
+          "title": "Cooldown Hours"
+        },
+        "kind": {
+          "enum": [
+            "theme_spike",
+            "new_theme",
+            "digest",
+            "review_queue",
+            "pipeline_health"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "min_count": {
+          "default": 5,
+          "description": "Minimum records this week.",
+          "minimum": 1,
+          "title": "Min Count",
+          "type": "integer"
+        },
+        "min_pending": {
+          "default": 10,
+          "minimum": 1,
+          "title": "Min Pending",
+          "type": "integer"
+        },
+        "name": {
+          "pattern": "^[\\w-]+$",
+          "title": "Name",
+          "type": "string"
+        },
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Shown in the message.",
+          "title": "Owner"
+        },
+        "period_days": {
+          "default": 7,
+          "description": "Covered by, and interval of, a digest.",
+          "minimum": 1,
+          "title": "Period Days",
+          "type": "integer"
+        },
+        "quotes": {
+          "default": 3,
+          "description": "Redacted quotes per theme alert.",
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Quotes",
+          "type": "integer"
+        },
+        "sensitivity": {
+          "default": 2.0,
+          "description": "Minimum z-score of this week.",
+          "exclusiveMinimum": 0,
+          "title": "Sensitivity",
+          "type": "number"
+        },
+        "stale_hours": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Also alert when a source fetched nothing for this long.",
+          "title": "Stale Hours"
+        },
+        "to": {
+          "description": "Sinks that deliver it: webhook, slack, notify or teams.",
+          "items": {
+            "$ref": "#/$defs/SinkEntry"
+          },
+          "minItems": 1,
+          "title": "To",
+          "type": "array"
+        },
+        "top": {
+          "default": 5,
+          "description": "Themes listed in a digest.",
+          "minimum": 1,
+          "title": "Top",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "to"
+      ],
+      "title": "AlertConfig",
+      "type": "object"
+    },
+    "AppStoreConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "app_id": {
+          "description": "The digits after 'id' in the app's App Store link.",
+          "pattern": "^\\d+$",
+          "title": "App Id",
+          "type": "string"
+        },
+        "countries": {
+          "description": "Storefronts as ISO 3166 alpha-2 codes, e.g. us, gb, de, jp.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Countries",
+          "type": "array"
+        },
+        "max_pages": {
+          "default": 10,
+          "description": "Feed pages per country, 50 reviews each.",
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "app_id"
+      ],
+      "title": "AppStoreConfig",
+      "type": "object"
+    },
+    "AppStoreConnectConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "app_id": {
+          "description": "Your app's Apple ID (digits) from App Store Connect.",
+          "pattern": "^\\d+$",
+          "title": "App Id",
+          "type": "string"
+        },
+        "issuer_id_env": {
+          "default": "ASC_ISSUER_ID",
+          "description": "Environment variable with the API key's issuer id.",
+          "secret": true,
+          "title": "Issuer Id Env",
+          "type": "string"
+        },
+        "key_id_env": {
+          "default": "ASC_KEY_ID",
+          "description": "Environment variable with the API key id.",
+          "secret": true,
+          "title": "Key Id Env",
+          "type": "string"
+        },
+        "max_pages": {
+          "default": 20,
+          "description": "Most pages of reviews read per run.",
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "private_key_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Environment variable with the .p8 key's contents.",
+          "secret": true,
+          "title": "Private Key Env"
+        },
+        "private_key_file": {
+          "anyOf": [
+            {
+              "format": "path",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to the downloaded .p8 key; or set private_key_env.",
+          "title": "Private Key File"
+        },
+        "territories": {
+          "description": "ISO 3166 alpha-3 codes, e.g. USA, DEU, JPN, BRA, IND.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Territories",
+          "type": "array"
+        }
+      },
+      "required": [
+        "app_id"
+      ],
+      "title": "AppStoreConnectConfig",
+      "type": "object"
+    },
+    "BlueskyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "app_password_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Environment variable with an app password for that handle.",
+          "secret": true,
+          "title": "App Password Env"
+        },
+        "handle_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Environment variable with your handle, if anonymous search is refused.",
+          "secret": true,
+          "title": "Handle Env"
+        },
+        "include_urls": {
+          "default": false,
+          "description": "Post URLs embed the author's DID, so they are off by default.",
+          "title": "Include Urls",
+          "type": "boolean"
+        },
+        "lang": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Only posts tagged with this language.",
+          "title": "Lang"
+        },
+        "max_pages": {
+          "default": 5,
+          "description": "Most pages of results read per run.",
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "query": {
+          "description": "Search terms, e.g. your product name.",
+          "minLength": 1,
+          "title": "Query",
+          "type": "string"
+        },
+        "service": {
+          "default": "https://bsky.social",
+          "description": "Bluesky server to search.",
+          "title": "Service",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "title": "BlueskyConfig",
+      "type": "object"
+    },
+    "ClassifyPluginConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "fallback_llm": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "llms entry asked when an answer is below its cutoff.",
+          "title": "Fallback Llm"
+        },
+        "fields": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FieldSpec"
+          },
+          "description": "Your own questions, by name: choice, score, yes/no or text.",
+          "title": "Fields",
+          "type": "object"
+        },
+        "intents": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "object"
+            }
+          ],
+          "description": "Intent options, optionally mapped to a description.",
+          "minLength": 2,
+          "title": "Intents"
+        },
+        "llm": {
+          "default": "default",
+          "description": "llms entry that answers.",
+          "title": "Llm",
+          "type": "string"
+        },
+        "min_confidence": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Per-field cutoffs for decision and local models (sentiment, intent or a field name); others use threshold.",
+          "title": "Min Confidence",
+          "type": "object"
+        },
+        "sentiments": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "object"
+            }
+          ],
+          "description": "Sentiment options, optionally mapped to a description.",
+          "minLength": 2,
+          "title": "Sentiments"
+        },
+        "threshold": {
+          "default": 0.7,
+          "description": "Cutoff below which an answer is flagged for review and asked of fallback_llm.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Threshold",
+          "type": "number"
+        }
+      },
+      "title": "ClassifyPluginConfig",
+      "type": "object"
+    },
+    "CsvConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "delimiter": {
+          "default": ",",
+          "description": "Column separator.",
+          "maxLength": 1,
+          "minLength": 1,
+          "title": "Delimiter",
+          "type": "string"
+        },
+        "encoding": {
+          "default": "utf-8-sig",
+          "description": "Text encoding of the file.",
+          "title": "Encoding",
+          "type": "string"
+        },
+        "fields": {
+          "$ref": "#/$defs/FieldMap",
+          "description": "Which columns hold the text, id, date, rating and other values."
+        },
+        "instance": {
+          "default": "default",
+          "description": "Name stored with each record, to tell several files apart.",
+          "title": "Instance",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path to the file, relative to where obsei runs.",
+          "format": "path",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "CsvConfig",
+      "type": "object"
+    },
+    "EgressPolicy": {
+      "description": "``air_gapped``: internal hosts only. ``private``: plus ``allowed_hosts``. ``hybrid``: any.",
+      "properties": {
+        "allowed_hosts": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Hosts",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "mode": {
+          "default": "air_gapped",
+          "enum": [
+            "air_gapped",
+            "private",
+            "hybrid"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "title": "EgressPolicy",
+      "type": "object"
+    },
+    "FieldMap": {
+      "additionalProperties": false,
+      "description": "Where to find record fields in a row or JSON item (dotted paths for nested JSON).",
+      "properties": {
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Field with the author handle; pseudonymised, never stored in clear.",
+          "title": "Author"
+        },
+        "context": {
+          "description": "Fields kept as string metadata.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Context",
+          "type": "array"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "created_at",
+          "description": "Field with the date: ISO 8601, RFC 2822 or epoch seconds.",
+          "title": "Created At"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "id",
+          "description": "Field with a stable id, so edits update the record instead of adding one.",
+          "title": "Id"
+        },
+        "lang": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Field with the language code.",
+          "title": "Lang"
+        },
+        "rating": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Field with a numeric rating.",
+          "title": "Rating"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "text",
+          "description": "Field with the feedback text; several are joined.",
+          "title": "Text"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Field with a link to the original.",
+          "title": "Url"
+        }
+      },
+      "title": "FieldMap",
+      "type": "object"
+    },
+    "FieldSpec": {
+      "additionalProperties": false,
+      "description": "``description`` is what the model is asked (a yes/no question for ``yesno``).\n\n``type`` defaults to ``choice`` with ``choices``, ``score`` with ``levels`` and free ``text``\notherwise; decision models answer only ``choice``, ``score`` and ``yesno`` fields. A ``yesno``\nfield with ``yes_means`` and ``no_means`` descriptions is asked as a two-option choice.",
+      "properties": {
+        "choices": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Options of a choice field, optionally mapped to a description.",
+          "title": "Choices"
+        },
+        "description": {
+          "description": "What the model is asked; a yes/no question for yesno.",
+          "title": "Description",
+          "type": "string"
+        },
+        "levels": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 10,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Ordered levels, lowest first.",
+          "title": "Levels"
+        },
+        "no_means": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What a no looks like (yesno).",
+          "title": "No Means"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "enum": [
+                "text",
+                "choice",
+                "score",
+                "yesno"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "text, choice, score or yesno; default: from choices or levels.",
+          "title": "Type"
+        },
+        "yes_means": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What a yes looks like (yesno).",
+          "title": "Yes Means"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "FieldSpec",
+      "type": "object"
+    },
+    "FileConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "encoding": {
+          "default": "utf-8-sig",
+          "description": "Text encoding of the file.",
+          "title": "Encoding",
+          "type": "string"
+        },
+        "fields": {
+          "$ref": "#/$defs/FieldMap",
+          "description": "Which columns hold the text, id, date, rating and other values."
+        },
+        "instance": {
+          "default": "default",
+          "description": "Name stored with each record, to tell several files apart.",
+          "title": "Instance",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path to the file, relative to where obsei runs.",
+          "format": "path",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "FileConfig",
+      "type": "object"
+    },
+    "FileDropConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "directory": {
+          "description": "Folder to read new and changed files from.",
+          "format": "path",
+          "title": "Directory",
+          "type": "string"
+        },
+        "fields": {
+          "$ref": "#/$defs/FieldMap",
+          "description": "Which fields hold the text, id, date, rating and other values."
+        },
+        "instance": {
+          "default": "default",
+          "description": "Name stored with each record.",
+          "title": "Instance",
+          "type": "string"
+        },
+        "items_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "For .json files holding a list.",
+          "title": "Items Path"
+        },
+        "pattern": {
+          "default": "*",
+          "description": "Which files to read, e.g. *.csv.",
+          "title": "Pattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "directory"
+      ],
+      "title": "FileDropConfig",
+      "type": "object"
+    },
+    "FilterConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "default": "tag",
+          "description": "drop removes matching records; tag only marks them.",
+          "enum": [
+            "drop",
+            "tag"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "llm": {
+          "default": "default",
+          "description": "An llms endpoint with api: decision.",
+          "title": "Llm",
+          "type": "string"
+        },
+        "no_means": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What a no looks like; goes with yes_means.",
+          "title": "No Means"
+        },
+        "question": {
+          "description": "A yes/no question; \"yes\" matches, e.g. \"Is this spam?\".",
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "threshold": {
+          "default": 0.5,
+          "description": "Probability of yes from which a record matches.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Threshold",
+          "type": "number"
+        },
+        "yes_means": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "With no_means: describe both answers to ask a two-option choice, which small models answer more reliably.",
+          "title": "Yes Means"
+        }
+      },
+      "required": [
+        "question"
+      ],
+      "title": "FilterConfig",
+      "type": "object"
+    },
+    "FreshdeskConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_key_env": {
+          "default": "FRESHDESK_API_KEY",
+          "description": "Environment variable with your Freshdesk API key.",
+          "secret": true,
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "domain": {
+          "description": "<domain>.freshdesk.com",
+          "pattern": "^[a-z0-9-]+$",
+          "title": "Domain",
+          "type": "string"
+        },
+        "max_pages": {
+          "default": 300,
+          "description": "Most pages of tickets read per run.",
+          "maximum": 300,
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "since": {
+          "default": "2020-01-01T00:00:00Z",
+          "description": "First run only: oldest ticket update to read.",
+          "format": "date-time",
+          "title": "Since",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain"
+      ],
+      "title": "FreshdeskConfig",
+      "type": "object"
+    },
+    "GitHubIssueSinkConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_url": {
+          "default": "https://api.github.com",
+          "description": "API URL; change it for GitHub Enterprise Server.",
+          "title": "Api Url",
+          "type": "string"
+        },
+        "labels": {
+          "description": "Labels added to each issue.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "array"
+        },
+        "max_issues": {
+          "default": 10,
+          "description": "Most issues opened per run.",
+          "minimum": 1,
+          "title": "Max Issues",
+          "type": "integer"
+        },
+        "max_rating": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Only records rated at most this.",
+          "title": "Max Rating"
+        },
+        "repo": {
+          "description": "owner/name of the repository to open issues in.",
+          "pattern": "^[\\w.-]+/[\\w.-]+$",
+          "title": "Repo",
+          "type": "string"
+        },
+        "token_env": {
+          "default": "GITHUB_TOKEN",
+          "description": "Environment variable with a token that can create issues.",
+          "secret": true,
+          "title": "Token Env",
+          "type": "string"
+        },
+        "when": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "Which records open an issue, e.g. {\"classify.intent\": [\"bug\"]}.",
+          "title": "When",
+          "type": "object"
+        }
+      },
+      "required": [
+        "repo"
+      ],
+      "title": "GitHubIssueSinkConfig",
+      "type": "object"
+    },
+    "GitHubIssuesConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_url": {
+          "default": "https://api.github.com",
+          "description": "API URL; change it for GitHub Enterprise Server.",
+          "title": "Api Url",
+          "type": "string"
+        },
+        "include_comments": {
+          "default": false,
+          "description": "Also read issue comments.",
+          "title": "Include Comments",
+          "type": "boolean"
+        },
+        "labels": {
+          "description": "Only issues with all of these labels.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "array"
+        },
+        "max_pages": {
+          "default": 20,
+          "description": "Most pages of 100 issues read per run.",
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "repo": {
+          "description": "owner/name of the repository.",
+          "pattern": "^[\\w.-]+/[\\w.-]+$",
+          "title": "Repo",
+          "type": "string"
+        },
+        "state": {
+          "default": "all",
+          "description": "open, closed or all.",
+          "pattern": "^(open|closed|all)$",
+          "title": "State",
+          "type": "string"
+        },
+        "token_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "GITHUB_TOKEN",
+          "description": "Environment variable with a token; optional for public repositories.",
+          "secret": true,
+          "title": "Token Env"
+        }
+      },
+      "required": [
+        "repo"
+      ],
+      "title": "GitHubIssuesConfig",
+      "type": "object"
+    },
+    "GongConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "access_key_env": {
+          "default": "GONG_ACCESS_KEY",
+          "description": "Environment variable with the API access key.",
+          "secret": true,
+          "title": "Access Key Env",
+          "type": "string"
+        },
+        "base_url": {
+          "default": "https://api.gong.io",
+          "description": "Your Gong API base URL.",
+          "title": "Base Url",
+          "type": "string"
+        },
+        "max_pages": {
+          "default": 20,
+          "description": "Most pages of calls read per run.",
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "secret_env": {
+          "default": "GONG_ACCESS_SECRET",
+          "description": "Environment variable with the access key secret.",
+          "secret": true,
+          "title": "Secret Env",
+          "type": "string"
+        },
+        "since": {
+          "default": "2024-01-01T00:00:00Z",
+          "description": "First run only: oldest call to read.",
+          "format": "date-time",
+          "title": "Since",
+          "type": "string"
+        }
+      },
+      "title": "GongConfig",
+      "type": "object"
+    },
+    "HackerNewsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "kinds": {
+          "description": "story, comment or both.",
+          "items": {
+            "enum": [
+              "story",
+              "comment"
+            ],
+            "type": "string"
+          },
+          "title": "Kinds",
+          "type": "array"
+        },
+        "max_pages": {
+          "default": 5,
+          "description": "Most pages of results read per run.",
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "query": {
+          "default": "",
+          "description": "Search terms, e.g. your product name.",
+          "title": "Query",
+          "type": "string"
+        },
+        "story_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Only this story and its comments.",
+          "title": "Story Id"
+        }
+      },
+      "title": "HackerNewsConfig",
+      "type": "object"
+    },
+    "ImapConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "folder": {
+          "default": "INBOX",
+          "description": "Mailbox folder to read.",
+          "title": "Folder",
+          "type": "string"
+        },
+        "host": {
+          "description": "IMAP server, e.g. imap.gmail.com.",
+          "title": "Host",
+          "type": "string"
+        },
+        "include_subject": {
+          "default": true,
+          "description": "Put the subject before the body.",
+          "title": "Include Subject",
+          "type": "boolean"
+        },
+        "max_messages": {
+          "default": 500,
+          "description": "Most messages read per run.",
+          "minimum": 1,
+          "title": "Max Messages",
+          "type": "integer"
+        },
+        "password_env": {
+          "default": "IMAP_PASSWORD",
+          "description": "Environment variable with the password (an app password for Gmail).",
+          "secret": true,
+          "title": "Password Env",
+          "type": "string"
+        },
+        "port": {
+          "default": 993,
+          "description": "IMAP over TLS port.",
+          "title": "Port",
+          "type": "integer"
+        },
+        "username_env": {
+          "default": "IMAP_USERNAME",
+          "description": "Environment variable with the mailbox user name.",
+          "secret": true,
+          "title": "Username Env",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host"
+      ],
+      "title": "ImapConfig",
+      "type": "object"
+    },
+    "IntercomConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_pages": {
+          "default": 50,
+          "description": "Most pages of conversations read per run.",
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "region": {
+          "default": "us",
+          "description": "Data region of your workspace: us, eu or au.",
+          "enum": [
+            "us",
+            "eu",
+            "au"
+          ],
+          "title": "Region",
+          "type": "string"
+        },
+        "token_env": {
+          "default": "INTERCOM_TOKEN",
+          "description": "Environment variable with an access token.",
+          "secret": true,
+          "title": "Token Env",
+          "type": "string"
+        },
+        "workspace": {
+          "default": "default",
+          "description": "Name stored with each record.",
+          "title": "Workspace",
+          "type": "string"
+        }
+      },
+      "title": "IntercomConfig",
+      "type": "object"
+    },
+    "JiraConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "default": "3",
+          "description": "REST API version: 3 for Cloud, 2 for Data Center.",
+          "enum": [
+            "2",
+            "3"
+          ],
+          "title": "Api Version",
+          "type": "string"
+        },
+        "auth": {
+          "default": "basic",
+          "description": "basic (Cloud: email and API token) or bearer (Data Center access token).",
+          "enum": [
+            "basic",
+            "bearer"
+          ],
+          "title": "Auth",
+          "type": "string"
+        },
+        "base_url": {
+          "description": "https://your-site.atlassian.net or your Data Center URL",
+          "title": "Base Url",
+          "type": "string"
+        },
+        "email_env": {
+          "default": "JIRA_EMAIL",
+          "description": "Environment variable with your Atlassian account email (basic auth).",
+          "secret": true,
+          "title": "Email Env",
+          "type": "string"
+        },
+        "issue_type": {
+          "default": "Bug",
+          "description": "Issue type to create.",
+          "title": "Issue Type",
+          "type": "string"
+        },
+        "labels": {
+          "description": "Labels added to each issue.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "array"
+        },
+        "max_issues": {
+          "default": 10,
+          "description": "Most issues created per run.",
+          "minimum": 1,
+          "title": "Max Issues",
+          "type": "integer"
+        },
+        "max_rating": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Only records rated at most this.",
+          "title": "Max Rating"
+        },
+        "project_key": {
+          "description": "Key of the project to create issues in, e.g. APP.",
+          "pattern": "^[A-Z][A-Z0-9_]+$",
+          "title": "Project Key",
+          "type": "string"
+        },
+        "token_env": {
+          "default": "JIRA_API_TOKEN",
+          "description": "Environment variable with the API token or personal access token.",
+          "secret": true,
+          "title": "Token Env",
+          "type": "string"
+        },
+        "when": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "Which records open an issue, e.g. {\"classify.intent\": [\"bug\"]}.",
+          "title": "When",
+          "type": "object"
+        }
+      },
+      "required": [
+        "base_url",
+        "project_key"
+      ],
+      "title": "JiraConfig",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "LinearConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_key_env": {
+          "default": "LINEAR_API_KEY",
+          "description": "Environment variable with a Linear API key.",
+          "secret": true,
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "label_ids": {
+          "description": "Ids of labels added to each issue.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Label Ids",
+          "type": "array"
+        },
+        "max_issues": {
+          "default": 10,
+          "description": "Most issues created per run.",
+          "minimum": 1,
+          "title": "Max Issues",
+          "type": "integer"
+        },
+        "max_rating": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Only records rated at most this.",
+          "title": "Max Rating"
+        },
+        "team_id": {
+          "description": "Id of the team to create issues in.",
+          "title": "Team Id",
+          "type": "string"
+        },
+        "when": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "Which records open an issue, e.g. {\"classify.intent\": [\"bug\"]}.",
+          "title": "When",
+          "type": "object"
+        }
+      },
+      "required": [
+        "team_id"
+      ],
+      "title": "LinearConfig",
+      "type": "object"
+    },
+    "LlmEndpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "openai",
+          "description": "\"decision\" for decision models (set url, not base_url); \"local\" for zero-shot classifiers run in process (obsei[local]).",
+          "enum": [
+            "openai",
+            "decision",
+            "local"
+          ],
+          "title": "Api",
+          "type": "string"
+        },
+        "api_key_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Key Env"
+        },
+        "api_key_header": {
+          "default": "Authorization",
+          "description": "\"api-key\" for Azure OpenAI keys.",
+          "title": "Api Key Header",
+          "type": "string"
+        },
+        "base_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Chat endpoints: the /v1 base URL.",
+          "title": "Base Url"
+        },
+        "embedding_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Embedding Model"
+        },
+        "max_requests": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Requests"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required for openai endpoints; local endpoints default to MoritzLaurer/bge-m3-zeroshot-v2.0.",
+          "title": "Model"
+        },
+        "models": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Local endpoints: a model per question, e.g. {sentiment: fastino/gliner2-multi-v1}.",
+          "title": "Models",
+          "type": "object"
+        },
+        "timeout": {
+          "default": 60.0,
+          "title": "Timeout",
+          "type": "number"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Decision endpoints: the full URL requests are posted to.",
+          "title": "Url"
+        },
+        "url_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Decision endpoints: environment variable holding the URL.",
+          "title": "Url Env"
+        }
+      },
+      "title": "LlmEndpoint",
+      "type": "object"
+    },
+    "McpClientConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "arguments": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "Arguments passed to the tool.",
+          "title": "Arguments",
+          "type": "object"
+        },
+        "command": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Launch over stdio.",
+          "title": "Command"
+        },
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Child env: variable name to obsei env variable.",
+          "title": "Env",
+          "type": "object"
+        },
+        "fields": {
+          "$ref": "#/$defs/FieldMap",
+          "description": "Which fields hold the text, id, date, rating and other values."
+        },
+        "instance": {
+          "default": "default",
+          "description": "Name stored with each record.",
+          "title": "Instance",
+          "type": "string"
+        },
+        "items_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to the list of items in the tool's result.",
+          "title": "Items Path"
+        },
+        "since_argument": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Argument that receives the newest timestamp seen.",
+          "title": "Since Argument"
+        },
+        "tool": {
+          "description": "Name of the tool to call.",
+          "title": "Tool",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Streamable HTTP endpoint.",
+          "title": "Url"
+        }
+      },
+      "required": [
+        "tool"
+      ],
+      "title": "McpClientConfig",
+      "type": "object"
+    },
+    "NamesConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "labels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "array"
+        },
+        "model": {
+          "default": "urchade/gliner_multi_pii-v1",
+          "description": "Hugging Face id, or a local directory (air-gapped).",
+          "title": "Model",
+          "type": "string"
+        },
+        "threshold": {
+          "default": 0.5,
+          "exclusiveMaximum": 1,
+          "exclusiveMinimum": 0,
+          "title": "Threshold",
+          "type": "number"
+        }
+      },
+      "title": "NamesConfig",
+      "type": "object"
+    },
+    "NotifyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_items": {
+          "default": 5,
+          "description": "Records listed per message.",
+          "minimum": 1,
+          "title": "Max Items",
+          "type": "integer"
+        },
+        "max_rating": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Only records rated at most this.",
+          "title": "Max Rating"
+        },
+        "urls_env": {
+          "default": "APPRISE_URLS",
+          "description": "Environment variable with Apprise URLs.",
+          "secret": true,
+          "title": "Urls Env",
+          "type": "string"
+        },
+        "when": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "e.g. {\"classify.intent\": [\"bug\", \"churn_risk\"]}",
+          "title": "When",
+          "type": "object"
+        }
+      },
+      "title": "NotifyConfig",
+      "type": "object"
+    },
+    "ParquetConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "directory": {
+          "description": "Folder the Parquet files are written to.",
+          "format": "path",
+          "title": "Directory",
+          "type": "string"
+        },
+        "include_authors": {
+          "default": false,
+          "description": "Also write author pseudonyms.",
+          "title": "Include Authors",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "directory"
+      ],
+      "title": "ParquetConfig",
+      "type": "object"
+    },
+    "PipelineConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "batch_size": {
+          "default": 100,
+          "minimum": 1,
+          "title": "Batch Size",
+          "type": "integer"
+        },
+        "enrichers": {
+          "items": {
+            "$ref": "#/$defs/PluginSpec"
+          },
+          "title": "Enrichers",
+          "type": "array"
+        },
+        "every_minutes": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "How often 'obsei serve' runs this pipeline.",
+          "title": "Every Minutes"
+        },
+        "name": {
+          "pattern": "^[\\w-]+$",
+          "title": "Name",
+          "type": "string"
+        },
+        "route": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/RouteRule"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Ordered routes; the first match decides which named sinks get a record.",
+          "title": "Route"
+        },
+        "sinks": {
+          "items": {
+            "$ref": "#/$defs/SinkEntry"
+          },
+          "title": "Sinks",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceEntry"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "sources"
+      ],
+      "title": "PipelineConfig",
+      "type": "object"
+    },
+    "PlayStoreConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "access_token_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Environment variable with an OAuth access token, instead of credentials_file.",
+          "secret": true,
+          "title": "Access Token Env"
+        },
+        "credentials_file": {
+          "anyOf": [
+            {
+              "format": "path",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Service account JSON key with access to your app (needs obsei[google]).",
+          "title": "Credentials File"
+        },
+        "max_pages": {
+          "default": 100,
+          "description": "Most pages of reviews read per run.",
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "package_name": {
+          "description": "Your app's package name, e.g. com.example.app.",
+          "pattern": "^[A-Za-z][\\w]*(\\.[A-Za-z][\\w]*)+$",
+          "title": "Package Name",
+          "type": "string"
+        },
+        "translation_language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Have Google translate reviews to this language, e.g. en; see context.",
+          "title": "Translation Language"
+        }
+      },
+      "required": [
+        "package_name"
+      ],
+      "title": "PlayStoreConfig",
+      "type": "object"
+    },
+    "PluginSpec": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "classify"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/ClassifyPluginConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "filter"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/FilterConfig"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "config": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "Settings of this type; secrets only as *_env names.",
+          "title": "Config",
+          "type": "object"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "enum": [
+                "classify",
+                "filter"
+              ]
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The enricher: run 'obsei integrations' to list them."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "PluginSpec",
+      "type": "object"
+    },
+    "PrivacyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "names": {
+          "$ref": "#/$defs/NamesConfig"
+        },
+        "redact": {
+          "default": true,
+          "title": "Redact",
+          "type": "boolean"
+        },
+        "regions": {
+          "items": {
+            "enum": [
+              "global",
+              "north_america",
+              "uk",
+              "eu",
+              "latam",
+              "apac",
+              "india",
+              "africa"
+            ],
+            "type": "string"
+          },
+          "title": "Regions",
+          "type": "array"
+        }
+      },
+      "title": "PrivacyConfig",
+      "type": "object"
+    },
+    "RedditConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "default": "new",
+          "description": "new posts, comments, or a search.",
+          "enum": [
+            "new",
+            "comments",
+            "search"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "query": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Search terms, for kind search.",
+          "title": "Query"
+        },
+        "subreddit": {
+          "description": "Subreddit name, without r/.",
+          "pattern": "^[A-Za-z0-9_]{2,21}$",
+          "title": "Subreddit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subreddit"
+      ],
+      "title": "RedditConfig",
+      "type": "object"
+    },
+    "RestConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "bearer_token_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Environment variable with a bearer token.",
+          "secret": true,
+          "title": "Bearer Token Env"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JSON body for POST.",
+          "title": "Body"
+        },
+        "cursor_param": {
+          "default": "cursor",
+          "description": "Query parameter that receives the cursor token.",
+          "title": "Cursor Param",
+          "type": "string"
+        },
+        "fields": {
+          "$ref": "#/$defs/FieldMap",
+          "description": "Which fields hold the text, id, date, rating and other values."
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Extra headers; put credentials in secret_headers.",
+          "title": "Headers",
+          "type": "object"
+        },
+        "instance": {
+          "default": "default",
+          "description": "Name stored with each record.",
+          "title": "Instance",
+          "type": "string"
+        },
+        "items_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dotted path to the list of items; default: the response itself.",
+          "title": "Items Path"
+        },
+        "max_pages": {
+          "default": 50,
+          "description": "Most pages read per run.",
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "method": {
+          "default": "GET",
+          "description": "GET or POST.",
+          "enum": [
+            "GET",
+            "POST"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "next_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to the next URL (next_url) or token (cursor).",
+          "title": "Next Path"
+        },
+        "page_param": {
+          "default": "page",
+          "description": "Query parameter for the page number or offset.",
+          "title": "Page Param",
+          "type": "string"
+        },
+        "page_size": {
+          "default": 100,
+          "description": "Items per page.",
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "page_size_param": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Query parameter for the page size.",
+          "title": "Page Size Param"
+        },
+        "page_start": {
+          "default": 1,
+          "description": "First page number.",
+          "title": "Page Start",
+          "type": "integer"
+        },
+        "pagination": {
+          "default": "none",
+          "description": "none, page, offset, link (Link header), next_url or cursor.",
+          "enum": [
+            "none",
+            "page",
+            "offset",
+            "link",
+            "next_url",
+            "cursor"
+          ],
+          "title": "Pagination",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "description": "Query parameters.",
+          "title": "Params",
+          "type": "object"
+        },
+        "secret_headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Header name to environment variable holding its value.",
+          "title": "Secret Headers",
+          "type": "object"
+        },
+        "since_param": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Query parameter that receives the newest timestamp seen.",
+          "title": "Since Param"
+        },
+        "text_format": {
+          "default": "plain",
+          "description": "'html' converts mapped text from HTML (Mastodon, forums).",
+          "enum": [
+            "plain",
+            "html"
+          ],
+          "title": "Text Format",
+          "type": "string"
+        },
+        "url": {
+          "description": "Endpoint that returns the items.",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "RestConfig",
+      "type": "object"
+    },
+    "RouteRule": {
+      "additionalProperties": false,
+      "description": "One of: ``when`` with ``sinks``; ``review`` (records still flagged for review); or\n``default`` (every record no earlier rule matched), which must come last.",
+      "properties": {
+        "default": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "pattern": "^[\\w-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "review": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Review"
+        },
+        "sinks": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sinks"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "When"
+        }
+      },
+      "title": "RouteRule",
+      "type": "object"
+    },
+    "RssConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "include_title": {
+          "default": true,
+          "description": "Put each entry's title before its text.",
+          "title": "Include Title",
+          "type": "boolean"
+        },
+        "instance": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Name stored with each record; default: the feed URL.",
+          "title": "Instance"
+        },
+        "url": {
+          "description": "RSS 2.0 or Atom feed URL.",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "RssConfig",
+      "type": "object"
+    },
+    "SinkEntry": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "github_issues"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/GitHubIssueSinkConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "jira"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/JiraConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "linear"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/LinearConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "notify"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/NotifyConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "parquet"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/ParquetConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "slack"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/SlackConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "sql"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/SqlSinkConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "teams"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/TeamsConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "webhook"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/WebhookConfig"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "config": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "Settings of this type; secrets only as *_env names.",
+          "title": "Config",
+          "type": "object"
+        },
+        "key": {
+          "anyOf": [
+            {
+              "pattern": "^[\\w-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Name routes refer to; default: the type.",
+          "title": "Key"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "enum": [
+                "github_issues",
+                "jira",
+                "linear",
+                "notify",
+                "parquet",
+                "slack",
+                "sql",
+                "teams",
+                "webhook"
+              ]
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The sink: run 'obsei integrations' to list them."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "SinkEntry",
+      "type": "object"
+    },
+    "SlackConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_messages": {
+          "default": 20,
+          "description": "Most messages posted per run.",
+          "minimum": 1,
+          "title": "Max Messages",
+          "type": "integer"
+        },
+        "max_rating": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Only records rated at most this.",
+          "title": "Max Rating"
+        },
+        "webhook_url_env": {
+          "default": "SLACK_WEBHOOK_URL",
+          "description": "Environment variable with the Slack incoming webhook URL.",
+          "secret": true,
+          "title": "Webhook Url Env",
+          "type": "string"
+        },
+        "when": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "e.g. {\"classify.intent\": [\"bug\", \"churn_risk\"]}",
+          "title": "When",
+          "type": "object"
+        }
+      },
+      "title": "SlackConfig",
+      "type": "object"
+    },
+    "SourceEntry": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "appstore"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/AppStoreConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "appstoreconnect"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/AppStoreConnectConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "bluesky"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/BlueskyConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "csv"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/CsvConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "filedrop"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/FileDropConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "freshdesk"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/FreshdeskConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "github_issues"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/GitHubIssuesConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "gong"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/GongConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "hackernews"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/HackerNewsConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "imap"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/ImapConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "intercom"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/IntercomConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "jsonl"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/FileConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "mcp"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/McpClientConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "playstore"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/PlayStoreConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "reddit"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/RedditConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "rest"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/RestConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "rss"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/RssConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "sql"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/SqlConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "typeform"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/TypeformConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "webhook"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/WebhookSourceConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "youtube"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/YouTubeConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "zendesk"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/ZendeskConfig"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "config": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "Settings of this type; secrets only as *_env names.",
+          "title": "Config",
+          "type": "object"
+        },
+        "key": {
+          "description": "Unique name of this source in the pipeline.",
+          "pattern": "^[\\w-]+$",
+          "title": "Key",
+          "type": "string"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "enum": [
+                "appstore",
+                "appstoreconnect",
+                "bluesky",
+                "csv",
+                "filedrop",
+                "freshdesk",
+                "github_issues",
+                "gong",
+                "hackernews",
+                "imap",
+                "intercom",
+                "jsonl",
+                "mcp",
+                "playstore",
+                "reddit",
+                "rest",
+                "rss",
+                "sql",
+                "typeform",
+                "webhook",
+                "youtube",
+                "zendesk"
+              ]
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The source: run 'obsei integrations' to list them."
+        }
+      },
+      "required": [
+        "type",
+        "key"
+      ],
+      "title": "SourceEntry",
+      "type": "object"
+    },
+    "SqlConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor_column": {
+          "default": "updated_at",
+          "description": "Column whose newest value is passed as :since on the next run.",
+          "title": "Cursor Column",
+          "type": "string"
+        },
+        "fetch_size": {
+          "default": 1000,
+          "description": "Rows fetched at a time.",
+          "minimum": 1,
+          "title": "Fetch Size",
+          "type": "integer"
+        },
+        "fields": {
+          "$ref": "#/$defs/FieldMap",
+          "description": "Which columns hold the text, id, date, rating and other values."
+        },
+        "initial_since": {
+          "default": "1970-01-01T00:00:00+00:00",
+          "description": "First run only: the value of :since.",
+          "title": "Initial Since",
+          "type": "string"
+        },
+        "instance": {
+          "default": "default",
+          "description": "Name stored with each record.",
+          "title": "Instance",
+          "type": "string"
+        },
+        "query": {
+          "description": "SELECT ... WHERE updated_at > :since ORDER BY updated_at",
+          "title": "Query",
+          "type": "string"
+        },
+        "url_env": {
+          "description": "Environment variable holding the SQLAlchemy URL.",
+          "secret": true,
+          "title": "Url Env",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url_env",
+        "query"
+      ],
+      "title": "SqlConfig",
+      "type": "object"
+    },
+    "SqlSinkConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "include_authors": {
+          "default": false,
+          "description": "Also write author pseudonyms.",
+          "title": "Include Authors",
+          "type": "boolean"
+        },
+        "schema_name": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Database schema of the table.",
+          "title": "Schema Name"
+        },
+        "table": {
+          "default": "obsei_feedback",
+          "description": "Table to upsert into; created if missing.",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$",
+          "title": "Table",
+          "type": "string"
+        },
+        "url_env": {
+          "description": "Environment variable holding the SQLAlchemy URL.",
+          "secret": true,
+          "title": "Url Env",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url_env"
+      ],
+      "title": "SqlSinkConfig",
+      "type": "object"
+    },
+    "StoreConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "default": "obsei.duckdb",
+          "format": "path",
+          "title": "Path",
+          "type": "string"
+        },
+        "unencrypted": {
+          "default": false,
+          "title": "Unencrypted",
+          "type": "boolean"
+        }
+      },
+      "title": "StoreConfig",
+      "type": "object"
+    },
+    "TeamsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_rating": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Only records rated at most this.",
+          "title": "Max Rating"
+        },
+        "max_records": {
+          "default": 10,
+          "description": "Records per card.",
+          "maximum": 25,
+          "minimum": 1,
+          "title": "Max Records",
+          "type": "integer"
+        },
+        "max_text": {
+          "default": 600,
+          "description": "Characters of each record's text shown.",
+          "maximum": 4000,
+          "minimum": 50,
+          "title": "Max Text",
+          "type": "integer"
+        },
+        "title": {
+          "default": "New customer feedback",
+          "description": "Heading of each card.",
+          "title": "Title",
+          "type": "string"
+        },
+        "webhook_url_env": {
+          "default": "TEAMS_WEBHOOK_URL",
+          "description": "Environment variable with the Workflows webhook URL.",
+          "secret": true,
+          "title": "Webhook Url Env",
+          "type": "string"
+        },
+        "when": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "e.g. {\"classify.sentiment\": [\"negative\"]}",
+          "title": "When",
+          "type": "object"
+        }
+      },
+      "title": "TeamsConfig",
+      "type": "object"
+    },
+    "ThemesConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "auto": {
+          "default": false,
+          "description": "Update themes after each scheduled run.",
+          "title": "Auto",
+          "type": "boolean"
+        },
+        "batch_size": {
+          "default": 64,
+          "minimum": 1,
+          "title": "Batch Size",
+          "type": "integer"
+        },
+        "duplicate_similarity": {
+          "default": 0.9,
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Duplicate Similarity",
+          "type": "number"
+        },
+        "embedder": {
+          "default": "auto",
+          "description": "'auto' (local when obsei[embeddings] is installed, else hashing), 'hashing', 'local', 'local:<model>' or an llms name.",
+          "title": "Embedder",
+          "type": "string"
+        },
+        "k_anonymity": {
+          "default": 5,
+          "minimum": 1,
+          "title": "K Anonymity",
+          "type": "integer"
+        },
+        "label_language": {
+          "default": "English",
+          "title": "Label Language",
+          "type": "string"
+        },
+        "labeler": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "llms name used to label themes.",
+          "title": "Labeler"
+        },
+        "max_records": {
+          "default": 10000,
+          "minimum": 1,
+          "title": "Max Records",
+          "type": "integer"
+        },
+        "similarity": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default 0.3 for hashing, 0.65 for local multilingual, 0.75 for others.",
+          "title": "Similarity"
+        }
+      },
+      "title": "ThemesConfig",
+      "type": "object"
+    },
+    "TrustedProxy": {
+      "additionalProperties": false,
+      "description": "For an SSO proxy (oauth2-proxy, Pomerium, Cloudflare Access) in front of obsei.\n\nThe proxy must send ``secret_header`` with the shared secret, so requests that bypass it are\nrefused. Users get the highest role whose groups they belong to, else ``default_role``.",
+      "properties": {
+        "default_role": {
+          "anyOf": [
+            {
+              "enum": [
+                "viewer",
+                "analyst",
+                "admin"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default Role"
+        },
+        "groups_header": {
+          "default": "x-forwarded-groups",
+          "title": "Groups Header",
+          "type": "string"
+        },
+        "roles": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "propertyNames": {
+            "enum": [
+              "viewer",
+              "analyst",
+              "admin"
+            ]
+          },
+          "title": "Roles",
+          "type": "object"
+        },
+        "secret_env": {
+          "title": "Secret Env",
+          "type": "string"
+        },
+        "secret_header": {
+          "default": "x-obsei-proxy-secret",
+          "title": "Secret Header",
+          "type": "string"
+        },
+        "user_header": {
+          "default": "x-forwarded-email",
+          "title": "User Header",
+          "type": "string"
+        }
+      },
+      "required": [
+        "secret_env"
+      ],
+      "title": "TrustedProxy",
+      "type": "object"
+    },
+    "TypeformConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_base": {
+          "default": "https://api.typeform.com",
+          "description": "https://api.eu.typeform.com for EU data-center accounts.",
+          "pattern": "^https://",
+          "title": "Api Base",
+          "type": "string"
+        },
+        "author_hidden_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hidden field holding a respondent id; pseudonymised.",
+          "title": "Author Hidden Field"
+        },
+        "form_id": {
+          "description": "The id in your form's link: form.typeform.com/to/<id>.",
+          "pattern": "^[A-Za-z0-9]+$",
+          "title": "Form Id",
+          "type": "string"
+        },
+        "instance": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Defaults to form_id.",
+          "title": "Instance"
+        },
+        "lang_hidden_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hidden field holding the respondent's language.",
+          "title": "Lang Hidden Field"
+        },
+        "max_pages": {
+          "default": 50,
+          "description": "Most pages read per run.",
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 200,
+          "description": "Responses per request.",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "rating_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Ref or id of a number, rating, opinion scale or NPS field.",
+          "title": "Rating Field"
+        },
+        "since": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "First run only: oldest response.",
+          "title": "Since"
+        },
+        "text_fields": {
+          "description": "Field refs or ids whose answers form the text; default: all text answers.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Text Fields",
+          "type": "array"
+        },
+        "token_env": {
+          "default": "TYPEFORM_TOKEN",
+          "description": "Environment variable with a personal access token (responses:read).",
+          "secret": true,
+          "title": "Token Env",
+          "type": "string"
+        }
+      },
+      "required": [
+        "form_id"
+      ],
+      "title": "TypeformConfig",
+      "type": "object"
+    },
+    "UserToken": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "default": "viewer",
+          "enum": [
+            "viewer",
+            "analyst",
+            "admin"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "token_env": {
+          "title": "Token Env",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "token_env"
+      ],
+      "title": "UserToken",
+      "type": "object"
+    },
+    "WebhookConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "exclude": {
+          "description": "Record fields left out of the payload.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude",
+          "type": "array"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Extra headers sent with each event.",
+          "title": "Headers",
+          "type": "object"
+        },
+        "secret_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Environment variable with the signing secret, ideally whsec_ and base64.",
+          "secret": true,
+          "title": "Secret Env"
+        },
+        "url": {
+          "description": "Where each batch is posted.",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "WebhookConfig",
+      "type": "object"
+    },
+    "WebhookSourceConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_unsigned": {
+          "default": false,
+          "description": "Accept requests without a signature (only on a trusted network).",
+          "title": "Allow Unsigned",
+          "type": "boolean"
+        },
+        "fields": {
+          "$ref": "#/$defs/FieldMap",
+          "description": "Which fields hold the text, id, date, rating and other values."
+        },
+        "instance": {
+          "default": "default",
+          "description": "Name stored with each record.",
+          "title": "Instance",
+          "type": "string"
+        },
+        "items_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to the list of items in the body; default: the body.",
+          "title": "Items Path"
+        },
+        "max_age_seconds": {
+          "default": 300,
+          "description": "Refuse signed requests older than this.",
+          "minimum": 1,
+          "title": "Max Age Seconds",
+          "type": "integer"
+        },
+        "require_timestamp": {
+          "default": true,
+          "description": "Refuse body-only signatures; false accepts GitHub's X-Hub-Signature-256.",
+          "title": "Require Timestamp",
+          "type": "boolean"
+        },
+        "secret_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Environment variable with the signing secret senders use.",
+          "secret": true,
+          "title": "Secret Env"
+        }
+      },
+      "title": "WebhookSourceConfig",
+      "type": "object"
+    },
+    "YouTubeConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_key_env": {
+          "default": "YOUTUBE_API_KEY",
+          "description": "Environment variable with a YouTube Data API v3 key.",
+          "secret": true,
+          "title": "Api Key Env",
+          "type": "string"
+        },
+        "channel_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A channel whose videos' comments to read.",
+          "title": "Channel Id"
+        },
+        "max_pages": {
+          "default": 5,
+          "description": "Most pages of comments read per video and run.",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "video_ids": {
+          "description": "Videos whose comments to read.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Video Ids",
+          "type": "array"
+        }
+      },
+      "title": "YouTubeConfig",
+      "type": "object"
+    },
+    "ZendeskConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "email_env": {
+          "default": "ZENDESK_EMAIL",
+          "description": "Environment variable with the email of the agent the token belongs to.",
+          "secret": true,
+          "title": "Email Env",
+          "type": "string"
+        },
+        "max_pages": {
+          "default": 50,
+          "description": "Most pages of tickets read per run.",
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "start_time": {
+          "default": "2020-01-01T00:00:00Z",
+          "description": "First run only: oldest ticket update to read.",
+          "format": "date-time",
+          "title": "Start Time",
+          "type": "string"
+        },
+        "subdomain": {
+          "description": "<subdomain>.zendesk.com",
+          "pattern": "^[a-z0-9-]+$",
+          "title": "Subdomain",
+          "type": "string"
+        },
+        "token_env": {
+          "default": "ZENDESK_API_TOKEN",
+          "description": "Environment variable with the API token.",
+          "secret": true,
+          "title": "Token Env",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subdomain"
+      ],
+      "title": "ZendeskConfig",
+      "type": "object"
+    }
+  },
+  "$id": "https://docs.obsei.com/schema/obsei.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "access": {
+      "$ref": "#/$defs/AccessConfig"
+    },
+    "alerts": {
+      "items": {
+        "$ref": "#/$defs/AlertConfig"
+      },
+      "title": "Alerts",
+      "type": "array"
+    },
+    "ask_judge": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "llms name of a decision endpoint that checks answers against the cited records.",
+      "title": "Ask Judge"
+    },
+    "ask_judge_threshold": {
+      "default": 0.5,
+      "description": "Below this, answers are flagged unsupported.",
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Ask Judge Threshold",
+      "type": "number"
+    },
+    "ask_llm": {
+      "default": "default",
+      "description": "llms name used by ask and the Slack bot.",
+      "title": "Ask Llm",
+      "type": "string"
+    },
+    "egress": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EgressPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "llms": {
+      "additionalProperties": {
+        "$ref": "#/$defs/LlmEndpoint"
+      },
+      "title": "Llms",
+      "type": "object"
+    },
+    "pipelines": {
+      "items": {
+        "$ref": "#/$defs/PipelineConfig"
+      },
+      "minItems": 1,
+      "title": "Pipelines",
+      "type": "array"
+    },
+    "plugins": {
+      "description": "Installed plugin entry points allowed to load.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Plugins",
+      "type": "array"
+    },
+    "privacy": {
+      "$ref": "#/$defs/PrivacyConfig"
+    },
+    "store": {
+      "$ref": "#/$defs/StoreConfig"
+    },
+    "themes": {
+      "$ref": "#/$defs/ThemesConfig"
+    },
+    "version": {
+      "const": 1,
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "pipelines"
+  ],
+  "title": "ObseiConfig",
+  "type": "object"
+}

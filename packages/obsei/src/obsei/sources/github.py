@@ -9,6 +9,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.sources._common import as_text, lookup, parse_time, stamp
@@ -17,13 +18,24 @@ from obsei.sources._common import as_text, lookup, parse_time, stamp
 class GitHubIssuesConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    repo: str = Field(pattern=r"^[\w.-]+/[\w.-]+$")
-    api_url: str = "https://api.github.com"
-    token_env: str | None = "GITHUB_TOKEN"  # noqa: S105
-    labels: list[str] = Field(default_factory=list)
-    state: str = Field(default="all", pattern="^(open|closed|all)$")
-    include_comments: bool = False
-    max_pages: int = Field(default=20, ge=1)
+    repo: str = Field(pattern=r"^[\w.-]+/[\w.-]+$", description="owner/name of the repository.")
+    api_url: str = Field(
+        default="https://api.github.com",
+        description="API URL; change it for GitHub Enterprise Server.",
+    )
+    token_env: str | None = Field(
+        default="GITHUB_TOKEN",
+        description="Environment variable with a token; optional for public repositories.",
+        json_schema_extra=SECRET,
+    )
+    labels: list[str] = Field(
+        default_factory=list, description="Only issues with all of these labels."
+    )
+    state: str = Field(
+        default="all", pattern="^(open|closed|all)$", description="open, closed or all."
+    )
+    include_comments: bool = Field(default=False, description="Also read issue comments.")
+    max_pages: int = Field(default=20, ge=1, description="Most pages of 100 issues read per run.")
 
 
 class GitHubError(RuntimeError):

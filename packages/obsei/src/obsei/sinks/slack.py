@@ -8,23 +8,29 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import EGRESS, Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Alert, SinkResult
 from obsei.core.record import Record
 from obsei.routing import Conditions, When
-from obsei.sinks._common import env, label
+from obsei.sinks._common import SinkConfigError, env, label
 
 MAX_TEXT = 2800
+VALID_WEBHOOK = frozenset({"no_text", "invalid_payload"})
 
 
 class SlackConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    webhook_url_env: str = "SLACK_WEBHOOK_URL"
+    webhook_url_env: str = Field(
+        default="SLACK_WEBHOOK_URL",
+        description="Environment variable with the Slack incoming webhook URL.",
+        json_schema_extra=SECRET,
+    )
     when: Conditions = Field(
         default_factory=dict, description='e.g. {"classify.intent": ["bug", "churn_risk"]}'
     )
-    max_rating: float | None = None
-    max_messages: int = Field(default=20, ge=1)
+    max_rating: float | None = Field(default=None, description="Only records rated at most this.")
+    max_messages: int = Field(default=20, ge=1, description="Most messages posted per run.")
 
 
 def _escape(text: str) -> str:
@@ -81,6 +87,12 @@ class SlackSink:
             summary = f"…and {len(selected) - len(posted)} more matching feedback item(s)."
             self.ctx.http.post(self.url, json={"text": summary}, extensions=EGRESS)
         return SinkResult(sent=len(posted), skipped=len(batch) - len(posted))
+
+    def verify(self) -> None:
+        """A live webhook refuses an empty message with no_text, so nothing is posted."""
+        response = self.ctx.http.post(self.url, json={}, extensions=EGRESS)
+        if response.text.strip() not in VALID_WEBHOOK:
+            raise SinkConfigError(f"slack returned {response.status_code}: {response.text[:80]}")
 
     def alert(self, alert: Alert) -> SinkResult:
         response = self.ctx.http.post(

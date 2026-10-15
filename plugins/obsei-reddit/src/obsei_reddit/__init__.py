@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from obsei.core.context import Context
-from obsei.core.plugin import factory
+from obsei.core.plugin import Catalog, factory
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record
 from obsei.core.registry import Registry
@@ -21,9 +21,13 @@ BASE = "https://www.reddit.com"
 class RedditConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    subreddit: str = Field(pattern=r"^[A-Za-z0-9_]{2,21}$")
-    kind: Literal["new", "comments", "search"] = "new"
-    query: str | None = None
+    subreddit: str = Field(
+        pattern=r"^[A-Za-z0-9_]{2,21}$", description="Subreddit name, without r/."
+    )
+    kind: Literal["new", "comments", "search"] = Field(
+        default="new", description="new posts, comments, or a search."
+    )
+    query: str | None = Field(default=None, description="Search terms, for kind search.")
 
     @model_validator(mode="after")
     def _query(self) -> RedditConfig:
@@ -52,4 +56,15 @@ class RedditSource:
 
 
 def register(registry: Registry) -> None:
-    registry.add_source("reddit", factory(RedditConfig, RedditSource))
+    registry.add_source(
+        "reddit",
+        factory(
+            RedditConfig,
+            RedditSource,
+            Catalog(
+                title="Reddit posts and comments",
+                category="social",
+                docs_url="https://github.com/obsei/obsei/tree/master/plugins/obsei-reddit",
+            ),
+        ),
+    )

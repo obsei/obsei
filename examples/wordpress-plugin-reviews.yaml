@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
+# Reviews of your WordPress.org plugin through its public reviews feed.
+#
+# Source:  https://wordpress.org/support/plugin/{slug}/reviews/feed/ (RSS 2.0, newest 30
+#          reviews, no key). Each review's text starts with "Rating: N stars"; titles end with
+#          "(N stars)". Preview any plugin with:
+#          obsei try https://wordpress.org/support/plugin/woocommerce/reviews/
+# Model:   the local classifier (pip install 'obsei[local]' && obsei models download).
+# Sinks:   Parquet files for notebooks.
+#
+# Extras:  local (optional, for labels)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+# Run:     obsei try -c examples/wordpress-plugin-reviews.yaml
+#          obsei run -c examples/wordpress-plugin-reviews.yaml --every 360
+version: 1
+
+store:
+  path: wordpress.duckdb
+
+llms:
+  default:
+    api: local
+
+pipelines:
+  - name: wordpress
+    sources:
+      - key: woocommerce
+        type: rss
+        config:
+          # Replace woocommerce with your plugin's slug, as in its wordpress.org link.
+          url: https://wordpress.org/support/plugin/woocommerce/reviews/feed/
+          instance: woocommerce
+    enrichers:
+      - type: classify
+        config: {llm: default, threshold: 0.4}
+    sinks:
+      - type: parquet
+        config: {directory: exports}

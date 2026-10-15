@@ -11,6 +11,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
 from obsei.sources._common import as_text, lookup, parse_time, stamp
@@ -20,10 +21,20 @@ class GongConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     base_url: str = Field(default="https://api.gong.io", description="Your Gong API base URL.")
-    access_key_env: str = "GONG_ACCESS_KEY"
-    secret_env: str = "GONG_ACCESS_SECRET"  # noqa: S105
-    since: datetime = datetime(2024, 1, 1, tzinfo=UTC)
-    max_pages: int = Field(default=20, ge=1)
+    access_key_env: str = Field(
+        default="GONG_ACCESS_KEY",
+        description="Environment variable with the API access key.",
+        json_schema_extra=SECRET,
+    )
+    secret_env: str = Field(
+        default="GONG_ACCESS_SECRET",
+        description="Environment variable with the access key secret.",
+        json_schema_extra=SECRET,
+    )
+    since: datetime = Field(
+        default=datetime(2024, 1, 1, tzinfo=UTC), description="First run only: oldest call to read."
+    )
+    max_pages: int = Field(default=20, ge=1, description="Most pages of calls read per run.")
 
 
 class GongError(RuntimeError):

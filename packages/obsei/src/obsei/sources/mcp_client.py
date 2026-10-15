@@ -35,12 +35,21 @@ class McpClientConfig(BaseModel):
     env: dict[str, str] = Field(
         default_factory=dict, description="Child env: variable name to obsei env variable."
     )
-    tool: str
-    arguments: dict[str, JsonValue] = Field(default_factory=dict)
-    since_argument: str | None = None
-    items_path: str | None = None
-    instance: str = "default"
-    fields: FieldMap = Field(default_factory=FieldMap)
+    tool: str = Field(description="Name of the tool to call.")
+    arguments: dict[str, JsonValue] = Field(
+        default_factory=dict, description="Arguments passed to the tool."
+    )
+    since_argument: str | None = Field(
+        default=None, description="Argument that receives the newest timestamp seen."
+    )
+    items_path: str | None = Field(
+        default=None, description="Path to the list of items in the tool's result."
+    )
+    instance: str = Field(default="default", description="Name stored with each record.")
+    fields: FieldMap = Field(
+        default_factory=FieldMap,
+        description="Which fields hold the text, id, date, rating and other values.",
+    )
 
     @model_validator(mode="after")
     def _one_target(self) -> McpClientConfig:

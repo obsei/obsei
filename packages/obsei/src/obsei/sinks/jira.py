@@ -9,26 +9,48 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import EGRESS, Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 from obsei.routing import Conditions, When
-from obsei.sinks._common import env, intents, open_issues
+from obsei.sinks._common import SinkConfigError, env, intents, open_issues
 
 
 class JiraConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     base_url: str = Field(description="https://your-site.atlassian.net or your Data Center URL")
-    project_key: str = Field(pattern=r"^[A-Z][A-Z0-9_]+$")
-    issue_type: str = "Bug"
-    auth: Literal["basic", "bearer"] = "basic"
-    email_env: str = "JIRA_EMAIL"
-    token_env: str = "JIRA_API_TOKEN"  # noqa: S105
-    api_version: Literal["2", "3"] = "3"
-    labels: list[str] = Field(default_factory=lambda: ["feedback"])
-    when: Conditions = Field(default_factory=lambda: intents("bug", "feature_request"))
-    max_rating: float | None = None
-    max_issues: int = Field(default=10, ge=1)
+    project_key: str = Field(
+        pattern=r"^[A-Z][A-Z0-9_]+$",
+        description="Key of the project to create issues in, e.g. APP.",
+    )
+    issue_type: str = Field(default="Bug", description="Issue type to create.")
+    auth: Literal["basic", "bearer"] = Field(
+        default="basic",
+        description="basic (Cloud: email and API token) or bearer (Data Center access token).",
+    )
+    email_env: str = Field(
+        default="JIRA_EMAIL",
+        description="Environment variable with your Atlassian account email (basic auth).",
+        json_schema_extra=SECRET,
+    )
+    token_env: str = Field(
+        default="JIRA_API_TOKEN",
+        description="Environment variable with the API token or personal access token.",
+        json_schema_extra=SECRET,
+    )
+    api_version: Literal["2", "3"] = Field(
+        default="3", description="REST API version: 3 for Cloud, 2 for Data Center."
+    )
+    labels: list[str] = Field(
+        default_factory=lambda: ["feedback"], description="Labels added to each issue."
+    )
+    when: Conditions = Field(
+        default_factory=lambda: intents("bug", "feature_request"),
+        description='Which records open an issue, e.g. {"classify.intent": ["bug"]}.',
+    )
+    max_rating: float | None = Field(default=None, description="Only records rated at most this.")
+    max_issues: int = Field(default=10, ge=1, description="Most issues created per run.")
 
 
 def dedupe_label(key: str) -> str:
@@ -98,3 +120,14 @@ class JiraSink:
 
     def send(self, batch: Sequence[Record]) -> SinkResult:
         return open_issues(self, batch, self.when, self.config.max_issues)
+
+    def verify(self) -> None:
+        url = f"{self.api}/project/{self.config.project_key}"
+        response = self.ctx.http.get(
+            url,
+            headers=self.headers,
+            auth=self.auth or httpx.USE_CLIENT_DEFAULT,
+            extensions=EGRESS,
+        )
+        if response.is_error:
+            raise SinkConfigError(f"Jira returned {response.status_code} for {url}")

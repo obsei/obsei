@@ -8,7 +8,7 @@ from typing import ClassVar
 from xml.etree.ElementTree import Element
 
 from defusedxml import ElementTree
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import Context
 from obsei.core.protocols import Cursor
@@ -23,9 +23,11 @@ DC = "{http://purl.org/dc/elements/1.1/}"
 class RssConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    url: str
-    instance: str | None = None
-    include_title: bool = True
+    url: str = Field(description="RSS 2.0 or Atom feed URL.")
+    instance: str | None = Field(
+        default=None, description="Name stored with each record; default: the feed URL."
+    )
+    include_title: bool = Field(default=True, description="Put each entry's title before its text.")
 
 
 def _text(element: Element | None) -> str:

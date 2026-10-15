@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
+# Google reviews of your own business locations through the Google Business Profile API
+# (beta recipe: needs API access approved for your project, and an OAuth token).
+#
+# Source:  GET https://mybusiness.googleapis.com/v4/accounts/{accountId}/locations/{locationId}/reviews
+#          (https://developers.google.com/my-business/content/review-data), newest first,
+#          up to 50 per page, paged with nextPageToken. Only verified locations you manage.
+#          starRating is a word (ONE..FIVE), so it is kept in context rather than as a rating.
+# Access:  request API access (https://developers.google.com/my-business/content/basic-setup),
+#          then get a token with the business.manage scope, e.g.
+#            gcloud auth application-default login \
+#              --scopes=https://www.googleapis.com/auth/business.manage,openid
+#            echo "GBP_ACCESS_TOKEN=$(gcloud auth application-default print-access-token)"
+#          OAuth access tokens last an hour: refresh it before each scheduled run.
+# Model:   the local classifier.
+# Sinks:   Parquet files.
+#
+# Extras:  local (optional, for labels)
+# Env:     OBSEI_DB_KEY, OBSEI_PSEUDONYM_SALT
+#          GBP_ACCESS_TOKEN     OAuth access token with the business.manage scope
+# Run:     obsei try -c examples/google-business-reviews.yaml
+version: 1
+
+store:
+  path: gbp.duckdb
+
+llms:
+  default:
+    api: local
+
+pipelines:
+  - name: google-reviews
+    sources:
+      - key: store-berlin
+        type: rest
+        config:
+          # Replace with your account and location ids (accounts.list and locations.list).
+          url: https://mybusiness.googleapis.com/v4/accounts/123456789/locations/987654321/reviews
+          instance: store-berlin
+          bearer_token_env: GBP_ACCESS_TOKEN
+          params: {orderBy: updateTime desc}
+          items_path: reviews
+          pagination: cursor
+          next_path: nextPageToken
+          cursor_param: pageToken
+          page_size_param: pageSize
+          page_size: 50
+          max_pages: 10
+          fields:
+            text: comment
+            id: reviewId
+            created_at: updateTime
+            author: reviewer.displayName        # pseudonymised before storage
+            context: [starRating, reviewReply.comment]
+    enrichers:
+      - type: classify
+        config: {llm: default, threshold: 0.4}
+    sinks:
+      - type: parquet
+        config: {directory: exports}

@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, ClassVar
 from pydantic import BaseModel, ConfigDict, Field
 
 from obsei.core.context import Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import SinkResult
 from obsei.core.record import Record
 
@@ -20,10 +21,20 @@ if TYPE_CHECKING:
 class SqlSinkConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    url_env: str
-    table: str = Field(default="obsei_feedback", pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,62}$")
-    schema_name: str | None = Field(default=None, pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,62}$")
-    include_authors: bool = False
+    url_env: str = Field(
+        description="Environment variable holding the SQLAlchemy URL.", json_schema_extra=SECRET
+    )
+    table: str = Field(
+        default="obsei_feedback",
+        pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,62}$",
+        description="Table to upsert into; created if missing.",
+    )
+    schema_name: str | None = Field(
+        default=None,
+        pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,62}$",
+        description="Database schema of the table.",
+    )
+    include_authors: bool = Field(default=False, description="Also write author pseudonyms.")
 
 
 class SqlSinkError(RuntimeError):

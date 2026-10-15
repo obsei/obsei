@@ -6,7 +6,7 @@ value is a ``register(registry: Registry) -> None`` hook.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Collection, Iterable
+from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
 from importlib.metadata import EntryPoint, entry_points
 from typing import Literal, TypeAlias, TypeVar
 
@@ -72,6 +72,16 @@ class Registry:
 
     def sink(self, name: str) -> Factory[Sink]:
         return _get(self._sinks, "sink", name)
+
+    def plugins(self) -> Iterator[tuple[PluginKind, str, Factory[object]]]:
+        tables: tuple[tuple[PluginKind, Mapping[str, Factory[object]]], ...] = (
+            ("source", self._sources),
+            ("enricher", self._enrichers),
+            ("sink", self._sinks),
+        )
+        for kind, table in tables:
+            for name in sorted(table):
+                yield kind, name, table[name]
 
     def names(self) -> dict[PluginKind, list[str]]:
         return {

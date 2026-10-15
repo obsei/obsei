@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 # Survey feedback: Typeform responses plus a CSV NPS export, classified by a local model,
 # grouped into themes and written to Parquet. Nothing leaves the machine except the Typeform
 # API calls that fetch your own responses.

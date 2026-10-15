@@ -23,9 +23,20 @@ MAX_PAGES = 10
 class AppStoreConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    app_id: str = Field(pattern=r"^\d+$")
-    countries: list[str] = Field(default_factory=lambda: ["us"], min_length=1)
-    max_pages: int = Field(default=MAX_PAGES, ge=1, le=MAX_PAGES)
+    app_id: str = Field(
+        pattern=r"^\d+$", description="The digits after 'id' in the app's App Store link."
+    )
+    countries: list[str] = Field(
+        default_factory=lambda: ["us"],
+        min_length=1,
+        description="Storefronts as ISO 3166 alpha-2 codes, e.g. us, gb, de, jp.",
+    )
+    max_pages: int = Field(
+        default=MAX_PAGES,
+        ge=1,
+        le=MAX_PAGES,
+        description="Feed pages per country, 50 reviews each.",
+    )
 
 
 def _text(entry: Element, path: str) -> str | None:

@@ -17,6 +17,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import EGRESS, Context
+from obsei.core.plugin import SECRET
 from obsei.core.protocols import Alert, AlertKind, EventDelivery, SinkResult
 from obsei.core.record import Record
 from obsei.sinks._common import env
@@ -53,10 +54,18 @@ def signature(key: bytes, event_id: str, stamp: str, body: bytes) -> str:
 class WebhookConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    url: str
-    secret_env: str | None = None
-    headers: dict[str, str] = Field(default_factory=dict)
-    exclude: list[str] = Field(default_factory=lambda: ["author"])
+    url: str = Field(description="Where each batch is posted.")
+    secret_env: str | None = Field(
+        default=None,
+        description="Environment variable with the signing secret, ideally whsec_ and base64.",
+        json_schema_extra=SECRET,
+    )
+    headers: dict[str, str] = Field(
+        default_factory=dict, description="Extra headers sent with each event."
+    )
+    exclude: list[str] = Field(
+        default_factory=lambda: ["author"], description="Record fields left out of the payload."
+    )
 
 
 def _result(delivery: EventDelivery, sent: int) -> SinkResult:

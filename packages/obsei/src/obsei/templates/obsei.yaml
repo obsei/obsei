@@ -1,8 +1,11 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
 # obsei configuration. Docs: https://docs.obsei.com/configuration/
 # Secrets never go in this file: set the environment variables named by *_env fields.
 #   OBSEI_DB_KEY          encrypts the local database (16+ characters)
 #   OBSEI_PSEUDONYM_SALT  pseudonymises author handles (16+ characters); unset = authors dropped
 # 'obsei init' generates both in .obsei/secrets.env; variables set in the environment win.
+# Add a source or sink without editing this file: obsei add appstore, obsei add slack (all of
+# them: obsei integrations); then obsei check.
 version: 1
 
 store:
