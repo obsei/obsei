@@ -1,6 +1,6 @@
 {
   "name": "obsei",
-  "version": "1.0.0-rc.5",
+  "version": "1.0.0",
   "description": "Query your self-hosted customer feedback with cited, privacy-filtered evidence.",
   "contextFileName": "integrations/claude/obsei/skills/voice-of-customer/SKILL.md",
   "mcpServers": {
