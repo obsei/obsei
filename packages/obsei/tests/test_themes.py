@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import sys
+from collections import Counter
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 
@@ -119,7 +120,7 @@ def test_keyword_label_breaks_ties_by_first_appearance() -> None:
 def test_keyword_label_is_stable_across_hash_seeds() -> None:
     code = (
         "from obsei.themes import keyword_label; "
-        "print(keyword_label(['dark mode please now', 'please dark mode now', 'now mode dark']))"
+        "print(keyword_label(['dark mode toggle now', 'toggle dark mode now', 'now mode dark']))"
     )
     labels = {
         subprocess.run(  # noqa: S603
@@ -131,7 +132,36 @@ def test_keyword_label_is_stable_across_hash_seeds() -> None:
         ).stdout.strip()
         for seed in ("1", "2", "3", "4")
     }
-    assert labels == {"dark, mode, please"}
+    assert labels == {"dark, mode, toggle"}
+
+
+def test_keyword_label_skips_stopwords_and_short_words() -> None:
+    samples = ["that would be like a dark mode", "dark mode, like that would be nice", "is it on"]
+    assert keyword_label(samples) == "dark, mode"
+
+
+def test_keyword_label_prefers_words_specific_to_the_theme() -> None:
+    template = "Check for existing issues. Describe the bug. Steps to reproduce. "
+    samples = [template + "terminal crashes", template + "terminal crashes on split"]
+    boilerplate = ("check", "existing", "issues", "describe", "steps", "reproduce")
+    df = Counter({**dict.fromkeys(boilerplate, 40), "terminal": 3, "crashes": 5})
+    assert keyword_label(samples, background=df, documents=40) == "terminal, crashes"
+    assert keyword_label(samples) == "check, existing, issues"
+
+
+def test_label_background_is_the_same_non_duplicate_texts(store: Store) -> None:
+    report = update_themes(store, HashingEmbedder(), ThemesConfig(k_anonymity=5))
+    texts = store.label_background()
+    assert len(texts) == len(TEXTS) - report.duplicates
+    assert set(texts) <= set(TEXTS)
+    assert store.label_background() == texts
+    assert store.label_background(limit=3) == texts[:3]
+
+
+def test_keyword_label_reads_non_latin_scripts() -> None:
+    assert keyword_label(["लॉगिन नहीं हो रहा", "लॉगिन फिर से नहीं"]) == "लॉगिन, नहीं"
+    assert keyword_label(["لا يمكنني تسجيل الدخول", "تسجيل الدخول لا يعمل"]) == "تسجيل, الدخول"
+    assert keyword_label(["ログインできません", "またログインできません"]) == "Theme"
 
 
 def test_ask_cites_only_retrieved_records(store: Store) -> None:

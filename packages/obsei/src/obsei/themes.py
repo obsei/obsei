@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 from collections import Counter
 from contextlib import nullcontext
@@ -34,7 +35,19 @@ LABEL_SCHEMA: JsonSchema = {
     "required": ["label", "description"],
     "properties": {"label": {"type": "string"}, "description": {"type": "string"}},
 }
-_WORD = re.compile(r"[^\W\d_]{4,}", re.UNICODE)
+# Letters plus the combining marks of Indic, Thai, Arabic and Hebrew scripts, which \w omits.
+_WORD = re.compile(
+    r"(?:[^\W\d_]|[\u0591-\u05c7\u0610-\u061a\u064b-\u065f\u0900-\u0dff\u0e31-\u0e4e])+"
+)
+_MIN_WORD = 4
+_STOPWORDS = frozenset(
+    "about after also because been before being could does doesn even every from have here into "  # noqa: SIM905
+    "just like make many more much need only other please really should some still than thank "
+    "thanks that their them then there these they this those very want were what when where which "
+    "while will with would your aber auch avec como cuando dans della desde eine einen esta este "
+    "isso kann mais muito nach nicht noch oder para pero porque pour questo sehr sind sono todo "
+    "wenn".split()
+)
 _PLACEHOLDER = re.compile(r"<[A-Z0-9_]+>")
 
 
@@ -75,17 +88,37 @@ class _Label(BaseModel):
     description: str = Field(max_length=300)
 
 
-def keyword_label(samples: list[str], top: int = 3, *, fallback: str = "Theme") -> str:
+def _words(text: str) -> list[str]:
+    """Distinct label candidates in ``text``, in order: four or more letters, no stopwords or
+    redaction placeholders."""
+    found = (m.casefold() for m in _WORD.findall(_PLACEHOLDER.sub(" ", text)))
+    return [w for w in dict.fromkeys(found) if len(w) >= _MIN_WORD and w not in _STOPWORDS]
+
+
+def keyword_label(
+    samples: list[str],
+    top: int = 3,
+    *,
+    fallback: str = "Theme",
+    background: Counter[str] | None = None,
+    documents: int = 0,
+) -> str:
     """Words shared by several samples; never verbatim text, which may identify one customer.
 
-    Ranked by how many samples use them, ties by first appearance, so labels are reproducible."""
-    counts = Counter(
-        w
-        for text in samples
-        for w in dict.fromkeys(m.casefold() for m in _WORD.findall(_PLACEHOLDER.sub(" ", text)))
-    )
-    words = [w for w, n in counts.most_common(top) if n > 1]
-    return ", ".join(words) if words else fallback
+    Ranked by how many samples use them times how rare they are across ``documents`` background
+    texts (``background`` counts the texts containing each word), so words common to all
+    feedback, such as an issue template's, rank last. Ties go to first appearance, so labels are
+    reproducible."""
+    counts = Counter(w for text in samples for w in _words(text))
+    df = background or Counter()
+
+    def weight(word: str) -> float:
+        rarity = math.log((1 + documents) / (1 + df[word])) if documents else 1.0
+        return counts[word] * rarity
+
+    shared = sorted((w for w in counts if counts[w] > 1), key=weight, reverse=True)
+    chosen = [w for w in shared if weight(w) > 0][:top]
+    return ", ".join(chosen) if chosen else fallback
 
 
 def fallback_label(theme_id: str) -> str:
@@ -172,15 +205,21 @@ def update_themes(
     with guard:
         _assign(store, embedder.model, config, report)
         unlabeled = store.unlabeled_themes(config.k_anonymity)
+        texts = store.label_background() if unlabeled else []
+    background = Counter(w for text in texts for w in _words(text))
     for theme_id in unlabeled:
         with guard:
             samples = store.theme_samples(theme_id)
         label = _llm_label(labeler, samples, config.label_language) if labeler else None
         with guard:
             if label is None:
-                store.label_theme(
-                    theme_id, keyword_label(samples, fallback=fallback_label(theme_id)), None
+                name = keyword_label(
+                    samples,
+                    fallback=fallback_label(theme_id),
+                    background=background,
+                    documents=len(texts),
                 )
+                store.label_theme(theme_id, name, None)
             else:
                 store.label_theme(theme_id, label.label, label.description)
         report.labeled += 1
