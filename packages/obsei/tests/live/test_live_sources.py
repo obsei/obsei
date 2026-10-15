@@ -56,10 +56,18 @@ def check(src: Source) -> None:
     assert not repeated, f"second fetch re-yielded {sorted(repeated)[:5]}"
 
 
+# Apple's public feed is intermittently empty (HTTP 200, no entries) for any app; test the first
+# app that has reviews and skip during an outage. Parse or HTTP errors still fail.
+APP_IDS = ("310633997", "375380948", "284882215", "389801252")
+
+
 def test_appstore_feed(ctx: Context) -> None:
-    check(
-        source("appstore", {"app_id": "375380948", "countries": ["us", "gb"], "max_pages": 1}, ctx)
-    )
+    for app_id in APP_IDS:
+        config = {"app_id": app_id, "countries": ["us", "gb"], "max_pages": 1}
+        if next(iter(source("appstore", config, ctx).fetch(None)), None):
+            check(source("appstore", config, ctx))
+            return
+    pytest.skip(f"Apple's public review feed is empty right now for all of {APP_IDS}")
 
 
 def test_hackernews(ctx: Context) -> None:

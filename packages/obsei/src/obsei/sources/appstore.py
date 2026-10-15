@@ -1,21 +1,30 @@
-"""Apple App Store public customer-reviews feed (latest ~500 reviews per country, no key)."""
+"""Apple App Store public customer-reviews feed (latest reviews per country, no key)."""
 
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import ClassVar
+from typing import ClassVar, NamedTuple
 from xml.etree.ElementTree import Element
 
+import httpx
 from defusedxml import ElementTree
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from obsei.core.context import Context
 from obsei.core.protocols import Cursor
 from obsei.core.record import Record, SourceRef
-from obsei.sources._common import as_float, oldest_first, parse_time, stamp
+from obsei.sources._common import as_float, as_text, lookup, oldest_first, parse_time, stamp
 
-# The XML feed: Apple's JSON variant of the same URL intermittently returns no entries.
-FEED_URL = "https://itunes.apple.com/{country}/rss/customerreviews/page={page}/id={app_id}/sortby=mostrecent/xml"
+FEED_URL = "https://itunes.apple.com/{country}/rss/customerreviews/{path}/{format}"
+# Apple's CDN often serves one spelling of the feed empty while another has the reviews, so
+# page 1 tries each spelling, as XML then JSON, until one has entries.
+FIRST_PAGE = (
+    "page=1/id={app_id}/sortby=mostrecent",
+    "id={app_id}/sortby=mostrecent",
+    "id={app_id}/sortBy=mostRecent",
+    "id={app_id}",
+)
+NEXT_PAGE = "page={page}/id={app_id}/sortby=mostrecent"
 NS = {"a": "http://www.w3.org/2005/Atom", "im": "http://itunes.apple.com/rss"}
 MAX_PAGES = 10
 
@@ -39,10 +48,65 @@ class AppStoreConfig(BaseModel):
     )
 
 
+class Review(NamedTuple):
+    id: str | None
+    rating: str | None
+    updated: str | None
+    body: str | None
+    title: str | None
+    version: str | None
+    author: str | None
+    url: str | None
+
+
 def _text(entry: Element, path: str) -> str | None:
     node = entry.find(path, NS)
     text = node.text.strip() if node is not None and node.text else ""
     return text or None
+
+
+def _from_xml(content: bytes) -> list[Review]:
+    reviews = []
+    for e in ElementTree.fromstring(content).findall("a:entry", NS):
+        link = e.find("a:link", NS)
+        reviews.append(
+            Review(
+                id=_text(e, "a:id"),
+                rating=_text(e, "im:rating"),
+                updated=_text(e, "a:updated"),
+                body=_text(e, "a:content[@type='text']"),
+                title=_text(e, "a:title"),
+                version=_text(e, "im:version"),
+                author=_text(e, "a:author/a:name"),
+                url=link.get("href") if link is not None else None,
+            )
+        )
+    return reviews
+
+
+def _from_json(data: JsonValue) -> list[Review]:
+    entries = lookup(data, "feed.entry")
+    if isinstance(entries, dict):
+        entries = [entries]
+    if not isinstance(entries, list):
+        return []
+
+    def label(e: JsonValue, path: str) -> str | None:
+        return as_text(lookup(e, f"{path}.label"))
+
+    return [
+        Review(
+            id=label(e, "id"),
+            rating=label(e, "im:rating"),
+            updated=label(e, "updated"),
+            body=label(e, "content"),
+            title=label(e, "title"),
+            version=label(e, "im:version"),
+            author=label(e, "author.name"),
+            url=as_text(lookup(e, "link.attributes.href")),
+        )
+        for e in entries
+    ]
 
 
 class AppStoreSource:
@@ -52,42 +116,53 @@ class AppStoreSource:
         self.config = config
         self.ctx = ctx
 
-    def _entries(self, country: str) -> Iterator[Element]:
-        for page in range(1, self.config.max_pages + 1):
-            url = FEED_URL.format(country=country, page=page, app_id=self.config.app_id)
-            response = self.ctx.http.get(url)
-            if response.status_code in (400, 404):
-                return
-            response.raise_for_status()
-            entries = ElementTree.fromstring(response.content).findall("a:entry", NS)
-            if not entries:
-                return
-            yield from entries
-
-    def _record(self, entry: Element, country: str) -> Record | None:
-        review_id, rating = _text(entry, "a:id"), _text(entry, "im:rating")
-        created = parse_time(_text(entry, "a:updated"))
-        body = _text(entry, "a:content[@type='text']")
-        if not review_id or rating is None or created is None or not body:
+    def _get(self, url: str) -> httpx.Response | None:
+        response = self.ctx.http.get(url)
+        if response.status_code in (400, 404):
             return None
-        title = _text(entry, "a:title")
+        response.raise_for_status()
+        return response
+
+    def _page(self, country: str, page: int) -> list[Review]:
+        paths = FIRST_PAGE if page == 1 else (NEXT_PAGE,)
+        for path in paths:
+            spelled = path.format(app_id=self.config.app_id, page=page)
+            for fmt in ("xml", "json"):
+                url = FEED_URL.format(country=country, path=spelled, format=fmt)
+                response = self._get(url)
+                if response is None:
+                    continue
+                reviews = (
+                    _from_xml(response.content) if fmt == "xml" else _from_json(response.json())
+                )
+                if reviews:
+                    return reviews
+        return []
+
+    def _reviews(self, country: str) -> Iterator[Review]:
+        for page in range(1, self.config.max_pages + 1):
+            reviews = self._page(country, page)
+            if not reviews:
+                return
+            yield from reviews
+
+    def _record(self, review: Review, country: str) -> Record | None:
+        created = parse_time(review.updated)
+        if not review.id or review.rating is None or created is None or not review.body:
+            return None
         context = {"country": country}
-        if version := _text(entry, "im:version"):
-            context["app_version"] = version
-        if title:
-            context["title"] = title
-        link = entry.find("a:link", NS)
+        if review.version:
+            context["app_version"] = review.version
+        if review.title:
+            context["title"] = review.title
         return Record(
             source=SourceRef(
-                type=self.name,
-                instance=self.config.app_id,
-                native_id=review_id,
-                url=link.get("href") if link is not None else None,
+                type=self.name, instance=self.config.app_id, native_id=review.id, url=review.url
             ),
-            text=f"{title}\n\n{body}" if title else body,
+            text=f"{review.title}\n\n{review.body}" if review.title else review.body,
             created_at=created,
-            author=self.ctx.author(_text(entry, "a:author/a:name"), None),
-            rating=as_float(rating),
+            author=self.ctx.author(review.author, None),
+            rating=as_float(review.rating),
             context=context,
         )
 
@@ -96,8 +171,8 @@ class AppStoreSource:
         for country in self.config.countries:
             seen = state.get(country)
             fresh: list[Record] = []
-            for entry in self._entries(country):
-                record = self._record(entry, country)
+            for review in self._reviews(country):
+                record = self._record(review, country)
                 if record is None:
                     continue
                 if isinstance(seen, str) and stamp(record) <= seen:
