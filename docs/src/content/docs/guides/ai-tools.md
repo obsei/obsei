@@ -18,7 +18,7 @@ server a startup timeout of about 60 seconds where the tool has one.
 
 The server reads `obsei.yaml` in the working directory, or the file named by `OBSEI_CONFIG`. Set
 `OBSEI_DB` for a database somewhere else and `OBSEI_DB_KEY` when it is encrypted. It opens the
-store read-only. The plugins for Claude Code, Codex, Copilot, VS Code, Cursor and Gemini also add
+store read-only, except to queue agent proposals for approval ([MCP](/guides/mcp/)). The plugins for Claude Code, Codex, Copilot, VS Code, Cursor and Gemini also add
 the `voice-of-customer` skill: one [`SKILL.md`](https://github.com/obsei/obsei/blob/master/integrations/claude/obsei/skills/voice-of-customer/SKILL.md)
 shared by all of them.
 

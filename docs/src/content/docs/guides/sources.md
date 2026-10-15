@@ -23,7 +23,8 @@ records; `obsei integrations` lists each one's secrets and where to get them
 | `bluesky` | Posts matching a query, optionally by language | none or app password | beta |
 | `youtube` | Comments on videos or a whole channel | `YOUTUBE_API_KEY` | beta |
 | `rss` | RSS 2.0 and Atom: forums, status pages, review sites | none | verified |
-| `reddit` (community plugin, [not on PyPI](#reddit-plugin)) | Subreddit posts, comments and searches via RSS | none | beta |
+| `reddit` ([plugin](#reddit-plugin), from Git) | Subreddit posts, comments and searches via RSS | none | beta |
+| `typeform` ([plugin](/reference/plugins/), from Git) | Completed survey responses, incremental | personal access token | beta |
 | `sql` | Any SQLAlchemy database or warehouse, incremental by a cursor column | URL in env, `obsei[sql]` | beta |
 | `filedrop` | New or changed CSV, JSON Lines and JSON files in a folder (SFTP drop, mounted bucket) | none | beta |
 | `imap` | Feedback mailboxes | username and password in env | beta |
@@ -94,7 +95,7 @@ More complete setups are on the [Examples](/examples/) page.
 
 ## Reddit plugin
 
-`reddit` is a first-party plugin, not on PyPI yet. Install it from Git, then allow it in
+`reddit` is a first-party plugin, installed from Git rather than PyPI. Install it, then allow it in
 `obsei.yaml` with `plugins: [reddit]`:
 
 ```bash

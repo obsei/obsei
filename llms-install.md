@@ -1,14 +1,17 @@
 # Install the obsei MCP server
 
-obsei serves read-only MCP tools over stdio (`search_feedback`, `feedback_stats`, `get_feedback`,
-`list_themes`) on customer feedback that it has already collected and redacted.
+obsei serves MCP tools over stdio on customer feedback that it has already collected and
+redacted: `search_feedback`, `feedback_stats`, `get_feedback` and `list_themes` read it, and
+`propose_issue` queues an issue that a person approves with `obsei approvals approve`. Customer
+text in results is marked `untrusted: true`.
 
 1. Check that `uvx` is available (`uvx --version`). If not, install uv:
    https://docs.astral.sh/uv/getting-started/installation/
 2. Ask the user for the path to their `obsei.yaml`. If they have none, they need to set up obsei
    first: https://docs.obsei.com/quickstart/ (`obsei init`, then `obsei run`).
-3. Ask whether the database is encrypted. If it is, the server needs `OBSEI_DB_KEY`. Have the user
-   enter the key in the settings file themselves; do not echo it back or invent one.
+3. The database is encrypted by default. If `.obsei/secrets.env` sits next to `obsei.yaml` (created
+   by `obsei init`), the server reads `OBSEI_DB_KEY` from it and nothing more is needed. Otherwise
+   have the user enter the key in the settings file themselves; do not echo it back or invent one.
 4. Add the server to the MCP settings:
 
 ```json

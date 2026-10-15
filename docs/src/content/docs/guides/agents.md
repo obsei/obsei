@@ -133,7 +133,7 @@ claude mcp add obsei -- obsei mcp
 > server over HTTP.
 
 ```bash
-cp .env.example .env   # agent fills it with openssl rand -hex 24 values
+cp .env.example .env   # OBSEI_DB_KEY and OBSEI_PSEUDONYM_SALT from .obsei/secrets.env, plus OBSEI_API_TOKEN
 docker compose up -d
 claude mcp add --transport http obsei http://localhost:8765/mcp \
   --header "Authorization: Bearer $OBSEI_API_TOKEN"

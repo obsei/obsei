@@ -1,6 +1,6 @@
 # obsei-reddit
 
-Install it from Git (a PyPI package is coming):
+Install it from Git (it is not published to PyPI):
 
 ```bash
 pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"

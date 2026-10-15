@@ -7,7 +7,8 @@ sidebar:
 
 obsei 0.0.x was an "observe, analyze, inform" toolkit: Python classes you wired together in your
 own code. 1.0 is a rewrite with a new codebase, not an upgrade. There is no compatibility layer,
-and 0.0.x code will not run against it.
+and 0.0.x code will not run against it. [What's new in 1.0](/whats-new/) summarizes the new
+features.
 
 ## Concepts
 
@@ -19,7 +20,7 @@ and 0.0.x code will not run against it.
 | Workflow, built and run in Python | Pipeline in `obsei.yaml`, run with `obsei run` or `obsei serve` |
 | Workflow store (SQL state) | Encrypted DuckDB store, which also skips records it has seen |
 | PII anonymizer analyzer, opt-in | Redaction and author pseudonyms at ingest, on by default |
-| Transformer classifiers and sentiment analyzers | `classify` with your LLM or a decision model ([Models](/guides/models/)) |
+| Transformer classifiers and sentiment analyzers | `classify` with the in-process local model (`obsei[local]`), an LLM or a decision model ([Models](/guides/models/)) |
 
 Configuration is declarative: a config file can name plugins but never import arbitrary code.
 Run `obsei init` for a starting `obsei.yaml`, then see [Configuration](/configuration/).
@@ -39,8 +40,10 @@ Run `obsei init` for a starting `obsei.yaml`, then see [Configuration](/configur
 
 ## What's gone
 
-- Twitter/X, Facebook, Google Maps reviews, Google News and the web crawler.
-- The Reddit scrapers. Reddit is a community plugin that reads RSS
+- Twitter/X, Facebook, Google News and the web crawler.
+- The Google Maps reviews scraper. Reviews of your own locations come from the
+  [Google Business Profile recipe](/guides/sources/#recipes-with-the-rest-source).
+- The Reddit scrapers. Reddit is a first-party plugin that reads RSS
   ([install it from Git](/guides/sources/#reddit-plugin)).
 - The Elasticsearch and logger informers. Use the `sql`, `parquet` or `webhook` sink, or
   `obsei try` to inspect records.
