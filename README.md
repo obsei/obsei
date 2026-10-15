@@ -73,6 +73,11 @@ or a LiteLLM proxy for Bedrock and Vertex ([benchmark](https://docs.obsei.com/gu
 Public endpoints are refused until you choose `OBSEI_EGRESS_MODE=private` (with `OBSEI_EGRESS_ALLOW`)
 or `hybrid`.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/public/brand/integrations-dark.svg">
+  <img alt="Sources: App Store, Google Play, Zendesk, Freshdesk, Intercom, Gong, GitHub issues, Hacker News, Bluesky, YouTube, Reddit, Typeform, RSS, email, SQL, CSV, any REST API, any MCP tool. Destinations: Slack, Teams, Jira, Linear, GitHub issues, Apprise, signed webhooks, SQL, Parquet." src="docs/public/brand/integrations-light.svg" width="920">
+</picture>
+
 | | Built in |
 | --- | --- |
 | Sources | CSV, JSON Lines, declarative REST, webhooks, App Store (any country), App Store Connect, Google Play (official API), GitHub issues, Hacker News, Bluesky, YouTube, RSS/Atom, SQL databases and warehouses, file drops, IMAP mailboxes, any MCP server, Zendesk, Freshdesk, Intercom, Gong; Reddit as an unpublished community plugin (install from Git) |

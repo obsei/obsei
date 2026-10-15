@@ -16,15 +16,15 @@ credentials, without sending anything ([Set up without editing YAML](/guides/set
 
 | Type | What | Idempotency | Status |
 | --- | --- | --- | --- |
-| `webhook` | One CloudEvents JSON event per batch, signed per [Standard Webhooks](https://www.standardwebhooks.com/), retried; authors omitted by default | `webhook-id` per event, record ids in the payload | beta |
-| `slack` | Messages for matching feedback, capped per run | at-least-once | verified |
-| `notify` | One summary per batch to Telegram, Discord, email, Teams and 100+ services via [Apprise](https://github.com/caronc/apprise) (`obsei[notify]`) | at-least-once | beta |
-| `github_issues` | One issue per matching record | hidden marker, searched before creating | beta |
-| `jira` | One issue per matching record (Cloud with ADF, or Data Center) | `obsei-rec_...` label | beta |
-| `linear` | One issue per matching record | marker in the description | verified |
-| `parquet` | Parquet files for notebooks and lakes | file named by batch content | beta |
-| `sql` | Upsert into a table in any SQLAlchemy database or warehouse | delete and insert by id | beta |
-| `teams` ([plugin](/reference/plugins/), `pip install obsei-teams`) | An Adaptive Card per matching record in a Microsoft Teams channel | at-least-once | beta |
+| <span class="i i-webhook"></span> `webhook` | One CloudEvents JSON event per batch, signed per [Standard Webhooks](https://www.standardwebhooks.com/), retried; authors omitted by default | `webhook-id` per event, record ids in the payload | beta |
+| <span class="i i-message-square"></span> `slack` | Messages for matching feedback, capped per run | at-least-once | verified |
+| <span class="i i-bell"></span> `notify` | One summary per batch to Telegram, Discord, email, Teams and 100+ services via [Apprise](https://github.com/caronc/apprise) (`obsei[notify]`) | at-least-once | beta |
+| <span class="i i-github"></span> `github_issues` | One issue per matching record | hidden marker, searched before creating | beta |
+| <span class="i i-jira"></span> `jira` | One issue per matching record (Cloud with ADF, or Data Center) | `obsei-rec_...` label | beta |
+| <span class="i i-linear"></span> `linear` | One issue per matching record | marker in the description | verified |
+| <span class="i i-apacheparquet"></span> `parquet` | Parquet files for notebooks and lakes | file named by batch content | beta |
+| <span class="i i-database"></span> `sql` | Upsert into a table in any SQLAlchemy database or warehouse | delete and insert by id | beta |
+| <span class="i i-users"></span> `teams` ([plugin](/reference/plugins/), `pip install obsei-teams`) | An Adaptive Card per matching record in a Microsoft Teams channel | at-least-once | beta |
 
 `verified` means a live test in
 [`packages/obsei/tests/live`](https://github.com/obsei/obsei/tree/master/packages/obsei/tests/live)
