@@ -10,7 +10,7 @@ set). Each entry has an `api`:
 
 | `api` | What runs | Use it for |
 | --- | --- | --- |
-| `local` (the `obsei init` default) | zero-shot classifiers inside obsei, on the CPU | `classify` labels, routing fields and scores, with nothing to serve |
+| `local` (the `obsei init` default) | zero-shot classifiers inside obsei, on a GPU when there is one, else the CPU | `classify` labels, routing fields and scores, with nothing to serve |
 | `decision` | a [decision model](#decision-models) on llama.cpp or a hosted API | the same labels from a model server; `filter` and `ask_judge` |
 | `openai` (default when `api` is unset) | any OpenAI-compatible chat endpoint | `ask`, theme labels, free-text fields, or `classify` with a chat model |
 
@@ -45,6 +45,15 @@ one CPU with three questions per record. Each extra field costs about as much as
 questions. `gliner2-multi-v1` (Apache-2.0) is about five times faster and slightly better at sentiment,
 but it routed no Japanese message to the right team, so the example above uses it for sentiment
 only. `obsei models download --classifier <model>` (repeatable) fetches other models.
+
+Speed depends on the length of each message times the number of options, because every option is
+scored against the whole message. The 0.7 records a second above are for the demo's one- or
+two-sentence messages. GitHub issues are longer (a median of about 240 tokens), and with 18 options
+across three questions bge-m3 took about 45 to 70 seconds per issue on an Apple M2 CPU and about
+2 seconds on its GPU. The classifier uses an NVIDIA GPU (CUDA) or an Apple GPU (MPS) when PyTorch
+finds one, with the same answers as on the CPU, and reads only the first 512 tokens of each message:
+on issues of 20,000 to 50,000 characters, that cut one question from 11 to 15 seconds to under one
+second on the M2's GPU.
 
 In `air_gapped` mode (the default) obsei never downloads a model: it loads them from
 `OBSEI_MODELS_DIR`, or from a local directory given as `model`. Run `obsei models download` once
@@ -82,7 +91,7 @@ at 0.7 is the share of records with at least one answer below 0.7. The mixed row
 
 Caveats: the records are synthetic, 5 to 41 per language (41 in English), and expected answers come from the demo's
 issue definitions, not from human review of each message. Timings are PyTorch on one CPU, one record
-at a time. Qwen3 1.7B and 4B, larger decision models (Kev-4B, Clef-Flash) and GPUs were not tested.
+at a time, on short messages. Qwen3 1.7B and 4B, larger decision models (Kev-4B, Clef-Flash) and GPUs were not tested.
 Your options and your feedback differ, so [measure on a labelled sample of your
 own](#measure-on-your-own-data) before a route acts on labels. `obsei eval --demo` reruns the
 default's row: the gold set ships with obsei as `templates/demo-gold.csv`.

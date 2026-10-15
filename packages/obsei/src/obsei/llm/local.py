@@ -26,6 +26,9 @@ from obsei.llm.embed import MODELS_DIR_ENV
 
 LOCAL_CLASSIFIER = "MoritzLaurer/bge-m3-zeroshot-v2.0"
 HYPOTHESIS = "This customer message is {}"
+# bge-m3 reads up to 8192 tokens, and NLI cost grows with length times options; the start of a
+# message carries its intent.
+MAX_TOKENS = 512
 INSTALL_HINT = "local classification needs: pip install 'obsei[local]'"
 
 Options: TypeAlias = Mapping[str, str | None]
@@ -74,9 +77,14 @@ def fetch(model: str, *, offline: bool, cache_dir: str | None = None) -> str:
 
 
 def _nli(path: str) -> Scorer:
-    from transformers import pipeline  # noqa: PLC0415
+    from transformers import AutoTokenizer, pipeline  # noqa: PLC0415
 
-    classify: _Nli = pipeline("zero-shot-classification", model=path, device=-1)
+    # No device: transformers picks CUDA or Apple MPS when present, else the CPU.
+    classify: _Nli = pipeline(
+        "zero-shot-classification",
+        model=path,
+        tokenizer=AutoTokenizer.from_pretrained(path, model_max_length=MAX_TOKENS),
+    )
 
     def score(text: str, options: Options) -> dict[str, float]:
         hypotheses = {f"{k}: {v}" if v else k: k for k, v in options.items()}
