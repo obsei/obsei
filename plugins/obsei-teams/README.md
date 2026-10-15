@@ -3,10 +3,10 @@
 Posts matching feedback to a Microsoft Teams channel as an Adaptive Card, through a Power
 Automate **Workflows** webhook (Microsoft retired the Office 365 connector incoming webhooks).
 
-Install it from Git (a PyPI package is coming):
+Install it from PyPI:
 
 ```bash
-pip install "obsei-teams @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-teams"
+pip install obsei-teams
 ```
 
 In Teams, open the channel's **Workflows** and choose the template *Post to a channel when a
