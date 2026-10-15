@@ -131,6 +131,15 @@ uv run --extra embeddings obsei models download
 uv run --extra embeddings obsei demo --embedder local --out docs/public/demo
 ```
 
+The demo's labels are committed in `packages/obsei/src/obsei/demo_labels.json`. To relabel them with
+the default local classifier (a few minutes on a CPU), then retake `website/studio-light.png` and
+`website/studio-dark.png` (1280x860) from the new demo:
+
+```bash
+uv run --extra local --extra embeddings obsei demo --local-labels --embedder local \
+  --save-labels packages/obsei/src/obsei/demo_labels.json --out docs/public/demo
+```
+
 The social images `website/og.png` and `docs/public/og.png` are rendered from the `og.svg` next to
 them (1200x630); the blog renders its own at build time.
 

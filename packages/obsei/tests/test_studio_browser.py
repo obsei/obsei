@@ -232,10 +232,10 @@ def assert_studio_renders(page: Page, badge: str) -> None:
     assert page.locator(".privacy .stat").count() >= 3
     assert page.locator(".themes .spark").count() == page.locator(".themes li").count()
     assert page.locator(".columns li.peak").count() == 1
-    expect(page.locator(".decisions")).to_contain_text("Julia-1")
+    expect(page.locator(".decisions")).to_contain_text("bge-m3-zeroshot-v2.0")
     expect(
         page.locator("section.panel", has=page.get_by_role("heading", name="Routes"))
-    ).to_contain_text("urgent-bugs")
+    ).to_contain_text("billing")
     assert page.locator(".decisions h3").all_text_contents() == ["angry", "team", "urgency"]
     assert page.locator(".evidence .labels").count() == page.locator(".evidence li").count()
     assert page.locator(".kpi").count() == 4
@@ -257,7 +257,7 @@ def test_demo_export_renders_and_is_interactive(
     assert page.locator(".graph .node.kind-source").count() == 6
     for selector in DEMO_ONLY:
         expect(page.locator(selector)).to_be_visible()
-    expect(page.locator(".intro")).to_contain_text("144M-parameter decision model")
+    expect(page.locator(".intro")).to_contain_text("568M-parameter zero-shot model")
     rising = page.locator(".themes li.rising")
     assert rising.count() >= 1
     expect(rising.first.locator("strong")).to_have_text(re.compile(r"^Can't log in"))

@@ -47,13 +47,18 @@ field), using the same
 routing code as a pipeline. In your deployment Ask uses your own
 model, and agents get the same answers over MCP.
 
-The demo's labels (sentiment, intent, team, urgency and an angry yes/no) come from Julia-1, a
-144M-parameter decision model, run once on a CPU and committed as `obsei/demo_labels.json`, so the
-build needs no model server. They are shown as the model produced them, mistakes included: 49% of
-records are marked for review (see [known limits](/guides/models/#known-limits)). To label it again with a decision model, put its endpoint URL in an
-environment variable:
+The demo's labels (sentiment, intent, team, urgency and an angry yes/no) come from the default local
+classifier, `MoritzLaurer/bge-m3-zeroshot-v2.0`, run once on a CPU and committed as
+`obsei/demo_labels.json`, so the build needs no model. They are shown as the model produced them,
+mistakes included: 21 of 136 records are marked for review, almost no message is judged angry and
+most urgencies are "this week", so the demo's `urgent-bugs` route catches only 4 records, which
+Studio hides because they are fewer than k (see
+[known limits](/guides/models/#known-limits)). To label it again with the local classifier, or
+with a decision model whose endpoint URL is in an environment variable:
 
 ```bash
+uv run --extra local obsei demo --local-labels \
+  --save-labels packages/obsei/src/obsei/demo_labels.json --out docs/public/demo
 export OBSEI_DEMO_DECISION_URL=...   # the decision endpoint URL your server documents
 uv run obsei demo --decision-url-env OBSEI_DEMO_DECISION_URL \
   --save-labels packages/obsei/src/obsei/demo_labels.json --out docs/public/demo

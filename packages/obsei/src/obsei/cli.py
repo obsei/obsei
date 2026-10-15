@@ -65,9 +65,9 @@ from obsei.demo import (
     DECISION_MODEL,
     GOLD_CONFIG,
     GOLD_FILE,
-    decision_labels,
     demo_records,
     demo_snapshot,
+    model_labels,
     raw_demo_records,
     redacted_demo_records,
     write_labels,
@@ -1112,17 +1112,28 @@ def demo(
     decision_model: Annotated[
         str, typer.Option(help="Model name recorded with labels from --decision-url-env.")
     ] = DECISION_MODEL,
+    local_labels: Annotated[
+        bool,
+        typer.Option(
+            help=f"Label the demo with the in-process {LOCAL_CLASSIFIER} (obsei\\[local]) "
+            "instead of the committed labels."
+        ),
+    ] = False,
     save_labels: Annotated[
         Path | None,
-        typer.Option(help="Also write the labels from --decision-url-env to this JSON file."),
+        typer.Option(help="Also write new labels (--local-labels or --decision-url-env) here."),
     ] = None,
 ) -> None:
     """Build the static Studio demo from synthetic multilingual feedback."""
-    if save_labels is not None and decision_url_env is None:
-        raise typer.BadParameter("--save-labels needs --decision-url-env")
+    if local_labels and decision_url_env:
+        raise typer.BadParameter("use --local-labels or --decision-url-env, not both")
+    if save_labels is not None and not (local_labels or decision_url_env):
+        raise typer.BadParameter("--save-labels needs --local-labels or --decision-url-env")
     settings = ThemesConfig(embedder=embedder, k_anonymity=5)
     llms = (
-        {"demo": LlmEndpoint(api="decision", url_env=decision_url_env, timeout=120)}
+        {"demo": LlmEndpoint(api="local")}
+        if local_labels
+        else {"demo": LlmEndpoint(api="decision", url_env=decision_url_env, timeout=120)}
         if decision_url_env
         else {}
     )
@@ -1134,10 +1145,9 @@ def demo(
             model = ctx.embedder(settings.embedder)
             raw = raw_demo_records()
             labels = None
-            if decision_url_env:
-                labels = decision_labels(
-                    redacted_demo_records(raw), ctx.decision("demo"), model=decision_model
-                )
+            if llms:
+                model_name = LOCAL_CLASSIFIER if local_labels else decision_model
+                labels = model_labels(redacted_demo_records(raw), ctx, model=model_name)
                 if save_labels is not None:
                     write_labels(labels, save_labels)
             store.upsert(demo_records(raw, labels))

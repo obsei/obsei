@@ -13,15 +13,18 @@ from pathlib import Path
 
 from obsei import studio
 from obsei.config import RouteRule
+from obsei.core.context import Context
 from obsei.core.record import Author, Enrichment, Record, SourceRef
 from obsei.enrichers.classify import (
     ClassifierConfig,
     ClassifyPluginConfig,
+    Decider,
     DecisionClassifier,
     FieldSpec,
+    LocalClassifier,
 )
 from obsei.llm.client import LlmError
-from obsei.llm.decision import DecisionClient
+from obsei.llm.local import LOCAL_CLASSIFIER
 from obsei.privacy.pseudonym import pseudonymize
 from obsei.privacy.redact import RegexRedactor
 from obsei.routing import Route, Router
@@ -44,7 +47,11 @@ LANGUAGES = {
 }
 LABELS_FILE = "demo_labels.json"
 DECISION_MODEL = "Julia-1"
-LABELLED_BY = "Julia-1, a 144M-parameter decision model running locally on a CPU"
+LABELLED_BY = {
+    DECISION_MODEL: "Julia-1, a 144M-parameter decision model running locally on a CPU",
+    LOCAL_CLASSIFIER: "bge-m3-zeroshot-v2.0, a 568M-parameter zero-shot model running locally "
+    "on a CPU",
+}
 DECISION_CONFIG = ClassifierConfig(
     sentiments={
         "negative": "a complaint or a problem",
@@ -519,12 +526,12 @@ def demo_records(
     raw: list[Record] | None = None, labels: Mapping[str, Enrichment] | None = None
 ) -> list[Record]:
     """The synthetic records as stored: redacted at ingest, then labelled (by default with the
-    decision model labels committed in ``demo_labels.json``)."""
+    model labels committed in ``demo_labels.json``)."""
     redacted = redacted_demo_records(raw)
     found = stored_labels() if labels is None else labels
     missing = [r.source.native_id for r in redacted if r.source.native_id not in found]
     if missing:
-        raise KeyError(f"no demo labels for {missing[:3]}; rebuild them with --decision-url-env")
+        raise KeyError(f"no demo labels for {missing[:3]}; rebuild them with --local-labels")
     router = Router(
         tuple(Route(r.label, tuple(r.targets), r.conditions(URGENCY_LEVELS)) for r in DEMO_ROUTES)
     )
@@ -539,18 +546,19 @@ def stored_labels() -> dict[str, Enrichment]:
     return {native_id: Enrichment.model_validate(e) for native_id, e in data.items()}
 
 
-def decision_labels(
-    records: Sequence[Record], client: DecisionClient, *, model: str
-) -> dict[str, Enrichment]:
-    """Label redacted ``records`` with a decision model, as ``classify`` with ``api: decision``
-    would, recording ``model`` as the model name."""
-    classifier = DecisionClassifier(
-        client, DECISION_CONFIG, threshold=0.6, min_confidence={"urgency": 0.3}
+def model_labels(records: Sequence[Record], ctx: Context, *, model: str) -> dict[str, Enrichment]:
+    """Label redacted ``records`` as ``classify`` would with the ``demo`` entry of ``ctx.llms``
+    (``api: decision`` or ``api: local``), recording ``model`` as the model name."""
+    local = ctx.llms["demo"].api == "local"
+    client: Decider = ctx.local("demo") if local else ctx.decision("demo")
+    kind = LocalClassifier if local else DecisionClassifier
+    classifier = kind(
+        client, DECISION_CONFIG, threshold=0.4 if local else 0.6, min_confidence={"urgency": 0.3}
     )
     labels: dict[str, Enrichment] = {}
     for record, enrichment in zip(records, classifier.enrich(records), strict=True):
         if enrichment is None:
-            raise LlmError(classifier.last_error or "the decision model gave no answer")
+            raise LlmError(classifier.last_error or "the model gave no answer")
         labels[record.source.native_id] = enrichment.model_copy(update={"model": model})
     return labels
 
@@ -615,7 +623,7 @@ def showcase(snapshot: Snapshot, raw: list[Record], store: Store) -> Showcase:
     return Showcase(
         redactions=redactions,
         answers=_answers(snapshot, store),
-        labelled_by=LABELLED_BY if model == DECISION_MODEL else model,
+        labelled_by=LABELLED_BY.get(model, model) if model else None,
     )
 
 

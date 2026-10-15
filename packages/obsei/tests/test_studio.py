@@ -5,6 +5,7 @@ import sys
 import threading
 import time
 import types
+from collections import Counter
 from collections.abc import Iterator
 from importlib import resources
 from pathlib import Path
@@ -22,16 +23,17 @@ from obsei.core.context import Context, LlmEndpoint
 from obsei.demo import (
     DECISION_MODEL,
     ISSUES,
-    decision_labels,
     demo_records,
     label_demo_themes,
+    model_labels,
     raw_demo_records,
     redacted_demo_records,
     stored_labels,
 )
 from obsei.llm import EgressPolicy
-from obsei.llm.decision import DecisionClient
+from obsei.llm import local as local_llm
 from obsei.llm.embed import LOCAL_MODEL, HashingEmbedder
+from obsei.llm.local import LOCAL_CLASSIFIER
 from obsei.serve import create_app
 from obsei.slackbot import SlackSignatureError, verify
 from obsei.store import Store
@@ -90,17 +92,17 @@ def test_privacy_panel_aggregates(store: Store) -> None:
     assert strict.privacy.hidden_groups > 0
 
 
-def test_demo_labels_come_from_the_decision_model(store: Store) -> None:
+def test_demo_labels_come_from_the_local_model(store: Store) -> None:
     labels = stored_labels()
     assert {r.source.native_id for r in raw_demo_records()} == set(labels)
-    assert {e.model for e in labels.values()} == {DECISION_MODEL}
+    assert {e.model for e in labels.values()} == {LOCAL_CLASSIFIER}
     text = (resources.files("obsei") / "demo_labels.json").read_text(encoding="utf-8")
     assert "http" not in text
     assert not any(pii in text for pii in RAW_PII)
     snap = studio.snapshot(store, k=5, evidence_per_theme=50)
     decisions = snap.overview.decisions
     assert decisions is not None
-    assert decisions.model == DECISION_MODEL
+    assert decisions.model == LOCAL_CLASSIFIER
     assert decisions.labelled == len(labels)
     assert 0 < decisions.review < decisions.labelled
     assert set(decisions.fields) == {"team", "urgency", "angry"}
@@ -137,13 +139,12 @@ def test_demo_decision_labels_use_the_decision_api() -> None:
                 }
         return httpx.Response(200, json={"model": "/models/local.gguf", "answers": answers})
 
-    client = DecisionClient(
-        url="http://127.0.0.1:9/decide",
-        policy=EgressPolicy(),
-        transport=httpx.MockTransport(handler),
+    ctx = Context(
+        llms={"demo": LlmEndpoint(api="decision", url="http://127.0.0.1:9/decide")},
+        llm_transport=httpx.MockTransport(handler),
     )
     records = redacted_demo_records()[:3]
-    labels = decision_labels(records, client, model=DECISION_MODEL)
+    labels = model_labels(records, ctx, model=DECISION_MODEL)
     assert len(asked) == 3
     assert all("@example.com" not in str(b["state"]) for b in asked)
     first = labels[records[0].source.native_id]
@@ -152,25 +153,51 @@ def test_demo_decision_labels_use_the_decision_api() -> None:
     assert first.value["fields"] == {"team": "engineering", "urgency": "this week", "angry": True}
 
 
-def test_demo_save_labels_needs_a_decision_model(tmp_path: Path) -> None:
-    result = CliRunner().invoke(
-        cli, ["demo", "--out", str(tmp_path), "--save-labels", str(tmp_path / "l.json")]
+def test_demo_local_labels_read_the_redacted_text(monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: list[str] = []
+
+    def load(model: str, offline: bool) -> local_llm.Scorer:
+        def score(text: str, options: local_llm.Options) -> dict[str, float]:
+            seen.append(text)
+            first, *rest = options
+            return {first: 0.9, **dict.fromkeys(rest, 0.1 / max(1, len(rest)))}
+
+        return score
+
+    monkeypatch.setattr(local_llm, "load", load)
+    records = redacted_demo_records()[:2]
+    labels = model_labels(
+        records, Context(llms={"demo": LlmEndpoint(api="local")}), model=LOCAL_CLASSIFIER
     )
+    first = labels[records[0].source.native_id]
+    assert first.model == LOCAL_CLASSIFIER
+    assert isinstance(first.value, dict)
+    fields = first.value["fields"]
+    assert isinstance(fields, dict)
+    assert fields["team"] == "engineering"
+    assert all("@example.com" not in t for t in seen)
+    assert {records[0].text, records[1].text} <= set(seen)
+
+
+@pytest.mark.parametrize(
+    "flags",
+    [["--save-labels", "l.json"], ["--local-labels", "--decision-url-env", "URL"]],
+)
+def test_demo_label_flags_are_checked(tmp_path: Path, flags: list[str]) -> None:
+    flags = [str(tmp_path / f) if f.endswith(".json") else f for f in flags]
+    result = CliRunner().invoke(cli, ["demo", "--out", str(tmp_path), *flags])
     assert result.exit_code == 2
     assert not (tmp_path / "l.json").exists()
 
 
 def test_demo_records_are_routed_by_the_example_routes(store: Store) -> None:
-    rules = {r.source.native_id: r.enrichments["route"].value for r in demo_records()}
-    assert {v["rule"] for v in rules.values() if isinstance(v, dict)} == {
-        "review",
-        "urgent-bugs",
-        "billing",
-        "default",
-    }
+    rules = Counter(
+        v["rule"] for r in demo_records() if isinstance(v := r.enrichments["route"].value, dict)
+    )
+    assert set(rules) == {"review", "urgent-bugs", "billing", "default"}
+    assert sum(rules.values()) == len(raw_demo_records())
     routes = {b.key: b.count for b in studio.snapshot(store, k=5).overview.by_route}
-    assert set(routes) == {"review", "urgent-bugs", "billing", "default"}
-    assert sum(routes.values()) == len(rules)
+    assert routes == {k: n for k, n in rules.items() if n >= 5}
 
 
 def test_theme_weekly_counts_match_trends(store: Store) -> None:

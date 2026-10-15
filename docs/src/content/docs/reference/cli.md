@@ -21,7 +21,7 @@ description: obsei command reference.
 | `obsei correct FILE.csv [-c FILE] [-p NAME] [--db PATH]` | Store human labels (`id` and a column per question) in place of the model's answers |
 | `obsei reprocess [-c FILE] [-p NAME] [--db PATH] [--since DATE] [--dry-run]` | Relabel stored records with the current `classify` config, keeping human labels, and report what changed |
 | `obsei studio --out DIR [-c FILE] [--db PATH]` | Export a static Studio snapshot |
-| `obsei demo [--out DIR] [--embedder hashing\|local\|local:MODEL] [--decision-url-env VAR [--decision-model NAME] [--save-labels FILE]]` | Build the synthetic multilingual demo (default: offline `hashing` embedder and the committed decision-model labels) |
+| `obsei demo [--out DIR] [--embedder hashing\|local\|local:MODEL] [--local-labels \| --decision-url-env VAR [--decision-model NAME]] [--save-labels FILE]` | Build the synthetic multilingual demo (default: offline `hashing` embedder and the committed labels from the local classifier) |
 | `obsei models download [--embeddings MODEL] [--classifier MODEL ...] [--dir DIR]` | Fetch the local embedding model (`obsei[embeddings]`) and classifier models (`obsei[local]`) for offline use; by default, those of the installed extras |
 | `obsei mcp [-c FILE] [--db PATH]` | MCP server over stdio (read-only, except to queue a proposal) |
 | `obsei approvals list [--status pending\|approved\|rejected\|failed] [-c FILE] [--db PATH] [--unencrypted]` | List what agents proposed, newest first |
