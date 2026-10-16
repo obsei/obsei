@@ -1,0 +1,65 @@
+---
+import { pct, type AppStats } from "./reviews";
+
+interface Props {
+  apps: AppStats[];
+}
+
+const { apps } = Astro.props;
+const total = (area: string) => apps.reduce((n, a) => n + a.areas[area], 0);
+const areas = Object.keys(apps[0].areas).filter(total).sort((x, y) => total(y) - total(x));
+const max = Math.max(...apps.flatMap((a) => Object.values(a.areas)));
+const label =
+  "Areas of the one- and two-star reviews, counting only answers with at least 0.4 confidence. " +
+  apps
+    .map(
+      (a) =>
+        `${a.name}, ${a.critical} critical reviews: ` +
+        areas.map((r) => `${r} ${a.areas[r]}`).join(", ") +
+        `; ${a.belowCutoff} below the cutoff.`,
+    )
+    .join(" ");
+---
+
+<figure class="fig">
+  <div class="panel" role="img" aria-label={label}>
+    <div class="grid" style={`grid-template-columns: 96px repeat(${apps.length}, minmax(0, 1fr))`}>
+      <span></span>
+      {apps.map((a) => <strong class="app">{a.name}<small>{a.critical} critical</small></strong>)}
+      {
+        areas.map((r) => (
+          <>
+            <span class="area">{r}</span>
+            {apps.map((a) => (
+              <span class="cell">
+                <span class="bar" style={`width:${(100 * a.areas[r]) / max}%`} />
+                <span class="n">{a.areas[r] || ""}</span>
+              </span>
+            ))}
+          </>
+        ))
+      }
+      <span class="area low">below 0.4</span>
+      {apps.map((a) => <span class="cell low">{a.belowCutoff} ({pct(a.belowCutoff, a.critical)})</span>)}
+    </div>
+  </div>
+  <figcaption>What the one- and two-star reviews are mainly about, counting only answers the model gave with at least 0.4 confidence. The rest go to a person.</figcaption>
+</figure>
+
+<style>
+  .fig { margin: 1.4em 0 2em; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow); }
+  .grid { display: grid; gap: 7px 14px; align-items: center; }
+  .app { font-size: 0.95rem; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .app small { display: block; font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+  .area { font-size: 0.85rem; color: var(--muted); }
+  .cell { display: flex; align-items: center; gap: 6px; min-height: 14px; }
+  .bar { height: 12px; border-radius: 4px; background: var(--neg); }
+  .n { font-size: 0.8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .low { padding-top: 8px; border-top: 1px dashed var(--line); font-size: 0.82rem; color: var(--muted); }
+  figcaption { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 12px; }
+  @media (max-width: 520px) {
+    .panel { padding: 14px 12px; }
+    .grid { gap: 7px 8px; grid-template-columns: 72px repeat(3, minmax(0, 1fr)) !important; }
+  }
+</style>

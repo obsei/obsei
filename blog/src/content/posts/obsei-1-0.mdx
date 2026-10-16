@@ -2,12 +2,16 @@
 title: "obsei 1.0: private customer feedback in five minutes"
 description: "obsei 1.0 is out: a self-hosted Voice of Customer pipeline that strips PII before any model sees it, can run its classifier on your machine, and plugs into your AI tools."
 pubDate: 2026-10-15
+updatedDate: 2026-10-16
 author: Lalit Pagaria
 tags: [release, voice-of-customer, privacy, open-source]
 cover: ./obsei-1-0/cover.svg
 aiAssisted: true
 coverAlt: "obsei logo with the words: obsei 1.0, private customer feedback in five minutes"
 ---
+
+import Benchmark from "../../components/figures/Benchmark.astro";
+import scores from "./obsei-1-0/benchmark.json";
 
 Ten days ago I wrote that [obsei is back](/obsei-is-back/). Today obsei 1.0 is on
 [PyPI](https://pypi.org/project/obsei/), and a plain `pip install obsei` gives you the new obsei
@@ -66,6 +70,8 @@ accurate: .82 on intent, .90 on sentiment and .91 on team routing. The decision 
 recommended before, Julia-1, came last at a mean of .69. The
 [full table and its caveats](https://docs.obsei.com/guides/models/#benchmark) are in the docs. You
 can still use Ollama, any OpenAI-compatible model or a decision model instead.
+
+<Benchmark scores={scores} highlight="bge-m3-zeroshot-v2.0" />
 
 **Measure it on your own data.** `obsei eval gold.csv` scores the classifier against a labelled
 sample. For each question it reports accuracy, calibration and how much goes to review, and it

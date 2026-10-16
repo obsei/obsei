@@ -1,0 +1,38 @@
+[
+  {
+    "model": "bge-m3-zeroshot-v2.0",
+    "intent": 0.824,
+    "sentiment": 0.897,
+    "team": 0.912
+  },
+  {
+    "model": "gliner2-multi-v1",
+    "intent": 0.772,
+    "sentiment": 0.919,
+    "team": 0.75
+  },
+  {
+    "model": "Qwen3-0.6B",
+    "intent": 0.743,
+    "sentiment": 0.75,
+    "team": 0.86
+  },
+  {
+    "model": "Julia-1",
+    "intent": 0.706,
+    "sentiment": 0.75,
+    "team": 0.618
+  },
+  {
+    "model": "gliner2-base-v1",
+    "intent": 0.757,
+    "sentiment": 0.61,
+    "team": 0.654
+  },
+  {
+    "model": "mDeBERTa-v3 xnli",
+    "intent": 0.463,
+    "sentiment": 0.647,
+    "team": 0.757
+  }
+]
