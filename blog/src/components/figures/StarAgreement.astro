@@ -16,7 +16,7 @@ const label =
 
 <figure class="fig">
   <div class="panel" role="img" aria-label={label}>
-    <div class="grid" style={`grid-template-columns: 70px repeat(${sentiments.length}, minmax(0, 1fr))`}>
+    <div class="grid">
       <span class="corner">stars ↓ model →</span>
       {sentiments.map((s) => <strong class="col">{s}</strong>)}
       {
@@ -24,10 +24,10 @@ const label =
           <>
             <strong class="rowh">{r.stars}<small>{sum(r)}</small></strong>
             {r.counts.map((n, i) => (
-              <span
-                class:list={["cell", { agree: agrees(r.stars, sentiments[i]) }]}
-                style={`--a:${Math.round((50 * n) / sum(r))}%`}
-              >
+              <span class:list={["cell", { agree: agrees(r.stars, sentiments[i]) }]}>
+                <svg viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="1" height="1" fill-opacity={(0.6 * n) / sum(r)} />
+                </svg>
                 <b>{n}</b>
                 <small>{pct(n, sum(r))}</small>
               </span>
@@ -37,25 +37,28 @@ const label =
       }
     </div>
   </div>
-  <figcaption>The model's sentiment for each review against its stars; shade is the share of the row. Outlined cells are where the two agree.</figcaption>
+  <figcaption>The model's sentiment for each review against its stars; the number under the stars is the row's total, and darker means a bigger share of the row. Outlined cells are where the two agree.</figcaption>
 </figure>
 
 <style>
   .fig { margin: 1.4em 0 2em; }
   .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow); }
-  .grid { display: grid; gap: 6px; align-items: stretch; }
+  .grid { display: grid; grid-template-columns: 76px repeat(4, minmax(0, 1fr)); gap: 6px; }
   .corner { font-size: 0.7rem; color: var(--muted); align-self: end; }
   .col { font-size: 0.82rem; text-align: center; align-self: end; padding-bottom: 4px; }
   .rowh { display: grid; align-content: center; font-size: 0.95rem; }
   .rowh small { font-size: 0.72rem; font-weight: 600; color: var(--muted); }
-  .cell { display: grid; place-content: center; text-align: center; min-height: 58px; border-radius: 10px; border: 2px solid transparent; background: color-mix(in srgb, var(--teal) var(--a), var(--tint)); }
+  .cell { position: relative; display: grid; place-content: center; text-align: center; min-height: 58px; border-radius: 10px; overflow: hidden; background: var(--tint); }
+  .cell svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  rect { fill: var(--teal); }
+  .cell b, .cell small { position: relative; }
   .cell b { font-size: 1rem; font-variant-numeric: tabular-nums; }
   .cell small { font-size: 0.72rem; }
-  .agree { border-color: var(--ink); }
+  .agree { outline: 2px solid var(--ink); outline-offset: -2px; }
   figcaption { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 12px; }
   @media (max-width: 520px) {
     .panel { padding: 14px 10px; }
-    .grid { grid-template-columns: 52px repeat(4, minmax(0, 1fr)) !important; gap: 4px; }
+    .grid { grid-template-columns: 52px repeat(4, minmax(0, 1fr)); gap: 4px; }
     .col { font-size: 0.7rem; }
   }
 </style>
