@@ -1,16 +1,15 @@
 ---
 title: "2,400 App Store reviews of ChatGPT, Claude and Gemini, read on a laptop"
 description: "What a local model found in recent App Store reviews of the three AI assistants across eight countries, how often it agreed with the star ratings, and where obsei fell short."
-pubDate: 2026-10-15
+pubDate: 2026-10-16
 author: Lalit Pagaria
 tags: [case-study, app-reviews, multilingual, local-models]
 cover: ./ai-app-reviews/cover.svg
 aiAssisted: true
 coverAlt: "obsei logo with the words: 2,400 App Store reviews of ChatGPT, Claude and Gemini, read on a laptop"
-draft: true
 ---
 
-I pointed obsei 1.1 at the App Store reviews of ChatGPT, Claude and Gemini in eight countries:
+I pointed obsei at the App Store reviews of ChatGPT, Claude and Gemini in eight countries:
 the US, UK, India, Brazil, Germany, France, Japan and Korea. It pulled the 100 most recent reviews
 for each app and country, 2,400 in all, in English, Portuguese, German, French, Japanese, Korean
 and a few others. Every review was redacted as it
@@ -115,7 +114,7 @@ Run [`obsei eval`](https://docs.obsei.com/guides/classify/) on a sample of your 
 - **No language detection.** The App Store feed gives a country, not a language, and the local
   classifier doesn't detect one, so these reviews have no language in Studio.
 
-Each of these is now an issue for obsei 1.x. The age-check pattern is the test: next time, obsei
+These are the gaps I want to close next. The age-check pattern is the test: next time, obsei
 should find it before I do.
 
 ## Reproduce it
