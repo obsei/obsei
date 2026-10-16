@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.1.0](https://github.com/obsei/obsei/compare/v1.0.1...v1.1.0) (2026-10-15)
+
+
+### Features
+
+* **demo:** label the demo with the local default model ([#468](https://github.com/obsei/obsei/issues/468)) ([413de37](https://github.com/obsei/obsei/commit/413de374f2f234113e72a299fb8b835967eba131))
+
+
+### Bug Fixes
+
+* **github:** drop issue-template boilerplate so themes see what users wrote ([#466](https://github.com/obsei/obsei/issues/466)) ([13a1708](https://github.com/obsei/obsei/commit/13a1708d920dc689c5fe9a6809ac590c45948ecf))
+* **themes:** keyword labels from distinctive words, without stopwords ([#467](https://github.com/obsei/obsei/issues/467)) ([ce4d1d4](https://github.com/obsei/obsei/commit/ce4d1d47d2e51c163e9a781df92d2d88df703aa9))
+
+
+### Performance Improvements
+
+* **classify:** run the local classifier on the GPU when there is one, and cap long inputs ([#469](https://github.com/obsei/obsei/issues/469)) ([1f8d973](https://github.com/obsei/obsei/commit/1f8d97397ac33c717e65d9a36e051471738cdeed))
+
+
+### Documentation
+
+* claim only what ships, and say how the AI tool plugins install ([#461](https://github.com/obsei/obsei/issues/461)) ([87a0208](https://github.com/obsei/obsei/commit/87a0208a2107b490c28a285f73f0464477c6f10a))
+
 ## [1.0.1](https://github.com/obsei/obsei/compare/v1.0.0...v1.0.1) (2026-10-15)
 
 
