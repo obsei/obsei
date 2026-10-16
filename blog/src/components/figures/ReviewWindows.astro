@@ -5,6 +5,7 @@ interface Props {
   apps: AppStats[];
 }
 
+// Geometry goes in SVG attributes: the CSP (style-src 'self') blocks style attributes.
 const { apps } = Astro.props;
 const DAY = 86400000;
 const first = apps.map((a) => a.first).sort()[0];
@@ -12,6 +13,8 @@ const last = apps.map((a) => a.last).sort().at(-1)!;
 const span = Date.parse(last) - Date.parse(first) + DAY;
 const at = (iso: string) => (100 * (Date.parse(iso) - Date.parse(first))) / span;
 const STARS = ["1★", "2★", "3★", "4★", "5★"];
+const segments = (a: AppStats) =>
+  a.stars.map((n, i) => ({ n, i, x: (100 * a.stars.slice(0, i).reduce((s, c) => s + c, 0)) / a.reviews, w: (100 * n) / a.reviews }));
 const label =
   "Star ratings and the dates covered by the 800 most recent reviews of each app. " +
   apps
@@ -35,20 +38,23 @@ const label =
       apps.map((a) => (
         <div class="row">
           <strong class="name">{a.name}</strong>
-          <div class="time">
-            <span class="track">
-              <span class="span" style={`left:${at(a.first)}%;width:${at(a.last) - at(a.first) + (100 * DAY) / span}%`} />
-            </span>
+          <div class="col">
+            <svg class="bar" viewBox="0 0 100 1" preserveAspectRatio="none" aria-hidden="true">
+              <rect class="track" width="100" height="1" />
+              <rect class="span" x={at(a.first)} width={at(a.last) - at(a.first) + (100 * DAY) / span} height="1" />
+            </svg>
             <span class="meta">
               {formatDay(a.first)} – {formatDay(a.last)} · <b>{a.days} days</b>
             </span>
           </div>
-          <div class="stars">
-            <span class="bar">
-              {a.stars.map((n, i) => (
-                <span class={`s s${i + 1}`} style={`width:${(100 * n) / a.reviews}%`} title={`${STARS[i]}: ${n}`} />
+          <div class="col">
+            <svg class="bar" viewBox="0 0 100 1" preserveAspectRatio="none" aria-hidden="true">
+              {segments(a).map((s) => (
+                <rect class={`s${s.i + 1}`} x={s.x} width={s.w} height="1">
+                  <title>{`${STARS[s.i]}: ${s.n}`}</title>
+                </rect>
               ))}
-            </span>
+            </svg>
             <span class="meta">
               <b>{pct(a.critical, a.reviews)}</b> one or two stars ({a.critical})
             </span>
@@ -57,7 +63,7 @@ const label =
       ))
     }
     <div class="legend" aria-hidden="true">
-      {STARS.map((s, i) => <span><i class={`s s${i + 1}`} />{s}</span>)}
+      {STARS.map((s, i) => <span><i class={`s${i + 1}`} />{s}</span>)}
     </div>
   </div>
   <figcaption>The same number of reviews covers 5 or 6 days for ChatGPT and Gemini and 67 days for Claude, so the star mixes don't compare.</figcaption>
@@ -71,17 +77,17 @@ const label =
   .head small { display: block; font-weight: 600; font-size: 0.75rem; color: var(--muted); }
   .row { padding: 14px 0; border-bottom: 1px solid var(--line); }
   .name { font-size: 1rem; }
-  .time, .stars { display: grid; gap: 6px; }
-  .track { position: relative; height: 12px; border-radius: 6px; background: var(--tint); }
-  .span { position: absolute; top: 0; bottom: 0; min-width: 4px; border-radius: 6px; background: var(--grad); }
-  .bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; }
+  .col { display: grid; gap: 6px; }
+  .bar { display: block; width: 100%; height: 12px; border-radius: 6px; }
+  .track { fill: var(--line); }
+  .span { fill: var(--blue); }
   .meta { font-size: 0.82rem; color: var(--muted); }
   .meta b { color: var(--ink); }
-  .s1 { background: var(--neg); }
-  .s2 { background: var(--neg-soft); }
-  .s3 { background: var(--mid); }
-  .s4 { background: var(--pos-soft); }
-  .s5 { background: var(--teal); }
+  .s1 { fill: var(--neg); background: var(--neg); }
+  .s2 { fill: var(--neg-soft); background: var(--neg-soft); }
+  .s3 { fill: var(--mid); background: var(--mid); }
+  .s4 { fill: var(--pos-soft); background: var(--pos-soft); }
+  .s5 { fill: var(--teal); background: var(--teal); }
   .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding-top: 12px; font-size: 0.8rem; color: var(--muted); }
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }

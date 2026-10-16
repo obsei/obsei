@@ -24,14 +24,22 @@ const label =
   <div class="panel" role="img" aria-label={label}>
     <div class="legend" aria-hidden="true">
       {QUESTIONS.map((q) => <span><i class={q} />{q}</span>)}
+      <span class="scale">accuracy, 0 to 1</span>
     </div>
     {
       scores.map((s) => (
         <div class:list={["row", { hi: s.model === highlight }]}>
           <span class="model">{s.model}{s.model === highlight && <small>default</small>}</span>
-          <span class="bars">
-            {QUESTIONS.map((q) => <span class={`bar ${q}`} style={`width:${100 * s[q]}%`} title={`${q} ${fmt(s[q])}`} />)}
-          </span>
+          <svg viewBox="0 0 100 27" preserveAspectRatio="none" aria-hidden="true">
+            {QUESTIONS.map((q, i) => (
+              <>
+                <rect class="track" y={i * 10} width="100" height="7" />
+                <rect class={q} y={i * 10} width={100 * s[q]} height="7">
+                  <title>{`${q} ${fmt(s[q])}`}</title>
+                </rect>
+              </>
+            ))}
+          </svg>
           <b class="mean">{fmt(mean(s))}</b>
         </div>
       ))
@@ -43,22 +51,23 @@ const label =
 <style>
   .fig { margin: 1.4em 0 2em; }
   .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px 20px; box-shadow: var(--shadow); }
-  .legend { display: flex; gap: 16px; font-size: 0.8rem; color: var(--muted); padding-bottom: 8px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.8rem; color: var(--muted); padding-bottom: 8px; }
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .legend i { width: 12px; height: 12px; border-radius: 3px; }
+  .legend .scale { margin-left: auto; }
   .row { display: grid; grid-template-columns: 170px minmax(0, 1fr) 40px; gap: 14px; align-items: center; padding: 9px 8px; border-radius: 10px; }
   .hi { background: var(--tint); }
   .model { font-size: 0.88rem; font-weight: 600; }
   .model small { display: block; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal-ink); }
-  .bars { display: grid; gap: 3px; }
-  .bar { height: 7px; border-radius: 4px; }
-  .intent { background: var(--teal); }
-  .sentiment { background: var(--blue); }
-  .team { background: var(--muted); }
+  svg { display: block; width: 100%; height: 27px; }
+  .track { fill: var(--line); }
+  .intent { fill: var(--teal); background: var(--teal); }
+  .sentiment { fill: var(--blue); background: var(--blue); }
+  .team { fill: var(--muted); background: var(--muted); }
   .mean { text-align: right; font-variant-numeric: tabular-nums; }
   figcaption { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 12px; }
   @media (max-width: 520px) {
-    .row { grid-template-columns: minmax(0, 1fr) 40px; }
-    .bars { grid-column: 1 / -1; grid-row: 2; }
+    .row { grid-template-columns: minmax(0, 1fr) 40px; gap: 6px 14px; }
+    svg { grid-column: 1 / -1; grid-row: 2; }
   }
 </style>

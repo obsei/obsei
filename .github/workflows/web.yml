@@ -4,6 +4,7 @@ name: Web
 on:
   pull_request:
     paths:
+      - "blog/**"
       - "docs/**"
       - "studio/**"
       - "website/**"
@@ -15,6 +16,7 @@ on:
   push:
     branches: [master]
     paths:
+      - "blog/**"
       - "docs/**"
       - "studio/**"
       - "website/**"
@@ -44,6 +46,24 @@ jobs:
         working-directory: docs
       - run: npm run build
         working-directory: docs
+
+  blog:
+    name: Blog builds without inline styles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - run: npm ci
+        working-directory: blog
+      - run: npm run build
+        working-directory: blog
+      # The CSP (blog/public/_headers) has style-src 'self', so style attributes are dropped in production.
+      - run: "! grep -rl ' style=\"' dist --include='*.html'"
+        working-directory: blog
 
   studio:
     name: Studio bundle is up to date
