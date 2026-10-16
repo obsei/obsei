@@ -15,6 +15,10 @@
   --on-blue: #ffffff;
   --shadow: 0 24px 60px -28px rgba(15, 42, 46, 0.35);
   --code-bg: #eef5f6;
+  --neg: #c2522d;
+  --neg-soft: #eba98c;
+  --mid: #bfcbcd;
+  --pos-soft: #8fcacd;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --measure: 44rem;
   font: 17px/1.6 system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
@@ -35,6 +39,10 @@
     --on-blue: #0f1a1d;
     --shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.7);
     --code-bg: #12242a;
+    --neg: #f08a5d;
+    --neg-soft: #94573e;
+    --mid: #4a5f63;
+    --pos-soft: #2c7479;
   }
 }
 * { box-sizing: border-box; }

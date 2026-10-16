@@ -1,0 +1,93 @@
+---
+import { formatDay, pct, type AppStats } from "./reviews";
+
+interface Props {
+  apps: AppStats[];
+}
+
+const { apps } = Astro.props;
+const DAY = 86400000;
+const first = apps.map((a) => a.first).sort()[0];
+const last = apps.map((a) => a.last).sort().at(-1)!;
+const span = Date.parse(last) - Date.parse(first) + DAY;
+const at = (iso: string) => (100 * (Date.parse(iso) - Date.parse(first))) / span;
+const STARS = ["1★", "2★", "3★", "4★", "5★"];
+const label =
+  "Star ratings and the dates covered by the 800 most recent reviews of each app. " +
+  apps
+    .map(
+      (a) =>
+        `${a.name}: ${formatDay(a.first)} to ${formatDay(a.last)} (${a.days} days); ` +
+        a.stars.map((n, i) => `${STARS[i]} ${n}`).join(", ") +
+        `; ${pct(a.critical, a.reviews)} one or two stars.`,
+    )
+    .join(" ");
+---
+
+<figure class="fig wide">
+  <div class="panel" role="img" aria-label={label}>
+    <div class="head">
+      <span></span>
+      <span>Dates covered <small>{formatDay(first)} – {formatDay(last)}</small></span>
+      <span>Star ratings <small>800 reviews each</small></span>
+    </div>
+    {
+      apps.map((a) => (
+        <div class="row">
+          <strong class="name">{a.name}</strong>
+          <div class="time">
+            <span class="track">
+              <span class="span" style={`left:${at(a.first)}%;width:${at(a.last) - at(a.first) + (100 * DAY) / span}%`} />
+            </span>
+            <span class="meta">
+              {formatDay(a.first)} – {formatDay(a.last)} · <b>{a.days} days</b>
+            </span>
+          </div>
+          <div class="stars">
+            <span class="bar">
+              {a.stars.map((n, i) => (
+                <span class={`s s${i + 1}`} style={`width:${(100 * n) / a.reviews}%`} title={`${STARS[i]}: ${n}`} />
+              ))}
+            </span>
+            <span class="meta">
+              <b>{pct(a.critical, a.reviews)}</b> one or two stars ({a.critical})
+            </span>
+          </div>
+        </div>
+      ))
+    }
+    <div class="legend" aria-hidden="true">
+      {STARS.map((s, i) => <span><i class={`s s${i + 1}`} />{s}</span>)}
+    </div>
+  </div>
+  <figcaption>The same number of reviews covers 5 or 6 days for ChatGPT and Gemini and 67 days for Claude, so the star mixes don't compare.</figcaption>
+</figure>
+
+<style>
+  .fig { margin: 1.4em 0 2em; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px 22px; box-shadow: var(--shadow); }
+  .head, .row { display: grid; grid-template-columns: 90px minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: center; }
+  .head { font-weight: 700; font-size: 0.9rem; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .head small { display: block; font-weight: 600; font-size: 0.75rem; color: var(--muted); }
+  .row { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .name { font-size: 1rem; }
+  .time, .stars { display: grid; gap: 6px; }
+  .track { position: relative; height: 12px; border-radius: 6px; background: var(--tint); }
+  .span { position: absolute; top: 0; bottom: 0; min-width: 4px; border-radius: 6px; background: var(--grad); }
+  .bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; }
+  .meta { font-size: 0.82rem; color: var(--muted); }
+  .meta b { color: var(--ink); }
+  .s1 { background: var(--neg); }
+  .s2 { background: var(--neg-soft); }
+  .s3 { background: var(--mid); }
+  .s4 { background: var(--pos-soft); }
+  .s5 { background: var(--teal); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding-top: 12px; font-size: 0.8rem; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+  figcaption { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 12px; }
+  @media (max-width: 680px) {
+    .head { display: none; }
+    .row { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  }
+</style>

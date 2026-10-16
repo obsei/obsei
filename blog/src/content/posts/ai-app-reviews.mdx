@@ -9,6 +9,12 @@ aiAssisted: true
 coverAlt: "obsei logo with the words: 2,400 App Store reviews of ChatGPT, Claude and Gemini, read on a laptop"
 ---
 
+import ReviewWindows from "../../components/figures/ReviewWindows.astro";
+import CriticalAreas from "../../components/figures/CriticalAreas.astro";
+import AgeLockouts from "../../components/figures/AgeLockouts.astro";
+import StarAgreement from "../../components/figures/StarAgreement.astro";
+import data from "./ai-app-reviews/figures.json";
+
 I pointed obsei at the App Store reviews of ChatGPT, Claude and Gemini in eight countries:
 the US, UK, India, Brazil, Germany, France, Japan and Korea. It pulled the 100 most recent reviews
 for each app and country, 2,400 in all, in English, Portuguese, German, French, Japanese, Korean
@@ -38,11 +44,7 @@ images, reliability, refusals or other). It's [at the end](#reproduce-it).
 On an Apple M2, labelling the 2,400 reviews took 26.5 minutes on the GPU, and grouping them into
 themes took 83 seconds.
 
-| App | Reviews | 1–2 stars | Dates covered |
-| --- | --- | --- | --- |
-| ChatGPT | 800 | 158 (20%) | 9–14 Oct |
-| Claude | 800 | 339 (42%) | 9 Aug–14 Oct |
-| Gemini | 800 | 87 (11%) | 10–14 Oct |
+<ReviewWindows apps={data.apps} />
 
 ## What the critical reviews are about
 
@@ -50,11 +52,7 @@ For each 1–2 star review, the model picks the area it is mainly about. I count
 gave with at least 0.4 confidence, the cutoff `obsei init` uses for this model. That leaves about
 a third of the reviews; the rest go to a person to read.
 
-| App | Most common confident areas (1–2 stars) |
-| --- | --- |
-| ChatGPT | reliability 18, limits 11, answers 10, refusals 8 |
-| Claude | refusals 27, limits 22, reliability 20, answers 16, account 14 |
-| Gemini | answers 5, reliability 3 (82% fell below the cutoff) |
+<CriticalAreas apps={data.apps} />
 
 A few of them, as stored:
 
@@ -71,6 +69,8 @@ Reading the Claude reviews, one complaint kept coming back: adults locked out by
 counted 12 of the 339 critical Claude reviews, from France, Korea, India, Japan, Brazil and
 Germany, in six languages. None of the ChatGPT or Gemini reviews mention it.
 
+<AgeLockouts apps={data.apps} />
+
 - France: *"j'ai 19 ans et mes deux comptes on était bloqué pour être suspecté d'être utilisé par
   un utilisateur mineur"* (I'm 19 and both my accounts were blocked, suspected of being used by a
   minor).
@@ -85,6 +85,8 @@ language. I found the pattern by reading.
 ## How far to trust the labels
 
 The star ratings make a rough check possible. Treating 1–2 stars as negative and 4–5 as positive:
+
+<StarAgreement sentiments={data.sentiments} rows={data.agreement} />
 
 - **When the model said positive or negative, it agreed with the stars 96% of the time**
   (1,784 of 1,863 reviews).

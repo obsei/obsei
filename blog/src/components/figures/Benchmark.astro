@@ -1,0 +1,64 @@
+---
+interface Score {
+  model: string;
+  intent: number;
+  sentiment: number;
+  team: number;
+}
+
+interface Props {
+  scores: Score[];
+  highlight: string;
+}
+
+const { scores, highlight } = Astro.props;
+const QUESTIONS = ["intent", "sentiment", "team"] as const;
+const mean = (s: Score) => (s.intent + s.sentiment + s.team) / 3;
+const fmt = (n: number) => n.toFixed(2).replace(/^0/, "");
+const label =
+  "Accuracy on the demo's 136 records in 11 languages. " +
+  scores.map((s) => `${s.model}: intent ${fmt(s.intent)}, sentiment ${fmt(s.sentiment)}, team ${fmt(s.team)}, mean ${fmt(mean(s))}.`).join(" ");
+---
+
+<figure class="fig">
+  <div class="panel" role="img" aria-label={label}>
+    <div class="legend" aria-hidden="true">
+      {QUESTIONS.map((q) => <span><i class={q} />{q}</span>)}
+    </div>
+    {
+      scores.map((s) => (
+        <div class:list={["row", { hi: s.model === highlight }]}>
+          <span class="model">{s.model}{s.model === highlight && <small>default</small>}</span>
+          <span class="bars">
+            {QUESTIONS.map((q) => <span class={`bar ${q}`} style={`width:${100 * s[q]}%`} title={`${q} ${fmt(s[q])}`} />)}
+          </span>
+          <b class="mean">{fmt(mean(s))}</b>
+        </div>
+      ))
+    }
+  </div>
+  <figcaption>Accuracy of six small models on the demo's 136 synthetic records in 11 languages; the number is the mean of the three questions.</figcaption>
+</figure>
+
+<style>
+  .fig { margin: 1.4em 0 2em; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px 20px; box-shadow: var(--shadow); }
+  .legend { display: flex; gap: 16px; font-size: 0.8rem; color: var(--muted); padding-bottom: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; }
+  .row { display: grid; grid-template-columns: 170px minmax(0, 1fr) 40px; gap: 14px; align-items: center; padding: 9px 8px; border-radius: 10px; }
+  .hi { background: var(--tint); }
+  .model { font-size: 0.88rem; font-weight: 600; }
+  .model small { display: block; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal-ink); }
+  .bars { display: grid; gap: 3px; }
+  .bar { height: 7px; border-radius: 4px; }
+  .intent { background: var(--teal); }
+  .sentiment { background: var(--blue); }
+  .team { background: var(--muted); }
+  .mean { text-align: right; font-variant-numeric: tabular-nums; }
+  figcaption { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 12px; }
+  @media (max-width: 520px) {
+    .row { grid-template-columns: minmax(0, 1fr) 40px; }
+    .bars { grid-column: 1 / -1; grid-row: 2; }
+  }
+</style>

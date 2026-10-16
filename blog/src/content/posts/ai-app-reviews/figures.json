@@ -1,0 +1,130 @@
+{
+  "apps": [
+    {
+      "name": "ChatGPT",
+      "reviews": 800,
+      "first": "2026-10-09",
+      "last": "2026-10-14",
+      "days": 6,
+      "stars": [
+        134,
+        24,
+        22,
+        44,
+        576
+      ],
+      "critical": 158,
+      "areas": {
+        "answers": 10,
+        "limits": 11,
+        "pricing": 2,
+        "account": 0,
+        "speech": 4,
+        "images": 1,
+        "reliability": 18,
+        "refusals": 8,
+        "other": 4
+      },
+      "belowCutoff": 100,
+      "ageLockouts": {}
+    },
+    {
+      "name": "Claude",
+      "reviews": 800,
+      "first": "2026-08-09",
+      "last": "2026-10-14",
+      "days": 67,
+      "stars": [
+        286,
+        53,
+        65,
+        49,
+        347
+      ],
+      "critical": 339,
+      "areas": {
+        "answers": 16,
+        "limits": 22,
+        "pricing": 7,
+        "account": 14,
+        "speech": 9,
+        "images": 0,
+        "reliability": 20,
+        "refusals": 27,
+        "other": 10
+      },
+      "belowCutoff": 214,
+      "ageLockouts": {
+        "fr": 3,
+        "kr": 3,
+        "in": 2,
+        "jp": 2,
+        "br": 1,
+        "de": 1
+      }
+    },
+    {
+      "name": "Gemini",
+      "reviews": 800,
+      "first": "2026-10-10",
+      "last": "2026-10-14",
+      "days": 5,
+      "stars": [
+        72,
+        15,
+        23,
+        77,
+        613
+      ],
+      "critical": 87,
+      "areas": {
+        "answers": 5,
+        "limits": 1,
+        "pricing": 0,
+        "account": 0,
+        "speech": 0,
+        "images": 2,
+        "reliability": 3,
+        "refusals": 2,
+        "other": 3
+      },
+      "belowCutoff": 71,
+      "ageLockouts": {}
+    }
+  ],
+  "sentiments": [
+    "negative",
+    "mixed",
+    "neutral",
+    "positive"
+  ],
+  "agreement": [
+    {
+      "stars": "1–2★",
+      "counts": [
+        467,
+        13,
+        95,
+        9
+      ]
+    },
+    {
+      "stars": "3★",
+      "counts": [
+        53,
+        11,
+        35,
+        11
+      ]
+    },
+    {
+      "stars": "4–5★",
+      "counts": [
+        70,
+        46,
+        273,
+        1317
+      ]
+    }
+  ]
+}

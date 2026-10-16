@@ -1,0 +1,57 @@
+---
+import type { AppStats } from "./reviews";
+
+interface Props {
+  apps: AppStats[];
+}
+
+const COUNTRY: Record<string, string> = {
+  br: "Brazil", de: "Germany", fr: "France", gb: "UK", in: "India", jp: "Japan", kr: "Korea", us: "US",
+};
+const { apps } = Astro.props;
+const hit = apps.find((a) => Object.keys(a.ageLockouts).length)!;
+const others = apps.filter((a) => a !== hit);
+const found = Object.values(hit.ageLockouts).reduce((n, c) => n + c, 0);
+const countries = Object.entries(hit.ageLockouts);
+const cells = countries.flatMap(([c, n]) => Array(n).fill(c) as string[]);
+const label =
+  `${found} of ${hit.name}'s ${hit.critical} one- and two-star reviews report adults locked out by age checks: ` +
+  countries.map(([c, n]) => `${COUNTRY[c]} ${n}`).join(", ") +
+  ". " +
+  others.map((a) => `${a.name}: 0 of ${a.critical}.`).join(" ");
+---
+
+<figure class="fig">
+  <div class="panel" role="img" aria-label={label}>
+    <div class="top">
+      <p class="big"><b>{found}</b> of {hit.name}'s {hit.critical} critical reviews</p>
+      <p class="sub">adults locked out by age checks, in {countries.length} countries</p>
+    </div>
+    <div class="waffle" aria-hidden="true">
+      {Array.from({ length: hit.critical }, (_, i) => <i class={cells[i] ? "on" : ""} title={cells[i] && COUNTRY[cells[i]]} />)}
+    </div>
+    <ul class="countries">
+      {countries.map(([c, n]) => <li><b>{n}</b> {COUNTRY[c]}</li>)}
+    </ul>
+    <p class="others">{others.map((a) => <span>{a.name}: <b>0</b> of {a.critical}</span>)}</p>
+  </div>
+  <figcaption>Each square is one critical review of {hit.name}. Every match was read by hand.</figcaption>
+</figure>
+
+<style>
+  .fig { margin: 1.4em 0 2em; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px; box-shadow: var(--shadow); display: grid; gap: 14px; }
+  .top p { margin: 0; }
+  .big { font-size: 1.1rem; }
+  .big b { font-size: 2rem; color: var(--neg); margin-right: 4px; }
+  .sub { color: var(--muted); font-size: 0.9rem; }
+  .waffle { display: grid; grid-template-columns: repeat(auto-fill, 13px); gap: 3px; }
+  .waffle i { width: 13px; height: 13px; border-radius: 3px; background: var(--tint); }
+  .waffle i.on { background: var(--neg); }
+  .countries { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .countries li { margin: 0; font-size: 0.85rem; border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; }
+  .countries b { color: var(--neg); }
+  .others { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 0.85rem; color: var(--muted); }
+  .others b { color: var(--ink); }
+  figcaption { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 12px; }
+</style>
