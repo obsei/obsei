@@ -4,7 +4,7 @@
 
 # obsei
 
-**Voice of Customer without violating privacy.** The self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it.
+**Know what customers are saying. Keep what they said private.** The self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it.
 Collect feedback from every channel and language, redact personal data before it is stored, find
 stable themes, and let your AI agents answer questions with cited evidence.
 

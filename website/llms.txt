@@ -1,6 +1,6 @@
 # obsei
 
-> obsei is the self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it.
+> obsei is open source, privacy-first Voice of Customer analytics: a self-hosted alternative to Enterpret and Unwrap that strips PII from feedback before any LLM sees it.
 
 obsei collects customer feedback from reviews, tickets, survey exports and communities, redacts personal data and pseudonymizes authors at ingest, labels it with a local multilingual model by default, groups it into themes across languages, routes it to sinks such as Slack, Jira, Linear or a signed webhook, and serves it to AI agents through an MCP server whose only write, a proposed issue, waits for human approval. It is a Python package (`pip install obsei`, or `uv tool install "obsei[recommended]"`) configured with `obsei.yaml` and run with the `obsei` CLI. Apache-2.0, free, no hosted version.
 

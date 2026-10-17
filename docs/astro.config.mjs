@@ -9,7 +9,7 @@ const softwareJsonLd = {
   "@id": "https://obsei.com/#software",
   name: "obsei",
   url: "https://obsei.com/",
-  description: "Privacy-first, self-hosted, AI-native Voice of Customer.",
+  description: "Open source, privacy-first Voice of Customer analytics that strips PII before any LLM sees it.",
   applicationCategory: "DeveloperApplication",
   operatingSystem: "Linux, macOS, Windows",
   license: "https://www.apache.org/licenses/LICENSE-2.0",
@@ -29,7 +29,7 @@ export default defineConfig({
       customCss: ["./src/styles/brand.css"],
       routeMiddleware: "./src/routeData.ts",
       favicon: "/favicon.svg",
-      description: "Privacy-first, self-hosted, AI-native Voice of Customer.",
+      description: "Open source, privacy-first Voice of Customer analytics that strips PII before any LLM sees it.",
       head: [
         { tag: "meta", attrs: { name: "theme-color", content: "#238a91" } },
         { tag: "link", attrs: { rel: "icon", href: "/logo.png", type: "image/png" } },
@@ -48,7 +48,7 @@ export default defineConfig({
       plugins: [
         starlightLlmsTxt({
           description:
-            "obsei is the self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it.",
+            "obsei is open source, privacy-first Voice of Customer analytics: a self-hosted alternative to Enterpret and Unwrap that strips PII from feedback before any LLM sees it.",
           details:
             "obsei collects customer feedback (reviews, tickets, surveys, communities), redacts personal data and pseudonymizes authors at ingest, enriches it with your own models, routes it to sinks and serves it to agents through a read-only MCP server. Configuration lives in `obsei.yaml`; the CLI is `obsei`.",
           promote: ["index*", "quickstart", "how-it-works", "configuration"],
