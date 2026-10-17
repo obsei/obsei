@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "obsei"
 dynamic = ["version"]
-description = "The self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it."
+description = "Open source, privacy-first Voice of Customer analytics. A self-hosted alternative to Enterpret and Unwrap that strips PII from feedback before any LLM sees it."
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]

@@ -27,7 +27,7 @@ RUN /opt/obsei/bin/python -c "import duckdb; duckdb.connect(config={'extension_d
 
 FROM python:3.12-slim-trixie@sha256:dddfd7e07f9d15aeeca61529320492139d21cac7f0070c00609243e51e4e0016
 LABEL org.opencontainers.image.source="https://github.com/obsei/obsei" \
-      org.opencontainers.image.description="Privacy-first, self-hosted Voice of Customer for AI agents" \
+      org.opencontainers.image.description="Open source, privacy-first Voice of Customer analytics. A self-hosted alternative to Enterpret and Unwrap that strips PII from feedback before any LLM sees it." \
       org.opencontainers.image.licenses="Apache-2.0"
 RUN useradd --no-create-home --home-dir /tmp --uid 10001 obsei \
     && install -d -m 1777 /data

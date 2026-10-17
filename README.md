@@ -4,7 +4,7 @@
 
 <h1 align="center">obsei</h1>
 
-<p align="center"><b>Voice of Customer without violating privacy.</b><br>
+<p align="center"><b>Know what customers are saying. Keep what they said private.</b><br>
 The self-hosted, open source alternative to Enterpret and Unwrap that strips PII before any LLM sees it.<br>Bring your own sources, models and agents.</p>
 
 <p align="center">

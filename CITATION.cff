@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it using this metadata."
-title: "obsei: privacy-first, self-hosted Voice of Customer for AI agents"
+title: "obsei: open source, privacy-first Voice of Customer analytics"
 authors:
   - family-names: Pagaria
     given-names: Lalit
