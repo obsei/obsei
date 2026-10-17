@@ -29,6 +29,8 @@ HYPOTHESIS = "This customer message is {}"
 # bge-m3 reads up to 8192 tokens, and NLI cost grows with length times options; the start of a
 # message carries its intent.
 MAX_TOKENS = 512
+# transformers loads the PyTorch weights; an ONNX export alongside them would double the download.
+SKIP_FILES = ["*.onnx", "*.onnx_data", "onnx/*"]
 INSTALL_HINT = "local classification needs: pip install 'obsei[local]'"
 
 Options: TypeAlias = Mapping[str, str | None]
@@ -68,7 +70,10 @@ def fetch(model: str, *, offline: bool, cache_dir: str | None = None) -> str:
         raise LlmError(INSTALL_HINT) from None
     try:
         path: str = snapshot_download(
-            model, cache_dir=cache_dir or os.environ.get(MODELS_DIR_ENV), local_files_only=offline
+            model,
+            cache_dir=cache_dir or os.environ.get(MODELS_DIR_ENV),
+            local_files_only=offline,
+            ignore_patterns=SKIP_FILES,
         )
     except (OSError, ValueError) as exc:
         hint = f"; download it first with: obsei models download --classifier {model}"
