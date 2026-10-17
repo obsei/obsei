@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.1](https://github.com/obsei/obsei/compare/v1.1.0...v1.1.1) (2026-10-17)
+
+
+### Bug Fixes
+
+* **models:** download only the PyTorch weights of the local classifier ([#473](https://github.com/obsei/obsei/issues/473)) ([6278e2a](https://github.com/obsei/obsei/commit/6278e2ab740dc7de968bd1f4433c957719486117))
+
+
+### Documentation
+
+* one description everywhere, and a headline about customers ([#475](https://github.com/obsei/obsei/issues/475)) ([b2f9a5a](https://github.com/obsei/obsei/commit/b2f9a5a46acbc3e06fb5e34865a9ecd9a6fd568b))
+
 ## [1.1.0](https://github.com/obsei/obsei/compare/v1.0.1...v1.1.0) (2026-10-15)
 
 
