@@ -35,4 +35,4 @@ in any MCP client. Codex, Copilot, VS Code, Cursor and others: https://docs.obse
 - Docs: https://docs.obsei.com
 - Live demo: https://docs.obsei.com/demo/
 - Source: https://github.com/obsei/obsei
-- Container: `ghcr.io/obsei/obsei:1.1.0` <!-- x-release-please-version -->
+- Container: `ghcr.io/obsei/obsei:1.1.1` <!-- x-release-please-version -->
