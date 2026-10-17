@@ -202,8 +202,11 @@ def test_fetch_respects_offline_and_explains_install(
 ) -> None:
     seen: list[dict[str, Any]] = []
 
-    def snapshot_download(model: str, cache_dir: str | None, local_files_only: bool) -> str:
+    def snapshot_download(
+        model: str, cache_dir: str | None, local_files_only: bool, ignore_patterns: list[str]
+    ) -> str:
         seen.append({"model": model, "cache_dir": cache_dir, "offline": local_files_only})
+        assert "onnx/*" in ignore_patterns
         if local_files_only:
             raise FileNotFoundError("not in cache")
         return "/models/snapshot"

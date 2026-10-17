@@ -31,7 +31,7 @@ once with `uv tool install "obsei[recommended]"` (or `pip install`).
   from. Back the file up: without the key the database cannot be read, and a new salt produces new
   pseudonyms. `obsei init` never overwrites it.
 - DuckDB's `httpfs` extension for encryption and, with `obsei[local]`, the classifier model
-  (about 2.2 GB, once). `--offline` skips both downloads.
+  (about 1.2 GB, once). `--offline` skips both downloads.
 
 On servers and in CI, set `OBSEI_DB_KEY` and `OBSEI_PSEUDONYM_SALT` from your secret manager, or
 mount a `.obsei/secrets.env` next to `obsei.yaml`.
@@ -109,7 +109,7 @@ ran `obsei init` without `obsei[local]`, add it and fetch the model:
 
 ```bash
 uv tool install --force "obsei[local]"   # or: pip install "obsei[local]"
-obsei models download                   # once, with network (about 2.2 GB)
+obsei models download                   # once, with network (about 1.2 GB)
 ```
 
 Then uncomment the `classify` enricher in `obsei.yaml`. Every record gets sentiment, intent and

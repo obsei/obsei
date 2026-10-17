@@ -40,7 +40,7 @@ scores each level with its question, so `scores` and `levels` work as with decis
 need a chat model. Models with `gliner2` in their name run with
 [GLiNER2](https://github.com/fastino-ai/GLiNER2) instead of NLI.
 
-`bge-m3-zeroshot-v2.0` (MIT, 568M parameters, about 2.2 GB) labelled about 0.7 records a second on
+`bge-m3-zeroshot-v2.0` (MIT, 568M parameters, about 1.2 GB) labelled about 0.7 records a second on
 one CPU with three questions per record. Each extra field costs about as much as one of those
 questions. `gliner2-multi-v1` (Apache-2.0) is about five times faster and slightly better at sentiment,
 but it routed no Japanese message to the right team, so the example above uses it for sentiment

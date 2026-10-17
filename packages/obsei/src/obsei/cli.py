@@ -473,7 +473,7 @@ def _ignore_secrets(gitignore: Path) -> None:
 
 
 def _download_classifier() -> None:
-    typer.echo(f"download {LOCAL_CLASSIFIER} (once, about 2.2 GB; it runs on this machine)")
+    typer.echo(f"download {LOCAL_CLASSIFIER} (once, about 1.2 GB; it runs on this machine)")
     try:
         fetch(LOCAL_CLASSIFIER, offline=False)
     except LlmError as exc:
