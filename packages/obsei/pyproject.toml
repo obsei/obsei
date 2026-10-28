@@ -29,7 +29,7 @@ keywords = [
     "duckdb",
 ]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Customer Service",
     "Intended Audience :: Developers",
