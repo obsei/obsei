@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/obsei/obsei/compare/v1.1.1...v1.1.2) (2026-10-29)
+
+
+### Bug Fixes
+
+* **package:** mark obsei Production/Stable and say installs need Python 3.11 ([#480](https://github.com/obsei/obsei/issues/480)) ([392e182](https://github.com/obsei/obsei/commit/392e182a58af76f82a8c9238264f2ccc9f31b693))
+
 ## [1.1.1](https://github.com/obsei/obsei/compare/v1.1.0...v1.1.1) (2026-10-17)
 
 
