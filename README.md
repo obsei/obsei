@@ -61,9 +61,10 @@ obsei serve                            # scheduled pipelines, webhooks, MCP and 
 obsei doctor                           # environment, secrets, encryption, egress mode, plugins
 ```
 
-`obsei[recommended]` is the full local setup (the classifier and multilingual themes); `obsei` alone
-is enough for redaction, sources and sinks. To keep the `obsei` command, install it once:
-`uv tool install "obsei[recommended]"` (or `pip install`). `obsei init` writes a random database key and pseudonym salt to
+obsei needs Python 3.11 or newer; on older Pythons, pip quietly installs the legacy 0.0.x instead,
+so keep the `>=1.0` floor. `obsei[recommended]` is the full local setup (the classifier and
+multilingual themes); `obsei` alone is enough for redaction, sources and sinks. To keep the `obsei`
+command, install it once: `uv tool install "obsei[recommended]>=1.0"` (or `pip install`). `obsei init` writes a random database key and pseudonym salt to
 `.obsei/secrets.env` (owner-only, git-ignored), and every command loads it; on servers and in CI,
 set `OBSEI_DB_KEY` and `OBSEI_PSEUDONYM_SALT` instead, or mount the file. With `obsei[local]`, the
 `classify` enricher labels sentiment, intent and language on the CPU with no model server. A

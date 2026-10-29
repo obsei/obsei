@@ -46,7 +46,7 @@ Open for contributors; not started.
 
 ## Releases
 
-`pip install obsei` installs the latest release. Releases follow semantic versioning: fixes ship as
+`pip install obsei` installs the latest release (on Python 3.11 or newer). Releases follow semantic versioning: fixes ship as
 patch releases (1.0.1, 1.0.2, ...) and additions as minor releases.
 
 ## Not planned (contributor-gated)

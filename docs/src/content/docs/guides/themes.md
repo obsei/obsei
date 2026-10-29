@@ -37,7 +37,7 @@ wording, so the same issue in two languages forms two themes. To group by meanin
 languages, use the local multilingual model (CPU only, about 220 MB, no PyTorch):
 
 ```bash
-uv tool install --force "obsei[mcp,embeddings]"   # or: pip install "obsei[embeddings]"
+uv tool install --force "obsei[mcp,embeddings]>=1.0"   # or: pip install "obsei[embeddings]>=1.0"
 obsei models download --dir /models      # once, with network
 export OBSEI_MODELS_DIR=/models          # air-gapped runs load it from here
 ```

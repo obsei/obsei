@@ -8,10 +8,11 @@
 Collect feedback from every channel and language, redact personal data before it is stored, find
 stable themes, and let your AI agents answer questions with cited evidence.
 
-> 1.0 is not compatible with 0.0.x; for the legacy toolkit, `pip install "obsei<1"`.
+> Requires Python 3.11 or newer; on older Pythons, pip quietly installs the legacy 0.0.x, so keep
+> the `>=1.0` floor. 1.0 is not compatible with 0.0.x; for the legacy toolkit, `pip install "obsei<1"`.
 
 ```bash
-uvx --from "obsei[recommended]>=1.0" obsei init   # or: pip install "obsei[recommended]"
+uvx --from "obsei[recommended]>=1.0" obsei init   # or: pip install "obsei[recommended]>=1.0"
 obsei try                                        # redacted, labelled preview; nothing stored
 obsei add appstore                               # add sources and sinks without editing YAML
 obsei add slack

@@ -16,9 +16,12 @@ obsei run                                        # fetch, redact, label, deliver
 Then add your own sources and sinks without editing YAML: `obsei add appstore`, `obsei add slack`,
 `obsei check` (see [Set up without editing YAML](/guides/setup/)).
 
+obsei needs Python 3.11 or newer. On an older Python, pip and uv quietly pick the legacy 0.0.x
+instead, so keep the `>=1.0` floor in install commands; `obsei --version` shows what you got.
+
 `obsei[recommended]` is the full local setup: the classifier (`local`) and multilingual themes
 (`embeddings`). `uvx` runs obsei without installing it; to keep the `obsei` command, install it
-once with `uv tool install "obsei[recommended]"` (or `pip install`).
+once with `uv tool install "obsei[recommended]>=1.0"` (or `pip install`).
 
 `obsei init` creates:
 
@@ -93,9 +96,9 @@ Some features need extra packages. Add them to the same install:
 
 ```bash
 # uv tool: --force replaces the install, so list every extra you want to keep
-uv tool install --force "obsei[mcp,embeddings]"
+uv tool install --force "obsei[mcp,embeddings]>=1.0"
 # pip, in the environment where obsei is installed
-pip install "obsei[mcp,embeddings]"
+pip install "obsei[mcp,embeddings]>=1.0"
 ```
 
 `uv run --extra ...` only works inside a project checkout; outside one it ignores the extra.
@@ -108,7 +111,7 @@ The default classifier runs inside obsei on the CPU, so there is no model server
 ran `obsei init` without `obsei[local]`, add it and fetch the model:
 
 ```bash
-uv tool install --force "obsei[local]"   # or: pip install "obsei[local]"
+uv tool install --force "obsei[local]>=1.0"   # or: pip install "obsei[local]>=1.0"
 obsei models download                   # once, with network (about 1.2 GB)
 ```
 

@@ -101,7 +101,7 @@ More complete setups are on the [Examples](/examples/) page.
 ```bash
 pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 # or, with uv tool:
-uv tool install obsei \
+uv tool install "obsei>=1.0" \
   --with "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 ```
 
