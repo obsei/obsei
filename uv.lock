@@ -16,6 +16,7 @@ members = [
     "obsei",
     "obsei-reddit",
     "obsei-teams",
+    "obsei-telegram",
     "obsei-typeform",
 ]
 
@@ -25,6 +26,7 @@ dev = [
     { name = "obsei", extras = ["apple", "google", "notify", "sql"], editable = "packages/obsei" },
     { name = "obsei-reddit", editable = "plugins/obsei-reddit" },
     { name = "obsei-teams", editable = "plugins/obsei-teams" },
+    { name = "obsei-telegram", editable = "plugins/obsei-telegram" },
     { name = "obsei-typeform", editable = "plugins/obsei-typeform" },
     { name = "playwright", specifier = "==1.63.0" },
     { name = "pytest", specifier = "==9.1.1" },
@@ -2095,6 +2097,17 @@ requires-dist = [{ name = "obsei", editable = "packages/obsei" }]
 name = "obsei-teams"
 version = "0.1.0"
 source = { editable = "plugins/obsei-teams" }
+dependencies = [
+    { name = "obsei" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "obsei", editable = "packages/obsei" }]
+
+[[package]]
+name = "obsei-telegram"
+version = "0.1.0"
+source = { editable = "plugins/obsei-telegram" }
 dependencies = [
     { name = "obsei" },
 ]
