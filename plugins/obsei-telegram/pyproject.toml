@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling>=1.32.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "obsei-telegram"
+version = "0.1.0"
+description = "Post matching obsei feedback to a Telegram chat through the Bot API."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["obsei>=1.0,<2"]
+
+[project.entry-points."obsei.plugins"]
+telegram = "obsei_telegram:register"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/obsei_telegram"]

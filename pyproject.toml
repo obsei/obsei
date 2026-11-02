@@ -11,6 +11,7 @@ members = ["packages/*", "plugins/obsei-*"]
 obsei = { workspace = true }
 obsei-reddit = { workspace = true }
 obsei-teams = { workspace = true }
+obsei-telegram = { workspace = true }
 obsei-typeform = { workspace = true }
 
 [dependency-groups]
@@ -18,6 +19,7 @@ dev = [
     "obsei[apple,google,notify,sql]",
     "obsei-reddit",
     "obsei-teams",
+    "obsei-telegram",
     "obsei-typeform",
     "mypy==2.4.0",
     "pytest==9.1.1",
@@ -50,7 +52,7 @@ ignore = ["PLR0913"]
 python_version = "3.11"
 strict = true
 plugins = ["pydantic.mypy"]
-files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/obsei-teams/src", "plugins/obsei-teams/tests", "plugins/obsei-typeform/src", "plugins/obsei-typeform/tests", "plugins/template/src", "plugins/template/tests"]
+files = ["packages/obsei/src", "packages/obsei/tests", "plugins/obsei-reddit/src", "plugins/obsei-reddit/tests", "plugins/obsei-teams/src", "plugins/obsei-teams/tests", "plugins/obsei-telegram/src", "plugins/obsei-telegram/tests","plugins/obsei-typeform/src", "plugins/obsei-typeform/tests", "plugins/template/src", "plugins/template/tests"]
 mypy_path = "packages/obsei/src:plugins/template/src"
 exclude = ["packages/obsei/src/obsei/templates/"]
 

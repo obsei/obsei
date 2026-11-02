@@ -2446,6 +2446,25 @@
           "if": {
             "properties": {
               "type": {
+                "const": "telegram"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/TelegramConfig"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
                 "const": "webhook"
               }
             },
@@ -2497,6 +2516,7 @@
                 "slack",
                 "sql",
                 "teams",
+                "telegram",
                 "webhook"
               ]
             },
@@ -3201,6 +3221,72 @@
         }
       },
       "title": "TeamsConfig",
+      "type": "object"
+    },
+    "TelegramConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "bot_token_env": {
+          "default": "TELEGRAM_BOT_TOKEN",
+          "description": "Environment variable with the bot token from @BotFather.",
+          "secret": true,
+          "title": "Bot Token Env",
+          "type": "string"
+        },
+        "chat_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Chat to post to, e.g. -1001234567890 or \"@mychannel\".",
+          "title": "Chat Id"
+        },
+        "max_messages": {
+          "default": 10,
+          "description": "Most messages posted per run.",
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Max Messages",
+          "type": "integer"
+        },
+        "max_rating": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Only records rated at most this.",
+          "title": "Max Rating"
+        },
+        "max_text": {
+          "default": 1000,
+          "description": "Characters of each record's text shown.",
+          "maximum": 3500,
+          "minimum": 50,
+          "title": "Max Text",
+          "type": "integer"
+        },
+        "when": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "e.g. {\"classify.sentiment\": [\"negative\"]}",
+          "title": "When",
+          "type": "object"
+        }
+      },
+      "required": [
+        "chat_id"
+      ],
+      "title": "TelegramConfig",
       "type": "object"
     },
     "ThemesConfig": {
