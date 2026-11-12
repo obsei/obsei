@@ -4,6 +4,7 @@ Mistral, Groq, OpenRouter, and LiteLLM proxy (for Bedrock, Vertex and others).""
 from __future__ import annotations
 
 import os
+import re
 from collections.abc import Sequence
 from typing import Literal, Protocol, TypedDict
 
@@ -73,6 +74,16 @@ class _Completion(BaseModel):
     choices: list[_Choice]
 
 
+_REASONING_MODEL = re.compile(r"^(o\d|gpt-[5-9])")
+
+
+def sends_temperature(model: str) -> bool:
+    """OpenAI's reasoning models (o-series, gpt-5 and later) reject any temperature but the
+    default. Their ``-chat`` variants and every other model accept ``temperature: 0``."""
+    name = model.rsplit("/", 1)[-1].lower()
+    return not _REASONING_MODEL.match(name) or "-chat" in name
+
+
 class OpenAICompatibleClient:
     def __init__(
         self,
@@ -117,13 +128,14 @@ class OpenAICompatibleClient:
     def complete(self, messages: Sequence[ChatMessage], *, schema: JsonSchema) -> str:
         payload: dict[str, JsonValue] = {
             "model": self._model,
-            "temperature": 0,
             "messages": [{"role": m["role"], "content": m["content"]} for m in messages],
             "response_format": {
                 "type": "json_schema",
                 "json_schema": {"name": "result", "schema": schema, "strict": True},
             },
         }
+        if sends_temperature(self._model):
+            payload["temperature"] = 0
         completion = _Completion.model_validate_json(self.post_json("/chat/completions", payload))
         content = completion.choices[0].message.content if completion.choices else None
         if not content:

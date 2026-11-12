@@ -89,6 +89,29 @@ def test_openai_compatible_client_sends_schema_and_key(monkeypatch: pytest.Monke
     assert seen[0].url.path == "/v1/chat/completions"
 
 
+@pytest.mark.parametrize(
+    ("model", "expected"),
+    [
+        ("qwen3:4b", 0),
+        ("gpt-4o-mini", 0),
+        ("gpt-5-chat-latest", 0),
+        ("gpt-5-mini", None),
+        ("openai/gpt-5.2", None),
+        ("o3-mini", None),
+    ],
+)
+def test_temperature_is_left_out_for_reasoning_models(model: str, expected: int | None) -> None:
+    seen: list[httpx.Request] = []
+    client = OpenAICompatibleClient(
+        base_url="http://localhost:11434/v1",
+        model=model,
+        policy=EgressPolicy(),
+        transport=_transport('{"ok": true}', seen),
+    )
+    client.complete([{"role": "user", "content": "hi"}], schema={"type": "object"})
+    assert json.loads(seen[0].content).get("temperature") == expected
+
+
 def test_azure_style_api_key_header(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AZURE_KEY", "az")
     seen: list[httpx.Request] = []
