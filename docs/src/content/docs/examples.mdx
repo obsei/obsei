@@ -230,3 +230,14 @@ Negative App Store and Google Play reviews posted to a Teams channel.
   title="alerts-teams.yaml"
   href="https://github.com/obsei/obsei/blob/master/examples/alerts-teams.yaml"
 />
+
+### Alerts in Telegram
+
+Negative App Store reviews posted to a Telegram chat, one message each.
+
+<Pipeline compact sources={["App Store"]} steps={["Redact", "Classify", "Store"]} outputs={["Telegram"]} />
+
+<LinkCard
+  title="alerts-telegram.yaml"
+  href="https://github.com/obsei/obsei/blob/master/examples/alerts-telegram.yaml"
+/>
