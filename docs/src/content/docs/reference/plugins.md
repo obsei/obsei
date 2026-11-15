@@ -20,22 +20,26 @@ directory and are tested with obsei in CI.
 | <span class="i i-reddit"></span> [`obsei-reddit`](https://github.com/obsei/obsei/tree/master/plugins/obsei-reddit) | `reddit` | source | Subreddit posts, comments and searches from Reddit's public RSS feeds, no API key. |
 | <span class="i i-clipboard-list"></span> [`obsei-typeform`](https://github.com/obsei/obsei/tree/master/plugins/obsei-typeform) | `typeform` | source | Completed Typeform survey responses through the Responses API with your token, incremental; picks text, rating, language and an optional pseudonymised respondent id from chosen fields. |
 | <span class="i i-users"></span> [`obsei-teams`](https://github.com/obsei/obsei/tree/master/plugins/obsei-teams) | `teams` | sink | Posts matching, redacted feedback to a Microsoft Teams channel as an Adaptive Card through a Power Automate Workflows webhook. |
+| <span class="i i-message-circle"></span> [`obsei-telegram`](https://github.com/obsei/obsei/tree/master/plugins/obsei-telegram) | `telegram` | sink | Posts each matching, redacted record to a Telegram chat, group or channel through the Bot API, with customer text HTML-escaped; `verify()` checks the bot can post without posting. |
 
-`obsei-teams` is on PyPI; `obsei-reddit` and `obsei-typeform` install from Git:
+`obsei-teams` is on PyPI; `obsei-reddit`, `obsei-typeform` and `obsei-telegram` install from Git:
 
 ```bash
 pip install obsei-teams
 pip install "obsei-reddit @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-reddit"
 pip install "obsei-typeform @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-typeform"
+pip install "obsei-telegram @ git+https://github.com/obsei/obsei#subdirectory=plugins/obsei-telegram"
 # uv tool: repeat --with for each plugin, and keep your extras
 uv tool install --force obsei --with obsei-teams
 ```
 
 Each plugin's README lists its configuration. The `teams` sink posts to public Microsoft hosts,
 so private egress mode needs them allowed:
-`OBSEI_EGRESS_ALLOW=logic.azure.com,environment.api.powerplatform.com`. Complete configurations
-are in [`examples/surveys-typeform.yaml`](https://github.com/obsei/obsei/blob/master/examples/surveys-typeform.yaml)
-and [`examples/alerts-teams.yaml`](https://github.com/obsei/obsei/blob/master/examples/alerts-teams.yaml).
+`OBSEI_EGRESS_ALLOW=logic.azure.com,environment.api.powerplatform.com`; the `telegram` sink needs
+`OBSEI_EGRESS_ALLOW=api.telegram.org`. Complete configurations are in
+[`examples/surveys-typeform.yaml`](https://github.com/obsei/obsei/blob/master/examples/surveys-typeform.yaml),
+[`examples/alerts-teams.yaml`](https://github.com/obsei/obsei/blob/master/examples/alerts-teams.yaml)
+and [`examples/alerts-telegram.yaml`](https://github.com/obsei/obsei/blob/master/examples/alerts-telegram.yaml).
 
 ## Writing a plugin
 

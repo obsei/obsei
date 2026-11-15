@@ -11,8 +11,8 @@ pipeline starts; `sql` checks the database host in its URL (BigQuery and Snowfla
 as their cloud hosts, SQLite files as local).
 
 Add one with `obsei add TYPE`: it asks for the settings, keeps the secret in
-`.obsei/secrets.env`, checks the egress policy and, for Slack, GitHub, Jira and Linear, the
-credentials, without sending anything ([Set up without editing YAML](/guides/setup/)).
+`.obsei/secrets.env`, checks the egress policy and, for Slack, GitHub, Jira, Linear and
+Telegram, the credentials, without sending anything ([Set up without editing YAML](/guides/setup/)).
 
 | Type | What | Idempotency | Status |
 | --- | --- | --- | --- |
@@ -25,6 +25,7 @@ credentials, without sending anything ([Set up without editing YAML](/guides/set
 | <span class="i i-apacheparquet"></span> `parquet` | Parquet files for notebooks and lakes | file named by batch content | beta |
 | <span class="i i-database"></span> `sql` | Upsert into a table in any SQLAlchemy database or warehouse | delete and insert by id | beta |
 | <span class="i i-users"></span> `teams` ([plugin](/reference/plugins/)) | An Adaptive Card per matching record in a Microsoft Teams channel (`pip install obsei-teams`) | at-least-once | beta |
+| <span class="i i-message-circle"></span> `telegram` ([plugin](/reference/plugins/)) | A message per matching record in a Telegram chat, group or channel through the Bot API (`pip install obsei-telegram`) | at-least-once | beta |
 
 `verified` means a live test in
 [`packages/obsei/tests/live`](https://github.com/obsei/obsei/tree/master/packages/obsei/tests/live)
@@ -154,6 +155,11 @@ Apprise URLs hold tokens, so they are read from the environment variable `urls_e
 | Discord | `discord://{webhook_id}/{webhook_token}` |
 | Email | `mailtos://{user}:{app_password}@gmail.com?to=voc@acme.com` |
 | Microsoft Teams (Power Automate workflow) | `workflows://{host}:{port}/{workflow}/{signature}` |
+
+For Telegram you can use `notify` or the [`telegram` plugin](/reference/plugins/). `notify` sends
+one summary per batch. The plugin sends one message per matching record, HTML-escapes customer
+text so it cannot add formatting or links, and has `verify()`, so `obsei add` and `obsei check`
+confirm the bot can post in the chat without posting.
 
 The [Apprise wiki](https://github.com/caronc/apprise/wiki) lists every service. Each target must
 pass the egress policy: obsei checks the service's API host (`api.telegram.org`, `discord.com`),

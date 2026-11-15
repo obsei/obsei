@@ -1,19 +1,22 @@
 import json
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import httpx
 import pytest
 from pydantic import JsonValue, ValidationError
 
+from obsei.config import builtin_registry, load_config
 from obsei.core.context import Context
 from obsei.core.protocols import Alert, Alerts, Sink, Verifies
 from obsei.core.record import Enrichment, Record, SourceRef
 from obsei.core.registry import Registry
 from obsei.llm.egress import EgressError, EgressPolicy
 from obsei.sinks._common import SinkConfigError
-from obsei_telegram import register
+from obsei_telegram import API, register
 
+EXAMPLE = Path(__file__).parents[3] / "examples" / "alerts-telegram.yaml"
 TOKEN = "123456:TEST-token-never-real"
 CHAT = -1001234567890
 ALLOW = EgressPolicy(mode="private", allowed_hosts=frozenset({"api.telegram.org"}))
@@ -251,6 +254,24 @@ def test_rejects_limits_telegram_cannot_take(limit: dict[str, JsonValue]) -> Non
     register(registry)
     with pytest.raises(ValidationError):
         registry.sink("telegram").config_model.model_validate({"chat_id": CHAT, **limit})
+
+
+def test_example_config_validates() -> None:
+    config = load_config(EXAMPLE)
+    registry = builtin_registry(config.plugins)
+    assert registry.loaded_entry_points == ["telegram"]
+    assert config.egress is not None
+    config.egress.check(API)
+    for pipeline in config.pipelines:
+        for source_spec in pipeline.sources:
+            registry.source(source_spec.type).config_model.model_validate(source_spec.config)
+        for spec in pipeline.enrichers:
+            registry.enricher(spec.type).config_model.model_validate(spec.config)
+        for spec in pipeline.sinks:
+            registry.sink(spec.type).config_model.model_validate(spec.config)
+    for alert in config.alerts:
+        for target in alert.to:
+            registry.sink(target.type).config_model.model_validate(target.config)
 
 
 def test_alert_is_one_escaped_message() -> None:

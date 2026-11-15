@@ -1,6 +1,6 @@
 ---
 title: Alerts
-description: Theme spikes, new themes, weekly digests, the review queue and pipeline health, sent to Slack, email, Teams or a webhook.
+description: Theme spikes, new themes, weekly digests, the review queue and pipeline health, sent to Slack, email, Teams, Telegram or a webhook.
 sidebar:
   order: 5.5
 ---
@@ -34,7 +34,7 @@ alerts:
 `to` lists the sinks that deliver the alert, written like pipeline sinks (`type`, `config` and an
 optional `key`, needed when two have the same type). They are separate from pipeline sinks, so an
 alerts channel never receives individual records. `webhook`, `slack`, `notify` and the `teams`
-plugin deliver alerts; any other sink type is a configuration error. Sink options that filter
+and `telegram` plugins deliver alerts; any other sink type is a configuration error. Sink options that filter
 records (`when`, `max_rating`, ...) do not apply to alerts.
 
 ## When alerts are checked
@@ -115,6 +115,19 @@ alerts:
     to:
       - type: teams
         config: {webhook_url_env: TEAMS_REVIEW_URL}
+```
+
+Failed runs to an on-call Telegram group with the [`telegram` plugin](/reference/plugins/)
+(`plugins: [telegram]`):
+
+```yaml
+alerts:
+  - name: health
+    kind: pipeline_health
+    stale_hours: 24
+    to:
+      - type: telegram
+        config: {chat_id: -1001234567890}
 ```
 
 Everything to n8n through a signed [webhook](/guides/sinks/#webhooks):

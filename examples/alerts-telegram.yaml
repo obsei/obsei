@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://docs.obsei.com/schema/obsei.schema.json
+# Negative App Store reviews posted to a Telegram chat, one message each, plus a message when a
+# theme spikes and a weekly digest.
+#
+#   pip install obsei-telegram
+#   export TELEGRAM_BOT_TOKEN=...    # from @BotFather; add the bot to the chat
+#   obsei init                       # once: writes the store key to .obsei/secrets.env
+#   obsei check --config alerts-telegram.yaml   # checks the bot can post, without posting
+#   obsei serve --config alerts-telegram.yaml
+#
+# Reviews are redacted before they reach Telegram, and their text is HTML-escaped. Spike alerts
+# need themes, so themes.auto updates them after each run; themes from fewer than 5 people are
+# never reported. Telegram is a public host, so the egress policy below allows only the Bot API.
+version: 1
+
+plugins: [telegram]
+
+egress:
+  mode: private
+  allowed_hosts: [api.telegram.org]
+
+themes:
+  auto: true
+
+llms:
+  default:
+    base_url: http://localhost:11434/v1
+    model: qwen3:8b
+
+pipelines:
+  - name: review-alerts
+    every_minutes: 30
+    sources:
+      - key: ios
+        type: appstore
+        config: {app_id: "284882215", countries: [us, gb, de]}
+    enrichers:
+      - type: classify
+        config: {llm: default}
+    sinks:
+      - type: telegram
+        config:
+          chat_id: -1001234567890        # or "@channelname" for a public channel
+          when: {classify.sentiment: [negative]}
+          max_rating: 2
+          max_messages: 10
+
+alerts:
+  - name: review-spikes
+    kind: theme_spike
+    owner: Mobile team
+    to:
+      - type: telegram
+        config: {chat_id: -1001234567890}
+  - name: weekly-digest
+    kind: digest
+    to:
+      - type: telegram
+        config: {chat_id: -1001234567890}
