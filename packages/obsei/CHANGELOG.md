@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/obsei/obsei/compare/v1.1.1...v1.1.2) (2026-11-15)
+
+
+### Bug Fixes
+
+* leave temperature out for OpenAI reasoning models ([#494](https://github.com/obsei/obsei/issues/494)) ([cd3e51c](https://github.com/obsei/obsei/commit/cd3e51cdc382ee936a81c5d4387efbae75d63f8a))
+* **package:** mark obsei Production/Stable and say installs need Python 3.11 ([#480](https://github.com/obsei/obsei/issues/480)) ([392e182](https://github.com/obsei/obsei/commit/392e182a58af76f82a8c9238264f2ccc9f31b693))
+
 ## [1.1.1](https://github.com/obsei/obsei/compare/v1.1.0...v1.1.1) (2026-10-17)
 
 
