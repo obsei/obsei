@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import html
 from collections.abc import Sequence
-from typing import Any, ClassVar
+from typing import ClassVar, TypeVar
 from urllib.parse import urlsplit
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field, JsonValue
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError
 
 from obsei.core.context import EGRESS, Context
 from obsei.core.plugin import SECRET, Catalog, factory
@@ -36,16 +36,24 @@ class TelegramConfig(BaseModel):
         default_factory=dict, description='e.g. {"classify.sentiment": ["negative"]}'
     )
     max_rating: float | None = Field(default=None, description="Only records rated at most this.")
-    max_messages: int = Field(default=10, ge=1, le=50, description="Most messages posted per run.")
+    max_messages: int = Field(
+        default=10,
+        ge=1,
+        le=20,
+        description="Most messages posted per run; groups allow about 20 a minute.",
+    )
     max_text: int = Field(
-        default=1000, ge=50, le=3500, description="Characters of each record's text shown."
+        default=1000,
+        ge=50,
+        le=2000,
+        description="Characters of each record's text shown. Telegram counts its 4096 limit "
+        "in UTF-16 units, so an emoji can count twice.",
     )
 
 
 def render(record: Record, max_text: int) -> str:
     """Customer text is HTML-escaped, so it cannot add formatting or hidden links (Telegram still
-    links bare URLs). Telegram counts its 4096-character limit after parsing, so ``max_text``
-    keeps each message under it."""
+    links bare URLs). ``max_text`` keeps each message under Telegram's 4096 limit."""
     head = [f"{record.source.type}/{record.source.instance}"]
     if record.rating is not None:
         stars = round(record.rating)
@@ -74,25 +82,36 @@ def render_alert(alert: Alert) -> str:
     )
 
 
-def _description(response: httpx.Response) -> str:
-    try:
-        body = response.json()
-    except ValueError:
-        return ""
-    description = body.get("description") if isinstance(body, dict) else None
-    return description[:MAX_DESCRIPTION] if isinstance(description, str) else ""
+class _Reply(BaseModel):
+    """A Bot API reply; fields the sink does not use are ignored."""
+
+    ok: bool = False
+    result: JsonValue = None
+    description: str | None = None
 
 
-def _can_post(member: dict[str, Any]) -> bool:
-    """Whether a getChatMember result lets the bot send messages."""
-    status = member.get("status")
-    if status in {"creator", "member"}:
-        return True
-    if status == "administrator":
-        return member.get("can_post_messages") is not False
-    if status == "restricted":
-        return bool(member.get("is_member")) and bool(member.get("can_send_messages"))
-    return False
+class _User(BaseModel):
+    id: int
+
+
+class _ChatMember(BaseModel):
+    status: str
+    is_member: bool | None = None
+    can_send_messages: bool | None = None
+    can_post_messages: bool | None = None
+
+    def can_post(self) -> bool:
+        """``can_post_messages`` is only set for channel administrators."""
+        if self.status in {"creator", "member"}:
+            return True
+        if self.status == "administrator":
+            return self.can_post_messages is not False
+        if self.status == "restricted":
+            return bool(self.is_member and self.can_send_messages)
+        return False
+
+
+_Model = TypeVar("_Model", bound=BaseModel)
 
 
 class TelegramSink:
@@ -120,19 +139,14 @@ class TelegramSink:
 
     def verify(self) -> None:
         """Checks the token and that the bot can post in the chat, posting nothing."""
-        me, error = self._call("getMe", {})
-        if error:
-            raise SinkConfigError(error)
-        member, error = self._call(
-            "getChatMember", {"chat_id": self.config.chat_id, "user_id": me.get("id")}
+        me = self._result("getMe", {}, _User)
+        member = self._result(
+            "getChatMember", {"chat_id": self.config.chat_id, "user_id": me.id}, _ChatMember
         )
-        if error:
-            raise SinkConfigError(error)
-        if not _can_post(member):
-            status = member.get("status", "unknown")
+        if not member.can_post():
             raise SinkConfigError(
-                f"the bot cannot post in chat {self.config.chat_id} (status: {status}); add it "
-                "to the chat, or make it an admin that can post in a channel"
+                f"the bot cannot post in chat {self.config.chat_id} (status: {member.status}); "
+                "add it to the chat, or make it an admin that can post in a channel"
             )
 
     def alert(self, alert: Alert) -> SinkResult:
@@ -147,28 +161,35 @@ class TelegramSink:
             "link_preview_options": {"is_disabled": True},
         }
 
-    def _call(
-        self, method: str, payload: dict[str, JsonValue]
-    ) -> tuple[dict[str, Any], str | None]:
-        """Calls a Bot API method and returns its result and an error message, or None on
+    def _call(self, method: str, payload: dict[str, JsonValue]) -> tuple[_Reply, str | None]:
+        """Calls a Bot API method and returns its reply and an error message, or None on
         success. The token is part of the URL, so errors carry only the status and Telegram's
         description."""
         url = f"{API}/bot{self.token}/{method}"
         try:
             response = self.ctx.http.post(url, json=payload, extensions=EGRESS)
         except httpx.HTTPError as e:
-            return {}, f"telegram request failed: {type(e).__name__}"
-        if response.is_error:
-            description = _description(response)
-            return {}, f"telegram returned {response.status_code}" + (
+            return _Reply(), f"telegram request failed: {type(e).__name__}"
+        try:
+            reply = _Reply.model_validate_json(response.content)
+        except ValidationError:
+            reply = _Reply()
+        if response.is_error or not reply.ok:
+            description = (reply.description or "")[:MAX_DESCRIPTION]
+            return reply, f"telegram returned {response.status_code}" + (
                 f": {description}" if description else ""
             )
+        return reply, None
+
+    def _result(self, method: str, payload: dict[str, JsonValue], model: type[_Model]) -> _Model:
+        """The result of a call that must succeed, for ``verify()``."""
+        reply, error = self._call(method, payload)
+        if error:
+            raise SinkConfigError(error)
         try:
-            body = response.json()
-        except ValueError:
-            body = None
-        result = body.get("result") if isinstance(body, dict) else None
-        return (result if isinstance(result, dict) else {}), None
+            return model.model_validate(reply.result)
+        except ValidationError:
+            raise SinkConfigError(f"telegram sent an unexpected {method} reply") from None
 
 
 def register(registry: Registry) -> None:

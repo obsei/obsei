@@ -3247,8 +3247,8 @@
         },
         "max_messages": {
           "default": 10,
-          "description": "Most messages posted per run.",
-          "maximum": 50,
+          "description": "Most messages posted per run; groups allow about 20 a minute.",
+          "maximum": 20,
           "minimum": 1,
           "title": "Max Messages",
           "type": "integer"
@@ -3268,8 +3268,8 @@
         },
         "max_text": {
           "default": 1000,
-          "description": "Characters of each record's text shown.",
-          "maximum": 3500,
+          "description": "Characters of each record's text shown. Telegram counts its 4096 limit in UTF-16 units, so an emoji can count twice.",
+          "maximum": 2000,
           "minimum": 50,
           "title": "Max Text",
           "type": "integer"

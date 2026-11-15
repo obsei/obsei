@@ -41,13 +41,14 @@ pipelines:
 | `chat_id` | required | Numeric chat id, or `@username` for a public channel. |
 | `when` | all records | Routing conditions to match (values, `is`, `min_confidence`, `gte`/`lte`, `review`), as in the `slack` sink. |
 | `max_rating` | none | Only records rated at or below this. |
-| `max_messages` | 10 | Messages posted per run (up to 50); one more message counts the rest. |
-| `max_text` | 1000 | Characters of feedback shown per record. |
+| `max_messages` | 10 | Messages posted per run (up to 20, Telegram's per-minute limit for groups); one more message counts the rest. |
+| `max_text` | 1000 | Characters of feedback shown per record (up to 2000). |
 
 Each matching record becomes one message showing its source, rating, sentiment and intent (when
 the `classify` enricher ran), its redacted text and an *Open* link for http(s) URLs. Customer
-text is HTML-escaped, so it cannot add links or formatting, and link previews are off. Authors
-are never sent. `obsei check` calls `getChat` to confirm the token and chat without posting.
+text is HTML-escaped, so it cannot add formatting or hidden links (Telegram still links bare
+URLs), and link previews are off. Authors are never sent. `obsei check` calls `getMe` and
+`getChatMember` to confirm the token and that the bot can post in the chat, without posting.
 
 `api.telegram.org` is public, so obsei's default air-gapped egress policy blocks it. Allow it
 with `OBSEI_EGRESS_MODE=private` and `OBSEI_EGRESS_ALLOW=api.telegram.org` or the `egress` block

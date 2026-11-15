@@ -4,7 +4,7 @@ from typing import Any
 
 import httpx
 import pytest
-from pydantic import JsonValue
+from pydantic import JsonValue, ValidationError
 
 from obsei.core.context import Context
 from obsei.core.protocols import Alert, Alerts, Sink, Verifies
@@ -229,6 +229,28 @@ def test_verify_reports_api_errors_without_the_token() -> None:
     with pytest.raises(SinkConfigError, match="telegram returned 401: Unauthorized") as error:
         failing.verify()
     assert TOKEN not in str(error.value)
+
+
+@pytest.mark.parametrize(
+    ("bot", "error"),
+    [
+        (Bot(results={"getMe": {"first_name": "no id"}}), "unexpected getMe reply"),
+        (Bot(200, {"ok": False, "description": "Forbidden"}), "telegram returned 200: Forbidden"),
+    ],
+)
+def test_verify_rejects_unexpected_replies(bot: Bot, error: str) -> None:
+    telegram = sink(bot)
+    assert isinstance(telegram, Verifies)
+    with pytest.raises(SinkConfigError, match=error):
+        telegram.verify()
+
+
+@pytest.mark.parametrize("limit", [{"max_messages": 21}, {"max_text": 2001}])
+def test_rejects_limits_telegram_cannot_take(limit: dict[str, JsonValue]) -> None:
+    registry = Registry()
+    register(registry)
+    with pytest.raises(ValidationError):
+        registry.sink("telegram").config_model.model_validate({"chat_id": CHAT, **limit})
 
 
 def test_alert_is_one_escaped_message() -> None:
